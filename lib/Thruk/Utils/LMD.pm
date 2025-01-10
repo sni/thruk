@@ -39,7 +39,7 @@ sub check_proc {
 
     my $lmd_dir    = $config->{'tmp_path'}.'/lmd';
     my $logfile    = $lmd_dir.'/lmd.log';
-    my $size       = -s $logfile;
+    my $size       = Thruk::Utils::IO::file_not_empty($logfile);
     my $keep       = $config->{'lmd_rotate_keep_logs'} || 3;
     my $rotatesize = ($config->{'lmd_rotate_size'} || 20 ) *1024*1024; # rotate logfile if its more than 20mb
     my $pid;
