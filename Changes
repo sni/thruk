@@ -21,6 +21,8 @@ next:
             - use latest in puppeteer installer
           - OMD-Top:
             - added as core module
+          - Panorama:
+            - add zoom/scale options to url panel
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command

@@ -9,6 +9,7 @@ Ext.define('TP.PanletUrl', {
         panel.callParent();
         panel.noChangeUrlParams = true;
         panel.xdata.url      = '';
+        panel.xdata.zoom     = '';
         panel.xdata.selector = '';
         panel.xdata.keepcss  = true;
         panel.reloadOnSiteChanges = true;
@@ -83,6 +84,7 @@ Ext.define('TP.PanletUrl', {
                         panel.setBlankAndRefreshLater(iframe);
                     }
                 }
+                panel.adjustBodyStyle();
             }
         };
 
@@ -150,6 +152,7 @@ Ext.define('TP.PanletUrl', {
                         fn: function () {
                             TP.log('['+panel.id+'] loaded');
                             window.clearTimeout(TP.timeouts['timeout_' + panel.id + '_refresh']);
+                            panel.adjustBodyStyle();
                             panel.unmask();
                             panel.body.unmask();
                         }
@@ -180,6 +183,28 @@ Ext.define('TP.PanletUrl', {
             TP.timeouts['timeout_' + panel.id + '_refresh'] = window.setTimeout(Ext.bind(panel.refreshHandler, panel, []), 1000);
         };
     },
+
+    adjustBodyStyle: function() {
+        var panel = this;
+        if(!panel || !panel.iframe || !panel.iframe.el || !panel.iframe.el.dom) { return; }
+        var iframeObj = panel.iframe.el.dom;
+        try {
+            if(panel.xdata.zoom) {
+                iframeObj.style.transform       = "scale("+panel.xdata.zoom+")";
+                iframeObj.style.width           = 100 / panel.xdata.zoom +"%";
+                iframeObj.style.height          = 100 / panel.xdata.zoom +"%";
+                iframeObj.style.transformOrigin = "top left";
+            } else {
+                iframeObj.style.transform       = "";
+                iframeObj.style.width           = "100%";
+                iframeObj.style.height          = "100%";
+                iframeObj.style.transformOrigin = "";
+            }
+        } catch(err) {
+            TP.logError(panel.id, "iframe style exception", err);
+        }
+    },
+
     setGearItems: function() {
         var panel = this;
         panel.callParent();
@@ -192,7 +217,7 @@ Ext.define('TP.PanletUrl', {
                 change: function(This, newV, oldV, eOpts) {
                     var pan = This.up('panel');
                     var sel = pan.items.getAt(4);
-                    var css = pan.items.getAt(5);
+                    var css = pan.items.getAt(6);
                     if(!TP.isSameOrigin(window.location, TP.getLocationObject(newV))) {
                         sel.emptyText = "css selector only supported for internal urls";
                         sel.setValue("");
@@ -213,6 +238,14 @@ Ext.define('TP.PanletUrl', {
             xtype:      'textfield',
             name:       'selector',
             emptyText:  'optional css selector, ex.: DIV#id_of_element'
+        }, {
+            fieldLabel: 'Scale / Zoom',
+            xtype:      'numberfield',
+            maxValue:    100,
+            minValue:    0.10,
+            step:        0.1,
+            name:       'zoom',
+            emptyText:  'scale or zoom, default is 1 (ex.: 0.5 scales the page to 50%)'
         }, {
             fieldLabel: 'Keep CSS',
             xtype:      'checkbox',
