@@ -584,6 +584,7 @@ sub get_objects_by_name {
         my $subtype;
         ($subtype,$name2) = split/:/mx, $name2, 2;
         my $objects = $self->get_objects_by_type($type, $name);
+        return [] unless $objects;
         my $id;
         if($subtype eq 'ho') {
             $id = $objects->{'host_name'}->{$name2};
