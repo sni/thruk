@@ -83,6 +83,7 @@
   [%- END -%]
 
   // switch to dark theme if prefered by the user
+  [% IF !c.req.parameters.defined("theme") %]
   var cookieTheme = readCookie('thruk_theme');
   if(!cookieTheme || cookieTheme.match(/^auto:/)) {
     switchTheme(cookieTheme);
@@ -93,5 +94,6 @@
       switchTheme(cookieTheme);
     });
   }
+  [% END %]
 -->
 </script>
