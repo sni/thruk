@@ -1653,6 +1653,9 @@ sub _update_core_conf {
             $self->{'_corefile'}->{'conf'}->{$key} = $value;
         }
 
+        if($key eq 'config_rel_path') {
+            $basedir = $value;
+        }
         if($key eq 'cfg_file') {
             push @{$self->{'config'}->{'obj_file'}}, $self->_resolve_relative_path($value, $basedir);
         }
