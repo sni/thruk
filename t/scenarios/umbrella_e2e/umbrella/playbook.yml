@@ -1,0 +1,45 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: local_tests
+    - role: thruk_developer
+  tasks:
+  - name: "create shared folders"
+    shell: "mkdir -p /mnt/shared/etc /mnt/shared/var"
+
+  - name: "sync shared folders"
+    shell: "rsync -avu /omd/sites/demo/{{item}}/thruk/. /mnt/shared/{{item}}/. ; rm -rf /omd/sites/demo/{{item}}/thruk ; ln -sfn /mnt/shared/{{item}} /omd/sites/demo/{{item}}/thruk"
+    with_items: ['etc', 'var']
+
+  - name: "chown shared folder"
+    shell: "chown -R demo: /mnt/shared/"
+
+  - name: "install thruk_local.conf"
+    copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+
+  - name: "enable lmd"
+    shell: sudo su - demo -c "sed -e 's/^#use_/use_/' -i etc/thruk/thruk_local.d/lmd.conf"
+
+  - name: "enable node-control plugin"
+    shell: sudo su - demo -c "rm -f etc/thruk/plugins-enabled/node-control ; thruk plugin enable node-control"
+    retries: 2
+    delay: 1
+    register: result
+    until: result.rc == 0
+
+
+  - name: "enable omd plugin"
+    shell: sudo su - demo -c "rm -f etc/thruk/plugins-enabled/omd ; thruk plugin enable omd"
+    retries: 2
+    delay: 1
+    register: result
+    until: result.rc == 0
+
+  - name: "thruk cron install "
+    shell: sudo su - demo -c "thruk cron install"
+

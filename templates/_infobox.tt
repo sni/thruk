@@ -13,7 +13,7 @@
       </td>
     </tr>
     [% END %]
-    <tr title="node: [% omd_site %]@[% c.config.hostname %]">
+    <tr>
       <th class="px-2">Version</th>
       <td class="truncate">
         <a class="link" href='http://www.thruk.org' target='_blank'>Thruk [% thrukversion %]</a>

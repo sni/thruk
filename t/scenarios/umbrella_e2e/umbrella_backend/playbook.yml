@@ -1,0 +1,32 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "create secret.key"
+    shell: echo "backend_key" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
+  - name: "create bp folder"
+    file:
+      path: /omd/sites/demo/etc/thruk/bp
+      state: directory
+      owner: demo
+      group: demo
+      mode: 0770
+
+  - name: add example business process
+    copy:
+      src: /root/1.tbp
+      dest: /omd/sites/demo/etc/thruk/bp/1.tbp
+      owner: demo
+      group: demo
+
+  - name: "thruk cron install "
+    shell: sudo su - demo -c "thruk cron install"

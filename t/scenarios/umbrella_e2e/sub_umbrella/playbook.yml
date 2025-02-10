@@ -1,0 +1,34 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "create secret.key"
+    shell: echo "sub_key" > /omd/sites/demo/var/thruk/secret.key
+  - name: "set permissions on secret.key"
+    file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+
+  - name: "copy test.cfg"
+    copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+
+  - name: "install thruk_local.conf"
+    copy:
+      src: "/root/thruk_local.conf"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
+      owner: "demo"
+      group: "demo"
+
+  - name: "enable lmd"
+    shell: sudo su - demo -c "sed -e 's/^#use_/use_/' -i etc/thruk/thruk_local.d/lmd.conf"
+
+  - name: "thruk cron install "
+    shell: sudo su - demo -c "thruk cron install"

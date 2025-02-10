@@ -1,0 +1,26 @@
+== Overview
+
+Umbrella monitoring setup. Uses a fixed frontend cluster (umbrella) which has
+a unclustered naemon to process business processes. Furthermore, there are
+multiple multi-level sub-umbrella systems connected.
+
+
+=== Loadbalancer
+
+The loadbalancer dashboard is available at:
+
+- http://127.0.0.3:60080/dashboard/
+
+=== Cluster
+
+The cluster address is:
+
+- https://127.0.0.3:60443/demo/
+- http://127.0.0.3:60080/demo/
+
+=== Architecture
+
+  umbrella
+  ├── sub_umbrella
+  │   └── sub_omd
+  └── umbrella_backend

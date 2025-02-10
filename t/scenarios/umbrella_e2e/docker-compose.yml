@@ -1,0 +1,145 @@
+networks:
+  test.local:
+  test.sub.local:
+
+services:
+  lb:
+    image: 'traefik:latest'
+    command:
+        - "--api=true"
+        - "--api.dashboard=true"
+        - "--api.insecure=true"
+        - "--providers.docker=true"
+        - "--global.sendAnonymousUsage=false"
+        - "--log.level=DEBUG"
+        - "--accesslog"
+        - "--entrypoints.web.address=:80"
+        - "--entrypoints.websecure.address=:443"
+        - "--serverstransport.insecureskipverify=true"
+        - "--providers.docker.exposedbydefault=false"
+    depends_on:
+        - umbrella_a
+        - umbrella_b
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60443:443"
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.dashboard.entrypoints=web"
+        - "traefik.http.routers.dashboard.rule=(PathPrefix(`/api`) || PathPrefix(`/dashboard`))"
+        - "traefik.http.routers.dashboard.service=api@internal"
+    networks:
+      - test.local
+
+  umbrella_a:
+    build: umbrella/
+    environment:
+        - TZ=Europe/Berlin
+    networks:
+      test.sub.local:
+      test.local:
+        aliases:
+          - umbrella_a.test.local
+    hostname: umbrella_a
+    domainname: test.local
+    ports:
+        - "80"
+        - "443"
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+        - shared:/mnt/shared
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.umbrella.entrypoints=web"
+        - "traefik.http.routers.umbrella.service=umbrella"
+        - "traefik.http.routers.umbrella.rule=PathPrefix(`/demo`)"
+        - "traefik.http.routers.umbrellassl.entrypoints=websecure"
+        - "traefik.http.routers.umbrellassl.service=umbrella"
+        - "traefik.http.routers.umbrellassl.rule=PathPrefix(`/demo`)"
+        - "traefik.http.routers.umbrellassl.tls=true"
+        - "traefik.http.services.umbrella.loadbalancer.server.port=443"
+        - "traefik.http.services.umbrella.loadbalancer.server.scheme=https"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.port=443"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
+
+  umbrella_b:
+    build: umbrella/
+    environment:
+        - TZ=Europe/Berlin
+    networks:
+      test.sub.local:
+      test.local:
+        aliases:
+          - umbrella_b.test.local
+    hostname: umbrella_b
+    domainname: test.local
+    ports:
+        - "80"
+        - "443"
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+        - shared:/mnt/shared
+    labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.umbrella.entrypoints=web"
+        - "traefik.http.routers.umbrella.service=umbrella"
+        - "traefik.http.routers.umbrella.rule=PathPrefix(`/demo`)"
+        - "traefik.http.routers.umbrellassl.entrypoints=websecure"
+        - "traefik.http.routers.umbrellassl.service=umbrella"
+        - "traefik.http.routers.umbrellassl.rule=PathPrefix(`/demo`)"
+        - "traefik.http.routers.umbrellassl.tls=true"
+        - "traefik.http.services.umbrella.loadbalancer.server.port=443"
+        - "traefik.http.services.umbrella.loadbalancer.server.scheme=https"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.port=443"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
+        - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
+
+  umbrella_backend:
+    build: umbrella_backend/
+    environment:
+        - TZ=Europe/Berlin
+    networks:
+      test.local:
+        aliases:
+          - backend.test.local
+    hostname: backend
+    domainname: test.local
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/test:ro
+
+  subumbrella:
+    build: sub_umbrella/
+    environment:
+        - TZ=Europe/Berlin
+    networks:
+      test.sub.local:
+        aliases:
+          - sub.test.sub.local
+    hostname: sub
+    domainname: test.sub.local
+    volumes:
+        - ../../../:/thruk:ro
+
+  subomd:
+    build: sub_omd/
+    environment:
+        - TZ=Europe/Berlin
+    networks:
+      test.sub.local:
+        aliases:
+          - omd.test.sub.local
+    hostname: omd
+    domainname: test.sub.local
+    volumes:
+        - ../../../:/thruk:ro
+
+volumes:
+  shared:

@@ -1,0 +1,1 @@
+../../cluster_e2e/t/300-controller_cluster.t
