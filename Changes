@@ -23,6 +23,8 @@ next:
             - added as core module
           - Panorama:
             - add zoom/scale options to url panel
+          - Business Process:
+            - add default_tab option
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command

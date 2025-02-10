@@ -518,7 +518,7 @@ sub _bp_start_page {
     $c->stash->{template}  = 'bp.tt';
     $c->stash->{editmode}  = 0;
 
-    my $type = $c->req->parameters->{'type'} // 'local';
+    my $type = $c->req->parameters->{'type'} // $c->config->{'Thruk::Plugin::BP'}->{'default_tab'} // 'local';
     $c->stash->{'type'} = $type;
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 

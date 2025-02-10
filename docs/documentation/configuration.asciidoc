@@ -3233,6 +3233,7 @@ Configuration Example:
     #default_state_order   = down, unreachable, ...
     #sync_downtime_ack_state = 0
     read_only              = 0
+    default_tab            = local | remote | all
   </Component>
 
 
@@ -3310,6 +3311,15 @@ Valid values are:
 === read_only
 Make all bp related pages readonly.
 
+=== default_tab
+Choose which tab should be displayed by default. Only useful if several http
+backends are in use.
+
+Valid values are:
+
+    * `local` - Local BPs (default)
+    * `remote` - Show remote BPs
+    * `all` - Show all BPs
 
 == User & Group Specific Overrides
 Both, the 'Users' and the 'Groups' directive override default settings for

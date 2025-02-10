@@ -17,9 +17,7 @@
       </div>
     [% END %]
     <div class="w-52">
-      [% IF allowed_for_edit %]
-      <a href="bp.cgi?action=new" class="button green">create new business process</a>
-      [% END %]
+      <a href="bp.cgi?action=new" class="button [% IF allowed_for_edit %]green[% ELSE %]not-clickable disabled[% END %]"[% IF !allowed_for_edit %] onclick="return false;" title="c"[% END %]>create new business process</a>
     </div>
   </div>
   <div class="mainTableHeader">
@@ -69,7 +67,7 @@
               [% IF allowed_for_edit %]
                 <a href="bp.cgi?action=details&amp;bp=[% bp.fullid %]&amp;edit=1"><i class="fa-solid fa-pencil text-sm" title='Change Business Process'></i></a>
               [% ELSE %]
-                <a href="#" class="not-clickable"><i class="fa-solid fa-pencil text-sm disabled" title='Change Business Process'></i></a>
+                <a href="#" class="not-clickable disabled" onclick="return false;"><i class="fa-solid fa-pencil text-sm" title='business processes are configured to be readonly'></i></a>
               [% END %]
             </td>
             <td class="mightOverflow border-l-0">
