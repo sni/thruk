@@ -7,3 +7,4 @@ THRUK_CRON=1
 0 */2 * * * thruk nc facts >/dev/null 2>&1
 
 THRUK_CRON=0
+
