@@ -42,7 +42,7 @@
 - stat: path=/thruk
   register: thruk_path
 - name: "run install.sh from omd_utils"
-  shell: "sudo su - {{ site }} -c 'yes | ~/local/share/omd_utils/thruk_developer/install.sh /thruk'"
+  shell: "sudo su - {{ site }} -c 'yes | NONINTERACTIVE=1 ~/local/share/omd_utils/thruk_developer/install.sh /thruk'"
   when: thruk_path.stat.exists
 - name: "disable auto restarts"
   shell: "sudo su - {{ site }} -c 'touch .THRUK_RESTARTER_DISABLED'"

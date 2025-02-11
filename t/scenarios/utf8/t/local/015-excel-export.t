@@ -65,6 +65,6 @@ like($content, '/döwnäüß€/', 'csv contains downtime comment');
 ###########################################################
 # cleanup
 unlink("/tmp/test.xls");
-#unlink("/tmp/test.csv");
+unlink("/tmp/test.csv");
 
 ###########################################################

@@ -14,6 +14,8 @@
       fi
       if test -f /usr/bin/apt; then
         apt-get install -y {{ package | join(' ') }} {{ deb | join(' ') }}
+      elif test -f /usr/bin/dnf; then
+        dnf install -y {{ package | join(' ') }} {{ rpm | join(' ') }}
       else
         yum install -y {{ package | join(' ') }} {{ rpm | join(' ') }}
       fi
