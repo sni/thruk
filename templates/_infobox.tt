@@ -2,7 +2,7 @@
 [% DEFAULT extra_classes = "" %][% IF extra_classes %][% SET extra_classes =  " " _ extra_classes %][% END %]
 <div class="card min-w-[350px][% extra_classes %] overflow-hidden">
   <div class="head">
-    <h3>[% infoBoxTitle %]</h3>
+    <h3 [% IF c.check_user_roles("admin") %]title="node: [% omd_site | html %]@[% c.config.hostname | html %]"[% END %]>[% infoBoxTitle %]</h3>
   </div>
   <table>
     [% IF show_last_update %]
@@ -13,7 +13,7 @@
       </td>
     </tr>
     [% END %]
-    <tr>
+    <tr title="node: [% omd_site %]@[% c.config.hostname %]">
       <th class="px-2">Version</th>
       <td class="truncate">
         <a class="link" href='http://www.thruk.org' target='_blank'>Thruk [% thrukversion %]</a>
