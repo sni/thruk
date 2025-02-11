@@ -169,13 +169,13 @@ sub index {
 
             # check if new objects really exits (wait up to 10seconds)
             my $success;
-            for (1..5) {
+            for (1..10) {
                 my $services = $c->db->get_services( filter => [ { 'host_name' => $bp->{'name'} } ], columns => [qw/description/] );
                 if($services && scalar @{$services} > 0) {
                     $success = 1;
                     last;
                 }
-                sleep(2);
+                sleep(1);
             }
             if(!$success) {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command succeeded, but services are missing" });

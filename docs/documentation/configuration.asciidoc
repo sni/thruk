@@ -3246,6 +3246,13 @@ As alternative to the spool_dir, a livestatus connection can be used
 to send results to the core. Set the name or key of the backend with
 this option.
 
+=== config_backend
+Use this backend to store the actual objects. Must be a backend of type http.
+
+=== mirror_backend
+Mirror business process files from this backend. Must be a backend of type http.
+Will overwrite all local business process files.
+
 === objects_save_file
 Save objects to this file. Content will be overwritten.
 

@@ -280,25 +280,37 @@ sub save_bp_objects {
         $text .= _get_icinga2_objects($c, $obj);
     }
 
-    my($fh, $filename) = tempfile();
-    _debug(sprintf("writing objects to %s", $filename));
-    Thruk::Utils::IO::write($filename, Encode::encode_utf8($text));
+    # save file to disk
+    my $config_backend = $c->config->{'Thruk::Plugin::BP'}->{'config_backend'};
+    if($config_backend) {
+        # store on remote backend
+        my $peer = $c->db->get_peer_by_name($config_backend);
+        die("no such config_backend: ".$config_backend) unless $peer;
+        die("config_backend must be of type http") unless $peer->{'type'} eq 'http';
+        my $rc = $peer->rpc($c, 'Thruk::Utils::IO::write', $file, $text);
+        die("write to config_backend failed") unless $rc;
+    } else {
+        my($fh, $filename) = tempfile();
+        _debug(sprintf("writing objects to %s", $filename));
+        Thruk::Utils::IO::write($filename, Encode::encode_utf8($text));
 
-    my $new_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
-    my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
+        my $new_hex = Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($filename));
+        my $old_hex = -f $file ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
-    # check if something changed
-    if($new_hex eq $old_hex) {
-        _debug(sprintf("no differences in %s and %s", $filename, $file));
-        # discard file
-        unlink($filename);
-        return(0, "no changes, no reload required");
+        # check if something changed
+        if($new_hex eq $old_hex) {
+            _debug(sprintf("no differences in %s and %s", $filename, $file));
+            # discard file
+            unlink($filename);
+            return(0, "no changes, no reload required");
+        }
+
+        _debug(sprintf("moving %s to %s", $filename, $file));
+        if(!move($filename, $file)) {
+            return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
+        }
     }
 
-    _debug(sprintf("moving %s to %s", $filename, $file));
-    if(!move($filename, $file)) {
-        return(1, 'move '.$filename.' to '.$file.' failed: '.$!);
-    }
     my $result_backend = $c->config->{'Thruk::Plugin::BP'}->{'result_backend'};
     if(!$result_backend) {
         my $peer_key = $c->db->peer_order->[0];
