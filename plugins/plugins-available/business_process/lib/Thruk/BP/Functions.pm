@@ -312,10 +312,10 @@ sub at_least {
     }
     $warning  = _expand_percent($warning,  $total);
     $critical = _expand_percent($critical, $total);
-    if($good <= $critical) {
+    if($good < $critical) {
         $state = 2;
     }
-    elsif($good <= $warning) {
+    elsif($good < $warning) {
         $state = 1;
     }
     my $perfdata = sprintf('good=%d;%f;%f;0;%d', $good, $warning, $critical, $total);
