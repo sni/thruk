@@ -168,10 +168,8 @@ prepare: base_images
 
 clean:
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker compose down --volumes --remove-orphans
-	docker compose kill -s INT
 	docker compose kill
-	docker compose rm -f
+	docker compose rm --force --volumes
 	-if test -e thruk.conf; then $(THRUK) cache clean all; fi || :
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_clean
