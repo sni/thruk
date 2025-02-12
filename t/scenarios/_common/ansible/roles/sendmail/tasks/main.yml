@@ -1,0 +1,16 @@
+- name: "ensure hostname has a domain"
+  shell: |
+    grep $(hostname) /etc/hosts | grep local >/dev/null || ( sed -e "s/$(hostname)/$(hostname) $(hostname).local/" /etc/hosts > /etc/hosts.new && cat /etc/hosts.new > /etc/hosts )
+    grep '\.' /etc/hostname >/dev/null || echo $(hostname).local > /etc/hostname
+
+- name: "install sendmail"
+  include_role:
+    name: yum_apt_retry
+  vars:
+    package:
+      - sendmail
+    creates:
+      - /usr/sbin/sendmail
+
+- name: "start sendmail"
+  shell: '/usr/sbin/sendmail -bd "-q1h" &'

@@ -3,13 +3,8 @@
   roles:
     - role: common
     - role: thruk_developer
+    - role: sendmail
   tasks:
-  - name: "yum install sendmail"
-    include_role:
-      name: yum_apt_retry
-    vars:
-      package:
-        - sendmail
   - name: "omd config change"
     shell: "omd config demo change"
     args:
@@ -28,4 +23,3 @@
       dest: /omd/sites/demo/var/thruk/reports/
       owner: demo
       group: demo
-  - shell: '/usr/sbin/sendmail -bd "-q1h" &'
