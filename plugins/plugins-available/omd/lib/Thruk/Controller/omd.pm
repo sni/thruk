@@ -31,7 +31,7 @@ my $pluginname = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
 sub index {
     my($c) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_SAFE_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
 
     $c->stash->{title}                 = 'Top Statistics';
     $c->stash->{page}                  = 'status';

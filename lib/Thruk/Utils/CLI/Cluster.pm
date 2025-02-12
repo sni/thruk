@@ -39,6 +39,7 @@ Show information about a Thruk cluster
 use warnings;
 use strict;
 
+use Thruk::Config 'noautoload';
 use Thruk::Utils::CLI ();
 
 our $skip_backends = 1;
@@ -85,7 +86,7 @@ sub cmd {
             }
             elsif($c->cluster->is_it_me($n)) {
                 $status = 'OK';
-                $n->{'version'} = Thruk::get_thruk_version();
+                $n->{'version'} = Thruk::Config::get_thruk_version();
                 $ok++;
             }
             elsif($n->{'last_contact'} <= 0) {

@@ -315,7 +315,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'thrukversion'              => \&Thruk::get_thruk_version,
+        'thrukversion'              => \&Thruk::Config::get_thruk_version,
         'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
@@ -790,8 +790,8 @@ return base config
 =cut
 sub get_base_config {
     if(!defined $base_defaults->{'thrukversion'}) {
-        $base_defaults->{'thrukversion'} = \&Thruk::get_thruk_version;
-        $config->{'thrukversion'}        = \&Thruk::get_thruk_version if $config;
+        $base_defaults->{'thrukversion'} = \&Thruk::Config::get_thruk_version;
+        $config->{'thrukversion'}        = \&Thruk::Config::get_thruk_version if $config;
     }
     if(!defined $base_defaults->{'hostname'}) {
         $base_defaults->{'hostname'} = &hostname();
@@ -863,6 +863,24 @@ sub get_toolkit_config {
     }
 
     return($view_tt_settings);
+}
+
+##############################################
+
+=head2 get_thruk_version
+
+  get_thruk_version()
+
+return full thruk version string, ex.: 2.40.2+10~feature_branch~45a4ceb
+
+=cut
+
+sub get_thruk_version {
+    my $git_info = &get_git_info(Thruk::Config::home());
+    if($git_info) {
+        return($VERSION.$git_info);
+    }
+    return($VERSION);
 }
 
 ##############################################

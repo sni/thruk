@@ -68,7 +68,7 @@ if($options->{'help'} || scalar @{$options->{'commandoptions'}} == 1) {
     exit(3);
 }
 if($options->{'version'}) {
-    print "check_thruk_rest v", Thruk::get_thruk_version(), "\n"; exit 0;
+    print "check_thruk_rest v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
 }
 
 require Thruk::Utils::CLI;

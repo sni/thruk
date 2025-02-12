@@ -1152,12 +1152,12 @@ sub _cmd_raw {
     # inject/add proxy version and config tool settings to processinfo result
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'thruk'} = {
-            'thruk_version'         => Thruk::get_thruk_version(),
+            'thruk_version'         => Thruk::Config::get_thruk_version(),
             'extra_version'         => $c->config->{'extra_version'},
             'data_source_version'   => $res->[2]->{$key}->{'data_source_version'},
         };
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
-        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.Thruk::get_thruk_version().')';
+        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.Thruk::Config::get_thruk_version().')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
         my $peer = $c->db->get_peer_by_key($key);

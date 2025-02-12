@@ -674,7 +674,7 @@ sub store_model_retention {
         my $data = {
             'configs'      => {$backend => $model->{'configs'}->{$backend}},
             'release_date' => $c->config->{'released'},
-            'version'      => Thruk::get_thruk_version(),
+            'version'      => Thruk::Config::get_thruk_version(),
         };
         store($data, $file);
         $c->config->{'conf_retention'}      = [stat($file)];
@@ -751,7 +751,7 @@ sub get_model_retention {
         if(defined $data->{'release_date'}
            and $data->{'release_date'} eq $c->config->{'released'}
            and defined $data->{'version'}
-           and $data->{'version'} eq Thruk::get_thruk_version()
+           and $data->{'version'} eq Thruk::Config::get_thruk_version()
         ) {
             my $model_configs = $data->{'configs'};
             for my $backend (keys %{$model_configs}) {

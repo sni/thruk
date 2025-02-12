@@ -32,7 +32,7 @@ Thruk Controller.
 sub index {
     my($c) = @_;
 
-    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::ADD_CACHED_DEFAULTS);
+    return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_CACHED_DEFAULTS);
 
     $c->stash->{'hide_backends_chooser'}   = 1;
     $c->stash->{no_auto_reload}    = 1;

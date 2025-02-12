@@ -161,7 +161,7 @@ sub new {
 ##############################################
 sub run {
     my($self) = @_;
-    my $vers  = Thruk::get_thruk_version();
+    my $vers  = Thruk::Config::get_thruk_version();
     my $host  = `hostname`;
     my $args  = $0.' '.join(' ', @ARGV);
     chomp($host);

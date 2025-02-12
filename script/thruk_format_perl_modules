@@ -551,7 +551,6 @@ sub _check_missing {
     for my $b (values %{$blocks}) {
         for my $f (@{$b->{'missing'}}) {
             my($m, $line) = @{$f};
-            next if $m eq 'Thruk';
             next if $m eq $b->{'package'}.'::Defaults';
             my $found = 0;
             for my $b (values %{$blocks}) {

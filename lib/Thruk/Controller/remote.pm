@@ -65,7 +65,7 @@ sub index {
             return;
         }
         if(ref $res eq 'HASH') {
-            $res->{'version'} = Thruk::get_thruk_version() unless defined $res->{'version'};
+            $res->{'version'} = Thruk::Config::get_thruk_version() unless defined $res->{'version'};
         }
         return $c->render(json => $res);
     }

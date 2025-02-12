@@ -15,7 +15,7 @@ use_ok("Thruk::Action::AddDefaults");
 
 my $config = Thruk::Config::set_config_env();
 is(ref Thruk->config, 'HASH', "got a config");
-ok(defined Thruk::get_thruk_version(), "got a version");
+ok(defined Thruk::Config::get_thruk_version(), "got a version");
 
 chomp(my $makefile_version = `grep "^VERSION\ *=" Makefile | head -n 1 | awk '{ print \$3 }'`);
 is($makefile_version, $Thruk::Config::VERSION, "Makefile shows Thruk::Config::VERSION: ".$Thruk::Config::VERSION);

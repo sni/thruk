@@ -1080,7 +1080,7 @@ returns full version string
 sub fullversion {
     my($c) = @_;
     die("no c") unless defined $c;
-    my $str = Thruk::get_thruk_version() // '';
+    my $str = Thruk::Config::get_thruk_version() // '';
     if($c->config->{'extra_version'}) {
         $str .= '/ '.$c->config->{'extra_version'};
     }
