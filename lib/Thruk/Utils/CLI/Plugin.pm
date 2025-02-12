@@ -315,7 +315,9 @@ sub _do_plugin_install {
         Thruk::Utils::IO::cmd("rm -rf $tmpdir");
         return("ERROR: could not remove existing folder prior installation: $target\n", 1);
     }
-    move($root, $target) or die("cannot move ".$root.' to '.$target.": $!");
+
+    my($rc, $out) = Thruk::Utils::IO::cmd("mv -f $root $target");
+    die('cannot move '.$root.' to '.$target.': '.$out) if $rc;
 
     # cleanup
     Thruk::Utils::IO::cmd("rm -rf $tmpdir");
