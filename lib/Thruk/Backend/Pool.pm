@@ -73,7 +73,11 @@ sub new {
 
     my $config       = Thruk::Base->config;
     my $peer_configs = Thruk::Base::list($backend_configs || $config->{'Thruk::Backend'}->{'peer'});
-    my $num_peers    = scalar @{$peer_configs};
+    my $num_peers    = 0;
+    for my $conf (@{$peer_configs}) {
+        next if(defined $conf->{'active'} && !$conf->{'active'});
+        $num_peers++;
+    }
     my $pool_size;
     if(defined $config->{'connection_pool_size'}) {
         $pool_size   = $config->{'connection_pool_size'};

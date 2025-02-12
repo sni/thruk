@@ -537,6 +537,24 @@ sub cache {
     return;
 }
 
+##############################################
+
+=head2 get_thruk_version
+
+  get_thruk_version()
+
+return full thruk version string, ex.: 2.40.2+10~feature_branch~45a4ceb
+
+=cut
+
+sub get_thruk_version {
+    my $git_info = Thruk::Config::get_git_info(Thruk::Config::home());
+    if($git_info) {
+        return($Thruk::Config::VERSION.$git_info);
+    }
+    return($Thruk::Config::VERSION);
+}
+
 ###################################################
 # mod_fcgid sends a SIGTERM on timeouts, so try to determine if this is a normal
 # exit or not and print the stacktrace if not.

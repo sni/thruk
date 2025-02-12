@@ -18,6 +18,7 @@ use URI::Escape qw/uri_unescape/;
 
 use Thruk::Utils ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::LMD ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
@@ -1682,7 +1683,7 @@ sub get_comments_filter {
     my $num;
 
     # LMD can simple search comments and downtimes, no need for a subquery (since version 2.2.2)
-    if($ENV{'THRUK_USE_LMD'} && Thruk::Utils::version_compare($ENV{'THRUK_LMD_VERSION'}, '2.2.2')) {
+    if($ENV{'THRUK_USE_LMD'} && Thruk::Utils::version_compare(Thruk::Utils::LMD::get_lmd_version($c->config), '2.2.2')) {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -or  => [ comments_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};
             push @servicefilter,       { -or  => [ host_comments_with_info  => { $op => $value }, comments_with_info  => { $op => $value },

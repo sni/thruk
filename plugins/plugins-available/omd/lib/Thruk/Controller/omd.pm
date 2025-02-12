@@ -3,7 +3,6 @@ package Thruk::Controller::omd;
 use warnings;
 use strict;
 
-use Thruk ();
 use Thruk::Backend::Manager ();
 use Thruk::Utils ();
 

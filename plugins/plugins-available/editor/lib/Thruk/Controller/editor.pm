@@ -7,7 +7,6 @@ use Digest::MD5 qw/md5_hex/;
 use Encode qw/decode_utf8/;
 use File::Temp qw/tempfile/;
 
-use Thruk ();
 use Thruk::Utils ();
 use Thruk::Utils::Status ();
 

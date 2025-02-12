@@ -85,7 +85,7 @@ sub cmd {
             }
             elsif($c->cluster->is_it_me($n)) {
                 $status = 'OK';
-                $n->{'version'} = $c->config->{'thrukversion'};
+                $n->{'version'} = Thruk::get_thruk_version();
                 $ok++;
             }
             elsif($n->{'last_contact'} <= 0) {

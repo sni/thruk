@@ -1810,7 +1810,7 @@ sub _rest_get_thruk {
     my($c) = @_;
     return({
         rest_version        => $VERSION,                                # rest api version
-        thruk_version       => $c->config->{'thrukversion'},            # thruk version
+        thruk_version       => Thruk::get_thruk_version(),      # thruk version
         thruk_release_date  => $c->config->{'released'},                # thruk release date
         localtime           => Time::HiRes::time(),                     # current server unix timestamp / epoch
         project_root        => $c->config->{'project_root'},            # thruk root folder
@@ -1835,7 +1835,11 @@ sub _rest_get_thruk_config {
             $val =~ s|//.*?@|//...:...@|gmx if defined $val;
             $data->{$key} = $val;
         } else {
-            $data->{$key} = $c->config->{$key};
+            my $val = $c->config->{$key};
+            if(ref $val eq 'CODE') {
+                $val = &{$val}();
+            }
+            $data->{$key} = $val;
         }
     }
     return($data);
@@ -2144,7 +2148,7 @@ sub _rest_get_sites {
             federation_name     => $peer->{'fed_info'}->{'name'}    || [ $peer->{'name'} ],
             federation_addr     => $peer->{'fed_info'}->{'addr'}    || [ $peer->{'addr'} ],
             federation_type     => $peer->{'fed_info'}->{'type'}    || [ $peer->{'type'} ],
-            federation_version  => $peer->{'fed_info'}->{'version'} || [ $peer->{'version'} ],
+            federation_version  => $peer->{'fed_info'}->{'version'} || [ $peer->{'version'} // Thruk::get_thruk_version() ],
             localtime           => $time,
         };
     }

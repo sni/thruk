@@ -209,7 +209,6 @@ sub _initialise_peer {
     $self->{'name'}          = $peer_config->{'name'};
     $self->{'type'}          = $peer_config->{'type'};
     $self->{'active'}        = $peer_config->{'active'} // 1;
-    $self->{'version'}       = Thruk::Config::get_thruk_version();
     $self->{'hidden'}        = defined $peer_config->{'hidden'} ? $peer_config->{'hidden'} : 0;
     $self->{'display'}       = defined $peer_config->{'display'} ? $peer_config->{'display'} : 1;
     $self->{'groups'}        = $peer_config->{'groups'};

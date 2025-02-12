@@ -100,7 +100,7 @@ if($options->{'help'}) {
 if($options->{'version'}) {
     require Thruk::Config;
     printf("thruk v%s%s\n",
-        Thruk::Config::get_thruk_version(),
+        Thruk::get_thruk_version(),
         ($Thruk::Config::GIT_HASH ? " (".$Thruk::Config::GIT_HASH.")" : ""),
     );
     exit 0;

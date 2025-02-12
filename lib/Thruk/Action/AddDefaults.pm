@@ -75,6 +75,7 @@ sub begin {
 
     $c->stash->{'show_sounds'}        = 0;
     $c->stash->{'has_debug_options'}  = $c->req->parameters->{'debug'} ? 1 : 0;
+    $c->stash->{'skip_navigation'}    = 1 if $c->req->path_info =~ m=/cgi-bin/remote.cgi=mx;
 
     # use pager?
     Thruk::Utils::set_paging_steps($c, $c->config->{'paging_steps'});
@@ -638,11 +639,6 @@ sub add_defaults {
 
     ###############################
     $c->stash->{'has_lmd'} = $c->config->{'use_lmd_core'} ? 1 : 0;
-    if($c->stash->{'has_lmd'}) {
-        ## no critic
-        $ENV{'THRUK_LMD_VERSION'} = Thruk::Utils::LMD::get_lmd_version($c->config) unless $ENV{'THRUK_LMD_VERSION'};
-        ## use critic
-    }
     $c->stash->{'has_expire_acks'} = $c->config->{'has_expire_acks'} // 1;
     $c->stash->{'require_comments_for_disable_cmds'} = $c->config->{'require_comments_for_disable_cmds'} || 0;
 

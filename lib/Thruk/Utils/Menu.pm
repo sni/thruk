@@ -30,6 +30,7 @@ reads the navigation
 sub read_navigation {
     my $c = shift;
 
+    return if $c->stash->{'skip_navigation'};
     $c->stats->profile(begin => "Utils::Menu::read_navigation()");
 
     $c->{'stash'} = $c->stash; # required for backwards compatibility on old menu_local.confs

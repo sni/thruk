@@ -30,7 +30,7 @@ our $VERSION = '3.20.2';
 our $GIT_HASH = ""; # set by dailydist make target
 
 our $config;
-my $project_root = home() || confess('could not determine project_root from inc.');
+our $project_root = home() || confess('could not determine project_root from inc.');
 
 my $base_defaults = {
     'name'                                  => 'Thruk',
@@ -304,7 +304,6 @@ sub import {
 =cut
 sub get_default_stash {
     my($c, $pre) = @_;
-    my $base_config = get_base_config();
     my $stash = {
         'total_backend_queries'     => 0,
         'total_backend_waited'      => 0,
@@ -316,7 +315,7 @@ sub get_default_stash {
         'user_profiling'            => 0,
         'real_page'                 => '',
         'make_test_mode'            => Thruk::Base->mode eq 'TEST' ? 1 : 0,
-        'thrukversion'              => $base_config->{'thrukversion'},
+        'thrukversion'              => \&Thruk::get_thruk_version,
         'fileversion'               => $VERSION,
         'starttime'                 => time(),
         'omd_site'                  => $ENV{'OMD_SITE'} || '',
@@ -791,8 +790,8 @@ return base config
 =cut
 sub get_base_config {
     if(!defined $base_defaults->{'thrukversion'}) {
-        $base_defaults->{'thrukversion'} = &get_thruk_version();
-        $config->{'thrukversion'}        = $base_defaults->{'thrukversion'} if $config;
+        $base_defaults->{'thrukversion'} = \&Thruk::get_thruk_version;
+        $config->{'thrukversion'}        = \&Thruk::get_thruk_version if $config;
     }
     if(!defined $base_defaults->{'hostname'}) {
         $base_defaults->{'hostname'} = &hostname();
@@ -868,15 +867,15 @@ sub get_toolkit_config {
 
 ##############################################
 
-=head2 _get_git_info
+=head2 get_git_info
 
-  _get_git_info()
+  get_git_info()
 
 return git branch/tag/has information to be used in the version
 
 =cut
 
-sub _get_git_info {
+sub get_git_info {
     my($project_root) = @_;
     our $git_info;
     return $git_info if defined $git_info;
@@ -909,7 +908,7 @@ sub _get_git_info {
 
     my(undef, $commits) = _cmd('cd '.$project_root.' && git log --oneline $(cd '.$project_root.' && git describe --tags --abbrev=0 2>/dev/null).. 2>/dev/null | wc -l');
 
-    &timing_breakpoint('_get_git_info');
+    &timing_breakpoint('get_git_info');
 
     if($branch eq 'master') {
         $git_info = "+".$commits."~".$hash;
@@ -1491,30 +1490,18 @@ sub hostname {
         $hostname = $ENV{'HOSTNAME'} if $ENV{'HOSTNAME'};
     }
 
+    # still no hostname yet, try posix uname
+    if(!$hostname) {
+        my @data = POSIX::uname();
+        $hostname = $data[1];
+    }
+
     # still no hostname yet, try hostname command
     if(!$hostname) {
-        (undef, $hostname) = _cmd("hostname") unless $hostname;
+        (undef, $hostname) = _cmd("hostname");
     }
 
     return($hostname);
-}
-
-##############################################
-
-=head2 get_thruk_version
-
-  get_thruk_version()
-
-return full thruk version string, ex.: 2.40.2+10~feature_branch~45a4ceb
-
-=cut
-
-sub get_thruk_version {
-    my $git_info = _get_git_info($project_root);
-    if($git_info) {
-        return($VERSION.$git_info);
-    }
-    return($VERSION);
 }
 
 ###################################################

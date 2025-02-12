@@ -438,7 +438,7 @@ sub pong {
         time        => time(),
         node_id     => $Thruk::Globals::NODE_ID,
         hostname    => $Thruk::Globals::HOSTNAME,
-        version     => $c->config->{'thrukversion'},
+        version     => Thruk::get_thruk_version(),
         maintenance => $c->cluster->{'node'}->{'maintenance'},
     });
 }

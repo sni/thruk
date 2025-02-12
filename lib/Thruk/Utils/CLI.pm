@@ -439,9 +439,27 @@ sub _external_request {
 
 ##############################################
 sub _dummy_c {
-    _debug2("_dummy_c()");
+    _debug2("create internal context");
     my($c) = _internal_request('/thruk/cgi-bin/remote.cgi');
+    #require Thruk;
+    #if(!$Thruk::thruk) {
+    #    Thruk->startup();
+    #}
+    #my $c = Thruk::Context->new($Thruk::thruk, {'PATH_INFO' => '/dummy-internal/'.__FILE__.':'.__LINE__});
+    #Thruk::Action::AddDefaults::begin($c);
+    _debug2("create internal context done");
     return($c);
+}
+
+##############################################
+sub _get_app {
+    our $app;
+    if(!$app) {
+        require Thruk;
+        require Plack::Test;
+        $app = Plack::Test->create(Thruk->startup);
+    }
+    return($app);
 }
 
 ##############################################
@@ -1134,12 +1152,12 @@ sub _cmd_raw {
     # inject/add proxy version and config tool settings to processinfo result
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'thruk'} = {
-            'thruk_version'         => $c->config->{'thrukversion'},
+            'thruk_version'         => Thruk::get_thruk_version(),
             'extra_version'         => $c->config->{'extra_version'},
             'data_source_version'   => $res->[2]->{$key}->{'data_source_version'},
         };
         $res->[2]->{$key}->{'localtime'}            = Time::HiRes::time();
-        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.$c->config->{'thrukversion'}.')';
+        $res->[2]->{$key}->{'data_source_version'} .= ' (via Thruk '.Thruk::get_thruk_version().')';
 
         # add config tool settings (will be read from Thruk::Backend::Manager::_do_on_peers)
         my $peer = $c->db->get_peer_by_key($key);
