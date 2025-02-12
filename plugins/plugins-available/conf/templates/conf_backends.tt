@@ -36,7 +36,24 @@
       <tr>
         <td colspan=3><hr></td>
       </tr>
-      [% PROCESS _conf_backends_backend.tt b = { name => '', addr => '', auth => '', proxy => '', remote_name => '', id => '', hidden => 0, type => 'livestatus', section => '', file => '', lineno => '', active => 1 } x = 0 %]
+      [% PROCESS _conf_backends_backend.tt
+          x = 0
+          b = {
+            name        => '',
+            addr        => '',
+            auth        => '',
+            proxy       => '',
+            verify      => 1,
+            remote_name => '',
+            id          => '',
+            hidden      => 0,
+            type        => 'livestatus',
+            section     => '',
+            file        => '',
+            lineno      => '',
+            active      => 1
+          }
+      %]
       <tr>
         <td colspan=3>
           <button class="w-32 mx-auto m-2" [% IF readonly %]disabled[% ELSE %]onclick="setBtnSpinner(this);"[% END %]>
@@ -98,6 +115,7 @@
     var typ         = jQuery('SELECT[name=type'+nr+']').val();
     var auth        = jQuery('INPUT[name=auth'+nr+']').val();
     var proxy       = jQuery('INPUT[name=proxy'+nr+']').val();
+    var verify      = jQuery('INPUT[name=verify'+nr+']:checked').val();
     var remote_name = jQuery('INPUT[name=remote_name'+nr+']').val();
     jQuery('.testimg_c_'+loopid).removeClass("hidden");
     jQuery('.testimg_e_'+loopid).addClass("hidden");
@@ -114,6 +132,7 @@
                 type:         typ,
                 auth:         auth,
                 proxy:        proxy,
+                verify:       verify,
                 remote_name:  remote_name,
                 CSRFtoken:    CSRFtoken
         },
@@ -164,6 +183,7 @@
 
     jQuery('.backend_conf_'+nr+'.backend_auth').hide();
     jQuery('.backend_conf_'+nr+'.backend_proxy').hide();
+    jQuery('.backend_conf_'+nr+'.backend_verify').hide();
     jQuery('.backend_conf_'+nr+'.backend_remote_name').hide();
     jQuery('.backend_conf_'+nr+'.backend_connection').hide();
 
@@ -171,6 +191,7 @@
       jQuery('.backend_conf_'+nr+'.backend_connection').show();
       jQuery('.backend_conf_'+nr+'.backend_auth').show();
       jQuery('.backend_conf_'+nr+'.backend_proxy').show();
+      jQuery('.backend_conf_'+nr+'.backend_verify').show();
       jQuery('.backend_conf_'+nr+'.backend_remote_name').show();
       jQuery('INPUT[name=peer'+nr+']').attr('placeholder', 'https://server/[sitename]');
     }

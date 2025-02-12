@@ -54,6 +54,15 @@
     </div>
   </td>
 </tr>
+<tr class="backend_conf_[% x %] backend_verify">
+  <th class="px-2">Verify SSL</th>
+  <td>
+    <div class="radiogroup">
+      <input type="radio" name="verify[% x %]" id="verify[% x %]_1" value="1"[% IF b.verify == 1 %] checked[% END %]><label for="verify[% x %]_1">Yes</label>
+      <input type="radio" name="verify[% x %]" id="verify[% x %]_0" value="0"[% IF b.verify == 0 %] checked[% END %]><label for="verify[% x %]_0">No</label>
+    </div>
+  </td>
+</tr>
 <tr class="backend_conf_[% x %] backend_proxy">
   <th class="px-2">Proxy</th>
   <td>

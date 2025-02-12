@@ -833,6 +833,7 @@ sub _process_backends_page {
         my $type        = $c->req->parameters->{'type'};
         my $auth        = $c->req->parameters->{'auth'};
         my $proxy       = $c->req->parameters->{'proxy'};
+        my $verify      = $c->req->parameters->{'verify'};
         my $remote_name = $c->req->parameters->{'remote_name'};
         my @test;
         my $con;
@@ -841,7 +842,13 @@ sub _process_backends_page {
             $con = Thruk::Backend::Peer->new({
                                                  type    => $type,
                                                  name    => 'test connection',
-                                                 options => { peer => $peer, auth => $auth, proxy => $proxy, remote_name => $remote_name },
+                                                 options => {
+                                                    peer        => $peer,
+                                                    auth        => $auth,
+                                                    proxy       => $proxy,
+                                                    remote_name => $remote_name,
+                                                    verify      => $verify,
+                                                 },
                                                 }, $c->config);
             @test   = $con->{'class'}->get_processinfo();
         };
@@ -875,6 +882,7 @@ sub _process_backends_page {
         $b->{'addr'}        = ref $p ne "HASH" ? $p->peer_list() : '';
         $b->{'auth'}        = $b->{'options'}->{'auth'}  || '';
         $b->{'proxy'}       = $b->{'options'}->{'proxy'} || '';
+        $b->{'verify'}      = $b->{'options'}->{'verify'} // '1';
         $b->{'remote_name'} = $b->{'options'}->{'remote_name'} || '';
         $b->{'hidden'}      = $b->{'hidden'}  // 0;
         $b->{'section'}     = $b->{'section'} // '';
@@ -2819,6 +2827,7 @@ sub _write_backends_to_thruk_local {
         $backend->{'options'}->{'auth'}         = $params->{'auth'.$x}        if $params->{'auth'.$x};
         $backend->{'options'}->{'proxy'}        = $params->{'proxy'.$x}       if $params->{'proxy'.$x};
         $backend->{'options'}->{'remote_name'}  = $params->{'remote_name'.$x} if $params->{'remote_name'.$x};
+        $backend->{'options'}->{'verify'}       = defined $params->{'verify'.$x} ? $params->{'verify'.$x} : 0;
         $x++;
         $backend->{'name'} = 'backend '.$x if(!$backend->{'name'} && $backend->{'options'}->{'peer'});
         next unless $backend->{'name'};
@@ -2832,8 +2841,9 @@ sub _write_backends_to_thruk_local {
             }
         }
 
-        # that's the default anyway
+        # cleanup keys with are the default already
         delete $backend->{'active'} if $backend->{'active'};
+        delete $backend->{'options'}->{'verify'} if $backend->{'options'}->{'verify'};
 
         # add values from existing backend config
         my $savefile = $file;

@@ -423,6 +423,7 @@ sub get_component_as_string {
         $string .= "            auth          = ".$b->{'options'}->{'auth'}."\n"          if $b->{'options'}->{'auth'};
         $string .= "            proxy         = ".$b->{'options'}->{'proxy'}."\n"         if $b->{'options'}->{'proxy'};
         $string .= "            remote_name   = ".$b->{'options'}->{'remote_name'}."\n"   if $b->{'options'}->{'remote_name'};
+        $string .= "            verify        = ".$b->{'options'}->{'verify'}."\n"        if defined $b->{'options'}->{'verify'};
         if($b->{options}->{fallback_peer}) {
             for my $p (@{$b->{options}->{fallback_peer}}) {
                 $string .= "            fallback_peer = ".$p."\n";
