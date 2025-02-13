@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 282;
+    plan tests => 294;
 }
 
 
@@ -59,6 +59,22 @@ for my $hst (sort keys %{$ids}) {
         );
     }
 }
+
+###############################################################################
+# send muliple commands to sub peers
+TestUtils::test_page(
+    'url'    => '/thruk/cgi-bin/cmd.cgi',
+    'post'   => {
+        'referer'           => 'status.cgi',
+        'selected_services' => 'tier3b;Load;e984d;e984d,tier3b;Ping;e984d',
+        'selected_hosts'    => '',
+        'quick_command'     => '1',
+        'start_time'        => time(),
+    },
+    'like'   => [ 'Commands successfully submitted' ],
+    'follow' => 1,
+);
+
 
 ###############################################################################
 TestUtils::test_command({

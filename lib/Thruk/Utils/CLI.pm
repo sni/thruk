@@ -1138,8 +1138,12 @@ sub _cmd_raw {
     if($ENV{'THRUK_USE_LMD'} && $function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
         my $peer = $c->db->lmd_peer;
         my $query = $opt->{'args'}->[0];
-        chomp($query);
-        $query .= "\nBackends: ".$key."\n";
+        my @querys = split/\n{2,}/mx, $query;
+        for my $q (@querys) {
+            chomp($q);
+            $q .= "\nBackends: ".$key."\n";
+        }
+        $query = join("\n", @querys);
         $c->res->body($peer->_raw_query($query));
         $c->{'rendered'} = 1;
         return;
