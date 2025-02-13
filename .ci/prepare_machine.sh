@@ -3,77 +3,78 @@
 set -ex
 
 export DEBIAN_FRONTEND="noninteractive"
-apt-get -y update
 
 apt-get -y update
-apt-get -y install apt-transport-https curl
-sh -c "echo 'deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./' >> /etc/apt/sources.list"
-curl -s -o /etc/apt/trusted.gpg.d/naemon.asc "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg"
-apt-get -y update
-
 apt-get -y install \
-    debhelper \
-    lsb-release \
-    chrpath \
-    curl \
-    wget \
-    git \
-    rsync \
-    perl \
-    perl-doc \
-    libperl-dev \
-    cpanminus \
-    tofrodos \
-    poppler-utils \
     apache2 \
     apache2-utils \
-    libmariadb-dev \
-    libpng-dev \
-    libjpeg62-dev \
-    zlib1g-dev \
-    libmodule-install-perl \
-    libcpanel-json-xs-perl \
-    libfcgi-perl \
-    libnet-http-perl \
-    libsocket-perl \
-    libio-socket-ip-perl \
-    libgd-perl \
-    libtemplate-perl \
-    libdate-calc-perl \
-    libfile-slurp-perl \
-    libdate-manip-perl \
-    libdatetime-timezone-perl \
-    libdatetime-perl \
-    libexcel-template-perl \
-    libio-string-perl \
-    liblog-log4perl-perl \
-    libmime-lite-perl \
+    apt-transport-https \
+    chrpath \
+    cpanminus \
+    curl \
+    debhelper \
+    git \
     libclass-inspector-perl \
-    libdbi-perl \
+    libconfig-general-perl \
+    libcpanel-json-xs-perl \
+    libcrypt-rijndael-perl \
+    libdate-calc-perl \
+    libdate-manip-perl \
+    libdatetime-perl \
+    libdatetime-timezone-perl \
     libdbd-mysql-perl \
-    libtest-simple-perl \
-    libhtml-lint-perl \
+    libdbi-perl \
+    libdevel-cycle-perl \
+    libexcel-template-perl \
+    libextutils-config-perl \
+    libextutils-helpers-perl \
+    libextutils-installpaths-perl \
+    libfcgi-perl \
     libfile-bom-perl \
-    libtest-cmd-perl \
-    libtest-pod-perl \
+    libfile-slurp-perl \
+    libgd-perl \
+    libhtml-lint-perl \
+    libhttp-message-perl \
+    libio-socket-ip-perl \
+    libio-string-perl \
+    libjpeg62-dev \
+    liblog-log4perl-perl \
+    libmariadb-dev \
+    libmime-lite-perl \
+    libmodule-build-tiny-perl \
+    libmodule-install-perl \
+    libnet-http-perl \
+    libpadwalker-perl \
     libperl-critic-perl \
+    libperl-dev \
+    libplack-perl \
+    libpng-dev \
+    libsocket-perl \
+    libsub-uplevel-perl \
+    libtemplate-perl \
+    libtest-cmd-perl \
     libtest-perl-critic-perl \
     libtest-pod-coverage-perl \
-    libdevel-cycle-perl \
-    libpadwalker-perl \
-    libmodule-build-tiny-perl \
-    libsub-uplevel-perl \
-    libextutils-helpers-perl \
-    libextutils-config-perl \
-    libextutils-installpaths-perl \
+    libtest-pod-perl \
     libtest-requires-perl \
-    libhttp-message-perl \
-    libplack-perl \
-    libcrypt-rijndael-perl \
-    libconfig-general-perl \
+    libtest-simple-perl \
     libwww-mechanize-perl \
+    lsb-release \
     npm \
+    perl \
+    perl-doc \
+    poppler-utils \
+    rsync \
+    tofrodos \
+    wget \
+    zlib1g-dev \
 
+# list of mirrors: https://mirrors.opensuse.org/
+#echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list
+echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list
+curl -s "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" \
+    -o /etc/apt/trusted.gpg.d/naemon.asc
+apt-get -y update
 apt-get -y install naemon-core naemon-livestatus
 chsh -s /bin/bash naemon
 ! grep docker /etc/group >/dev/null || gpasswd -a naemon docker
