@@ -37,7 +37,7 @@
       </span>
       [% last_section = section %]
     </td>
-    <td title="id: [% pd %]">
+    <td title="id: [% pd %]" data-id="[% pd %]">
       <b>
       [% remote_thruk_url = get_remote_thruk_url_path(c, pd); IF remote_thruk_url %]
       <a href="proxy.cgi/[% pd %][% remote_thruk_url %]" target="_blank">
