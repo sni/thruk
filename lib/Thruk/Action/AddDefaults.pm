@@ -527,7 +527,8 @@ sub add_defaults {
         };
         $c->stash->{'data_source_error'} = $@ if $@;
     }
-    my $disabled_backends = set_enabled_backends($c);
+    my $disabled_backends  = set_enabled_backends($c);
+    my($selected_backends) = $c->db->select_backends('get_sites');
 
     ###############################
     # add program status
@@ -559,7 +560,6 @@ sub add_defaults {
         if($err) {
             $c->stash->{'data_source_error'} = $err;
             # index.html and some other pages should not be redirect to the error page on backend errors
-            set_possible_backends($c, $disabled_backends);
             if(Thruk::Base->debug) {
                 _warn("data source error: $err");
             } else {
@@ -570,7 +570,9 @@ sub add_defaults {
         }
         $c->stash->{'last_program_restart'} = $last_program_restart;
 
-        set_possible_backends($c, $disabled_backends);
+        # reset selected backends, might have changed during setting program status
+        set_enabled_backends($c, $selected_backends);
+
         $c->stats->profile(end => "AddDefaults::get_proc_info");
     }
 
@@ -588,6 +590,9 @@ sub add_defaults {
         if($c->{'session'} && !$c->{'session'}->{'fake'}) {
             $c->stash->{'cookie_auth'} = 1;
         }
+
+        # reset selected backends, might have changed during fetching groups
+        set_enabled_backends($c, $selected_backends);
     }
 
     ###############################
