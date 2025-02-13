@@ -875,7 +875,7 @@ sub _bulk_send_backend {
     if($err) {
         $err = _strip_line($err);
         $c->stash->{'last_command_error'} = $err;
-        _warn($err);
+        _warn($err) unless($c->want_json_response() || Thruk::Base->mode_cli());
         Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
         return;
     }
