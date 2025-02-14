@@ -1622,7 +1622,7 @@ sub _update_logcache_compact {
     my $log_count = 0;
     my $log_clear = 0;
 
-    # since we usually backtrack 4 days in reports, use 3days plus 2 extra hours to compensate timshifts to compact state changes
+    # since we usually backtrack 4 days in reports, use 3days plus 2 extra hours to compensate timeshifts to compact state changes
     my $offset = 74*3600;
 
     if($blocksize =~ m/^\d+[a-z]{1}/mx) {
@@ -2286,6 +2286,7 @@ sub _import_logcache_from_file {
         chdir($ENV{'THRUKOLDPWD'});
     }
 
+    my $failed = 0;
     for my $p (@{$files}) {
         my $expanded = [];
         if(-f $p) {
@@ -2294,10 +2295,16 @@ sub _import_logcache_from_file {
             $expanded = [glob($p.'/*')];
         } else {
             $expanded = [glob($p)];
+            if(scalar @{$expanded} == 0) {
+                $failed++;
+                _warn("no files found for: $p");
+                next;
+            }
         }
         for my $f (@{$expanded}) {
             if(!-f $f) {
-                _debug("skipping $f: $!");
+                $failed++;
+                _warn("skipping $f: $!");
                 next;
             }
             _infos($f);
@@ -2370,6 +2377,10 @@ sub _import_logcache_from_file {
     # restore old working dir
     if($ENV{'THRUKOLDPWD'}) {
         chdir($ENV{'HOME'});
+    }
+
+    if($failed == scalar @{$files}) {
+        die("no file imported");
     }
 
     return $log_count;
