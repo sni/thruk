@@ -662,6 +662,7 @@ plugins/plugins-available/reports2/templates/reports/locale/dk.tt
 plugins/plugins-available/reports2/templates/reports/locale/en.tt
 plugins/plugins-available/reports2/templates/reports/locale/es.tt
 plugins/plugins-available/reports2/templates/reports/locale/fr.tt
+plugins/plugins-available/reports2/templates/reports/locale/hu.tt
 plugins/plugins-available/reports2/templates/reports/locale/it.tt
 plugins/plugins-available/reports2/templates/reports/report_from_url.tt
 plugins/plugins-available/reports2/templates/reports/sla_host.tt
