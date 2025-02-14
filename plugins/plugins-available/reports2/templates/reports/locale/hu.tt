@@ -1,0 +1,51 @@
+[%
+  locale_name          = 'hungarian';      # language name should be in english
+  reportDateTimeFormat = '%d %b %Y  %H:%M:%S';
+  reportDateFormat     = '%d %b %Y';
+  weekAbbr             = 'Hét';
+  monthNames           = ['Jan','Feb','Már','Ápr','Máj','Jún','Júl','Aug','Szept','Okt','Nov','Dec'];
+  dayNames             = ['Hét','Ked','Sze','Csü','Pén','Szo','Vas'];
+  translations         = {
+# keep those personal names
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Hostcsoport:',
+    'Servicegroup:'                         => 'Szolgáltatáscsoport:',
+    'Event Report'                          => 'Eseményjelentés',
+    'SLA Report'                            => 'SLA jelentés',
+    'SLA Outage Report'                     => 'SLA kiesési jelentés',
+    'Business Process:'                     => 'Üzleti folyamat:',
+    'Report Timeperiod:'                    => 'Jelentési időszak:',
+    'Legend'                                => 'Jelmagyarázat',
+    'Host Alert'                            => 'Host riasztás',
+    'Service Alert'                         => 'Szolgáltatás riasztás',
+    'Totals'                                => 'Összesen',
+    'Events'                                => 'Események',
+    'no events during this timeperiod.'     => 'nincsenek események ebben az időszakban.',
+    'SLA Overview Graph'                    => 'SLA áttekintő grafikon',
+    'Availability'                          => 'Elérhetőség',
+    'Service: %s on %s'                     => 'Szolgáltatás: %s a %s rendszeren',
+    'Average Availability'                  => 'Átlagos elérhetőség',
+    'Total Uptime'                          => 'Teljes üzemidő',
+    'Total Downtime'                        => 'Teljes leállási idő',
+    'no outages during this timeperiod'     => 'nincsenek kiesések ebben az időszakban',
+    'Worst Outages'                         => 'Leghosszabb kiesések',
+    'Latest Outages'                        => 'Legutóbbi kiesések',
+    'Outages'                               => 'Kiesések',
+    'Report:'                               => 'Jelentés:',
+    'Description:'                          => 'Leírás:',
+    'Your report is attached.'              => 'A jelentés csatolva.',
+    'Out of Scope'                          => 'Hatókörön kívül',
+  };
+
+  set_time_locale("hu_HU.UTF-8");
+%]
