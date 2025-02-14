@@ -6,7 +6,7 @@ use Thruk::Utils ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 231;
+    plan tests => 276;
 }
 BEGIN {
     use lib('t');
