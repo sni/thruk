@@ -69,7 +69,13 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
     var random     = Number(Math.random() * 100000).toFixed(0);
     var source_url = url.replace(/\/grafana\/(d|dashboard|dashboard-solo)\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&').replace('&disablePanelTitle', '');
     if(source_url.match("/histou/index.php")) {
-      await page.goto(source_url);
+      const response = await page.goto(source_url);
+      if(!response.ok()) {
+        console.log("fetching url "+source_url+" failed: "+response.status()+" "+response.statusText())
+        //console.log(response.text())
+        await browser.close();
+        process.exit(2);
+      }
 
       let data = await page.content();
       data = data.replace(/^[\s\S]*<br>\{/, '{');
@@ -79,9 +85,14 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       data.rows.forEach(function(row, i) {
           row.panels.forEach(function(panel, j) {
             var title = panel.title;
+            title = title.replace(hostname+' - ', '');
             title = title.replace(hostname+' ', '');
+            title = title.replace(service+' - ', '');
             title = title.replace(service+' ', '');
+            title = title.replace(/^\/check_\S+[^\/]*\/ /, '');
+            title = title.replace(/^check_\S+ - /, '');
             title = title.replace(/^check_\S+ /, '');
+            title = title.replace(/^\${|:\w+}/g, '');
             if(panel.id==panelId || title == panelId) {
               urlObj.searchParams.set('panelId', panel.id);
               url = urlObj.toString();
@@ -94,7 +105,13 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       if(matches && matches[1]) {
         var dashboard_id = matches[1];
         var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
-        await page.goto(api_url);
+        const response = await page.goto(api_url);
+        if(!response.ok()) {
+          console.log("fetching url "+api_url+" failed: "+response.status()+" "+response.statusText())
+          //console.log(response.text())
+          await browser.close();
+          process.exit(2);
+        }
 
         let data = await page.content();
         data = data.replace(/.*<pre>/, '');
@@ -115,7 +132,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
 
   const response = await page.goto(url);
   if(!response.ok()) {
-    console.log("fetching url failed: "+response.status()+" "+response.statusText())
+    console.log("fetching url "+url+" failed: "+response.status()+" "+response.statusText())
     //console.log(response.text())
     await browser.close();
     process.exit(2);

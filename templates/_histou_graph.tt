@@ -4,10 +4,9 @@
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";
   var histou_source     = "[% histou_source %]";
-  var random            = Number(Math.random() * 100000).toFixed(0);
 
   /* try to fetch sources */
-  var source_url = histou_url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
+  var source_url = histou_url.replace(/\/grafana\/dashboard\/script\/histou\.js\?/, '/histou/index.php?');
   if(source_url.match("/histou/index.php")) {
     jQuery.ajax({
       url: source_url,
@@ -24,15 +23,7 @@
         jQuery('#histou_source_select').find('option').remove();
         jQuery(data.rows).each(function(i, row) {
             jQuery(row.panels).each(function(j, panel) {
-              var title = panel.title;
-              title = title.replace('[% escape_js(hst) %] - ', '');
-              title = title.replace('[% escape_js(hst) %] ', '');
-              title = title.replace('[% escape_js(svc) %] - ', '');
-              title = title.replace('[% escape_js(svc) %] ', '');
-              title = title.replace(/^\/check_\S+[^\/]*\/ /, '');
-              title = title.replace(/^check_\S+ - /, '');
-              title = title.replace(/^check_\S+ /, '');
-              title = title.replace(/^\${|:\w+}/g, '');
+              var title = replaceHistouTitle(panel.title, '[% escape_js(hst) %]', '[% escape_js(svc) %]');
               jQuery('#histou_source_select').append('<option value="'+panel.id+'"'+((panel.id==histou_source || title == histou_source) ? ' selected' : '')+'>'+title+'<\/option>');
               has_graphs++;
             });
@@ -130,40 +121,30 @@
   if(jQuery.isNumeric(histou_source)) {
     set_histou_img(histou_start, histou_end, histou_id, histou_source, true);
   } else {
-    // fetch id for source name
-    var source_url = histou_url.replace(/\/grafana\/(d|dashboard|dashboard-solo)\/script\/histou\.js\?/, '/histou/index.php?_='+random+'&');
     jQuery('#pnpwaitimg').css('display', 'block');
-    if(source_url.match("/histou/index.php")) {
-      jQuery.ajax({
-        url: source_url,
-        type: 'POST',
-        xhrFields: {
-          withCredentials: true
-        },
-        success: function(data) {
-          data = data.replace(/^[\s\S]*<br>\{/, '{');
-          data = data.replace(/<br><\/pre>$/, '');
-          data = data.replace(/\n/g, '');
-          eval('data = '+data+";");
-          jQuery(data.rows).each(function(i, row) {
-              jQuery(row.panels).each(function(j, panel) {
-                var title = panel.title;
-                title = title.replace('[% escape_js(hst) %] ', '');
-                title = title.replace('[% escape_js(svc) %] ', '');
-                title = title.replace(/^check_\S+ /, '');
-                if(panel.id==histou_source || title == histou_source) {
-                  histou_source = panel.id; // make refreses use the extracted id
-                  set_histou_img(histou_start, histou_end, histou_id, panel.id);
-                }
-              });
-          });
-        },
-        error: ajax_xhr_error_logonly
+
+    var hst   = '[% escape_js(hst) %]';
+    var svc   = '[% escape_js(svc) %]';
+    var grafana_default_panelId = "[% c.config.grafana_default_panelId %]";
+    if(grafana_default_panelId == "") {
+        grafana_default_panelId = "1";
+    }
+
+    // fetch id for source name
+    if(histou_url.match("/script/histou.js")) {
+      fetchHistouPanelId(histou_url, histou_source, hst, svc, function(newId) {
+        if(newId === null) {
+          set_histou_img(histou_start, histou_end, histou_source, grafana_default_panelId);
+        } else {
+          histou_source = ""+newId; // make refresh use the extracted id
+          set_histou_img(histou_start, histou_end, histou_source, newId);
+        }
       });
     } else {
       // extract panels from plain grafana dashboard
-      var matches = source_url.match(/(?:d|d-solo|dashboard)\/([^\/]+)\//);
+      var matches = histou_url.match(/(?:d|d-solo|dashboard)\/([^\/]+)\//);
       if(matches && matches[1]) {
+        var source_url = histou_url;
         var dashboard_id = matches[1];
         var api_url = source_url.replace(/\/grafana\/.*$/, '/grafana/api/dashboards/uid/'+dashboard_id)
         jQuery.ajax({

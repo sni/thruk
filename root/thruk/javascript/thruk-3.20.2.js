@@ -10112,6 +10112,73 @@ function toUnixtime(ts) {
     return(ts);
 }
 
+function replaceHistouTitle(title, hst, svc) {
+    title = title.replace(hst + ' - ', '');
+    title = title.replace(hst + ' ', '');
+    title = title.replace(svc + ' - ', '');
+    title = title.replace(svc + ' ', '');
+    title = title.replace(/^\/check_\S+[^\/]*\/ /, '');
+    title = title.replace(/^check_\S+ - /, '');
+    title = title.replace(/^check_\S+ /, '');
+    title = title.replace(/^\${|:\w+}/g, '');
+    return(title);
+}
+
+function fetchHistouPanelId(histou_url, histou_source, hst, svc, cb) {
+    // fetch id for source name
+    if(!histou_url.match("/script/histou.js")) {
+        cb(null);
+        return;
+    }
+
+    var source_url = histou_url.replace(/\/grafana\/(d|dashboard|dashboard-solo)\/script\/histou\.js\?/, '/histou/index.php?');
+    jQuery.ajax({
+        url: source_url,
+        type: 'POST',
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function(data) {
+            data = data.replace(/^[\s\S]*<br>\{/, '{');
+            data = data.replace(/<br><\/pre>$/, '');
+            data = data.replace(/\n/g, '');
+            eval('data = '+data+";");
+
+            // direct title match
+            var found = false;
+            jQuery(data.rows).each(function(i, row) {
+                jQuery(row.panels).each(function(j, panel) {
+                    var title = replaceHistouTitle(panel.title, hst, svc);
+                    if(panel.id==histou_source || title == histou_source) {
+                        cb(""+panel.id);
+                        found = true;
+                        return false;
+                    }
+                });
+            });
+            if(found) { return; }
+
+            // try sub string match
+            jQuery(data.rows).each(function(i, row) {
+                jQuery(row.panels).each(function(j, panel) {
+                var title = replaceHistouTitle(panel.title, hst, svc);
+                var re    = new RegExp(histou_source);
+                if(panel.id==histou_source || title.match(re)) {
+                    cb(""+panel.id);
+                    found = true;
+                    return false;
+                }
+                });
+            });
+            if(found) { return; }
+
+            cb(null);
+        },
+        error: ajax_xhr_error_logonly
+    });
+}
+
+
 
 /*******************************************************************************
 88888888888 db  8b           d8 88   ,ad8888ba,   ,ad8888ba,   888b      88
