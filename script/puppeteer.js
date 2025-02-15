@@ -132,6 +132,12 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
         let value = await page.evaluate(el => el.textContent, element)
         errorMsg = value;
       }),
+      page.waitForSelector('div[role="alert"]', {timeout: 0}).then(async () => {
+        console.error("alert message found, export failed");
+        let element = await page.$('div[role="alert"]')
+        let value = await page.evaluate(el => el.ariaLabel, element)
+        errorMsg = value;
+      }),
       page.waitForSelector('DIV.markdown-html H1', {timeout: 0}).then(async () => {
         console.error("alert message found, export failed:");
         let element = await page.$('DIV.markdown-html H1')
