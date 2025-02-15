@@ -172,11 +172,18 @@ always use the first graph in it's details page and in reports. Since release
 The PNP4Nagios source index starts with 0 as first graph. So use 1 if you want
 to view the second graph as default.
 
+Since v3.20 you can also use speaking names to address specific graphs.
+
 Example Service
 
 ------
+define host {
+  ...
+  _GRAPH_SOURCE         rta   # use graph by name
+}
+
 define service {
   ...
-  _GRAPH_SOURCE         1
+  _GRAPH_SOURCE         1     # use graph by number
 }
 ------
