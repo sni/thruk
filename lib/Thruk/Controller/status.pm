@@ -561,6 +561,7 @@ sub _process_details_page {
         my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
+        Thruk::Utils::fill_commands_cache($c);
         for my $s (@{$services}) {
             # remove custom macro colums which could contain confidential informations
             Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline);
@@ -686,6 +687,7 @@ sub _process_hostdetails_page {
         my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
+        Thruk::Utils::fill_commands_cache($c);
         for my $h (@{$hosts}) {
             # remove custom macro colums which could contain confidential informations
             Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);
@@ -1213,6 +1215,7 @@ sub _process_combined_page {
         my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
+        Thruk::Utils::fill_commands_cache($c);
         # remove custom macro colums which could contain confidential informations
         for my $h (@{$hosts}) {
             Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);

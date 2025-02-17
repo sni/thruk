@@ -3130,15 +3130,14 @@ sub guess_field_type {
 ##########################################################
 sub _fill_commands_cache {
     my($c) = @_;
-    return if $c->stash->{'all_commands_cache'};
+
     # only if there is a check_command or host_check_command column requested
     my $columns = Thruk::Base::array2hash(get_request_columns($c, NAMES) || []);
     if(scalar keys %{$columns} > 0 && !$columns->{'check_command'} && !$columns->{'host_check_command'}) {
         return;
     }
 
-    $c->stash->{'all_commands_cache'} = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
-    return;
+    return Thruk::Utils::fill_commands_cache($c);
 }
 
 ##########################################################

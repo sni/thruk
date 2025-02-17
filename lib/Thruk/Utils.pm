@@ -1076,6 +1076,23 @@ sub set_allowed_rows_data {
     return($obj);
 }
 
+##########################################################
+
+=head2 fill_commands_cache
+
+  fill_commands_cache($c)
+
+fill cache used by expand_command()
+
+=cut
+sub fill_commands_cache {
+    my($c) = @_;
+    return if $c->stash->{'all_commands_cache'};
+
+    $c->stash->{'all_commands_cache'} = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
+    return;
+}
+
 ########################################
 
 =head2 get_user_data
