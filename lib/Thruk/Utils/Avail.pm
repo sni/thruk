@@ -392,7 +392,7 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
         my $host_data = $c->db->get_hosts(filter => $filter, columns => [qw/name state alias display_name custom_variables/]);
         _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
-        for my $host (keys %{$host_data}) {
+        for my $host (@{$host_data}) {
             $affected_backends->{$host->{'peer_key'}} = 1;
         }
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
@@ -426,7 +426,7 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
         my $host_data = $c->db->get_hosts(filter => $filter, columns => [qw/name state alias display_name custom_variables/]);
         _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
-        for my $host (keys %{$host_data}) {
+        for my $host (@{$host_data}) {
             $affected_backends->{$host->{'peer_key'}} = 1;
         }
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
