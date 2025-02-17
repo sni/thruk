@@ -988,7 +988,14 @@ sub finalize_request {
         }
     }
     # slow pages log
+    my $log_request = 0;
     if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $c->config->{'slow_page_log_threshold'} > 0 && $elapsed > $c->config->{'slow_page_log_threshold'}) {
+        $log_request = 1;
+    }
+    if(($ENV{'THRUK_MODE'} // '') eq 'TEST' && ($c->stash->{'total_backend_queries'} // 0) > 20) {
+        $log_request = 2;
+    }
+    if($log_request) {
         _warn("***************************");
         _warn(sprintf("slow_page_log_threshold (%ds) hit, page took %.1fs to load.", $c->config->{'slow_page_log_threshold'}, $elapsed));
         _warn(sprintf("page:    %s\n", $c->req->url)) if defined $c->req->url;
@@ -997,6 +1004,7 @@ sub finalize_request {
         _warn(sprintf("address: %s%s\n", $c->req->address, ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' : '')));
         _warn($c->stash->{errorDetails}) if $c->stash->{errorDetails}; # might contain hints about the current dashboard
         _warn($c->stats->report());
+        die("too many queries") if $log_request == 2;
     }
 
     my $content_length;
