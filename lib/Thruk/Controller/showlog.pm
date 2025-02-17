@@ -126,7 +126,7 @@ sub index {
                 ],
         };
         $backends = Thruk::Utils::get_affected_backends(
-            $c->db->get_services(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], { host_name => $host, description => $service } ], columns => [qw/host_name/])
+            $c->db->get_services(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], { host_name => $host, description => $service } ], columns => [qw/host_name/]),
         );
     }
     elsif($host) {
@@ -140,7 +140,7 @@ sub index {
                 ],
         };
         $backends = Thruk::Utils::get_affected_backends(
-            $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], { name => $host } ], columns => [qw/name/])
+            $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], { name => $host } ], columns => [qw/name/]),
         );
     }
 
