@@ -200,6 +200,9 @@ sub calculate_availability {
             time => { '<=' => $end },
     ]};
 
+    my($backends) = $c->db->select_backends("get_logs");
+    my $affected_backends = {};
+
     # services
     $c->stash->{'services'} = {};
     if(exists $params->{s_filter}) {
@@ -215,6 +218,7 @@ sub calculate_availability {
             if($initialassumedservicestate == -1) {
                 $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
             }
+            $affected_backends->{$service->{'peer_key'}} = 1;
         }
         if(scalar keys %{$services_data} == 0) {
             _die_no_matches($c, 'service', 'filter', @{$filter}) unless scalar @{$all_services} > 0;
@@ -262,6 +266,7 @@ sub calculate_availability {
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
             push @hostfilter, { 'host_name' => $host->{'name'} };
+            $affected_backends->{$host->{'peer_key'}} = 1;
         }
         $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
         $loghostheadfilter = Thruk::Utils::combine_filter('-or', \@hostfilter);
@@ -307,6 +312,7 @@ sub calculate_availability {
             if($initialassumedservicestate == -1) {
                 $initial_states->{'services'}->{$service->{'host_name'}}->{$service->{'description'}} = $service->{'state'};
             }
+            $affected_backends->{$service->{'peer_key'}} = 1;
         }
         if(scalar keys %{$services_data} == 0) {
             return $c->detach('/error/index/15');
@@ -376,6 +382,7 @@ sub calculate_availability {
         }
         for my $host (@{$host_data}) {
             push @{$hosts}, $host->{'name'};
+            $affected_backends->{$host->{'peer_key'}} = 1;
         }
         $c->stash->{'hosts'} = Thruk::Base::array2hash($host_data, 'name');
     }
@@ -396,6 +403,9 @@ sub calculate_availability {
         }
         if(scalar keys %{$host_data} == 0) {
             return $c->detach('/error/index/15');
+        }
+        for my $host (keys %{$host_data}) {
+            $affected_backends->{$host->{'peer_key'}} = 1;
         }
     }
 
@@ -459,6 +469,9 @@ sub calculate_availability {
                 $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
             }
         }
+        for my $host (keys %{$host_data}) {
+            $affected_backends->{$host->{'peer_key'}} = 1;
+        }
 
         if($params->{'include_host_services'}) {
             # some pages includes services too, so
@@ -502,6 +515,7 @@ sub calculate_availability {
         my $service_data;
         for my $service (@{$all_services}) {
             $service_data->{$service->{'host_name'}}->{$service->{'description'}} = $service;
+            $affected_backends->{$service->{'peer_key'}} = 1;
         }
         $c->stash->{'services'} = $service_data;
 
@@ -656,8 +670,11 @@ sub calculate_availability {
         $file = 1;
     }
 
+    # only use affected backends
+    $backends = [sort keys %{$affected_backends}];
+
     $c->stats->profile(begin => "avail.pm fetchlogs");
-    $logs = $c->db->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file);
+    $logs = $c->db->get_logs(filter => $filter, columns => [ qw/time type message/ ], file => $file, backend => $backends);
     $c->stats->profile(end   => "avail.pm fetchlogs");
 
     $file = fix_and_sort_logs($c, $logs, $file, $rpttimeperiod);
