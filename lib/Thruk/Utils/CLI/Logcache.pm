@@ -131,6 +131,14 @@ sub cmd {
         if($blocksize !~ m/^\d+$/mx) {
             $blocksize = Thruk::Utils::expand_duration($blocksize) / 86400;
         }
+    } elsif($mode eq 'stats' || $mode eq 'status') {
+        $mode = 'stats';
+    } elsif($mode eq 'authupdate') {
+    } elsif($mode eq 'optimize') {
+    } elsif($mode eq 'removeunused') {
+    } elsif($mode eq 'drop') {
+    } else {
+        return("ERROR - unknown mode. See --help/-h for available modes.\n", 1);
     }
 
     $opt->{'force'} = $global_options->{'force'};
