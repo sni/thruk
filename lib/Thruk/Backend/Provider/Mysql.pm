@@ -971,8 +971,8 @@ sub _replace_column_name {
             return($col, $val);
         }
         $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
-        my $id = $self->{'query_meta'}->{'host_lookup'}->{$val};
-        return('l.host_id', $id) if defined $id;
+        my $id = $self->{'query_meta'}->{'host_lookup'}->{$val} // -1; # always replace host_name. Using the name leads to zero results but skips the index
+        return('l.host_id', $id);
     }
     return($col, $val);
 }
