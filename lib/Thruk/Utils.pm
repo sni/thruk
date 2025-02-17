@@ -4216,6 +4216,25 @@ sub clean_old_folder_files {
     return;
 }
 
+##########################################################
+
+=head2 get_affected_backends
+
+  get_affected_backends($data)
+
+return list of affected backend from query result
+
+=cut
+sub get_affected_backends {
+    my($data) = @_;
+    return([]) unless $data;
+    my $affected_backends = {};
+    for my $obj (@{$data}) {
+        $affected_backends->{$obj->{'peer_key'}} = 1;
+    }
+    return([sort keys %{$affected_backends}]);
+}
+
 ##############################################
 
 1;

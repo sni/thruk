@@ -48,6 +48,8 @@ sub index {
         $type = $c->req->uri =~ m/history\.cgi/mx ? 0 : '';
     }
 
+    my($backends) = $c->db->select_backends("get_logs");
+
     # time filter
     push @{$filter}, { time => { '>=' => $start }};
     push @{$filter}, { time => { '<'  => $end }};
@@ -123,6 +125,9 @@ sub index {
                         ]},
                 ],
         };
+        $backends = Thruk::Utils::get_affected_backends(
+            $c->db->get_services(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], { host_name => $host, description => $service } ], columns => [qw/host_name/])
+        );
     }
     elsif($host) {
         push @{$filter}, {
@@ -134,6 +139,9 @@ sub index {
                         ]},
                 ],
         };
+        $backends = Thruk::Utils::get_affected_backends(
+            $c->db->get_hosts(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], { name => $host } ], columns => [qw/name/])
+        );
     }
 
     my $total_filter;
@@ -160,7 +168,7 @@ sub index {
 
         $c->stats->profile(begin => "showlog::fetch");
         $c->stash->{'logs_from_compacted_zone'} = 0;
-        $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1);
+        $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {$order => 'time'}, pager => 1, backend => $backends);
         $c->stats->profile(end   => "showlog::fetch");
     }
 
