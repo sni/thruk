@@ -392,6 +392,9 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')] ];
         my $host_data = $c->db->get_hosts(filter => $filter, columns => [qw/name state alias display_name custom_variables/]);
         _die_no_matches($c, 'host', undef, @{$filter}) unless scalar @{$host_data} > 0;
+        for my $host (keys %{$host_data}) {
+            $affected_backends->{$host->{'peer_key'}} = 1;
+        }
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
         push @{$hosts}, keys %{$host_data};
         $logserviceheadfilter = { service_description => undef };
@@ -403,9 +406,6 @@ sub calculate_availability {
         }
         if(scalar keys %{$host_data} == 0) {
             return $c->detach('/error/index/15');
-        }
-        for my $host (keys %{$host_data}) {
-            $affected_backends->{$host->{'peer_key'}} = 1;
         }
     }
 
@@ -426,6 +426,9 @@ sub calculate_availability {
         my $filter    = [ [Thruk::Utils::Auth::get_auth_filter($c, 'hosts')], $hostfilter ];
         my $host_data = $c->db->get_hosts(filter => $filter, columns => [qw/name state alias display_name custom_variables/]);
         _die_no_matches($c, 'host', 'hostgroup:' .$hostgroup, @{$filter}) unless scalar @{$host_data} > 0;
+        for my $host (keys %{$host_data}) {
+            $affected_backends->{$host->{'peer_key'}} = 1;
+        }
         $host_data    = Thruk::Base::array2hash($host_data, 'name');
         if($hostgroup ne '' and $hostgroup ne 'all') {
             $groupfilter       = Thruk::Utils::combine_filter('-or', \@groupfilter);
@@ -468,9 +471,6 @@ sub calculate_availability {
             for my $hostname (keys %{$host_data}) {
                 $initial_states->{'hosts'}->{$hostname} = $host_data->{$hostname}->{'state'};
             }
-        }
-        for my $host (keys %{$host_data}) {
-            $affected_backends->{$host->{'peer_key'}} = 1;
         }
 
         if($params->{'include_host_services'}) {
