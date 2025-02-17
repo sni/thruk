@@ -875,6 +875,11 @@ sub expand_command {
     my $commands = $data{'commands'}; # optional lookup table for commands
     my $source   = $data{'source'};
 
+    if(!$commands && $Thruk::Globals::c) {
+        my $c = $Thruk::Globals::c;
+        $commands = $c->stash->{'all_commands_cache'} if $c->stash->{'all_commands_cache'};
+    }
+
     my $obj          = $host;
     my $command_name = $host->{'check_command'};
     if(defined $service) {

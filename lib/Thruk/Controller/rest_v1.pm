@@ -86,6 +86,7 @@ sub index {
     local $ENV{'THRUK_QUIET'} = 1 unless Thruk::Base->verbose;
 
     $c->stash->{'backend_errors_handling'} = DIE;
+    local $Thruk::Globals::c = $c;
 
     my $format   = 'json';
     my $backends = [];
@@ -2163,6 +2164,7 @@ register_rest_path_v1('GET', qr%^/hosts?$%mx, \&_rest_get_livestatus_hosts);
 sub _rest_get_livestatus_hosts {
     my($c) = @_;
     my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "hosts");
     return($data);
 }
@@ -2194,6 +2196,7 @@ register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/services?$%mx, \&_rest_get_live
 sub _rest_get_livestatus_hosts_services {
     my($c, undef, $host) = @_;
     my $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host }, _livestatus_filter($c, 'services') ], %{_livestatus_options($c, "services")});
+    _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -2233,6 +2236,7 @@ register_rest_path_v1('GET', qr%^/hosts?/([^/]+)$%mx, \&_rest_get_livestatus_hos
 sub _rest_get_livestatus_hosts_by_name {
     my($c, undef, $host) = @_;
     my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "hosts");
     return($data);
 }
@@ -2277,6 +2281,7 @@ register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services
 sub _rest_get_livestatus_services {
     my($c) = @_;
     my $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), _livestatus_filter($c, 'services')  ], %{_livestatus_options($c, "services")});
+    _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -2289,6 +2294,7 @@ register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_liv
 sub _rest_get_livestatus_services_by_name {
     my($c, undef, $host, $service) = @_;
     my $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
+    _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
 }
@@ -3119,6 +3125,20 @@ sub guess_field_type {
     }
 
     return('', '');
+}
+
+##########################################################
+sub _fill_commands_cache {
+    my($c) = @_;
+    return if $c->stash->{'all_commands_cache'};
+    # only if there is a check_command or host_check_command column requested
+    my $columns = Thruk::Base::array2hash(get_request_columns($c, NAMES) || []);
+    if(scalar keys %{$columns} > 0 && !$columns->{'check_command'} && !$columns->{'host_check_command'}) {
+        return;
+    }
+
+    $c->stash->{'all_commands_cache'} = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
+    return;
 }
 
 ##########################################################
