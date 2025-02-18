@@ -68,7 +68,8 @@
           [% END %]
         </td>
         [% IF type == "new" || type == "exists" || type == "obsolete" %]
-        <td class="truncate max-w-xs text-left">
+        <td class="truncate max-w-xs text-left" title="additional check arguments&#013;ex.: override thresholds: warn='load > 5'">
+[% dump(check) %]
           [% IF type == "new" %]
             <input type="text" name="args.[% check.id %]" placeholder="additional arguments" class="ml-1" onkeydown="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();">
           [% ELSE %]
@@ -391,6 +392,12 @@ jQuery(document).ready(function() {
           },
           type: 'POST',
           success: function(data) {
+            // simply fill if empty
+            if(data.address && jQuery("INPUT[name=ip]").val() == "") {
+              jQuery("INPUT[name=ip]").val(data.address).effect('highlight', {}, 1000);
+              return;
+            }
+
             if(confirm("autofill with resolved addess: "+data.address)) {
               jQuery("INPUT[name=ip]").val(data.address).effect('highlight', {}, 1000);
             }

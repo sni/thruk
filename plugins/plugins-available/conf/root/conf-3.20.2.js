@@ -132,6 +132,12 @@ function init_conf_tool_buttons() {
             },
             type: 'POST',
             success: function(data) {
+                // simply fill if empty
+                if(data.address && jQuery('#attr_table').find('.obj_address').val() == "") {
+                    jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
+                    return;
+                }
+
                 if(confirm("autofill with resolved addess: "+data.address)) {
                     jQuery('#attr_table').find('.obj_address').val(data.address).effect('highlight', {}, 1000);
                 }
