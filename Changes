@@ -14,6 +14,7 @@ next:
             - outages: fix extracting timeperiod
             - outages: fix filtering by host/service query
             - fix double encoded error messages
+            - performance improvements
           - Node-Control:
             - prevent running multiple updates from cron in parallel
           - Reports:
