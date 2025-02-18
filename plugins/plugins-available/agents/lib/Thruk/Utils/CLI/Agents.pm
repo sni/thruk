@@ -23,8 +23,8 @@ Available commands are:
   - list   | -l               list agent hosts
   - show   | -S   <host>      show checks for host
   - add    | -I   <host> ...  add/inventory for new/existing host(s)
-  - update | -II  <host> ...  add/inventory for new/existing host(s) and freshly apply excludes
-             -III <host> ...  add/inventory for new/existing host(s) and remove manual overrides
+  - update | -II  <host> ...  update inventory for existing host(s) and freshly apply excludes
+             -III <host> ...  update inventory for existing host(s) and remove manual overrides
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
@@ -387,6 +387,10 @@ sub _run_add_host {
     my($c, $hostname, $opt, $edit_only) = @_;
 
     my($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
+    if($opt->{'fresh'} && !$hst && !$hostobj) {
+        _error("no host found by name: %s (add new hosts with -I / add)", $hostname);
+        return("", 3);
+    }
     if($edit_only) {
         if(!$hostobj) {
             _error("no host found by name: %s", $hostname);
