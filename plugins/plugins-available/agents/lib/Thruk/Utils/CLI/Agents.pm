@@ -471,7 +471,7 @@ sub _run_add_host {
 
     my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
     my $agent   = $class->new();
-    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt->{'fresh'}, $opt->{'cached'});
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, $opt);
     my @result;
     for my $obj (@{$objects}) {
         my $file = Thruk::Controller::conf::get_context_file($c, $obj, $obj->{'_filename'});
@@ -651,7 +651,7 @@ sub _check_inventory {
     my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
     my $agent   = $class->new();
     my $checks_config = _build_checks_config($checks);
-    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, 1);
+    my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, { fresh => 1 });
     my @need_update;
     for my $obj (@{$objects}) {
         next unless $obj->{'conf'}->{'service_description'};

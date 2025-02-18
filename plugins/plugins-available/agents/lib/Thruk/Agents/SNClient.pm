@@ -62,13 +62,13 @@ sub settings {
 
 =head2 get_config_objects
 
-    get_config_objects($c, $data, $checks_config, $fres, $inventory_file)
+    get_config_objects($c, $data, $checks_config, $cli_opts)
 
 returns list of Monitoring::Objects for the host / services along with list of objects to remove
 
 =cut
 sub get_config_objects {
-    my($self, $c, $data, $checks_config, $fresh, $inventory_file) = @_;
+    my($self, $c, $data, $checks_config, $cli_opts) = @_;
 
     my $backend  = $data->{'backend'}  || die("missing backend");
     my $hostname = $data->{'hostname'} || die("missing hostname");
@@ -132,7 +132,7 @@ sub get_config_objects {
     }
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $fresh, $section, $mode, $settings->{'options'}, $inventory_file);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $cli_opts, $section, $mode, $settings->{'options'});
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     if(!$checks || scalar @{$checks} == 0) {
@@ -191,7 +191,7 @@ sub get_config_objects {
         my @templates = ($template);
         unshift @templates, $perf_template unless $chk->{'noperf'};
 
-        if($fresh || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
+        if($cli_opts->{'fresh'} || $type eq 'on' || ($chk->{'svc_conf'}->{'_AGENT_ARGS'}//'') ne ($args//'')) {
             if(!defined $chk->{'svc_conf'}->{'service_description'}) {
                 # these are obsolete services, just keep them as is
                 next;
@@ -345,17 +345,17 @@ sub _add_templates {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options, $inventory_file)
+    get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $fresh, $section, $mode, $options, $inventory_file) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options) = @_;
     my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
-    if($inventory_file) {
-        $datafile = $inventory_file;
-        _debug("using %s as inventory file", $inventory_file);
+    if($cli_opts->{'cached'}) {
+        $datafile = $cli_opts->{'cached'};
+        _debug("using %s as inventory file", $datafile);
     }
     if(!-r $datafile) {
         return([]);
@@ -372,7 +372,7 @@ sub get_services_checks {
                     $data->{'inventory'},
                     $hostname,
                     $password,
-                    $fresh,
+                    $cli_opts,
                     $section,
                     $mode,
                     $options // $settings->{'options'} // {},
@@ -457,7 +457,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password, $fresh, $section, $mode, $options) = @_;
+    my($c, $inventory, $hostname, $password, $cli_opts, $section, $mode, $options) = @_;
     my $checks = [];
 
     # get available modules
