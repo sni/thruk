@@ -134,18 +134,11 @@
 <div class="flexrow 2xl:justify-between h-full w-full max-w-[1200px]">
   <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[500px]">
     <div class="head justify-between" style="flex: 0 0 40px;">
-      <div class="w-[100px]">
+      <div class="w-40">
         <a href="agents.cgi" class="button header-button rounded w-[70px]" title="Go back to agent list"><i class="uil uil-angle-double-left"></i>Back</a>
       </div>
       <h3>[% IF agent.hostname != "new" %]Edit[% ELSE%]Add[% END %] Agent</h3>
-      <div class="w-40">
-        [% class = ""; IF reload_required; class=" orange"; END %]
-        [% PROCESS _button btn = {
-          form   => { action => '../r/config/reload', },
-          data   => { backend => agent.peer_key, CSRFtoken => get_user_token(c), },
-          button => { class => 'js-activate-btn w-full' _ class, title => "Apply all changes and reload core", onclick => "return agents_activate(this);", html => '<i class="uil uil-sync"></i>Activate Changes' },
-        }%]
-      </div>
+      <div class="w-40"></div>
     </div>
     <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-50px)]" onsubmit="setFormBtnSpinner(this)">
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
@@ -159,51 +152,66 @@
         <table class="body cellspacing striped">
           <tbody>
             <tr>
-              <th>Hostname</th>
+              <th class="text-right px-0">Hostname</th>
+              <td>
+                <input class="w-full min-w-20" type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'[% IF agent.hostname != 'new' %]rename this host[% ELSE %]create new host[% END %]', autosubmit:false })">
+              </td>
+              <th class="text-right px-0">IP Address</th>
               <td>
                 <div class="flexrow flex-nowrap gap-x-1">
-                  <input type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" class="flex-grow" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'[% IF agent.hostname != 'new' %]rename this host[% ELSE %]create new host[% END %]', autosubmit:false })">
-                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Section:</span>
-                  <input type="text" name="section" value="[% agent.section | html %]" class="w-[360px]" onfocus="this.click()" onclick="ajax_search.init(this, 'section', { url: 'agents.cgi?action=json&amp;type=section', emptymsg:'create new section', autosubmit:false })">
+                  <input class="w-full min-w-20" type="text" name="ip" value="[% agent.ip | html %]" placeholder="will use hostname if empty">
+                  <button class="js-ip-wzd-button" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>
+                </div>
+              </td>
+              <th class="text-right px-0">Mode</th>
+              <td>
+                <select name="mode" class="w-full">
+                  <option value="https"[% IF agent.mode == "https" %] selected[% END %]>https</option>
+                  <option value="insecure"[% IF agent.mode == "insecure" %] selected[% END %]>https (no verification)</option>
+                  <option value="http"[% IF agent.mode == "http" %] selected[% END %]>plain http</option>
+                </select>
+              </td>
+              <th class="text-right px-0">Port</th>
+              <td>
+                <input type="text" name="port" value="[% agent.port | html %]" class="w-full" placeholder="[% default_port | html %]">
+              </td>
+            </tr>
+            <tr>
+              <th class="text-right px-0">Password</th>
+              <td colspan="3">
+                <div class="js-toggle-password relative flex-grow">
+                  <input type="password" name="password" value="" class="w-full" placeholder="[% IF agent.password != '' %]password set, enter new one to change[% ELSE %]enter agent password or macro, ex.: $USER9$[% END %]" autocomplete="new-password">
+                  <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 opacity-50 text-lg js-toggle-password"></i>
+                </div>
+              </td>
+              <th class="text-right px-0">Section</th>
+              <td colspan="3">
+                <input class="w-full" type="text" name="section" value="[% agent.section | html %]" onfocus="this.click()" onclick="ajax_search.init(this, 'section', { url: 'agents.cgi?action=json&amp;type=section', emptymsg:'create new section', autosubmit:false })">
+              </td>
+            </tr>
+            <tr>
+              <th class="text-right px-0">Tags</th>
+              <td colspan="3">
+                <input class="w-full" type="text" name="tags" value="" placeholder="comma seperated tags" class="flex-grow">
+              </td>
+              [% IF has_multiple_backends %]
+                <th class="text-right px-0">Site</th>
+                <td>
+                  <input type="text" name="backend" value="[% peer_name(agent) | html %]" class="w-full" onfocus="this.click()" onclick="ajax_search.init(this, 'site', { url: 'agents.cgi?action=json&amp;type=site', emptymsg:'select an existing site', autosubmit:false })" required>
+                </td>
+              [% ELSE %]
+                <td colspan="2"></td>
+              [% END %]
+              <td colspan="2">
+                <div class="flexrow justify-end">
+                  <button class="ml-2 pr-1 w-36" onclick="jQuery('#advanced-options').toggleClass('hidden'); return false;">Advanded Options <i class="uil uil-angle-down mr-0"></i></button>
                 </div>
               </td>
             </tr>
             <tr>
-              <th>IP Address</th>
-              <td>
-                <div class="flexrow flex-nowrap gap-x-1">
-                  <div class="flexrow flex-nowrap gap-x-1 grow">
-                    <input type="text" name="ip" value="[% agent.ip | html %]" placeholder="will use hostname if empty" class="flex-grow">
-                    <button class="js-ip-wzd-button" title="autofill address from hostname ip lookup."><i class="uil uil-lightbulb mr-0"></i></button>
-                  </div>
-                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Mode:</span>
-                  <select name="mode" class="w-36">
-                    <option value="https"[% IF agent.mode == "https" %] selected[% END %]>https</option>
-                    <option value="insecure"[% IF agent.mode == "insecure" %] selected[% END %]>https (no verification)</option>
-                    <option value="http"[% IF agent.mode == "http" %] selected[% END %]>plain http</option>
-                  </select>
-                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Port:</span>
-                  <input type="text" name="port" value="[% agent.port | html %]" class="w-36" placeholder="[% default_port | html %]">
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th class="align-top"><div class="mt-1">Password</div></th>
-              <td>
-                <div class="flexrow flex-nowrap gap-x-1">
-                  <div class="js-toggle-password relative flex-grow">
-                    <input type="password" name="password" value="" class="w-full" placeholder="[% IF agent.password != '' %]password set, enter new one to change[% ELSE %]enter agent password or macro, ex.: $USER9$[% END %]" autocomplete="new-password">
-                    <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 opacity-50 text-lg js-toggle-password"></i>
-                  </div>
-                  [% IF has_multiple_backends %]
-                  <span class="ml-2 text-right w-14 textTH font-semibold self-center">Site:</span>
-                  <input type="text" name="backend" value="[% peer_name(agent) | html %]" class="w-36" onfocus="this.click()" onclick="ajax_search.init(this, 'site', { url: 'agents.cgi?action=json&amp;type=site', emptymsg:'select an existing site', autosubmit:false })" required>
-                  <span class="text-right w-14"></span>
-                  [% END %]
-                  <button class="ml-2 pr-1 w-fit" onclick="jQuery('#advanced-options').toggleClass('hidden'); return false;">Advanded Options <i class="uil uil-angle-down mr-0"></i></button>
-                </div>
+              <td colspan="8">
                 [% has_options = 0; opts = BLOCK %]
-                  <span class="text-right w-fit textTH font-semibold self-center" title="if set, device can be offline for given duration, ex: 1d">Offline Threshold:</span>
+                  <span class="text-right w-fit textTH font-semibold self-center" title="if set, device can be offline for given duration, ex: 1d">Offline Threshold</span>
                   <input type="text" name="options.offline" placeholder="1d" value="[% IF agent.exists("settings") && agent.settings.exists("options") && agent.settings.options.exists("offline"); has_options = 1 %][% agent.settings.options.offline | html %][% END %]" class="w-16">
                 [% END %]
                 <div class="flexrow flex-nowrap gap-x-1[% IF !has_options %] hidden[% END %]" id="advanced-options">
@@ -212,10 +220,13 @@
               </td>
             </tr>
             <tr>
-              <td colspan="2" align="center">
-                <div class="flexrow flex-nowrap justify-evenly">
-                  <button class="w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
-                  <button class="w-44 js-save-btn" name="action" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
+              <td colspan="8" align="center">
+                <div class="flexrow flex-nowrap justify-center gap-x-8">
+                  <button class="w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" title="Connect to agent and discover services" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
+                  <i class="uil uil-angle-double-right self-center"></i>
+                  <button class="w-44 js-save-btn" name="action" title="Write object configuration" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
+                  <i class="uil uil-angle-double-right self-center"></i>
+                  <button class="w-44 js-activate-btn [% IF reload_required %]orange[% END %]" title="Reload core" onclick="return agents_activate(this);"><i class="uil uil-sync"></i> Activate Changes</button>
                 </div>
               </td>
             </tr>
@@ -344,9 +355,12 @@ function checkSaveButtonColor() {
   }
 }
 
-function agents_activate(form) {
-  send_form_in_background_with_callback(form, {}, function(form, success, data, textStatus, jqXHR) {
-    var btn = jQuery(form).find("BUTTON").first();
+function agents_activate(btn) {
+  var form = document.createElement('form');
+  form.action = '../r/config/reload';
+  var data = { backend: "[% agent.peer_key | html %]", CSRFtoken: CSRFtoken };
+  setBtnSpinner(btn);
+  var cb = function(form, success, data, textStatus, jqXHR) {
     if(!success) {
       var msg = getXHRerrorMsg("", textStatus, jqXHR, false);
       setBtnError(btn, msg);
@@ -359,7 +373,8 @@ function agents_activate(form) {
       setBtnError(btn, "reload failed");
       thruk_message(1, "reload failed, please check your logs...\n"+data[0]["output"]);
     }
-  });
+  };
+  submitFormInBackground(form, cb, data);
   return false;
 }
 
