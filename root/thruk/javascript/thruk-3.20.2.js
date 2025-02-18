@@ -10466,8 +10466,17 @@ function overcard(options) {
         'caption':  '',
         'width':    '',
         'minWidth': 500,
-        'callback': null
+        'callback': null,
+        'draggable': false,
+        'resizable': false
     };
+
+    if(!has_jquery_ui() && (settings['draggable'] || settings['resizable'])) {
+        load_jquery_ui(function() {
+            overcard(settings);
+        });
+        return;
+    }
 
     for(var key in options) {
         if(key in settings) {
@@ -10531,6 +10540,27 @@ function overcard(options) {
         head.style.display = '';
     } else {
         head.style.display = 'none';
+    }
+    if(settings['draggable']) {
+        jQuery('#'+containerId).draggable({
+            handle: "H3, .head",
+            start: function(e, ui) {
+                // disable body click close after element has been dragged
+                remove_close_element(containerId);
+            }
+        });
+        jQuery('#'+containerId+' H3, #'+containerId+' .head').css("cursor", "move");
+    }
+    if(settings['resizable']) {
+        jQuery('#'+containerId).resizable({
+            minWidth:  100,
+            minHeight: 100,
+            start: function(e, ui) {
+                // disable body click close after element has been resized
+                remove_close_element(containerId);
+            }
+        });
+        settings["minWidth"] = 100;
     }
 
     if(settings["width"])    { container.style.width    = settings["width"]+'px'; }

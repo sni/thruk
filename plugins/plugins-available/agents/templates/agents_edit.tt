@@ -55,7 +55,7 @@
               [% reason = check.disabled %]
               [% IF reason == 0; reason = "manually disabled"; END %]
               [% IF reason == 1; reason = "unknown reason"; END %]
-              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'disabled_[% check.id %]', 'caption': 'disabled details for [% check.name | html %]', 'width': 900 }); return false;">
+              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'disabled details for [% check.name | html %]', 'width': 900 }); return false;">
                 <div class='text-center badge PENDING'>disabled</div>
               </a>
               <div id="disabled_[% check.id %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
@@ -78,7 +78,7 @@
         [% END %]
         <td class="[% IF type != "exists" %]w-full[% END %]">
           [% IF check.defined("info") %]
-            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
             <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
           [% END %]
         </td>
