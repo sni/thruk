@@ -10517,22 +10517,20 @@ function overcard(options) {
     var doc = settings["document"] || document;
     var containerId = 'overcard';
     // check if container div is already present
-    var container = doc.getElementById(containerId);
-    if(!container) {
-        var containerHTML = ""
-            +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen overflow-hidden" id="'+containerId+'">'
-            +'<div class="head justify-between">'
-            +'<h3 id="'+containerId+'_head"><\/h3>'
-            +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
-            +'<\/div>'
-            +'<div class="overflow-y-auto max-h-[88vh] '+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
-            +'<\/div>';
-        jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
-        container = doc.getElementById(containerId);
-        var check = function() { element_check_visibility(container); };
-        jQuery(container, doc).on('move', check);
-        new ResizeObserver(check).observe(container);
-    }
+    jQuery("#"+containerId).remove();
+    var containerHTML = ""
+        +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen overflow-hidden" id="'+containerId+'">'
+        +'<div class="head justify-between">'
+        +'<h3 id="'+containerId+'_head"><\/h3>'
+        +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
+        +'<\/div>'
+        +'<div class="overflow-y-auto max-h-[88vh] '+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
+        +'<\/div>';
+    jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
+    container = doc.getElementById(containerId);
+    var check = function() { element_check_visibility(container); };
+    jQuery(container, doc).on('move', check);
+    new ResizeObserver(check).observe(container);
 
     var head = doc.getElementById(containerId+"_head");
     if(settings["caption"]) {

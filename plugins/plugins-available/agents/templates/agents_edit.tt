@@ -55,7 +55,7 @@
               [% reason = check.disabled %]
               [% IF reason == 0; reason = "manually disabled"; END %]
               [% IF reason == 1; reason = "unknown reason"; END %]
-              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'disabled details for [% check.name | html %]', 'width': 900 }); return false;">
+              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
                 <div class='text-center badge PENDING'>disabled</div>
               </a>
               <div id="disabled_[% check.id %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
@@ -69,7 +69,6 @@
         </td>
         [% IF type == "new" || type == "exists" || type == "obsolete" %]
         <td class="truncate max-w-xs text-left" title="additional check arguments&#013;ex.: override thresholds: warn='load > 5'">
-[% dump(check) %]
           [% IF type == "new" %]
             <input type="text" name="args.[% check.id %]" placeholder="additional arguments" class="ml-1" onkeydown="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();">
           [% ELSE %]
@@ -79,8 +78,25 @@
         [% END %]
         <td class="[% IF type != "exists" %]w-full[% END %]">
           [% IF check.defined("info") %]
-            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'details for [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
-            <div id="info_[% check.id %]" class="hidden whitespace-pre text-left">[% check.info | nl2br %]</div>
+            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+            <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
+              <div>
+                <h4>Check Command</h4>
+                <div class="whitespace-pre text-left">[% check.check | html %]</div>
+              </div>
+              <div>
+                <h4>Default Arguments</h4>
+                [% IF check.current_args.size == 0 %]
+                  <div class="whitespace-pre text-left">(none)</div>
+                [% ELSE %]
+                  <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
+                [% END %]
+              </div>
+              <div>
+                <h4>Attributes</h4>
+                <div class="whitespace-pre text-left">[% check.info | nl2br %]</div>
+              </div>
+            </div>
           [% END %]
         </td>
         [% IF type == "exists" || type == "obsolete" %]

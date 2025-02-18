@@ -507,6 +507,7 @@ sub _extract_checks {
                 '$_HOSTAGENT_PORT$',
                 $chk->{'check'},
         );
+        my $current_args = [];
         my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
         if($chk->{'check'}) {
             if($chk->{'check'} eq 'inventory') {
@@ -521,10 +522,13 @@ sub _extract_checks {
                     for my $arg (@{$chk->{'args'}}) {
                         next unless defined $arg;
                         $command .= sprintf(" %s", $arg);
+                        push @{$current_args}, $arg;
                     }
                 } else {
                     for my $arg (sort keys %{$chk->{'args'}}) {
-                        $command .= sprintf(" %s='%s'", $arg, $chk->{'args'}->{$arg});
+                        my $a = sprintf("%s='%s'", $arg, $chk->{'args'}->{$arg});
+                        $command .= " ".$a;
+                        push @{$current_args}, $a;
                     }
                 }
             }
@@ -532,6 +536,7 @@ sub _extract_checks {
 
         $chk->{'name'} =~ s|[`~!\$%^&*\|'"<>?,()=]*||gmx; # remove nasty chars from object name
         $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, ex.: in windows drives
+        $chk->{'current_args'} = $current_args;
 
         $chk->{'svc_conf'} = {
             'host_name'           => $hostname,
