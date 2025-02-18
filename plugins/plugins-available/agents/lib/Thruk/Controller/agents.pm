@@ -96,6 +96,7 @@ sub _process_show {
     my($c) = @_;
 
     $c->stash->{has_sections} = 0;
+    $c->stash->{has_tags}     = 0;
     my $info = {};
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                               'custom_variables' => { '~' => 'AGENT .+' },
@@ -130,9 +131,8 @@ sub _process_show {
             'os_version'       => '',
             'os_arch'          => '',
         };
-        if($hst->{'_AGENT_SECTION'}) {
-            $c->stash->{has_sections} = 1;
-        }
+        if($hst->{'_AGENT_SECTION'}) { $c->stash->{has_sections} = 1; }
+        if($hst->{'_AGENT_TAGS'})    { $c->stash->{has_tags}     = 1; }
     }
     $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
 
@@ -249,6 +249,7 @@ sub _process_new {
         'mode'     => $c->req->parameters->{'mode'}     // 'https',
         'peer_key' => $c->req->parameters->{'backend'}  // $c->stash->{'param_backend'},
         'settings' => {},
+        'tags'     => [],
     };
     return _process_edit($c, $agent);
 }
@@ -286,6 +287,7 @@ sub _process_edit {
             'mode'     => $obj->{'_AGENT_MODE'}     // 'https',
             'peer_key' => $backend,
             'settings' => decode_json($obj->{'_AGENT_CONFIG'} // "{}"),
+            'tags'     => [split(/\s*,\s*/mx, ($obj->{'_AGENT_TAGS'} // ''))],
         };
         if($agent->{'settings'}->{'disabled'}) {
             $agent->{'settings'}->{'disabled'} = Thruk::Base::array2hash($agent->{'settings'}->{'disabled'});
@@ -331,6 +333,7 @@ sub _process_save {
     my $mode      = $c->req->parameters->{'mode'} // 'https';
     my $port      = $c->req->parameters->{'port'};
     my $ip        = $c->req->parameters->{'ip'};
+    my $tags      = $c->req->parameters->{'tags'} // '';
 
     if(!$hostname) {
         Thruk::Utils::set_message( $c, 'fail_message', "hostname is required");
@@ -358,6 +361,7 @@ sub _process_save {
         mode     => $mode,
         port     => $port,
         ip       => $ip,
+        tags     => $tags,
     };
 
     my $class   = Thruk::Utils::Agents::get_agent_class($type);
@@ -489,6 +493,19 @@ sub _process_json {
             @{$data} = sort @{$data};
         }
         push @{$json}, { 'name' => "sites", 'data' => $data };
+    } elsif($type eq 'tags') {
+        my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                'custom_variables' => { '~' => 'AGENT .+' },
+                                                ],
+                                    );
+        my $hashed = {};
+        for my $hst (@{$hosts}) {
+            my $vars  = Thruk::Utils::get_custom_vars($c, $hst);
+            for my $t (split(/\s*,\s*/mx, ($vars->{'AGENT_TAGS'} // ''))) {
+                $hashed->{$t} = 1;
+            }
+        }
+        push @{$json}, { 'name' => "tags", 'data' => [sort keys %{$hashed}] };
     }
 
     return $c->render(json => $json);

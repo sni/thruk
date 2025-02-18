@@ -141,6 +141,7 @@
       <div class="w-40"></div>
     </div>
     <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-50px)]" onsubmit="setFormBtnSpinner(this)">
+      <input type="submit" onclick="return false;" class="hidden"><!--do not submit on enter-->
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type="hidden" name="old_hostname" value="[% IF agent.hostname != "new"; agent.hostname | html; END %]">
       <input type="hidden" name="old_backend" value="[% agent.peer_key | html %]">
@@ -192,7 +193,7 @@
             <tr>
               <th class="text-right px-0">Tags</th>
               <td colspan="3">
-                <input class="w-full" type="text" name="tags" value="" placeholder="comma seperated tags" class="flex-grow">
+                <input class="w-full" type="text" name="tags" value="[% agent.tags.join(', ') | html %]" placeholder="comma seperated tags" class="flex-grow" onfocus="this.click()" onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'new tags will be created automatically', autosubmit:false, list:true })">
               </td>
               [% IF has_multiple_backends %]
                 <th class="text-right px-0">Site</th>

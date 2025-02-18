@@ -234,7 +234,7 @@ sub build_agent {
     my($host) = @_;
     my $c = $Thruk::Globals::c;
 
-    my($agenttype, $hostdata, $section, $port, $mode);
+    my($agenttype, $hostdata, $section, $port, $mode, $tags);
     if(!ref $host) {
         $agenttype = $host;
         $hostdata  = {};
@@ -245,6 +245,7 @@ sub build_agent {
         $section   = $host->{'conf'}->{'_AGENT_SECTION'};
         $port      = $host->{'conf'}->{'_AGENT_PORT'};
         $mode      = $host->{'conf'}->{'_AGENT_MODE'};
+        $tags      = $host->{'conf'}->{'_AGENT_TAGS'};
         $hostdata  = $host->{'conf'};
     } else {
         my $vars  = Thruk::Utils::get_custom_vars($c, $host);
@@ -252,6 +253,7 @@ sub build_agent {
         $section   = $vars->{'AGENT_SECTION'};
         $port      = $vars->{'AGENT_PORT'};
         $mode      = $vars->{'AGENT_MODE'};
+        $tags      = $vars->{'AGENT_TAGS'};
         $hostdata  = $host;
     }
     my $class = get_agent_class($agenttype);
@@ -265,6 +267,7 @@ sub build_agent {
     $agent->{'section'} = $section || $settings->{'section'} // '';
     $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
     $agent->{'mode'}    = $mode    || 'https';
+    $agent->{'tags'}    = [split(/\s*,\s*/mx, ($tags // ''))];
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
         $agent->{'icon'} = $settings->{'icon_dark'};

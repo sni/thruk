@@ -8764,6 +8764,9 @@ var ajax_search = {
             ajax_search.limit = options.limit;
         }
         if(options.list != undefined) {
+            if(options.list === true) {
+                options.list = '\\s*,\\s*';
+            }
             ajax_search.list = options.list;
         }
         if(options.templates != undefined) {

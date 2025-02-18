@@ -77,6 +77,7 @@ sub get_config_objects {
     my $password = $data->{'password'} // '';
     my $port     = $data->{'port'}     || settings()->{'default_port'};
     my $mode     = $data->{'mode'}     || 'https';
+    my $tags     = [split(/\s*,\s*/mx, ($data->{'tags'} // ''))];
 
     $section =~ s|^\/*||gmx if $section;
     $section =~ s|\/*$||gmx if $section;
@@ -149,6 +150,10 @@ sub get_config_objects {
     delete $hostdata->{'_AGENT_MODE'};
     if($mode && $mode ne 'https') {
         $hostdata->{'_AGENT_MODE'} = $mode;
+    }
+    delete $hostdata->{'_AGENT_TAGS'};
+    if(scalar @{$tags} > 0) {
+        $hostdata->{'_AGENT_TAGS'} = join(", ", @{$tags});
     }
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
