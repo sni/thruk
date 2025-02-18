@@ -24,7 +24,7 @@ Available commands are:
   - show   | -S   <host>      show checks for host
   - add    | -I   <host> ...  add/inventory for new/existing host(s)
   - update | -II  <host> ...  update inventory for existing host(s) and freshly apply excludes
-             -III <host> ...  update inventory for existing host(s) and remove manual overrides
+             -III <host> ...  update inventory for existing host(s) and remove all manual overrides
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 

@@ -86,7 +86,7 @@
               </div>
               <div>
                 <h4>Default Arguments</h4>
-                [% IF check.current_args.size == 0 %]
+                [% IF check.defined("current_args") && check.current_args.size == 0 %]
                   <div class="whitespace-pre text-left">(none)</div>
                 [% ELSE %]
                   <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
