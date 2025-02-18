@@ -4231,7 +4231,7 @@ function thruk_message(rc, message, close_timeout) {
     }
     html += ''
         + '    </div>'
-        + '    <div class="flex-grow text-center font-semibold whitespace-nowrap overflow-scroll">'
+        + '    <div class="flex-grow text-center font-semibold whitespace-nowrap overflow-auto">'
         + '      <span class="' + cls + '">' + message
         + '      </span>';
 
@@ -4250,7 +4250,7 @@ function thruk_message(rc, message, close_timeout) {
     if(lines.length > 0) {
         html += ''
             + '    <div class="w-full flex justify-center">'
-            + '      <pre class="'+cls+' max-w-full overflow-scroll" style="display:none;" id="message_details">'
+            + '      <pre class="'+cls+' max-w-full overflow-auto" style="display:none;" id="message_details">'
             + lines.join("\n") // joining with <br> breaks html output returned from server actions
             + '      </pre>'
             + '    </div>';

@@ -8,7 +8,7 @@
     <div class="w-5">
       [% IF message.0 == 'fail_message' %]<i class="fa-solid fa-exclamation round small yellow ml-2" title="Errors detected"></i>[% END %]
     </div>
-    <div class="flex-grow text-center font-semibold whitespace-nowrap overflow-scroll">
+    <div class="flex-grow text-center font-semibold whitespace-nowrap overflow-auto">
       <span class="[% message.0 | html %]">[% message.1 %]</span>
       [% IF message.2 && thruk_message_details.size > 1 %]
         <div class="mt-1"><a class="link" href="#" onclick="showElement('message_details'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...</a></div>
@@ -21,7 +21,7 @@
 
   [% IF message.2 %]
     <div class="w-full flex justify-center">
-      <pre class="[% message.0 | html %] max-w-full overflow-scroll" style="[% IF thruk_message_details.size > 1 %]display:none;[% END %]" id="message_details">
+      <pre class="[% message.0 | html %] max-w-full overflow-auto" style="[% IF thruk_message_details.size > 1 %]display:none;[% END %]" id="message_details">
 [%- FOREACH detail = thruk_message_details -%][%- detail.trim %]
 [% END -%]
       </pre>
