@@ -77,7 +77,7 @@ sub get_config_objects {
     my $password = $data->{'password'} // '';
     my $port     = $data->{'port'}     || settings()->{'default_port'};
     my $mode     = $data->{'mode'}     || 'https';
-    my $tags     = [split(/\s*,\s*/mx, ($data->{'tags'} // ''))];
+    my $tags     = Thruk::Base::comma_separated_list($data->{'tags'} // '');
 
     $section =~ s|^\/*||gmx if $section;
     $section =~ s|\/*$||gmx if $section;
@@ -133,7 +133,7 @@ sub get_config_objects {
     }
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $cli_opts, $section, $mode, $settings->{'options'});
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $cli_opts, $section, $mode, $settings->{'options'}, $tags);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     if(!$checks || scalar @{$checks} == 0) {
@@ -205,7 +205,7 @@ sub get_config_objects {
             $svc->{'conf'} = $chk->{'svc_conf'};
             $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
-            my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section);
+            my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section, $tags);
             push @{$extra}, $chk->{'extra'} if $chk->{'extra'};
             if($args) { # user supplied manual overrides
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
@@ -235,6 +235,7 @@ sub get_config_objects {
                     next if $key eq 'match';
                     next if $key eq 'service';
                     next if $key eq 'section';
+                    next if $key eq 'tags';
                     next if $key eq 'host_name';
                     next if $key eq 'args';
                     next if $key eq 'check';
@@ -265,13 +266,14 @@ sub get_config_objects {
     }
 
     # set extra host options
-    my $extra = _get_extra_opts_hst($c, $hostname, $section);
+    my $extra = _get_extra_opts_hst($c, $hostname, $section, $tags);
     my $host_check;
     for my $ex (@{$extra}) {
         for my $key (sort keys %{$ex}) {
             next if $key eq 'host';
             next if $key eq 'match';
             next if $key eq 'section';
+            next if $key eq 'tags';
             next if $key eq 'host_name';
             next if $key eq 'name';
             $hostdata->{$key} = $ex->{$key};
@@ -350,14 +352,15 @@ sub _add_templates {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options)
+    get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags)
 
 returns list of Monitoring::Objects for the host / services
 
 =cut
 sub get_services_checks {
-    my($self, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options) = @_;
+    my($self, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags) = @_;
     my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
+
     if($cli_opts->{'cached'}) {
         $datafile = $cli_opts->{'cached'};
         _debug("using %s as inventory file", $datafile);
@@ -381,6 +384,7 @@ sub get_services_checks {
                     $section,
                     $mode,
                     $options // $settings->{'options'} // {},
+                    $tags,
                 ) if $data->{'inventory'};
 
     return($checks);
@@ -462,7 +466,7 @@ sub get_inventory {
 
 ##########################################################
 sub _extract_checks {
-    my($c, $inventory, $hostname, $password, $cli_opts, $section, $mode, $options) = @_;
+    my($c, $inventory, $hostname, $password, $cli_opts, $section, $mode, $options, $tags) = @_;
     my $checks = [];
 
     # get available modules
@@ -489,7 +493,7 @@ sub _extract_checks {
     };
 
     # append extra service checks
-    my $extra = _get_extra_service_checks($c, $hostname, $section);
+    my $extra = _get_extra_service_checks($c, $hostname, $section, $tags);
     push @{$checks}, @{$extra};
 
     # compute service configuration
@@ -673,7 +677,7 @@ sub _make_section_template {
 
 ##########################################################
 sub _get_extra_opts_hst {
-    my($c, $hostname, $section) = @_;
+    my($c, $hostname, $section, $tags) = @_;
     my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_host_opts'});
     my $res = [];
     for my $opt (@{$opts}) {
@@ -688,7 +692,7 @@ sub _get_extra_opts_hst {
 
 ##########################################################
 sub _get_extra_opts_svc {
-    my($c, $name, $hostname, $section) = @_;
+    my($c, $name, $hostname, $section, $tags) = @_;
     my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_service_opts'});
     my $res = [];
     for my $opt (@{$opts}) {
@@ -704,7 +708,7 @@ sub _get_extra_opts_svc {
 
 ##########################################################
 sub _get_extra_service_checks {
-    my($c, $hostname, $section) = @_;
+    my($c, $hostname, $section, $tags) = @_;
     my $checks = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_service_checks'});
     my $res = [];
     for my $chk (@{$checks}) {
@@ -727,6 +731,7 @@ sub _get_extra_service_checks {
             next if $key eq 'name';
             next if $key eq 'host';
             next if $key eq 'section';
+            next if $key eq 'tags';
             next if $key eq 'check';
             next if $key eq 'args';
 

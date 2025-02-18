@@ -333,7 +333,7 @@ sub _process_save {
     my $mode      = $c->req->parameters->{'mode'} // 'https';
     my $port      = $c->req->parameters->{'port'};
     my $ip        = $c->req->parameters->{'ip'};
-    my $tags      = $c->req->parameters->{'tags'} // '';
+    my $tags      = Thruk::Base::comma_separated_list($c->req->parameters->{'tags'} // '');
 
     if(!$hostname) {
         Thruk::Utils::set_message( $c, 'fail_message', "hostname is required");
@@ -501,7 +501,7 @@ sub _process_json {
         my $hashed = {};
         for my $hst (@{$hosts}) {
             my $vars  = Thruk::Utils::get_custom_vars($c, $hst);
-            for my $t (split(/\s*,\s*/mx, ($vars->{'AGENT_TAGS'} // ''))) {
+            for my $t (@{Thruk::Base::comma_separated_list($vars->{'AGENT_TAGS'} // '')}) {
                 $hashed->{$t} = 1;
             }
         }

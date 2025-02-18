@@ -770,10 +770,12 @@ sub _get_checks {
         'mode'     => $mode,
         'port'     => $port,
         'ip'       => $opt->{'address'} || $hst->{'address'},
+        'tags'     => '',
     };
     if($hostobj) {
         $data->{'ip'}       = $hostobj->{'conf'}->{'address'}         unless $data->{'ip'};
         $data->{'password'} = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} unless $data->{'password'};
+        $data->{'tags'}     = $hostobj->{'conf'}->{'_AGENT_TAGS'} // '';
         if($opt->{'clear_manual'}) {
             # remove manual disabled settings
             my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
@@ -782,6 +784,8 @@ sub _get_checks {
             $hostobj->{'conf'}->{'_AGENT_CONFIG'} = $json->encode($settings);
         }
     }
+
+    $data->{'tags'} = [split(/\s*,\s*/mx, ($data->{'tags'} // ''))];
 
     if($update) {
         if($hostobj) {
@@ -793,7 +797,7 @@ sub _get_checks {
         }
     }
 
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt->{'fresh'}, $data->{'section'}, undef, undef, $opt->{'cached'});
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, $opt, $data->{'section'}, undef, undef, $data->{'tags'});
     return($checks, $checks_num, $hst->{'peer_key'} ? $hst : undef, $hostobj, $data);
 }
 

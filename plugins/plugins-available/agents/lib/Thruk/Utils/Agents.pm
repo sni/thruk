@@ -30,11 +30,11 @@ returns list of checks for this host grouped by type (new, exists, obsolete, dis
 
 =cut
 sub get_agent_checks_for_host {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $cli_opts, $section, $mode, $options, $inventory_file) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $cli_opts, $section, $mode, $options, $tags) = @_;
     $section = $section // $hostobj->{'conf'}->{'_AGENT_SECTION'};
 
     # extract checks and group by type
-    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $cli_opts, $section, $mode, $options);
+    my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $cli_opts, $section, $mode, $options, $tags);
     my $checks = Thruk::Base::array_group_by($flat, "exists");
     for my $key (qw/new exists obsolete disabled/) {
         $checks->{$key} = [] unless defined $checks->{$key};
@@ -102,13 +102,13 @@ sub update_inventory {
 
 =head2 get_services_checks
 
-    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $cli_opts, $section, $mode, $options)
+    get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, $password, $cli_opts, $section, $mode, $options, $tags)
 
 returns list of checks as flat list.
 
 =cut
 sub get_services_checks {
-    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $cli_opts, $section, $mode, $options) = @_;
+    my($c, $backend, $hostname, $hostobj, $agenttype, $password, $cli_opts, $section, $mode, $options, $tags) = @_;
     my $checks   = [];
     return($checks) unless $hostname;
 
@@ -120,7 +120,7 @@ sub get_services_checks {
         confess("no peer found by name: ".$backend) unless $peer;
         confess("no remotekey") unless $peer->remotekey();
         confess("need agenttype") unless $agenttype;
-        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $cli_opts, $section, $mode, $options], 1);
+        my @res = $c->db->rpc($backend, __PACKAGE__."::get_services_checks", [$c, $peer->remotekey(), $hostname, undef, $agenttype, $password, $cli_opts, $section, $mode, $options, $tags], 1);
         return($res[0]);
     }
 
@@ -139,7 +139,7 @@ sub get_services_checks {
     $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
-    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options);
+    $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
     _set_checks_category($c, $hostname, $hostobj, $checks, $type, $cli_opts);
 
     return($checks);
@@ -267,7 +267,7 @@ sub build_agent {
     $agent->{'section'} = $section || $settings->{'section'} // '';
     $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
     $agent->{'mode'}    = $mode    || 'https';
-    $agent->{'tags'}    = [split(/\s*,\s*/mx, ($tags // ''))];
+    $agent->{'tags'}    = Thruk::Base::comma_separated_list($tags // '');
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
         $agent->{'icon'} = $settings->{'icon_dark'};
