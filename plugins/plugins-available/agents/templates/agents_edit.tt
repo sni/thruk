@@ -70,9 +70,9 @@
         [% IF type == "new" || type == "exists" || type == "obsolete" %]
         <td class="truncate max-w-xs text-left" title="additional check arguments&#013;ex.: override thresholds: warn='load > 5'">
           [% IF type == "new" %]
-            <input type="text" name="args.[% check.id %]" placeholder="additional arguments" class="ml-1" onkeydown="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();">
+            <input type="text" name="args.[% check.id %]" class="js-checks ml-1" placeholder="additional arguments" onkeyup="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();" onchange="checkSaveButtonColor();">
           [% ELSE %]
-            <input type="text" name="args.[% check.id %]" value="[% IF check.defined("args") %][% check.args | html %][% END %]" class="ml-1">
+            <input type="text" name="args.[% check.id %]" class="js-checks ml-1" value="[% IF check.defined("args") %][% check.args | html %][% END %]" onkeyup="checkSaveButtonColor();" onchange="checkSaveButtonColor();">
           [% END %]
         </td>
         [% END %]
@@ -109,11 +109,11 @@
         <td class="pt-px pb-px">
           <div class="flexrow flex-nowrap gap-x-2">
             <div class="radiogroup" style="width: 135px; height: 24px;">
-              <input type="radio" value="on"  class="js-radio-[% type %] activeENABLED" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
+              <input type="radio" value="on"  class="js-checks js-radio-[% type %] activeENABLED" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
               [% IF type == "new" %]
-              <input type="radio" value="new" class="js-radio-[% type %]" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
+              <input type="radio" value="new" class="js-checks js-radio-[% type %]" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
               [% END %]
-              <input type="radio" value="off" class="js-radio-[% type %]" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
+              <input type="radio" value="off" class="js-checks js-radio-[% type %]" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
             </div>
           </div>
         </td>
@@ -327,11 +327,16 @@ function updateChecksTotals() {
 
 var initial_form_values;
 function saveInitialFormValues() {
-  initial_form_values = jQuery("INPUT[type='radio']").serialize();
+  initial_form_values = getFormValues();
+}
+
+function getFormValues() {
+  var formVal = jQuery("INPUT.js-checks").serialize();
+  return(formVal);
 }
 
 function checkSaveButtonColor() {
-  var cur_form_values = jQuery("INPUT[type='radio']").serialize();
+  var cur_form_values = getFormValues();
   if(cur_form_values != initial_form_values) {
     jQuery(".js-save-btn").addClass("green");
   } else {
@@ -361,7 +366,7 @@ function agents_activate(form) {
 jQuery(document).on("click", checkSaveButtonColor);
 
 jQuery(window).on('beforeunload', function(e){
-  var cur_form_values = jQuery("INPUT[type='radio']").serialize();
+  var cur_form_values = getFormValues();
   if(cur_form_values != initial_form_values) {
     var msg = "Not applied changes will be lost if you leave this page.";
     e.returnValue = msg;

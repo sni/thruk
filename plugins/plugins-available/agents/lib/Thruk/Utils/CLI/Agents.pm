@@ -457,7 +457,7 @@ sub _run_add_host {
             elsif($m eq 'address:') { $data->{'address'} = $id; next; }
             elsif($m eq 'section:') { $data->{'section'} = $id; next; }
 
-            $checks_config->{'args.'.$id} = $args = $args;
+            $checks_config->{'args.'.$id} = $args;
         }
     } else {
         # none-interactive - set all new to enabled automatically
@@ -839,7 +839,7 @@ sub _user_confirm {
 
 ##############################################
 sub _build_checks_config {
-    my($checks, $remove_obsolete) = @_;
+    my($checks, $start_fresh) = @_;
     my $checks_config = {};
 
     for my $t (qw/new exists obsolete disabled/) {
@@ -847,11 +847,12 @@ sub _build_checks_config {
             $chk->{'_type'} = $t;
             $chk->{'type'} = "new"  if $t eq 'new';
             if($t eq 'obsolete') {
-                $chk->{'type'} = $remove_obsolete ? "off" : "keep";
+                $chk->{'type'} = $start_fresh ? "off" : "keep";
             }
             $chk->{'type'} = "keep" if $t eq 'exists';
             $chk->{'type'} = "off"  if $t eq 'disabled';
-            $checks_config->{"check.".$chk->{'id'}} = $chk->{'type'};
+            $checks_config->{'check.'.$chk->{'id'}} = $chk->{'type'};
+            $checks_config->{'args.'.$chk->{'id'}} = $chk->{'args'} unless $start_fresh;
         }
     }
 
