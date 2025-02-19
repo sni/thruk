@@ -224,6 +224,10 @@
               <td colspan="8" align="center">
                 <div class="flexrow flex-nowrap justify-center gap-x-8">
                   <button class="w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" title="Connect to agent and discover services" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
+                  [% IF agent.hostname == "new" %]
+                  <i class="uil uil-angle-double-right self-center"></i>
+                  <button class="w-44" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
+                  [% END %]
                   <i class="uil uil-angle-double-right self-center"></i>
                   <button class="w-44 js-save-btn" name="action" title="Write object configuration" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
                   <i class="uil uil-angle-double-right self-center"></i>

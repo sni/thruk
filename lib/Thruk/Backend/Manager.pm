@@ -275,7 +275,6 @@ sub get_peers_by_tags {
 returns all configured peers which use a local unix socket to connect
 
 =cut
-
 sub get_local_peers {
     my($self) = @_;
 
@@ -284,6 +283,24 @@ sub get_local_peers {
         push @peers, $b if $b->is_local();
     }
     return \@peers;
+}
+
+##########################################################
+
+=head2 get_local_peers_keys
+
+  get_local_peers_keys()
+
+returns all configured peer keys which use a local unix socket to connect
+
+=cut
+sub get_local_peer_keys {
+    my($self) = @_;
+    my @keys;
+    for my $peer (@{$self->get_local_peers()}) {
+        push @keys, $peer->{'key'};
+    }
+    return(\@keys);
 }
 
 ##########################################################

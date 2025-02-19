@@ -38,7 +38,6 @@ Available commands are:
        --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
   -n | --dryrun     only print changes    (available in add mode)
 
-
 =back
 
 =cut
@@ -325,7 +324,7 @@ sub _run_show {
 sub _run_add {
     my($c, $commandoptions, $opt, $edit_only) = @_;
 
-    my $output = "usage: $0 agents add <host>|ALL\n";
+    my $output = "usage: $0 agents add <host>|ALL|LOCAL\n";
     my $rc     = 3;
 
     my $hosts = $commandoptions;
@@ -341,6 +340,18 @@ sub _run_add {
                                                 'custom_variables' => { '~' => 'AGENT .+' },
                                                 ],
                                       columns => [qw/name/],
+        );
+        $hosts = [];
+        for my $hst (@{$data}) {
+            push @{$hosts}, $hst->{'name'};
+        }
+    }
+    elsif($hosts->[0] eq 'LOCAL') {
+        my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
+                                                'custom_variables' => { '~' => 'AGENT .+' },
+                                                ],
+                                      columns => [qw/name/],
+                                      backend => $c->db->get_local_peer_keys(),
         );
         $hosts = [];
         for my $hst (@{$data}) {
@@ -968,6 +979,10 @@ Show all checks for host localhost
 Add new host localhost, edit checks interactivly and reload afterwards
 
   %> thruk agents -IiR localhost
+
+Apply new config to all hosts (use LOCAL for hosts monitored by local site):
+
+  %> thruk agents -II ALL
 
 See 'thruk agents help' for more help.
 
