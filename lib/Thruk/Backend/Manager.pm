@@ -1679,7 +1679,7 @@ sub _do_on_peers {
     for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
         # cleanup errors a bit
         $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
-        $c->stash->{'failed_backends'}->{$key} =~ s/,\s*<GEN1>\s*line\s*\d+\.$//mx;
+        $c->stash->{'failed_backends'}->{$key} = _strip_line($c->stash->{'failed_backends'}->{$key});
     }
 
     # all backends failed, set a error message
