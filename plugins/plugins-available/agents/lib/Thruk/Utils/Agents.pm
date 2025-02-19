@@ -575,8 +575,8 @@ sub scan_agent {
         if($err =~ m/\Qflag provided but not defined\E/mx) {
             $err = "please update check_nsc_web\n".$err;
         }
-        _error($err);
-        return($err);
+        _debug($err);
+        return(_strip_line($err));
     } else {
         # save scan results
         Thruk::Utils::IO::mkdir_r($c->config->{'var_path'}.'/agents/hosts');

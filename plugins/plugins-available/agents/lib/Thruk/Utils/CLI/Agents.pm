@@ -727,7 +727,8 @@ sub _get_backend {
         }
     }
 
-    die("must specify backend (-b) if there are more than one.");
+    _error("must specify backend (-b) if there are more than one.");
+    exit(1);
 }
 
 ##############################################
@@ -801,10 +802,18 @@ sub _get_checks {
     if($update) {
         if($hostobj) {
             my($inv, $err) = Thruk::Utils::Agents::update_inventory($c, $hostname, $hostobj, $data);
-            die($err) if $err;
+            if($err) {
+                _debug($err);
+                _error(_strip_line($err));
+                exit(1);
+            }
         } else {
             my $err = Thruk::Utils::Agents::scan_agent($c, $data);
-            die($err) if $err;
+            if($err) {
+                _debug($err);
+                _error(_strip_line($err));
+                exit(1);
+            }
         }
     }
 
