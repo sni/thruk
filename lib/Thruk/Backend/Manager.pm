@@ -287,9 +287,9 @@ sub get_local_peers {
 
 ##########################################################
 
-=head2 get_local_peers_keys
+=head2 get_local_peer_keys
 
-  get_local_peers_keys()
+  get_local_peer_keys()
 
 returns all configured peer keys which use a local unix socket to connect
 
