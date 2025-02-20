@@ -84,8 +84,13 @@ sub index {
         $c->stash->{'backend_chooser'} = 'select';
         $c->stash->{'param_backend'} = '';
         $c->req->parameters->{'backend'} = $backend;
+
+        # make sure additional backends show up in list
         my($selected) = $c->db->select_backends('get_status');
-        Thruk::Action::AddDefaults::update_site_panel_hashes($c, $selected);
+        for my $add (@{$selected}) {
+            $c->stash->{'disabled_backends'}->{$add} = 0 unless defined $c->stash->{'disabled_backends'}->{$add};
+        }
+        Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'});
     }
 
     return;
