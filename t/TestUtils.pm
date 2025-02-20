@@ -1358,10 +1358,9 @@ sub js_ok {
     }
     my @err = $mech->js_errors();
     for my $e (@err) {
-      _js_diag_error($e, sprintf("console errors for %s: %s", $msg, ($diag ? ' (from '.$diag.') ' : '')));
+      _js_diag_error($e, sprintf("console messages for %s: %s", $msg, ($diag ? ' (from '.$diag.') ' : '')));
     }
     $mech->clear_js_errors();
-    ok(scalar @err == 0, "js errors clean");
     alarm(0);
 }
 
@@ -1381,11 +1380,8 @@ sub js_is {
     $mech->clear_js_errors();
     my($val, $type) = $mech->eval_in_page($src);
     my @err = $mech->js_errors();
-    if(scalar @err != 0) {
-      fail("failed to evaluate: ".$src);
-    }
     for my $e (@err) {
-      _js_diag_error($e, "console errors for: ".($msg//'unknown'));
+      _js_diag_error($e, "console messages for: ".($msg//'unknown'));
     }
     $mech->clear_js_errors();
     is($val, $expect, $msg);
@@ -1394,30 +1390,47 @@ sub js_is {
 
 #################################################
 sub _js_diag_error {
-  my($e, $diag) = @_;
-  diag($diag) if $diag;
-  if($e->{'message'}) {
-    diag($e->{'message'});
-    return;
-  }
-  if($e->{'exceptionDetails'}) {
-    diag(sprintf("[%s:%d:%d] %s: %s",
-      $e->{'exceptionDetails'}->{url}//'<anonymous>',
-      $e->{'exceptionDetails'}->{lineNumber},
-      $e->{'exceptionDetails'}->{columnNumber},
-      $e->{'exceptionDetails'}->{text},
-      $e->{'exceptionDetails'}->{exception}->{description},
-    ));
-    return;
-  }
-  if($e->{'args'}) {
-    diag(join ", ",
-        map { $_->{value} // $_->{description} }
-        @{$e->{args}}
-    );
-    return;
-  }
-  diag("unknown error: ".Dumper($e));
+    my($e, $diag) = @_;
+    diag($diag) if $diag;
+    my $known = 0;
+    if($e->{'message'}) {
+        diag($e->{'message'});
+        $known = 1;
+    }
+    if($e->{'exceptionDetails'}) {
+        diag(sprintf("[%s:%d:%d] %s: %s",
+            $e->{'exceptionDetails'}->{url}//'<anonymous>',
+            $e->{'exceptionDetails'}->{lineNumber},
+            $e->{'exceptionDetails'}->{columnNumber},
+            $e->{'exceptionDetails'}->{text},
+            $e->{'exceptionDetails'}->{exception}->{description},
+        ));
+        $known = 1;
+    }
+    if($e->{'args'}) {
+        diag(join ", ",
+            map { $_->{value} // $_->{description} }
+            @{$e->{args}}
+        );
+        $known = 1;
+    }
+    if($e->{'stackTrace'} && ref $e->{'stackTrace'} eq 'HASH' && $e->{'stackTrace'}->{'callFrames'}) {
+        diag("Stack Trace:");
+        for my $frame (@{$e->{'stackTrace'}->{'callFrames'}}) {
+            diag(sprintf("  at %s (%s:%s:%s)",
+                $frame->{functionName} // 'anonymous',
+                $frame->{url} // '[unknown]',
+                $frame->{lineNumber} // '?',
+                $frame->{columnNumber} // '?',
+            ));
+        }
+    }
+    if($e->{'type'} && $e->{'type'} eq 'debug') {
+        diag("not failing on debug lvl console message");
+    } else {
+        fail("got js error");
+    }
+    diag("unknown error: ".Dumper($e)) unless $known;
 }
 
 #################################################
