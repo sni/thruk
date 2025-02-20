@@ -4190,15 +4190,17 @@ sub http_response_error {
     if($response->decoded_content && $response->decoded_content =~ m|<h1>(OMD:.*?)</h1>|sxm) {
         return($1);
     }
-    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:(.*?)(:error\|)\-\->|sxm) {
-        $message = "\n".$1;
+    if($response->decoded_content && $response->decoded_content =~ m|<!\-\-error:\s*(.*?)\s*(:error\|)\-\->|sxm) {
+        my $err = $1;
+        $err =~ s|^internal\ server\ error\s*||sgmx;
+        $message = " - ".$err;
     }
     if(defined $response) {
         return $response->code().': '.$response->message().$message;
-    } else {
-        my $req_string = Thruk::Base::clean_credentials_from_string($response->request->as_string());
-        return(sprintf("request failed: %d - %s\nrequest:\n%s\n\nresponse:\n%s\n", $response->code(), $response->message(), $req_string, $response->as_string()));
     }
+
+    my $req_string = Thruk::Base::clean_credentials_from_string($response->request->as_string());
+    return(sprintf("request failed: %d - %s\nrequest:\n%s\n\nresponse:\n%s\n", $response->code(), $response->message(), $req_string, $response->as_string()));
 }
 
 ##########################################################
