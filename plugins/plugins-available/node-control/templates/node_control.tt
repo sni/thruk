@@ -56,8 +56,8 @@
 
 <div class="card w-full mt-5" style="min-width: 800px;">
   <div class="head p-0 justify-between border-0">
-    <div class="mx-2">
-      [% PROCESS _table_search_field.tt ids=["msTable"] %]
+    <div class="mx-2 w-48">
+      [% PROCESS _table_search_field.tt ids=["msTable"] extraCls="w-full" %]
     </div>
     <div class="grow"></div>
     <span class="tabs w-32 text-center js-tabs clickable" id="view_all"      onclick="omd_view('all')     ; return false;">All</span>
