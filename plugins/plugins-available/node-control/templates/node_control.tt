@@ -140,7 +140,7 @@
           IF s.last_error;
             error_lines = s.last_error.split("\n");
           END %]
-          <tr class="js-node[% IF s.outdated %] js-outdated[% ELSE %] js-current[% END %] [% IF s.last_error %] js-failed[% END %]" id="node_row_[% s.peer_key | html %]">
+          <tr class="js-node[% IF s.outdated %] js-outdated[% ELSE %] js-current[% END %] [% IF s.has_errors %] js-failed[% END %]" id="node_row_[% s.peer_key | html %]">
             [% hide_remaining_columns = 0 %]
             [% FOREACH col = columns %]
               [% IF hide_remaining_columns && col != "actions"; NEXT; END %]

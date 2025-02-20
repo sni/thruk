@@ -222,6 +222,7 @@ sub get_server {
         logs                    => $logs,
         facts                   => $facts || {},
         outdated                => 0,
+        has_errors              => 0,
     };
 
     # add fallback site name and address
@@ -243,6 +244,12 @@ sub get_server {
     }
     if($server->{'last_error'} && !$peer->{'last_error'}) {
         $peer->{'last_error'} = [split(/\n/mx, $server->{'last_error'})]->[0];
+    }
+    if($server->{'last_error'} || $server->{'last_error'}) {
+        $server->{'has_errors'} = 1;
+    }
+    for my $l (values %{$logs}) {
+        $server->{'has_errors'} = 1 if $l->{'failed'};
     }
 
     # remove current default from cleanable
