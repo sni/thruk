@@ -79,6 +79,8 @@ sub get_peers {
         }
     }
 
+    clean_old_json_files($c, \@peers);
+
     $c->stats->profile(end => "get_peers");
     return \@peers;
 }
@@ -1584,6 +1586,37 @@ sub get_addon_modules {
 sub _sitename {
     my($peer, $server) = @_;
     return($peer->{'peer_config'}->{'options'}->{'site_name'} // $server->{'omd_site'} || $ENV{'OMD_SITE'} || $ENV{'USER'} || 'nobody');
+}
+
+##########################################################
+
+=head2 clean_old_json_files
+
+  clean_old_json_files()
+
+remove old json files from var path
+
+=cut
+sub clean_old_json_files {
+    my($c, $peers) = @_;
+
+    $c->stats->profile(begin => "clean_old_json_files");
+
+    my $keys = {};
+    for my $peer (@{$peers}) {
+        $keys->{$peer->{'key'}} = 1;
+    }
+    my @files = glob($c->config->{'var_path'}.'/node_control/*.json');
+    for my $f (@files) {
+        $f = Thruk::Base::basename($f);
+        $f =~ s/\.json$//gmx;
+        next if $f eq '_conf';
+        unlink($c->config->{'var_path'}.'/node_control/'.$f.'.json') unless $keys->{$f};
+    }
+
+    $c->stats->profile(end => "clean_old_json_files");
+
+    return;
 }
 
 ##########################################################
