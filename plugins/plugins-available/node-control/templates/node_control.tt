@@ -60,9 +60,10 @@
       [% PROCESS _table_search_field.tt ids=["msTable"] %]
     </div>
     <div class="grow"></div>
-    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_all"      onclick="omd_view('all')     ; return false;">All</span>
-    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_outdated" onclick="omd_view('outdated'); return false;">Outdated</span>
-    <span class="tabs min-w-[140px] w-40 text-center js-tabs clickable" id="view_current"  onclick="omd_view('current') ; return false;">Up To Date</span>
+    <span class="tabs w-32 text-center js-tabs clickable" id="view_all"      onclick="omd_view('all')     ; return false;">All</span>
+    <span class="tabs w-32 text-center js-tabs clickable" id="view_current"  onclick="omd_view('current') ; return false;">Latest</span>
+    <span class="tabs w-32 text-center js-tabs clickable" id="view_outdated" onclick="omd_view('outdated'); return false;">Outdated</span>
+    <span class="tabs w-32 text-center js-tabs clickable" id="view_failed"   onclick="omd_view('failed')  ; return false;">Failed</span>
     <div class="grow"></div>
     <div class="w-48"></div>
   </div>
@@ -139,7 +140,7 @@
           IF s.last_error;
             error_lines = s.last_error.split("\n");
           END %]
-          <tr class="js-node[% IF s.omd_version %][% IF omd_default_version != s.omd_version %] js-outdated[% ELSE %] js-current[% END; END %]" id="node_row_[% s.peer_key | html %]">
+          <tr class="js-node[% IF s.outdated %] js-outdated[% ELSE %] js-current[% END %] [% IF s.last_error %] js-failed[% END %]" id="node_row_[% s.peer_key | html %]">
             [% hide_remaining_columns = 0 %]
             [% FOREACH col = columns %]
               [% IF hide_remaining_columns && col != "actions"; NEXT; END %]

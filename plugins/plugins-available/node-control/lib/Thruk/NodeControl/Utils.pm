@@ -221,6 +221,7 @@ sub get_server {
         last_gather_runtime     => $facts->{'last_gather_runtime'} // '',
         logs                    => $logs,
         facts                   => $facts || {},
+        outdated                => 0,
     };
 
     # add fallback site name and address
@@ -248,6 +249,10 @@ sub get_server {
     if($server->{'omd_cleanable'}) {
         my $def = $config->{'omd_default_version'};
         @{$server->{'omd_cleanable'}} = grep(!/$def/mx, @{$server->{'omd_cleanable'}}) if $def;
+    }
+
+    if($config->{'omd_default_version'} && $server->{'omd_version'} ne $config->{'omd_default_version'}) {
+        $server->{'outdated'} = 1;
     }
 
     # allow addons to finally change and reorder the server list
