@@ -153,8 +153,7 @@ function init_page() {
     });
 
     /* show calendar popups for these */
-    jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_clear").off("click").on("click", show_cal);
-    jQuery("IMG.cal_popup, I.cal_popup").off("click").on("click", show_cal).addClass("clickable");
+    init_calender_inputs();
 
     /* toggle passwords */
     jQuery("I.js-toggle-password").off("click").on("click", togglePasswordVisibility).addClass("clickable");
@@ -8441,6 +8440,11 @@ Y8,            d8""""""""8b   88
   `"Y8888Y"' d8'          `8b 88888888888
 *******************************************************************************/
 
+function init_calender_inputs() {
+    jQuery("INPUT.cal_popup, INPUT.cal_popup_range, INPUT.cal_popup_range_cond, INPUT.cal_popup_clear").off("click").on("click", show_cal);
+    jQuery("IMG.cal_popup, I.cal_popup").off("click").on("click", show_cal).addClass("clickable");
+}
+
 function show_cal(ev) {
     // clicks in IMG tags redirect to corresponding input field
     if(ev.target.tagName == "IMG" || ev.target.tagName == "I") {
@@ -8459,6 +8463,7 @@ function show_cal(ev) {
     }
 
     // do not open if target input contains short durations like 2m or 10d
+    // however, we destroy it on close anyway...
     if(ev.target.tagName == "INPUT") {
         var val = ev.target.value;
         if(String(val).match(/^\d+\w$/)) {
@@ -8466,16 +8471,22 @@ function show_cal(ev) {
         }
     }
 
-    var id1       = ev.target.id;
-    var hasClear  = ev.target.className.match(/cal_popup_clear/)         ? true : false;
-    var hasRange  = ev.target.className.match(/cal_popup_range/)         ? true : false;
-    var hasSelect = ev.target.className.match(/cal_popup_select/)        ? true : false;
-    var hasSelFut = ev.target.className.match(/cal_popup_select_future/) ? true : false;
-    var hasSubmit = ev.target.className.match(/cal_popup_auto_submit/)   ? true : false;
-    var hasCustom = ev.target.className.match(/cal_custom/)              ? true : false;
+    var id1           = ev.target.id;
+    var hasClear      = ev.target.className.match(/cal_popup_clear/)         ? true : false;
+    var hasRange      = ev.target.className.match(/cal_popup_range/)         ? true : false;
+    var hasRangeCond  = ev.target.className.match(/cal_popup_range_cond/)    ? true : false;
+    var hasSelect     = ev.target.className.match(/cal_popup_select/)        ? true : false;
+    var hasSelFut     = ev.target.className.match(/cal_popup_select_future/) ? true : false;
+    var hasSubmit     = ev.target.className.match(/cal_popup_auto_submit/)   ? true : false;
+    var hasCustom     = ev.target.className.match(/cal_custom/)              ? true : false;
 
     if(document.getElementById(id1).picker) {
+        // once created, the daterangepicker add a event to handle open/close itself
         return;
+    }
+
+    if(hasRangeCond) {
+        hasRange = true;
     }
 
     // set known range pairs
@@ -8487,14 +8498,24 @@ function show_cal(ev) {
         if(id1 == "t1")         { id2 = "t2"; }
         // show picker at the end date
         if(id2 && id1 != id2) {
-            document.getElementById(id2).click();
-            return;
+            if(hasRangeCond && jQuery('#'+id2).is(":visible")) {
+                document.getElementById(id2).click();
+                return;
+            }
         }
         if(!id2) {
             if(id1 == "end_date") { id2 = "start_date"; }
             if(id1 == "end_time") { id2 = "start_time"; }
             if(id1 == "end")      { id2 = "start"; }
             if(id1 == "t2")       { id2 = "t1"; }
+        }
+    }
+
+    if(hasRangeCond) {
+        if(!jQuery('#'+id1).is(":visible") || !jQuery('#'+id2).is(":visible")) {
+            // not visible, disable range
+            hasRange  = false;
+            hasSelect = false;
         }
     }
 
@@ -8622,10 +8643,8 @@ function show_cal(ev) {
                 jQuery(this).addClass("todayHighlight");
             }
         })
-        jQuery('#'+id1).off("keyup");
-        jQuery('#'+id2).off("keyup");
-        jQuery('#'+id1).on("keyup", [picker], _onKeyUp);
-        jQuery('#'+id2).on("keyup", [picker], _onKeyUp);
+        jQuery('#'+id1).off("keyup").on("keyup", [picker], _onKeyUp);
+        jQuery('#'+id2).off("keyup").on("keyup", [picker], _onKeyUp);
     };
     var apply = function(start, end, label) {
         if(hasRange) {
@@ -8640,9 +8659,27 @@ function show_cal(ev) {
         }
     };
 
-    document.getElementById(id1).picker = true;
     jQuery('#'+id1).on('showCalendar.daterangepicker', function(ev,picker) { _onShow(ev,picker,id1) });
+    jQuery('#'+id1).on('hide.daterangepicker', function(ev,picker) {
+        document.getElementById(id1).picker = false;
+
+        // restore input field(s)
+        var val1  = document.getElementById(id1).value;
+        var html1 = document.getElementById(id1).outerHTML;
+        jQuery("#"+id1).replaceWith(html1);
+        document.getElementById(id1).value = val1;
+
+        if(id2 && document.getElementById(id2)) {
+            var val2  = document.getElementById(id2).value;
+            var html2 = document.getElementById(id2).outerHTML;
+            jQuery("#"+id2).replaceWith(html2);
+            document.getElementById(id2).value = val2;
+        }
+
+        init_calender_inputs();
+    });
     jQuery('#'+id1).daterangepicker(options, apply);
+    document.getElementById(id1).picker = true;
 
     // show calendar
     jQuery('#'+id1).click();

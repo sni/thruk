@@ -109,14 +109,14 @@
         <tr id="row_start">
           <th>Start</th>
           <td class="flexrow gap-1">
-            <div class="flex-grow"><input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]" id="start_time" name="start_time" onkeyup="verify_time(this.id, 'end_time')" class="cal_popup w-full"></div>
+            <div class="flex-grow"><input type="text" value="[% format_date(date.now, '%Y-%m-%d %H:%M:00') %]" id="start_time" name="start_time" onkeyup="verify_time(this.id, 'end_time')" class="cal_popup_range_cond cal_popup_select cal_popup_select_future w-full"></div>
             <div class="w-5"><i class="uil uil-schedule text-lg cal_popup for_start_time" title="pick start date"></i></div>
           </td>
         </tr>
         <tr id="row_end">
           <th>End</th>
           <td class="flexrow gap-1">
-            <div class="flex-grow"><input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:00') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id, 'start_time')" class="cal_popup w-full"></div>
+            <div class="flex-grow"><input type="text" value="[% format_date(date.now+downtime_duration, '%Y-%m-%d %H:%M:00') %]" id="end_time" name="end_time" size="20" onkeyup="verify_time(this.id, 'start_time')" class="cal_popup_range_cond cal_popup_select cal_popup_select_future w-full"></div>
             <div class="w-5"><i class="uil uil-schedule text-lg cal_popup for_end_time" title="pick end date"></i></div>
           </td>
         </tr>
