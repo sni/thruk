@@ -1358,7 +1358,7 @@ sub js_ok {
     }
     my @err = $mech->js_errors();
     for my $e (@err) {
-      _js_diag_error($e);
+      _js_diag_error($e, sprintf("console errors for %s: %s", $msg, ($diag ? ' (from '.$diag.') ' : '')));
     }
     $mech->clear_js_errors();
     ok(scalar @err == 0, "js errors clean");
@@ -1385,7 +1385,7 @@ sub js_is {
       fail("failed to evaluate: ".$src);
     }
     for my $e (@err) {
-      _js_diag_error($e);
+      _js_diag_error($e, "console errors for: ".($msg//'unknown'));
     }
     $mech->clear_js_errors();
     is($val, $expect, $msg);
@@ -1394,7 +1394,8 @@ sub js_is {
 
 #################################################
 sub _js_diag_error {
-  my($e) = @_;
+  my($e, $diag) = @_;
+  diag($diag) if $diag;
   if($e->{'message'}) {
     diag($e->{'message'});
     return;
