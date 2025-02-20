@@ -1013,7 +1013,7 @@ sub _ssh_cmd {
     my $server      = get_server($c, $peer, $config);
     my $host_name   = $peer->{'peer_config'}->{'options'}->{'host_name'};
     my $user_name   = _sitename($peer, $server);
-    my $ssh_options = $config->{'ssh_options'};
+    my $ssh_options = $config->{'ssh_base_options'}.' '.$config->{'ssh_options'};
 
     my $fullcmd = sprintf('ssh %s "%s@%s" "%s"', $ssh_options, $user_name, $host_name, $cmd);
 
@@ -1037,7 +1037,7 @@ sub _scp_cmd {
     my $server      = get_server($c, $peer, $config);
     my $host_name   = $peer->{'peer_config'}->{'options'}->{'host_name'};
     my $user_name   = _sitename($peer, $server);
-    my $scp_options = $config->{'scp_options'};
+    my $scp_options = $config->{'scp_base_options'}.' '.$config->{'scp_options'};
 
     my $fullcmd = sprintf('scp %s "%s" "%s@%s:%s"', $scp_options, $src, $user_name, $host_name, $target);
 
@@ -1274,8 +1274,10 @@ sub config {
         'pkg_cleanup'             => 1,
         'skip_confirms'           => 0,
         'parallel_tasks'          => 3,
-        'ssh_options'             => '-o BatchMode=yes -o LogLevel=INFO -n -T',
-        'scp_options'             => '-B',
+        'ssh_base_options'        => '-o BatchMode=yes -o LogLevel=INFO -n -T',
+        'ssh_options'             => '',
+        'scp_base_options'        => '-B',
+        'scp_options'             => '',
         'omd_update_script'       => undef, # set fallback later to avoid race conditions if updated started on the host machine as well
         'cmd_omd_cleanup'         => 'sudo -n omd cleanup',
         'cmd_yum_pkg_install'     => 'sudo -n yum install -y %PKG',

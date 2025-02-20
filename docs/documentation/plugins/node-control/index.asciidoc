@@ -68,6 +68,18 @@ thruk_local.conf:
   # set to 0 to disable ssh fallback in case http connection fails
   #ssh_fallback = 1
 
+  # ssh base options in case of ssh fallback connection
+  ssh_base_options = -o BatchMode=yes -o LogLevel=INFO -n -T
+
+  # ssh additional options
+  ssh_options =
+
+  # ssh base options in case of ssh fallback connection
+  scp_base_options = -B
+
+  # ssh base options in case of ssh fallback connection
+  scp_options =
+
   # set to 0 to disable os updates, set it to 2 to show updates but dont offer updating them
   #os_updates = 1
 
