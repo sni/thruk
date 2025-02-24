@@ -1293,7 +1293,14 @@ sub merge_cgi_cfg {
     my($c) = @_;
     my $cfg = read_cgi_cfg($c->app);
     for my $key (sort keys %{$cfg}) {
-        $c->config->{$key} = $cfg->{$key};
+        if(!exists $c->config->{"_".$key}) {
+            $c->config->{"_".$key} = $c->config->{$key};
+        }
+        if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
+            $c->config->{$key} = [@{Thruk::Base::comma_separated_list($cfg->{$key})}, @{Thruk::Base::comma_separated_list($c->config->{"_".$key})}];
+        } else {
+            $c->config->{$key} = $cfg->{$key};
+        }
     }
 
     _normalize_auth_config($c->config);
@@ -1308,7 +1315,6 @@ sub _normalize_auth_config {
     for my $key (keys %{$config}) {
         if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
             $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
-            next;
         }
     }
     return;
