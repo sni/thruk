@@ -287,7 +287,7 @@ sub get_primary_name {
 
     return $fallback if defined $fallback;
 
-    return if defined $conf->{'register'} and $conf->{'register'} == 0;
+    return if defined $conf->{'register'} && $conf->{'register'} eq "0";
 
     return $conf->{$self->{'primary_key'}} unless ref $self->{'primary_key'};
 
