@@ -61,8 +61,8 @@
           <table class="hidden w-fit mb-2" id="testsound_panel">
             [% FOREACH s = ['normal', 'host_down', 'host_unreachable', 'service_warning', 'service_critical', 'service_unknown' ] %]
               <tr>
-                <td><button class="w-fit [% IF !c.config.defined(s _ "_sound") %]disabled[% END %]" [% IF !c.config.defined(s _ "_sound") %]disabled[% END %] onClick="play_test_audio(this, '[% s %]')"><i class="uil uil-play m-0"></i></button></td>
-                <td>[% s.replace("_", " ") %][% IF !c.config.defined(s _ "_sound") %] <span class="textHINT">(cgi.cfg: no audio file configured)</span>[% END %]</td>
+                <td><button class="w-7 h-7 [% IF !c.config.defined(s _ "_sound") %]disabled[% END %]" [% IF !c.config.defined(s _ "_sound") %]disabled[% END %] onClick="play_test_audio(this, '[% s %]')" id="btn_snc_[% loop.index %]"><i class="uil uil-play m-0"></i></button></td>
+                <td[% IF c.config.defined(s _ "_sound") %] class="clickable" onclick="jQuery('#btn_snc_[% loop.index %]').click(); return false;"[% END %]>[% s.replace("_", " ") %][% IF !c.config.defined(s _ "_sound") %] <span class="textHINT">(cgi.cfg: no audio file configured)</span>[% END %]</td>
               </tr>
             [% END %]
           </table>
