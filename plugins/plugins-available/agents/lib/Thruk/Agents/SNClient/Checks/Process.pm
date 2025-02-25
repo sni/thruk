@@ -106,7 +106,7 @@ sub get_checks {
                 $match = $cfg->{'name'};
                 next unless $p->{'exe'} eq $match;
                 push @{$args}, "process='".$match."'";
-                $cfg->{'name'} = "process ".$match;
+                $cfg->{'_name'} = "process ".$match;
             }
 
             my $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, $cfg->{'user'});
@@ -144,7 +144,7 @@ sub get_checks {
             $exe =~ s/\]$//gmx;
             push @{$checks}, {
                 'id'       => $id,
-                'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'proc %e %u', { '%e' => $exe, '%u' => $username }),
+                'name'     => Thruk::Agents::SNClient::make_name($cfg->{'_name'} // $cfg->{'name'} // 'proc %e %u', { '%e' => $exe, '%u' => $username }),
                 'check'    => 'check_process',
                 'args'     => $args,
                 'parent'   => 'agent version',
