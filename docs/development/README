@@ -5,6 +5,7 @@
 just use figlet for that:
 ----
   %> figlet -w 900 -f univers SEARCH
+  %> figlet -w 900 -f big SEARCH # if above font does not exist
 ----
 
 

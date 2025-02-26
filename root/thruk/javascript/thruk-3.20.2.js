@@ -276,6 +276,11 @@ function init_page() {
             })
     });
 
+    // initialize tag inputs
+    jQuery(".tags-input").each(function(i, el) {
+        tags_input_init(el);
+    });
+
     // break from old frame mode
     try {
         if(window.frameElement && window.frameElement.tagName == "FRAME" && window.top && window.top.location != location) {
@@ -4158,7 +4163,6 @@ function fade(id, duration, remove) {
         return true;
     }
     var el = id;
-console.log(el);
     if(!is_object(el)) {
         el = document.getElementById(el);
     }
@@ -4175,6 +4179,10 @@ console.log(el);
         // completely remove message from dom after fading out
         if(remove) {
             jQuery(el).remove();
+            // remove can be a callback
+            if(typeof(remove) == "function") {
+                remove();
+            }
             return;
         }
         // remove opacity style, since it confuses the showElement
@@ -5473,6 +5481,91 @@ function play_test_audio(btn, audio) {
             }
         }
     )
+}
+
+
+/*******************************************************************************
+ *  _______       _____  _____
+ * |__   __|/\   / ____|/ ____|
+ *    | |  /  \ | |  __| (___
+ *    | | / /\ \| | |_ |\___ \
+ *    | |/ ____ \ |__| |____) |
+ *    |_/_/    \_\_____|_____/
+ */
+function tags_input_init(div) {
+    var input = jQuery(div).find("INPUT");
+    var tags = jQuery(input).val();
+    tags = tags.split(/\s*,\s*/);
+    jQuery(div).prepend('<div class="tags-list"></div>');
+
+    tags_input_recreate_badges(div, tags);
+
+    jQuery(input).val("");
+    jQuery(div).prepend('<input type="hidden" name="'+jQuery(input).attr("name")+'">');
+    jQuery(input).attr("name", "");
+    jQuery(input).on("keydown", function(evt) {
+        if(evt.key === 'Enter' && ajax_search.cur_select === -1) {
+            tags_input_cb(evt.target);
+        }
+     });
+
+    tags_input_update_hidden_value(div);
+}
+
+function tags_input_remove(evt) {
+    var span = evt.target;
+    if(span.tagName != "SPAN") {
+        jQuery(span).parents("SPAN:first").click();
+        return;
+    }
+    var div = jQuery(span).parents("DIV.tags-input:first");
+    fade(span, 100, function() {
+        tags_input_update_hidden_value(div);
+    });
+}
+
+// (re)create the badge spans
+function tags_input_recreate_badges(div, tags) {
+    jQuery(div).find(".tags-list SPAN").remove();
+    var tagsContainer = jQuery(div).find(".tags-list");
+    jQuery(tags).each(function(i, t) {
+        jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
+    });
+    jQuery(div).find("span").off("click").on("click", tags_input_remove);
+}
+
+// return array of existing tags
+function tags_input_get_existing_tags(div) {
+    var tags = [];
+    jQuery(div).find(".tags-list SPAN").each(function(i, el) {
+        tags.push(jQuery(el).text());
+    });
+    return(tags);
+}
+
+// synchronize tags list with hidden field value
+function tags_input_update_hidden_value(div) {
+    var tags = tags_input_get_existing_tags(div);
+    var tagsRealInput = jQuery(div).find("INPUT[type='hidden']");
+    jQuery(tagsRealInput).val(tags.join(", "));
+}
+
+function tags_input_cb(input) {
+    var div = jQuery(input).parents("DIV.tags-input:first");
+    var tags = tags_input_get_existing_tags(div);
+    var val = input.value.trim();
+    jQuery(val.split(/\s*,\s*/)).each(function(i, n) {
+        if(n != "") {
+            tags.push(n);
+        }
+    });
+
+    // make tags unique
+    tags = Array.from(new Set(tags));
+    tags_input_recreate_badges(div, tags);
+    tags_input_update_hidden_value(div);
+    input.value = "";
+    ajax_search.hide_results();
 }
 
 /*******************************************************************************

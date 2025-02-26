@@ -193,7 +193,16 @@
             <tr>
               <th class="text-right px-0">Tags</th>
               <td colspan="3">
-                <input class="w-full" type="text" name="tags" value="[% agent.tags.join(', ') | html %]" placeholder="comma seperated tags" onfocus="this.click()" onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'new tags will be created automatically', autosubmit:false, list:true })">
+                <div class="tags-input">
+                  <input
+                    type="text"
+                    name="tags"
+                    value="[% agent.tags.join(', ') | html %]"
+                    placeholder="additional tags"
+                    onfocus="this.click()"
+                    onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'new tags will be created automatically', autosubmit:false, onselect:tags_input_cb })"
+                  >
+                </div>
               </td>
               [% IF has_multiple_backends %]
                 <th class="text-right px-0">Site</th>
