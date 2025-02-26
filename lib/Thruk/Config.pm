@@ -1091,6 +1091,25 @@ sub read_config_file {
     return($conf);
 }
 
+########################################
+
+=head2 parse_config_from_text
+
+  parse_config_from_text($txt)
+
+return parsed config options
+
+=cut
+
+sub parse_config_from_text {
+    my($txt) = @_;
+    my $conf = {};
+    my @rows = split/\n/mx, $txt;
+    _parse_rows("<inline>", \@rows, $conf);
+    _fixup_config($conf);
+    return($conf);
+}
+
 ######################################
 sub _parse_rows {
     my($file, $rows, $conf, $cur_line, $until, $until_source) = @_;
