@@ -201,6 +201,7 @@ plugins/plugins-available/agents/root/images/snclient.png
 plugins/plugins-available/agents/root/images/snclient_dark.png
 plugins/plugins-available/agents/routes
 plugins/plugins-available/agents/t/controller_agents.t
+plugins/plugins-available/agents/t/utils_agents.t
 plugins/plugins-available/agents/templates/agents.tt
 plugins/plugins-available/agents/templates/agents_edit.tt
 plugins/plugins-available/business_process/description.txt

@@ -604,16 +604,9 @@ sub check_wildcard_match {
         return(undef);
     }
     $str = Thruk::Base::list($str);
-    for my $raw (@{$pattern}) {
-        my $p = $raw;
-        $p =~ s/\.\*/*/gmx;
-        $p =~ s/\*/.*/gmx;
-        return "ANY" if $p eq 'ANY';
-        return "ANY" if $p eq '.*';
-        for my $s (@{$str}) {
-            ## no critic
-            return $p if $s =~ m/$p/i;
-            ## use critic
+    for my $s (@{$str}) {
+        for my $p (@{$pattern}) {
+            return $p if _check_pattern($s, $p);
         }
     }
     return(undef);
@@ -789,12 +782,10 @@ sub _check_pattern {
             $f  = $2;
         }
         if($op eq '=' || $op eq '==') {
-            return 1 if $val eq $f;
-            return 1 if $f eq 'ANY';
-            return 1 if $f eq '*';
+            return 1 if _check_wildcard_pattern($val, $f);
         }
         elsif($op eq '!=' || $op eq '!==') {
-            return 1 if $val ne $f;
+            return 1 if !_check_wildcard_pattern($val, $f);
         }
         elsif($op eq '~' || $op eq '~~') {
             ## no critic
@@ -810,6 +801,25 @@ sub _check_pattern {
         }
     }
     return(0);
+}
+
+##########################################################
+sub _check_wildcard_pattern {
+    my($str, $pattern) = @_;
+
+    return 1 if $pattern eq $str;
+    return 1 if $pattern eq 'ANY';
+    return 1 if $pattern eq '*';
+    return 1 if $pattern eq '.*';
+    if($pattern =~ m/\*/mx) {
+        my $p = "$pattern";
+        $p =~ s/\.\*/*/gmx;
+        $p =~ s/\*/.*/gmx;
+        ## no critic
+        return 1 if $str =~ m/$p/i;
+        ## use critic
+    }
+    return;
 }
 
 ##########################################################
