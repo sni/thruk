@@ -24,6 +24,83 @@ from the plugins section in the config tool.
 
 It worked if you have a new menu item under `System` -> `Agents`.
 
+### Matching Rules
+
+Some rule blocks like `extra_service_opts`, `extra_host_opts` or `extra_service_checks`
+have matching pattern for `section`, `tags`, `host` and `service` attributes.
+
+Examples:
+
+#### Match All
+
+...................................
+# default is to match all hosts / services
+host    = ANY
+service = ANY
+section = ANY
+tags    = ANY
+...................................
+
+
+when using multiple attributes, all must match:
+
+...................................
+# matches all hosts starting with abc but they must also have the tag1 tag.
+host = ^abd
+tags = tag1
+...................................
+
+#### String Match
+
+...................................
+# simple string compare, exact match (case insensitive)
+# matches localhost or Localhost
+host = localhost
+...................................
+
+#### Wildcard Match
+
+...................................
+# wildcard match (case insensitive)
+# matches localhost
+host = local*
+...................................
+
+#### Regexp Match
+
+...................................
+# regular expression match (case insensitive)
+# matches localhost or Localhost
+host ~ local.*
+...................................
+
+Note: regexp should be *fenced* with `^pattern$`, otherwise the regexp `tag1` also matches `tag10`.
+
+#### Combined Match
+
+...................................
+# multiple tags (OR)
+# matches if host has either tag1 or tag2
+tags = tag1, tag2     # as string match
+tags ~ ^(tag1|tag2)$  # as regexp
+# is the same as
+tags = tag1
+tags = tag2
+
+# multiple tags (AND)
+# matches only if all given tags exist
+tags = tag1 & tag2
+...................................
+
+#### Excludes
+
+...................................
+# exclude something
+# exclude pattern start with a '!'
+# this matches all hosts which have tag1 but must not have tag2
+tags = tag1 & !tag2
+...................................
+
 ### Configuration
 
 Create a example configuration file:
