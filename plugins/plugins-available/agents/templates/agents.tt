@@ -122,11 +122,11 @@
             </td>
             <td>
               [% IF info.exists(hostname) && info.$hostname.inv_checks != "" %]
-                <div class="badge min-w-full text-center [% IF info.$hostname.inv_new > 0 %]WARNING[% END %]" title="[% IF info.$hostname.inv_new > 0 %][% info.$hostname.inv_out | html %][% ELSE %]new / obsolete / checks / disabled[% END %]">
-                  [% info.$hostname.inv_new %] /
-                  [% info.$hostname.inv_obsolete %] /
-                  [% info.$hostname.inv_checks %] /
-                  [% info.$hostname.inv_disabled %]
+                <div class="badge min-w-full text-center [% IF info.$hostname.inv_new > 0 %]WARNING[% END %]" title="[% IF info.$hostname.inv_new > 0 %][% info.$hostname.inv_out | html %][% ELSE %][% info.$hostname.inv_new %] new&#13;[% info.$hostname.inv_obsolete %] obsolete&#13;[% info.$hostname.inv_checks %] checks&#13;[% info.$hostname.inv_disabled %] disabled[% END %]">
+                  <span class="[% IF info.$hostname.inv_new      > 0 %]textHINT[% END %]">[% info.$hostname.inv_new %]</span> /
+                  <span>[% info.$hostname.inv_obsolete %]</span> /
+                  <span>[% info.$hostname.inv_checks %]</span> /
+                  <span>[% info.$hostname.inv_disabled %]</span>
                 </div>
               [% END %]
             </td>
