@@ -604,8 +604,12 @@ sub check_wildcard_match {
         return(undef);
     }
     $str = Thruk::Base::list($str);
-    for my $s (@{$str}) {
-        for my $p (@{$pattern}) {
+    for my $p (@{$pattern}) {
+        return $p if $p eq 'ANY';
+        return $p if $p eq 'ANY';
+        return $p if $p eq '*';
+        return $p if $p eq '.*';
+        for my $s (@{$str}) {
             return $p if _check_pattern($s, $p);
         }
     }

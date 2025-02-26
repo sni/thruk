@@ -7,7 +7,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 13;
+    plan tests => 14;
 }
 
 BEGIN {
@@ -50,6 +50,9 @@ EOT
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "test", ["tag1"]);
+    ok($opts->[0]->{'first_notification_delay'} == 30, "default extra opts parsed");
+
+    $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "", []);
     ok($opts->[0]->{'first_notification_delay'} == 30, "default extra opts parsed");
 }
 
