@@ -604,11 +604,61 @@ sub check_wildcard_match {
         return(undef);
     }
     $str = Thruk::Base::list($str);
+
+    # check excludes first
     for my $p (@{$pattern}) {
+        next unless $p =~ m/^\!/mx;
+        $p = "$p";
+        $p =~ s=^\!==mx;
+        for my $s (@{$str}) {
+            return if _check_pattern($s, $p);
+        }
+    }
+
+    for my $p (@{$pattern}) {
+        next if $p =~ m/^\!/mx;
         return $p if $p eq 'ANY';
         return $p if $p eq 'ANY';
         return $p if $p eq '*';
         return $p if $p eq '.*';
+
+        my @sub_pattern = split/\s*\&\&\s*/mx, $p;
+        if(scalar @sub_pattern > 1) {
+            # all must match
+            my $total = 1;
+            for my $sp (@sub_pattern) {
+                my $res;
+                # negated filter, none must match
+                if($sp =~ m/^\!/mx) {
+                    $res = 1;
+                    $sp =~ s/^\!//mx;
+                    for my $s (@{$str}) {
+                        if(_check_pattern($s, $sp)) {
+                            $res = 0;
+                            last;
+                        }
+                    }
+                }
+
+                # normal filter, any must match
+                else {
+                    $res = 0;
+                    for my $s (@{$str}) {
+                        if(_check_pattern($s, $sp)) {
+                            $res = 1;
+                            last;
+                        }
+                    }
+                }
+                if(!$res) {
+                    $total = 0;
+                    last;
+                }
+            }
+            return $p if $total;
+            next;
+        }
+
         for my $s (@{$str}) {
             return $p if _check_pattern($s, $p);
         }

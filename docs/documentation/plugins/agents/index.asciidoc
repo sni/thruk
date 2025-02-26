@@ -89,7 +89,7 @@ tags = tag2
 
 # multiple tags (AND)
 # matches only if all given tags exist
-tags = tag1 & tag2
+tags = tag1 && tag2
 ...................................
 
 #### Excludes
@@ -97,8 +97,14 @@ tags = tag1 & tag2
 ...................................
 # exclude something
 # exclude pattern start with a '!'
+# this matches all hosts except localhost
+host = ANY
+host = !localhost
+...................................
+
+...................................
 # this matches all hosts which have tag1 but must not have tag2
-tags = tag1 & !tag2
+tags = tag1 && !tag2
 ...................................
 
 ### Configuration
