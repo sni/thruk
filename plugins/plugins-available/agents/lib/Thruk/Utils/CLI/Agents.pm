@@ -28,15 +28,16 @@ Available commands are:
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
-  -i                interactive mode      (available in edit/add mode)
-  --all             show all items        (available in show mode)
-  -P | --password   set password          (available in add mode)
-  -p | --port       set tcp port          (available in add mode)
-       --ip         set ip address        (available in add mode)
-       --section    set section           (available in add mode)
-  -k | --insecure   skip tls verification (available in add mode)
+  -i                interactive mode       (available in edit/add mode)
+  --all             show all items         (available in show mode)
+  -P | --password   set password           (available in add mode)
+  -p | --port       set tcp port           (available in add mode)
+       --ip         set ip address         (available in add mode)
+       --section    set section            (available in add mode)
+  -k | --insecure   skip tls verification  (available in add mode)
        --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
-  -n | --dryrun     only print changes    (available in add mode)
+  -n | --dryrun     only print changes     (available in add mode)
+  -t | --tags <tag> list only specific tag (available in list mode)
 
 =back
 
@@ -95,6 +96,7 @@ sub cmd {
         'section'      => undef,
         'insecure'     => undef,
         'cached'       => undef,
+        'tags'         => undef,
         'dryrun'       => undef,
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
@@ -109,6 +111,7 @@ sub cmd {
        "P|password=s" => \$opt->{'password'},
        "T|type=s"     => \$opt->{'type'},
        "l|list"       => \$opt->{'list'},
+       "t|tags=s"     => \$opt->{'tags'},
        "S|show"       => \$opt->{'show'},
        "C|check"      => \$opt->{'check'},
        "R|reload"     => \$opt->{'reload'},
@@ -230,8 +233,13 @@ sub _run_list {
             'site'      => Thruk::Utils::Filter::peer_name($hst),
             'section'   => $agent->{'section'},
             'agent'     => $agent->{'type'},
+            'tags'      => $agent->{'tags'},
             'address'   => $address,
         };
+        if($opt->{'tags'}) {
+            my $tags = Thruk::Base::array2hash($agent->{'tags'});
+            next unless $tags->{$opt->{'tags'}};
+        }
         if($versions->{$hst->{'name'}}) {
             my $versiondata = $versions->{$hst->{'name'}};
             if($versiondata->{'state'} == 0) {
@@ -255,6 +263,7 @@ sub _run_list {
         keys => [
                     ['Section',  'section'],
                     ['Hostname', 'host_name'],
+                    ['Tags',     'tags'],
                     ['Address',  'address'],
                     ['Site',     'site'],
                     ['Agent',    'agent'],
