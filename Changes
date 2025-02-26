@@ -28,6 +28,8 @@ next:
             - add default_tab option
           - Agents:
             - do not add new hosts with -II, only with -I
+            - add -t/--tag filter to cli list
+            - add tag support for object configuration
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command
