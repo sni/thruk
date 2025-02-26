@@ -151,10 +151,11 @@ For example:
     # set extra service attributes (if multiple blocks match, each is applied in order and overwrites previous values)
     # block can be used multiple times
     <extra_service_opts>
-      service = ^cpu$ # regex match on service description
+      service  = ^cpu$ # regex match on service description
       # restrict to specific hosts (regular expression)
-      #host = ANY
+      #host    = ANY
       #section ~ test # apply this attributes only to sections containing "test"
+      tags     = ANY
 
       # can be used to append extra arguments to the command line
       #args = warn='load > 95' crit='load > 100'
@@ -168,8 +169,9 @@ For example:
     # set extra host attributes (if multiple blocks match, each is applied in order)
     # block can be used multiple times
     <extra_host_opts>
-      host = ^hostname$ # regex match on host name
+      host     = ^hostname$ # regex match on host name
       #section ~ test # apply this attributes only to sections containing "test"
+      tags     = ANY
 
       # naemon host attributes will be added to the generated host configuration
       #first_notification_delay = 30
@@ -179,9 +181,10 @@ For example:
 
     # add custom snclient based service checks
     <extra_service_checks>
-      # on which host / sections should this serice be created
+      # on which host / sections / tags should this serice be created
       host    = ANY
       section = ANY
+      tags    = ANY
 
       name    = dns           # the actual service description
       check   = check_dns     # snclient check
@@ -192,9 +195,10 @@ For example:
 
     # add custom service checks
     <extra_service_checks>
-      # on which host / sections should this serice be created
+      # on which host / sections / tags should this serice be created
       host    = ANY
       section = ANY
+      tags    = ANY
 
       name    = ping  # the actual service description
       check_command = check-host-alive!$HOSTADDRESS$

@@ -235,6 +235,7 @@ sub get_config_objects {
                     next if $key eq 'match';
                     next if $key eq 'service';
                     next if $key eq 'section';
+                    next if $key eq 'tag';
                     next if $key eq 'tags';
                     next if $key eq 'host_name';
                     next if $key eq 'args';
@@ -273,6 +274,7 @@ sub get_config_objects {
             next if $key eq 'host';
             next if $key eq 'match';
             next if $key eq 'section';
+            next if $key eq 'tag';
             next if $key eq 'tags';
             next if $key eq 'host_name';
             next if $key eq 'name';
@@ -684,6 +686,7 @@ sub _get_extra_opts_hst {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'match'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($opt->{'section'} // 'ANY'));
+        next unless Thruk::Utils::Agents::check_wildcard_match($tags, ($opt->{'tags'} // $opt->{'tag'} // 'ANY'));
         push @{$res}, $opt;
     }
 
@@ -700,6 +703,7 @@ sub _get_extra_opts_svc {
         next unless Thruk::Utils::Agents::check_wildcard_match($name, ($opt->{'service'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($opt->{'section'} // 'ANY'));
+        next unless Thruk::Utils::Agents::check_wildcard_match($tags, ($opt->{'tags'} // $opt->{'tag'} // 'ANY'));
         push @{$res}, $opt;
     }
 
@@ -714,6 +718,7 @@ sub _get_extra_service_checks {
     for my $chk (@{$checks}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($chk->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($chk->{'section'} // 'ANY'));
+        next unless Thruk::Utils::Agents::check_wildcard_match($tags, ($chk->{'tags'} // $chk->{'tag'} // 'ANY'));
 
         # create a copy, because it will be changed in the process of creating checks
         my $svc = Storable::dclone($chk);
@@ -731,6 +736,7 @@ sub _get_extra_service_checks {
             next if $key eq 'name';
             next if $key eq 'host';
             next if $key eq 'section';
+            next if $key eq 'tag';
             next if $key eq 'tags';
             next if $key eq 'check';
             next if $key eq 'args';
