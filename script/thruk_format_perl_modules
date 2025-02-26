@@ -192,6 +192,7 @@ sub _parse_file {
         $test =~ s|'[^']*\s*Thruk\s+[^']*'||gmx;
         $test =~ s%(die|confess)\("[^"]*"%%gmx;
         $test =~ s%(die|confess)\('[^']*'%%gmx;
+        $test =~ s%<Component.*?>%%gmx;
 
         # split by BEGIN blocks, there might be a reason to load some modules after the BEGIN block
         if($test =~ m/^BEGIN/mx && $lastblock) {
