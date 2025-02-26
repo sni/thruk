@@ -597,13 +597,13 @@ returns true if attribute matches given config
 =cut
 sub check_wildcard_match {
     my($str, $pattern) = @_;
-    $str     = Thruk::Base::list($str);
     $pattern = Thruk::Base::list($pattern);
     return "ANY" if scalar @{$pattern} == 0;
-    if(scalar @{$str} == 0) {
+    if(!defined $str) {
         _warn(Carp::longmess("undef wildcard match"));
         return(undef);
     }
+    $str = Thruk::Base::list($str);
     for my $raw (@{$pattern}) {
         my $p = $raw;
         $p =~ s/\.\*/*/gmx;
@@ -612,7 +612,7 @@ sub check_wildcard_match {
         return "ANY" if $p eq '.*';
         for my $s (@{$str}) {
             ## no critic
-            return $p if $s =~ m/^$p$/i;
+            return $p if $s =~ m/$p/i;
             ## use critic
         }
     }
