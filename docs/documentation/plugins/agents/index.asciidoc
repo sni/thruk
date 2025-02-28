@@ -9,6 +9,9 @@ lightbox: true
 
 Agent configuration for SNClient+ agents in Naemon.
 
+The idea of the agents plugin is to programatically run an inventory scan on the snclient
+agents and create hosts / services checks with as little manual work as possible.
+
 ++++
 <a title="agents" rel="lightbox[plugins]" href="agents.png"><img src="agents.png" alt="agents plugin " width="30%" height="30%" /></a>
 <br style="clear: both;">
@@ -290,4 +293,67 @@ For example:
     </extra_service_checks>
   </snclient>
 </Component>
+...................................
+
+### Tips & Tricks
+
+#### Use Rules
+
+Instead of manually disabling service checks, use rules to exclude them.
+This means less work and you can easily adjust those rules for all or many
+hosts at once.
+
+You can either use the `<disable>` tag to select specific checks if supported by the plugin.
+For example to disable network device checks on localhost use this block:
+
+...................................
+    <disable network>
+      enabled != true
+      name    ~  ^(lo|.*Loopback)
+    </disable>
+...................................
+
+Or more generic:
+
+Exclude service checks based on its name like this:
+
+...................................
+    <exclude>
+      name = check_services  # name match
+      name ~ net lo          # name regex match
+    </exclude>
+...................................
+
+#### Always OK Inventory Check
+
+In case the inventory check should always be OK, ex.: because it is used
+in dashboards, simply use the `--always-ok` option.
+
+Apply this option to all inventory checks:
+
+...................................
+    <extra_service_opts>
+      service = agent inventory
+      args    = --always-ok
+    </extra_service_opts>
+...................................
+
+#### Add Additional Service Checks
+
+In case you would like to add additional service check which are
+not created from the inventory, you can add rules to do so.
+
+For example, add a ping check to all hosts.
+
+...................................
+    <extra_service_checks>
+      host    = ANY
+      section = ANY
+      tags    = ANY
+
+      name    = ping  # the actual service description
+      # add arbitray naemon config attributes here as well
+      check_command = check-host-alive!$HOSTADDRESS$
+      first_notification_delay = 30
+    </extra_service_checks>
 ...................................
