@@ -422,7 +422,8 @@ like set_config_env, but return config only
 sub get_config_env {
     my($files) = @_;
 
-    my $conf    = Thruk::Utils::IO::dclone(get_base_config());
+    my $conf    = {};
+       $conf    = Thruk::Utils::IO::dclone(get_base_config()) unless $ENV{'TEST_THRUK_SKIP_CONFIG_DEFAULTS'};
     my $configs = _load_config_files($files // []);
 
     ###################################################
@@ -438,22 +439,20 @@ sub get_config_env {
     }
     $conf->{'Thruk::Backend'} = $base_backends unless($conf->{'Thruk::Backend'} && scalar keys %{$conf->{'Thruk::Backend'}} > 0);
 
-    $conf = set_default_config($conf);
+    $conf = set_default_config($conf) unless $ENV{'TEST_THRUK_SKIP_CONFIG_DEFAULTS'};
 
     return($conf);
 }
 
 ######################################
 
-=head2 set_default_config
+=head2 apply_defaults_and_normalize
 
-return basic config hash and sets environment, but does not read config again
+return normalized config with defaults replaced. Also checks type of config entry based on default config.
 
 =cut
-sub set_default_config {
-    my($config) = @_;
-
-    my $base_config = get_base_config();
+sub apply_defaults_and_normalize {
+    my($config, $base_config) = @_;
 
     ###################################################
     # normalize lists / scalars and set defaults
@@ -473,6 +472,23 @@ sub set_default_config {
             next;
         }
     }
+
+    return($config);
+}
+
+
+######################################
+
+=head2 set_default_config
+
+return basic config hash and sets environment, but does not read config again
+
+=cut
+sub set_default_config {
+    my($config) = @_;
+
+    my $base_config = get_base_config();
+    $config = apply_defaults_and_normalize($config, $base_config);
 
     # ensure comma separated lists
     for my $key (qw/csrf_allowed_hosts show_custom_vars expose_custom_vars/) {
@@ -738,8 +754,9 @@ sub _load_config_files {
     my($files) = @_;
 
     # read/load config files
-    my @local_files;
+    my $local_files = [];
     my @base_files;
+
     if(scalar @{$files} == 0) {
         for my $p ($ENV{'THRUK_CONFIG'}, '.') {
             next unless defined $p;
@@ -748,26 +765,9 @@ sub _load_config_files {
             next unless -d $path.'/.';
             push @base_files, $path.'/thruk.conf' if -f $path.'/thruk.conf';
             if(-d $path.'/thruk_local.d') {
-                my @tmpfiles = sort glob($path.'/thruk_local.d/*');
-                for my $tmpfile (@tmpfiles) {
-                    my $ext;
-                    if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
-                    if(!$ext) {
-                        _debug2("skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname");
-                        next;
-                    }
-                    if($ext ne 'conf' && $ext ne 'cfg') {
-                        # only read if the extension matches the hostname
-                        my $hostname = &hostname;
-                        if($tmpfile !~ m/\Q$hostname\E$/mx) {
-                            _debug2("skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'");
-                            next;
-                        }
-                    }
-                    push @local_files, $tmpfile;
-                }
+                $local_files = _add_conf_recurse($local_files, $path.'/thruk_local.d');
             }
-            push @local_files, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
+            push @{$local_files}, $path.'/thruk_local.conf' if -f $path.'/thruk_local.conf';
             last if scalar @base_files > 0;
         }
     }
@@ -776,9 +776,40 @@ sub _load_config_files {
     for my $f (@{$files}, @base_files) {
         push @{$cfg}, [$f, _fixup_config(read_config_file($f))];
     }
-    push @{$cfg}, ['thruk_local.conf', _fixup_config(read_config_file(\@local_files))];
+    push @{$cfg}, ['thruk_local.conf', _fixup_config(read_config_file($local_files))];
 
     return $cfg;
+}
+
+######################################
+sub _add_conf_recurse {
+    my($local_files, $tmpfile) = @_;
+
+    if(-d $tmpfile."/.") {
+        my @tmpfiles = sort glob($tmpfile.'/*');
+        for my $tmpfile (@tmpfiles) {
+            $local_files = _add_conf_recurse($local_files, $tmpfile);
+        }
+        return $local_files;
+    }
+
+    my $ext;
+    if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
+    if(!$ext) {
+        _debug2("skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname");
+        return;
+    }
+    if($ext ne 'conf' && $ext ne 'cfg') {
+        # only read if the extension matches the hostname
+        my $hostname = &hostname;
+        if($tmpfile !~ m/\Q$hostname\E$/mx) {
+            _debug2("skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'");
+            return;
+        }
+    }
+    push @{$local_files}, $tmpfile;
+
+    return $local_files;
 }
 
 ######################################
@@ -1425,12 +1456,15 @@ sub merge_sub_config {
                 $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
             }
             elsif($key eq 'Thruk::Agents') {
-                if(ref $add->{$key} eq 'ARRAY') {
-                    for my $entry (@{$add->{$key}}) {
-                        Thruk::Utils::IO::merge_deep($config->{$key}, $entry);
+                # simply merge everything, do not overwrite anything
+                for my $block (@{Thruk::Base::list($add->{$key})}) {
+                    # first key is agent name
+                    for my $agentname (sort keys %{$block}) {
+                        $config->{$key}->{$agentname} = {} unless $config->{$key}->{$agentname};
+                        for my $subkey (sort keys %{$block->{$agentname}}) {
+                            $config->{$key}->{$agentname}->{$subkey} = _merge_all($config->{$key}->{$agentname}->{$subkey}, $block->{$agentname}->{$subkey});
+                        }
                     }
-                } else {
-                    $config->{$key} = { %{$config->{$key}}, %{$add->{$key}} };
                 }
             } else {
                 if(ref $add->{$key} eq 'HASH') {
@@ -1451,6 +1485,34 @@ sub merge_sub_config {
     }
 
     return;
+}
+
+########################################
+sub _merge_all {
+    my($conf, $add) = @_;
+
+    if(!defined $conf) {
+        my $ref = ref $add;
+        if($ref eq 'HASH') {
+            $conf = [$add];
+        } elsif($ref eq 'ARRAY') {
+            $conf = $add;
+        } else {
+            $conf = $add;
+        }
+    }
+    elsif(ref $conf eq 'ARRAY') {
+        if(ref $add eq 'ARRAY') {
+            push @{$conf}, @{$add};
+        } else {
+            push @{$conf}, $add;
+        }
+    } else {
+        $conf = [$conf];
+        push @{$conf}, $add;
+    }
+
+    return $conf;
 }
 
 ########################################

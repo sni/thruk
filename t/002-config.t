@@ -42,6 +42,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/nested_config';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $expected_backends = {
         'peer' => [{ 'name' => 'local1', '_FILE' => 't/data/nested_config/thruk_local.d/a.conf', '_LINE' => 4 },
                    { 'name' => 'local2', '_FILE' => 't/data/nested_config/thruk_local.d/b.conf', '_LINE' => 9 },
@@ -67,6 +68,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/separated_hashes';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $expected_actions = {
         "a" => 1,
         "b" => 2,
@@ -91,6 +93,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/scalar_values';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     is_deeply($config->{'cookie_auth_domain'}, 'test.local', "parsing cookie domain from thruk_local.d");
 };
 
@@ -116,6 +119,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/split_plugins';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $expected = {
         test => 2,
         a    => 1,
@@ -128,6 +132,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/number_lists';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $exp = [ '3', '0-4,11-12' ];
     is_deeply($config->{'command_disabled'}, $exp, "parsing config from t/data/number_lists/");
 };
@@ -136,6 +141,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/user_overrides';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     is_deeply($config->{'user_password_min_length'}, 5, "parsing value from t/data/user_overrides/");
     my $exp = { readonly => 1 };
     is_deeply($config->{'Thruk::Plugin::Panorama'}, $exp, "parsing value from t/data/user_overrides/");
@@ -154,6 +160,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/editor_config';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $exp = [{ 'files' => { 'action' => 'perl_editor_menu', 'filter' => '\\.pm$', 'folder' => 'etc/thruk/bp/', 'syntax' => 'perl' }, 'name' => 'BP Functions' },
                { 'files' => { 'filter' => '\\.tbp$', 'folder' => 'etc/thruk/bp/' }, 'name' => 'BP Files' }];
     is_deeply($config->{'editor'}, $exp, "parsing value from thruk_local.d");
@@ -172,6 +179,7 @@ if(!$@) {
 {
     local $ENV{'THRUK_CONFIG'} = 't/data/nested_hash';
     my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $exp = [
         { 'login' => 'l1', 'client_id' => 'c1', 'id' => 'p1' },
         { 'login' => 'l2', 'client_id' => 'c2', 'id' => 'p2' },
@@ -179,6 +187,25 @@ if(!$@) {
         { 'login' => 'l4', 'client_id' => 'c4', 'id' => 'oauth' },
     ];
     is_deeply($config->{'auth_oauth'}->{'provider'}, $exp, "parsing value from t/data/nested_hash/");
+};
+
+####################################################
+{
+    local $ENV{'TEST_THRUK_SKIP_CONFIG_DEFAULTS'} = 1;
+    local $ENV{'THRUK_CONFIG'} = 't/data/nested_subdir';
+    my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
+    my $expected_proc = [
+        { 'name' => 'naemon',   'warn' => '3', 'crit' => '4' },
+        { 'name' => 'snclient', 'warn' => '2', 'crit' => '2' },
+    ];
+    my $expected_service = [
+        { 'name' => 'httpd',           'host' => 'ANY' },
+        { 'name' => ['naemon', 'ntp'], 'host' => 'ANY' },
+        { 'name' => 'apache2',         'host' => 'ANY' },
+    ];
+    is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'proc'},    $expected_proc,    "parsing proc from thruk_local.d");
+    is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'service'}, $expected_service, "parsing service from thruk_local.d");
 };
 
 ####################################################
