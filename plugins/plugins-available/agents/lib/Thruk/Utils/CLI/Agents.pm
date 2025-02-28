@@ -125,6 +125,7 @@ sub cmd {
        "k|insecure"   => \$opt->{'insecure'},
        "cached:s"     => \$opt->{'cached'},
        "n|dryrun"     => \$opt->{'dryrun'},
+       "always-ok"    => \$opt->{'always-ok'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -191,7 +192,7 @@ sub _run_reload {
 sub _run_check {
     my($c, $commandoptions, $data, $opt) = @_;
 
-    my $output = "usage: $0 agents check inventory <host>\n";
+    my $output = "usage: $0 agents check inventory <host> [--always-ok]\n";
     my $rc     = 3;
 
     $data->{'all_stdout'} = 1;
@@ -200,6 +201,7 @@ sub _run_check {
         my $host = shift @{$commandoptions} // '';
         ($output, $rc) = _check_inventory($c, $host, $opt);
     }
+    $rc = 0 if $opt->{'always-ok'};
     return($output, $rc);
 }
 
@@ -517,6 +519,7 @@ sub _run_add_host {
             }
             elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
                 $change = "updated";
+                _log_changes_diff($obj);
             }
             push @result, {
                 'id'      => $id,
@@ -537,6 +540,7 @@ sub _run_add_host {
                     'name'    => $obj->{'conf'}->{'host_name'},
                     '_change' => "updated",
                 };
+                _log_changes_diff($obj);
             }
         }
         if(!$opt->{'dryrun'}) {
@@ -563,6 +567,12 @@ sub _run_add_host {
     }
 
     return(sprintf("%s: no changes made.\n", $hostname), 0) if scalar @result == 0;
+
+    if($opt->{'dryrun'}) {
+        for my $row (@result) {
+            $row->{"_change"} = "(dry run) ".$row->{"_change"};
+        }
+    }
 
     # build result table
     my $out = Thruk::Utils::text_table(

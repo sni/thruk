@@ -48,7 +48,7 @@
           <th class="w-24">Checks</th>
           <th class="w-32">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
-              <div class="flexrow flex-nowrap gap-x-1">
+              <div class="flexrow flex-nowrap gap-x-1 h-5">
                 <a href="#" onclick="return agents_run_all(this, '.js-update-btn', {})"><i class="fa-solid fa-arrows-rotate text-sm" title="Update inventory for all visible servers"></i></a>
               </div>
             </div>
