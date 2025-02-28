@@ -48,6 +48,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "test", ["tag1"]);
     ok($opts->[0]->{'first_notification_delay'} == 30, "default extra opts parsed");
@@ -75,6 +76,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "test", ["tag1"]);
     ok($opts->[0]->{'first_notification_delay'} == 30, "string match");
@@ -105,6 +107,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "test", ["tag1"]);
     ok($opts->[0]->{'first_notification_delay'} == 30, "wildcard match");
@@ -135,6 +138,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "test", ["tag1"]);
     ok($opts->[0]->{'first_notification_delay'} == 30, "regexp match");
@@ -166,6 +170,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "", []);
     ok(scalar @{$opts} == 0, "excludes match");
@@ -193,6 +198,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "", []);
     ok(scalar @{$opts} == 0, "combined match");
@@ -226,6 +232,7 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
+    undef $Thruk::Agents::SNClient::conf;
 
     my $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "", []);
     ok(scalar @{$opts} == 0, "combined exclude match");
