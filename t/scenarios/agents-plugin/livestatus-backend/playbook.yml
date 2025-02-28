@@ -46,3 +46,17 @@
       dest: "/omd/sites/demo/etc/thruk/thruk_local.d/agents.cfg"
       owner: "demo"
       group: "demo"
+
+  # copy again
+  - name: Create a directory if it does not exist
+    file:
+      path: "/omd/sites/demo/etc/thruk/thruk_local.d/agents.d/"
+      state: directory
+      mode: '0755'
+      owner: "demo"
+      group: "demo"
+  - copy:
+      src: "/root/agents.cfg"
+      dest: "/omd/sites/demo/etc/thruk/thruk_local.d/agents.d/test.cfg"
+      owner: "demo"
+      group: "demo"

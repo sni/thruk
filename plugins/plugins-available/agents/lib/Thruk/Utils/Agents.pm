@@ -74,7 +74,8 @@ sub update_inventory {
 
     my $address   = $hostobj->{'conf'}->{'address'};
     my $type      = $hostobj->{'conf'}->{'_AGENT'}          // default_agent_type($c);
-    my $password  = $opt->{'password'} || $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+    my $config    = get_agent_class($type)->config();
+    my $password  = $opt->{'password'} || $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $config->{'default_password'};
     my $port      = $opt->{'port'}     || $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
     my $mode      = $opt->{'mode'}     || $hostobj->{'conf'}->{'_AGENT_MODE'}     // 'https';
 
@@ -135,8 +136,8 @@ sub get_services_checks {
         }
     }
 
-    my $type = $agenttype // $hostobj->{'conf'}->{'_AGENT'};
-    $password = $password || $c->config->{'Thruk::Agents'}->{lc($type)}->{'default_password'};
+    my $type  = $agenttype // $hostobj->{'conf'}->{'_AGENT'};
+    $password = $password || get_agent_class($type)->config()->{'default_password'};
 
     my $agent = build_agent($agenttype // $hostobj);
     $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
@@ -266,7 +267,7 @@ sub build_agent {
     }
     $agent->{'section'} = $section || $settings->{'section'} // '';
     $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
-    $agent->{'mode'}    = $mode    || 'https';
+    $agent->{'mode'}    = $mode    || $settings->{'default_mode'} // 'https';
     $agent->{'tags'}    = Thruk::Base::comma_separated_list($tags // '');
 
     if($c->stash->{'theme'} =~ m/dark/mxi) {
@@ -371,7 +372,8 @@ sub _set_checks_category {
     my $services_by_id = get_host_agent_services_by_id($services);
     my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
 
-    my $excludes = $c->config->{'Thruk::Agents'}->{lc($agenttype)}->{'exclude'};
+    my $config   = get_agent_class($agenttype)->config();
+    my $excludes = $config->{'exclude'};
 
     my $existing = {};
     for my $chk (@{$checks}) {
@@ -561,7 +563,8 @@ sub scan_agent {
             $password = $obj->{'_AGENT_PASSWORD'};
         }
     }
-    $password = $password || $c->config->{'Thruk::Agents'}->{lc($agenttype)}->{'default_password'};
+    my $config = get_agent_class($agenttype)->config();
+    $password  = $password || $config->{'default_password'};
 
     my $class = get_agent_class($agenttype);
     my $agent = $class->new({});
@@ -679,13 +682,16 @@ sub check_disable {
     my($data, $disabled_config, $keys) = @_;
     $keys = Thruk::Base::list($keys);
     for my $conf_key (@{$keys}) {
-        my $conf = $disabled_config->{$conf_key} // next;
-        for my $attr (sort keys %{$conf}) {
-            my $val = $data->{$attr} // '';
-            for my $pattern (@{Thruk::Base::list($conf->{$attr})}) {
-                if(_check_pattern($val, $pattern)) {
-                    return sprintf("disabled by '<disabled %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'",
-                        $conf_key, $attr, $pattern, $val);
+        my $con = Thruk::Base::list($disabled_config);
+        for my $disabled (@{Thruk::Base::list($disabled_config)}) {
+            my $conf = $disabled->{$conf_key} // next;
+            for my $attr (sort keys %{$conf}) {
+                my $val = $data->{$attr} // '';
+                for my $pattern (@{Thruk::Base::list($conf->{$attr})}) {
+                    if(_check_pattern($val, $pattern)) {
+                        return sprintf("disabled by '<disabled %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'",
+                            $conf_key, $attr, $pattern, $val);
+                    }
                 }
             }
         }

@@ -28,15 +28,16 @@ Available commands are:
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
-  -i                interactive mode       (available in edit/add mode)
+  -i                interactive mode       (available in edit/add/update mode)
   --all             show all items         (available in show mode)
-  -P | --password   set password           (available in add mode)
-  -p | --port       set tcp port           (available in add mode)
-       --ip         set ip address         (available in add mode)
-       --section    set section            (available in add mode)
-  -k | --insecure   skip tls verification  (available in add mode)
+  -P | --password   set password           (available in add/update mode)
+  -p | --port       set tcp port           (available in add/update mode)
+       --ip         set ip address         (available in add/update mode)
+       --section    set section            (available in add/update mode)
+  -k | --insecure   skip tls verification  (available in add/update mode)
        --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
-  -n | --dryrun     only print changes     (available in add mode)
+  -n | --dryrun     only print changes     (available in add/update mode)
+  -d | --diff       print diff of changes  (available in add/update mode)
   -t | --tags <tag> list only specific tag (available in list mode)
 
 =back
@@ -98,6 +99,7 @@ sub cmd {
         'cached'       => undef,
         'tags'         => undef,
         'dryrun'       => undef,
+        'diff'         => undef,
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
     $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
@@ -125,6 +127,7 @@ sub cmd {
        "k|insecure"   => \$opt->{'insecure'},
        "cached:s"     => \$opt->{'cached'},
        "n|dryrun"     => \$opt->{'dryrun'},
+       "d|diff"       => \$opt->{'diff'},
        "always-ok"    => \$opt->{'always-ok'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
@@ -519,7 +522,7 @@ sub _run_add_host {
             }
             elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
                 $change = "updated";
-                _log_changes_diff($obj);
+                _log_changes_diff($obj, $opt->{'diff'});
             }
             push @result, {
                 'id'      => $id,
@@ -540,7 +543,7 @@ sub _run_add_host {
                     'name'    => $obj->{'conf'}->{'host_name'},
                     '_change' => "updated",
                 };
-                _log_changes_diff($obj);
+                _log_changes_diff($obj, $opt->{'diff'});
             }
         }
         if(!$opt->{'dryrun'}) {
@@ -688,7 +691,7 @@ sub _check_inventory {
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
         if($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
-            _log_changes_diff($obj);
+            _log_changes_diff($obj, $opt->{'diff'});
         }
     }
     if(scalar @need_update > 0) {
@@ -936,9 +939,9 @@ sub _deep_compare {
 ##############################################
 # log diff of changes
 sub _log_changes_diff {
-    my($obj) = @_;
+    my($obj, $force) = @_;
 
-    return unless Thruk::Base::verbose();
+    return if(!$force && !Thruk::Base::verbose());
 
     my $txt1 = $obj->as_text();
     my $conf = $obj->{'conf'};
@@ -969,8 +972,13 @@ sub _log_changes_diff {
     $diff =~ s/\Q$filename2\E.*/old/mx;
     $diff =~ s/\Q$filename1\E.*/new/mx;
 
-    _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
-    _debug($diff);
+    if($force) {
+        _info("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+        _info($diff);
+    } else {
+        _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+        _debug($diff);
+    }
 
     return($diff);
 }

@@ -17,12 +17,37 @@ Thruk::Agents::SNClient - implements snclient based agent configuration
 
 =cut
 
-my $global_defaults = {
+my $global_settings = {
     'type'          => 'snclient',
     'icon'          => 'snclient.png',
     'icon_dark'     => 'snclient_dark.png',
     'default_port'  => 8443,
+    'default_mode'  => 'https',
+};
+
+my $config_defaults = {
     'check_nsc_web_extra_options' => '-t 35',
+    'default_backend'             => 'LOCAL',
+    'default_password'            => '',
+    'default_port'                => $global_settings->{'default_port'},
+    'check_interval'              => 1,
+    'retry_interval'              => 0.5,
+    'max_check_attempts'          => 3,
+    'inventory_interval'          => 60,
+    'os_updates_interval'         => 60,
+    'default_contacts'            => [],
+    'default_contactgroups'       => [],
+    'perf_template'               => "auto",
+    'host_perf_template'          => "auto",
+    'host_check'                  => "\$USER1\$/check_icmp -H \$HOSTADDRESS\$ -w 3000.0,80% -c 5000.0,100% -p 5",
+    'default_opt'                 => [],
+    'disable'                     => {},
+    'exclude'                     => [],
+    'service'                     => [],
+    'proc'                        => [],
+    'extra_service_opts'          => [],
+    'extra_host_opts'             => [],
+    'extra_service_checks'        => [],
 };
 
 =head1 METHODS
@@ -51,11 +76,31 @@ sub new {
 
     settings()
 
-returns settings for this agent
+returns global module settings
 
 =cut
 sub settings {
-    return($global_defaults);
+    return($global_settings);
+}
+
+##########################################################
+
+=head2 config
+
+    config()
+
+returns config for this agent
+
+=cut
+sub config {
+    our $conf;
+    return($conf) if $conf;
+
+    my $c = $Thruk::Globals::c || die("uninitialized");
+    $conf = $c->config->{'Thruk::Agents'}->{'snclient'};
+    $conf = Thruk::Config::apply_defaults_and_normalize($conf, $config_defaults);
+
+    return($conf);
 }
 
 ##########################################################
@@ -107,8 +152,9 @@ sub get_config_objects {
         $perf_template      = 'srv-perf';
         $host_perf_template = 'host-perf';
     }
-    $perf_template      = $c->config->{'Thruk::Agents'}->{'snclient'}->{'perf_template'}      // $perf_template;
-    $host_perf_template = $c->config->{'Thruk::Agents'}->{'snclient'}->{'host_perf_template'} // $host_perf_template;
+    my $config = &config();
+    $perf_template      = $config->{'perf_template'}      eq 'auto' ? $perf_template      : $config->{'perf_template'};
+    $host_perf_template = $config->{'host_perf_template'} eq 'auto' ? $host_perf_template : $config->{'host_perf_template'};
 
     $hostobj->{'conf'}->{'use'} = [$host_perf_template, ($section ? _make_section_template("host", $section) : 'generic-thruk-agent-host')];
 
@@ -286,8 +332,7 @@ sub get_config_objects {
     my $proxy_cmd = _check_proxy_command($c, $settings->{'options'});
     # if there is a proxy command, we have to set a check_command for hosts
     if($proxy_cmd) {
-        $hostdata->{'check_command'} = $host_check || $c->config->{'Thruk::Agents'}->{'snclient'}->{'host_check'} ||
-                                       "\$USER1\$/check_icmp -H \$HOSTADDRESS\$ -w 3000.0,80% -c 5000.0,100% -p 5";
+        $hostdata->{'check_command'} = $host_check || $config->{'host_check'};
         $hostdata->{'check_command'} =
             sprintf("check_thruk_agent!%s%s",
                 $proxy_cmd,
@@ -498,6 +543,8 @@ sub _extract_checks {
     my $extra = _get_extra_service_checks($c, $hostname, $section, $tags);
     push @{$checks}, @{$extra};
 
+    my $config = &config();
+
     # compute service configuration
     for my $chk (@{$checks}) {
         next if $chk->{'id'} eq '_host';
@@ -519,14 +566,19 @@ sub _extract_checks {
                 $chk->{'check'},
         );
         my $current_args = [];
-        my $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_interval'} // 1;
+        my $interval = $config->{'check_interval'};
         if($chk->{'check'}) {
             if($chk->{'check'} eq 'inventory') {
-                $command  = 'check_thruk_agent!'.$proxy_cmd.'$USER4$/bin/thruk agents check inventory \'$HOSTNAME$\'';
-                $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'inventory_interval'} // 60;
+                my $thruk = '$USER4$/bin/thruk';
+                if(-x $c->config->{'home'}."/script/thruk") {
+                    # use path to local script if this is a git installation
+                    $thruk = $c->config->{'home'}."/script/thruk";
+                }
+                $command  = 'check_thruk_agent!'.$proxy_cmd.$thruk.' agents check inventory \'$HOSTNAME$\'';
+                $interval = $config->{'inventory_interval'};
             }
             if($chk->{'check'} eq 'check_os_updates') {
-                $interval = $c->config->{'Thruk::Agents'}->{'snclient'}->{'os_updates_interval'} // 60;
+                $interval = $config->{'os_updates_interval'};
             }
             if($chk->{'args'}) {
                 if(ref $chk->{'args'} eq 'ARRAY') {
@@ -553,8 +605,8 @@ sub _extract_checks {
             'host_name'           => $hostname,
             'service_description' => $chk->{'name'},
             'check_interval'      => $interval,
-            'retry_interval'      => $c->config->{'Thruk::Agents'}->{'snclient'}->{'retry_interval'}     // 0.5,
-            'max_check_attempts'  => $c->config->{'Thruk::Agents'}->{'snclient'}->{'max_check_attempts'} // 5,
+            'retry_interval'      => $config->{'retry_interval'},
+            'max_check_attempts'  => $config->{'max_check_attempts'},
             'check_command'       => $command,
             '_AGENT_AUTO_CHECK'   => $chk->{'id'},
         };
@@ -563,7 +615,7 @@ sub _extract_checks {
         $chk->{'args'} = "";
 
         for my $attr (qw/contacts contactgroups/) {
-            my $data = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'default_'.$attr});
+            my $data = Thruk::Base::list($config->{'default_'.$attr});
             $data    = Thruk::Base::comma_separated_list(join(",", @{$data}));
             if(scalar @{$data} > 0) {
                 $chk->{'svc_conf'}->{$attr} = join(",", @{$data});
@@ -624,8 +676,9 @@ returns disabled config for this key with a fallback
 sub get_disabled_config {
     my($c, $key, $fallback) = @_;
 
-    my $dis =   $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}->{$key}
-              ? $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}
+    my $config = &config;
+    my $dis =   $config->{$key}
+              ? $config->{'disable'}
               : { $key => $fallback };
     return($dis);
 }
@@ -642,7 +695,8 @@ returns default options for this check
 sub default_opt {
     my($c, $check) = @_;
 
-    my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'default_opt'});
+    my $config = &config;
+    my $opts   = Thruk::Base::list($config->{'default_opt'});
     my $res;
     for my $opt (@{$opts}) {
         next unless defined $opt->{$check};
@@ -655,8 +709,8 @@ sub default_opt {
 ##########################################################
 sub _check_nsc_web_extra_options {
     my($c, $mode) = @_;
-    my $options = $c->config->{'Thruk::Agents'}->{'snclient'}->{'check_nsc_web_extra_options'}
-            // settings()->{'check_nsc_web_extra_options'};
+    my $config  = &config;
+    my $options = $config->{'check_nsc_web_extra_options'};
     $options = $options." -k " if($mode && $mode eq 'insecure');
     return($options);
 }
@@ -680,8 +734,9 @@ sub _make_section_template {
 ##########################################################
 sub _get_extra_opts_hst {
     my($c, $hostname, $section, $tags) = @_;
-    my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_host_opts'});
-    my $res = [];
+    my $config = &config;
+    my $opts   = Thruk::Base::list($config->{'extra_host_opts'});
+    my $res    = [];
     for my $opt (@{$opts}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'match'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
@@ -696,8 +751,9 @@ sub _get_extra_opts_hst {
 ##########################################################
 sub _get_extra_opts_svc {
     my($c, $name, $hostname, $section, $tags) = @_;
-    my $opts = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_service_opts'});
-    my $res = [];
+    my $config = &config;
+    my $opts   = Thruk::Base::list($config->{'extra_service_opts'});
+    my $res    = [];
     for my $opt (@{$opts}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($name, ($opt->{'match'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($name, ($opt->{'service'} // 'ANY'));
@@ -713,8 +769,9 @@ sub _get_extra_opts_svc {
 ##########################################################
 sub _get_extra_service_checks {
     my($c, $hostname, $section, $tags) = @_;
-    my $checks = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'extra_service_checks'});
-    my $res = [];
+    my $config = &config;
+    my $checks = Thruk::Base::list($config->{'extra_service_checks'});
+    my $res    = [];
     for my $chk (@{$checks}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($chk->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($chk->{'section'} // 'ANY'));

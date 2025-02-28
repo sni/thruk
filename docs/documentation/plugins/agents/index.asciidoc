@@ -136,7 +136,7 @@ For example:
     # override check interval
     check_interval = 1
     retry_interval = 0.5
-    max_check_attempts = 5
+    max_check_attempts = 3
 
     # override inventory interval
     inventory_interval = 60
