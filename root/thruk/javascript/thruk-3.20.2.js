@@ -5529,7 +5529,9 @@ function tags_input_recreate_badges(div, tags) {
     jQuery(div).find(".tags-list SPAN").remove();
     var tagsContainer = jQuery(div).find(".tags-list");
     jQuery(tags).each(function(i, t) {
-        jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
+        if(t !== "") {
+            jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
+        }
     });
     jQuery(div).find("span").off("click").on("click", tags_input_remove);
 }
