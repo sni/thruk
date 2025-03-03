@@ -571,7 +571,7 @@ sub _check_exit_reason {
     my $url = $c->req ? $c->req->url : '<no url>';
 
     my $params = ($c->req && $c->req->parameters && scalar keys %{$c->req->parameters} > 0) ? Thruk::Utils::dump_params($c->req->parameters) : undef;
-    if($params =~ m=Thruk::Utils::Cluster::pong|Thruk::Utils::External::read_job=mx) {
+    if($params && $params =~ m=Thruk::Utils::Cluster::pong|Thruk::Utils::External::read_job=mx) {
         return;
     }
 
