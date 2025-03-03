@@ -253,4 +253,12 @@ TestUtils::test_command({
     });
 };
 
+# cli sig pipe handling
+{
+    TestUtils::test_command({
+        cmd  => $BIN.' r /csv/services | head -n1',
+        like => ['/;acknowledged;/', '/;state;/'],
+    });
+};
+
 done_testing();
