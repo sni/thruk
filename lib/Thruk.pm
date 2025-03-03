@@ -551,6 +551,11 @@ sub _check_exit_reason {
         ## use critic
     }
 
+    # cli mode gets a sigpipe ex. when the result is piped somewhere which then returns early
+    if($sig eq 'PIPE' && Thruk::Base->mode() eq 'CLI') {
+        return;
+    }
+
     my $reason = longmess();
 
     ## no critic
