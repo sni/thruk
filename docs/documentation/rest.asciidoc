@@ -1176,6 +1176,7 @@ alias for /hosts?name=<name>
 
 lists alerts for given host.
 alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+supports wildcards for: <name>
 
 === GET /hosts/<name>/availability
 
@@ -1272,6 +1273,7 @@ list of supported commands:
 === GET /hosts/<name>/commandline
 
 displays commandline for check command of given hosts.
+supports wildcards for: <name>
 
 [options="header"]
 |===========================================
@@ -1307,6 +1309,7 @@ Deletes given host from configuration.
 
 lists notifications for given host.
 alias for /logs?class=3&host_name=<name>
+supports wildcards for: <name>
 
 === GET /hosts/<name>/outages
 
@@ -1673,6 +1676,7 @@ there is an alias /services.
 
 lists services for given host and name.
 alias for /services?host_name=<host_name>&description=<service>
+supports wildcards for: <host> and <service>
 
 === GET /services/<host>/<service>/availability
 
@@ -1761,6 +1765,7 @@ list of supported commands:
 === GET /services/<host>/<service>/commandline
 
 displays commandline for check command of given services.
+supports wildcards for: <host> and <service>
 
 [options="header"]
 |===========================================

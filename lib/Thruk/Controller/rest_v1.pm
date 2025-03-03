@@ -2204,6 +2204,7 @@ sub _rest_get_livestatus_hosts_services {
 ##########################################################
 # REST PATH: GET /hosts/<name>/commandline
 # displays commandline for check command of given hosts.
+# supports wildcards for: <name>
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/commandline?$%mx, \&_rest_get_livestatus_hosts_commandline);
 sub _rest_get_livestatus_hosts_commandline {
     my($c, undef, $host) = @_;
@@ -2211,8 +2212,9 @@ sub _rest_get_livestatus_hosts_commandline {
         return({ 'message' => 'not authorized', 'description' => 'you are not authorized to view the command line', code => 403 });
     }
     my $data = [];
+    my $filter = _host_service_filter($host);
     my $all_commands = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
-    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { "name" => $host }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), $filter, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "hosts")});
     for my $hst (@{$hosts}) {
         my $command = $c->db->expand_command('host' => $hst, commands => $all_commands, 'source' => $c->config->{'show_full_commandline_source'} );
         push @{$data}, {
@@ -2290,10 +2292,12 @@ sub _rest_get_livestatus_services {
 # REST PATH: GET /services/<host>/<service>
 # lists services for given host and name.
 # alias for /services?host_name=<host_name>&description=<service>
+# supports wildcards for: <host> and <service>
 register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)$%mx, \&_rest_get_livestatus_services_by_name);
 sub _rest_get_livestatus_services_by_name {
     my($c, undef, $host, $service) = @_;
-    my $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
+    my $filter = _host_service_filter($host, $service);
+    my $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
     _fill_commands_cache($c);
     _expand_perfdata_and_custom_vars($c, $data, "services");
     return($data);
@@ -2302,6 +2306,7 @@ sub _rest_get_livestatus_services_by_name {
 ##########################################################
 # REST PATH: GET /services/<host>/<service>/commandline
 # displays commandline for check command of given services.
+# supports wildcards for: <host> and <service>
 register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)/commandline$%mx, \&_rest_get_livestatus_services_commandline);
 sub _rest_get_livestatus_services_commandline {
     my($c, undef, $host, $service) = @_;
@@ -2310,7 +2315,8 @@ sub _rest_get_livestatus_services_commandline {
     }
     my $data = [];
     my $all_commands = Thruk::Base::array2hash(\@{$c->db->get_commands()}, 'peer_key', 'name');
-    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { "host_name" => $host, description => $service }, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
+    my $filter = _host_service_filter($host, $service);
+    my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $filter, _livestatus_filter($c, 'hosts') ], %{_livestatus_options($c, "services")});
     for my $svc (@{$services}) {
         my $command = $c->db->expand_command('host' => $svc, 'service' => $svc, commands => $all_commands, 'source' => $c->config->{'show_full_commandline_source'} );
         push @{$data}, {
@@ -2534,12 +2540,14 @@ sub _rest_get_livestatus_notifications {
 # REST PATH: GET /hosts/<name>/notifications
 # lists notifications for given host.
 # alias for /logs?class=3&host_name=<name>
+# supports wildcards for: <name>
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/notifications?$%mx, \&_rest_get_livestatus_host_notifications);
 sub _rest_get_livestatus_host_notifications {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
+    my $filter2 = _host_service_filter($host);
     _append_time_filter($c, $filter);
-    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3, host_name => $host }, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name'])));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { class => 3 }, $filter2, $filter ], %{_livestatus_options($c)}, extra_columns => ['command_name'])));
 }
 
 ##########################################################
@@ -2558,12 +2566,14 @@ sub _rest_get_livestatus_alerts {
 # REST PATH: GET /hosts/<name>/alerts
 # lists alerts for given host.
 # alias for /logs?type[~]=^(HOST|SERVICE) ALERT&host_name=<name>
+# supports wildcards for: <name>
 register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/alerts?$%mx, \&_rest_get_livestatus_host_alerts);
 sub _rest_get_livestatus_host_alerts {
     my($c, undef, $host) = @_;
     my $filter = _livestatus_filter($c, 'logs');
+    my $filter2 = _host_service_filter($host);
     _append_time_filter($c, $filter);
-    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { host_name => $host, type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter ], %{_livestatus_options($c)})));
+    return(_post_process_logs($c, $c->db->get_logs(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'log'), { type => { '~' => '^(HOST|SERVICE) ALERT$' } }, $filter2, $filter ], %{_livestatus_options($c)})));
 }
 
 ##########################################################
@@ -3138,6 +3148,33 @@ sub _fill_commands_cache {
     }
 
     return Thruk::Utils::fill_commands_cache($c);
+}
+
+##########################################################
+sub _host_service_filter {
+    my($host, $service) = @_;
+
+    my $filter = {};
+    if(defined $host) {
+        $host =~ s=\.\*=*=gmx;
+        $host =~ s=\*=.*=gmx;
+        if(Thruk::Base::looks_like_regex($host)) {
+            $filter->{'host_name'} = { '~~' => $host };
+        } else {
+            $filter->{'host_name'} = $host;
+        }
+    }
+    if(defined $service) {
+        $service =~ s=\.\*=*=gmx;
+        $service =~ s=\*=.*=gmx;
+        if(Thruk::Base::looks_like_regex($service)) {
+            $filter->{'description'} = { '~~' => $service };
+        } else {
+            $filter->{'description'} = $service;
+        }
+    }
+
+    return($filter);
 }
 
 ##########################################################
