@@ -972,12 +972,22 @@ sub _log_changes_diff {
     $diff =~ s/\Q$filename2\E.*/old/mx;
     $diff =~ s/\Q$filename1\E.*/new/mx;
 
-    if($force) {
-        _info("changes in service '%s'", $obj->{'conf'}->{'service_description'});
-        _info($diff);
+    if($obj->{'conf'}->{'service_description'}) {
+        if($force) {
+            _info("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+            _info($diff);
+        } else {
+            _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
+            _debug($diff);
+        }
     } else {
-        _debug("changes in service '%s'", $obj->{'conf'}->{'service_description'});
-        _debug($diff);
+        if($force) {
+            _info("changes in host '%s'", $obj->{'conf'}->{'host_name'});
+            _info($diff);
+        } else {
+            _debug("changes in host '%s'", $obj->{'conf'}->{'host_name'});
+            _debug($diff);
+        }
     }
 
     return($diff);

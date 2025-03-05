@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 145;
+plan tests => 147;
 
 use_ok("Thruk::Utils::IO");
 

@@ -141,7 +141,7 @@ sub get_services_checks {
 
     my $agent = build_agent($agenttype // $hostobj);
     $checks = $agent->get_services_checks($c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
-    _set_checks_category($c, $hostname, $hostobj, $checks, $type, $cli_opts);
+    _set_checks_category($c, $hostname, $hostobj, $checks, $type, $cli_opts, $section, $tags);
 
     return($checks);
 }
@@ -366,7 +366,7 @@ sub set_object_model {
 # - obsolete: exists as services but not in inventory anymore
 # - disabled: exists in inventory but is disabled by user config
 sub _set_checks_category {
-    my($c, $hostname, $hostobj, $checks, $agenttype, $fresh) = @_;
+    my($c, $hostname, $hostobj, $checks, $agenttype, $fresh, $section, $tags) = @_;
 
     my $services = $hostobj ? get_host_agent_services($c, $hostobj) : {};
     my $services_by_id = get_host_agent_services_by_id($services);
@@ -381,6 +381,7 @@ sub _set_checks_category {
         my $name = $chk->{'name'};
         $existing->{$chk->{'id'}} = 1;
         my $svc = $services_by_id->{$chk->{'id'}} // $services->{$name};
+        delete $chk->{'exclude_reason'};
         if($svc && $svc->{'conf'}->{'_AGENT_AUTO_CHECK'}) {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
@@ -397,9 +398,10 @@ sub _set_checks_category {
                 # disabled by 'disable' configuration
                 $chk->{'exists'} = 'disabled';
             }
-            elsif(_is_excluded($hostname, $chk, $excludes)) {
+            elsif(my $res = _is_excluded($hostname, $section, $tags, $chk, $excludes)) {
                 # disabled by 'exclude' configuration
                 $chk->{'exists'} = 'disabled';
+                $chk->{'exclude_reason'} = $res;
             } else {
                 $chk->{'exists'} = 'new';
             }
@@ -921,18 +923,29 @@ sub _find_agent_modules {
 ##########################################################
 # returns true if check matches any of the given excludes
 sub _is_excluded {
-    my($hostname, $chk, $excludes) = @_;
+    my($hostname, $section, $tags, $chk, $excludes) = @_;
     return unless $excludes;
     $excludes = Thruk::Base::list($excludes);
     for my $ex (@{$excludes}) {
-        $ex->{'host'} = "ANY" unless defined $ex->{'host'};
-        if(!_check_pattern($hostname, $ex->{'host'})) {
-            next;
+        next unless check_wildcard_match($hostname, ($ex->{'host'}//'ANY'));
+        if($section) {
+            next unless check_wildcard_match($section,  ($ex->{'section'}//'ANY'));
         }
-        return 1 if _check_pattern($chk->{'name'}, $ex->{'name'});
-        return 1 if _check_pattern($chk->{'id'},   $ex->{'type'});
+        if($tags) {
+            my $list = Thruk::Base::comma_separated_list($tags // '');
+            next unless check_wildcard_match($list, ($ex->{'tag'}//'ANY'));
+        }
+
+        my $names = [@{Thruk::Utils::list($ex->{'name'})}, @{Thruk::Utils::list($ex->{'service'})}];
+        if(scalar @{$names} > 0) {
+            return $ex if check_wildcard_match($chk->{'name'}, $names);
+        }
+        my $types = Thruk::Utils::list($ex->{'type'});
+        if(scalar @{$types} > 0) {
+            return $ex if check_wildcard_match($chk->{'id'}, $types);
+        }
     }
-    return(0);
+    return;
 }
 
 ##########################################################

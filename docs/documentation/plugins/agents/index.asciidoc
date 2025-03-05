@@ -149,7 +149,7 @@ tags = tag2
 tags = tag1 && tag2
 ...................................
 
-#### Excludes
+#### Exclude Match
 
 ...................................
 # exclude something
@@ -327,6 +327,7 @@ Apply this option to all inventory checks:
       #host !~ \.win\.      # apply this exclude only to specific hosts, only hosts not matching ".win."
       #host ~ ^l            # apply this exclude only to hosts starting with an "l"
       #section ~ test       # apply this exclude only to sections containing "test"
+      #tags = prod          # apply this exclude only to tag "prod"
     </exclude>
 
     # include services in discovery
