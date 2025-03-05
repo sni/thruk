@@ -667,10 +667,19 @@ sub get_disabled_config {
     my($c, $key, $fallback) = @_;
 
     my $config = &config;
-    my $dis =   $config->{$key}
-              ? $config->{'disable'}
-              : { $key => $fallback };
-    return($dis);
+    if($config->{'disable'}) {
+        # merge blocks
+        my $blocks = [];
+        for my $dis (@{Thruk::Base::list($config->{'disable'})}) {
+            if($dis->{$key}) {
+                push @{$blocks}, @{Thruk::Base::list($dis->{$key})};
+            }
+        }
+        return({ $key => $blocks }) if scalar @{$blocks} > 0;
+    }
+
+    # no matches, return fallback
+    return({ $key => $fallback });
 }
 
 ##########################################################

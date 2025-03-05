@@ -80,6 +80,12 @@
           [% IF check.defined("info") %]
             <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
             <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
+              [% IF check.defined("disabled") %]
+              <div>
+                <h4>Disabled</h4>
+                <div class="whitespace-pre text-left">[% IF check.disabled == 0 %]manually[% ELSE %][% check.disabled | html | nl2br %][% END %]</div>
+              </div>
+              [% END %]
               <div>
                 <h4>Check Command</h4>
                 <div class="whitespace-pre text-left">[% check.check | html %]</div>

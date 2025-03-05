@@ -682,15 +682,16 @@ sub check_disable {
     my($data, $disabled_config, $keys) = @_;
     $keys = Thruk::Base::list($keys);
     for my $conf_key (@{$keys}) {
-        my $con = Thruk::Base::list($disabled_config);
         for my $disabled (@{Thruk::Base::list($disabled_config)}) {
             my $conf = $disabled->{$conf_key} // next;
-            for my $attr (sort keys %{$conf}) {
-                my $val = $data->{$attr} // '';
-                for my $pattern (@{Thruk::Base::list($conf->{$attr})}) {
-                    if(_check_pattern($val, $pattern)) {
-                        return sprintf("disabled by '<disabled %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'",
-                            $conf_key, $attr, $pattern, $val);
+            for my $co (@{Thruk::Base::list($conf)}) {
+                for my $attr (sort keys %{$co}) {
+                    my $val = $data->{$attr} // '';
+                    for my $pattern (@{Thruk::Base::list($co->{$attr})}) {
+                        if(_check_pattern($val, $pattern)) {
+                            return sprintf("disabled by '<disable %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'",
+                                $conf_key, $attr, $pattern, $val);
+                        }
                     }
                 }
             }

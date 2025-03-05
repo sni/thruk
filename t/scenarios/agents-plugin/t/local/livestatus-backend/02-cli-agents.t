@@ -60,7 +60,12 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -II ALL -n -v',
         '/\+\s+use\s+srv-pnp,generic-thruk-agent-service,srv-perf/',
         '/\+\s+use\s+generic/',
         '/\+\s+first_notification_delay/',
-    ] });
+    ],
+    unlike => [
+        '/disk\ \/test/',      # excluded by disable drivesize
+        '/zombie\ processes/', # excluded by exclude block
+    ],
+    });
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -II ALL', like => ['/^localhost/', '/updated.*cpu/', '/to activate changes/'] });
 ok(unlink("etc/thruk/thruk_local.d/agents_extra.cfg", "removed extra config"));
 TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -yD localhost', like => ['/host\ localhost\ removed\ successsfully/'] });
