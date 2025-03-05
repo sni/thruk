@@ -109,7 +109,7 @@ sub get_checks {
                 $cfg->{'_name'} = "process ".$match;
             }
 
-            my $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, $cfg->{'user'});
+            my $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, ($cfg->{'user'} // 'ANY'));
             next unless $user;
             if($user ne 'ANY') {
                 push @{$args}, "filter='username ~~ /".$user."/'";
