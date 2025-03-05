@@ -50,6 +50,8 @@ my $config_defaults = {
     'extra_service_checks'        => [],
 };
 
+my $matching_keys = [qw/host match service section tag tags host_name args check/];
+
 =head1 METHODS
 
 =cut
@@ -204,6 +206,8 @@ sub get_config_objects {
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
 
+    my $skip_keys = Thruk::Base::array2hash($matching_keys);
+
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
         my $type = $checks_config->{'check.'.$id} // 'off';
@@ -252,7 +256,7 @@ sub get_config_objects {
             $svc->{'conf'}->{'use'} = \@templates;
             delete $chk->{'svc_conf'}->{'_AGENT_ARGS'};
             my $extra = _get_extra_opts_svc($c, $svc->{'conf'}->{'service_description'}, $hostname, $section, $tags);
-            push @{$extra}, $chk->{'extra'} if $chk->{'extra'};
+            unshift @{$extra}, $chk->{'extra'} if $chk->{'extra'};
             if($args) { # user supplied manual overrides
                 $chk->{'svc_conf'}->{'_AGENT_ARGS'}    = $args;
                 $chk->{'svc_conf'}->{'check_command'} .= " ".$args;
@@ -277,16 +281,8 @@ sub get_config_objects {
             # set extra service options
             for my $ex (@{$extra}) {
                 for my $key (sort keys %{$ex}) {
-                    next if $key eq 'host';
-                    next if $key eq 'match';
-                    next if $key eq 'service';
-                    next if $key eq 'section';
-                    next if $key eq 'tag';
-                    next if $key eq 'tags';
-                    next if $key eq 'host_name';
-                    next if $key eq 'args';
-                    next if $key eq 'check';
-                    $chk->{'svc_conf'}->{$key} = $ex->{$key};
+                    next if $skip_keys->{$key};
+                    _apply_extra_obj_attr($chk->{'svc_conf'}, $key, $ex->{$key});
                 }
             }
 
@@ -317,14 +313,8 @@ sub get_config_objects {
     my $host_check;
     for my $ex (@{$extra}) {
         for my $key (sort keys %{$ex}) {
-            next if $key eq 'host';
-            next if $key eq 'match';
-            next if $key eq 'section';
-            next if $key eq 'tag';
-            next if $key eq 'tags';
-            next if $key eq 'host_name';
-            next if $key eq 'name';
-            $hostdata->{$key} = $ex->{$key};
+            next if $skip_keys->{$key};
+            _apply_extra_obj_attr($hostdata, $key, $ex->{$key});
             $host_check = $ex->{$key} if $key eq 'check_command';
         }
     }
@@ -808,6 +798,37 @@ sub _get_extra_service_checks {
     }
 
     return $res;
+}
+
+##########################################################
+sub _apply_extra_obj_attr {
+    my($conf, $key, $extra) = @_;
+
+    for my $ex (@{Thruk::Base::list($extra)}) {
+        if($ex =~ m/^\!/mx) {
+            # remove this entry
+            my $val = $extra;
+            $val =~ s/^\!//gmx;
+            my $cur = Thruk::Base::comma_separated_list($conf->{$key}//'');
+            $cur = Thruk::Base::array_remove($cur, $val);
+            $cur = Thruk::Base::array_uniq($cur);
+            $conf->{$key} = join(",", @{$cur});
+        }
+        elsif($ex =~ m/^\+/mx) {
+            # add this entry
+            my $val = $extra;
+            $val =~ s/^\+//gmx;
+            my $cur = Thruk::Base::comma_separated_list($conf->{$key}//'');
+            push @{$cur}, @{Thruk::Base::comma_separated_list($val//'')};
+            $cur = Thruk::Base::array_uniq($cur);
+            $conf->{$key} = join(",", @{$cur});
+        } else {
+            # replace this entry
+            $conf->{$key} = $ex;
+        }
+    }
+
+    return;
 }
 
 ##########################################################

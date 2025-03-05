@@ -585,7 +585,7 @@ sub _run_add_host {
                 ],
         data => \@result,
     );
-    print($out."\n");
+    printf("%s:\n%s\n", $hostname, $out);
     return("", 0);
 }
 

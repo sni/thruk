@@ -295,9 +295,7 @@ For example:
 </Component>
 ...................................
 
-### Tips & Tricks
-
-#### Use Rules
+### Rules
 
 Instead of manually disabling service checks, use rules to exclude them.
 This means less work and you can easily adjust those rules for all or many
@@ -323,6 +321,25 @@ Exclude service checks based on its name like this:
       name ~ net lo          # name regex match
     </exclude>
 ...................................
+
+#### Testing Rules
+
+It is good advice to test changed rules on the command line before applying them
+to all hosts.
+
+List all changes:
+
+```
+  %> ta -II ALL -n
+```
+
+Show detailed all changes for specific host:
+
+```
+  %> ta -II hostname -n -v
+```
+
+### Tips & Tricks
 
 #### Always OK Inventory Check
 
@@ -356,4 +373,62 @@ For example, add a ping check to all hosts.
       check_command = check-host-alive!$HOSTADDRESS$
       first_notification_delay = 30
     </extra_service_checks>
+...................................
+
+#### Adjust Host / Service Attributes
+
+Using the `extra_service_opts` or `extra_host_opts` is a good way to
+programatically adjust host/service object attributes.
+
+Here are a few examples:
+
+*set / overwrite attributes*
+
+...................................
+    <extra_service_opts>
+      # match all services named 'cpu'
+      service  = cpu
+
+      # set/overwrite contacts and timeperiod to a new value
+      contacts            = admin
+      notification_period = office_hours
+    </extra_service_opts>
+...................................
+
+
+*append to list attributes*
+
+...................................
+    <extra_service_opts>
+      # set all contacts to this one
+      contacts = admin
+    </extra_service_opts>
+
+    # extend special services
+    <extra_service_opts>
+      # match all services named 'memory'
+      service  = memory
+
+      # extend list of contacts
+      contacts = +manager
+    </extra_service_opts>
+...................................
+
+*remove from list attributes*
+
+...................................
+    <extra_service_opts>
+      # first set all contacts to these
+      contacts = admin, manager, customer
+    </extra_service_opts>
+
+    # extend special services
+    <extra_service_opts>
+      # match all services named 'memory'
+      service  = memory
+
+      # remove from list of contacts
+      contacts = !manager
+      contacts = !customer
+    </extra_service_opts>
 ...................................
