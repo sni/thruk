@@ -4,6 +4,7 @@
     - role: common
     - role: local_tests
     - role: thruk_developer
+    - role: site_git
   tasks:
   - name: "omd config change"
     shell: "omd config demo change"
@@ -60,3 +61,5 @@
       dest: "/omd/sites/demo/etc/thruk/thruk_local.d/agents.d/test.cfg"
       owner: "demo"
       group: "demo"
+
+  - shell: sudo su - demo -c "git add . && git commit -m 'setup complete'"

@@ -10,7 +10,9 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 144;
+plan tests => 145;
+
+use_ok("Thruk::Utils::IO");
 
 ###########################################################
 # test thruks script path

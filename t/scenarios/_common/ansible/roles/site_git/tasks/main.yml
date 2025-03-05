@@ -1,0 +1,59 @@
+- name: initialize git config name
+  shell:
+    cmd: "git config --global user.name {{ site }}"
+  become: yes
+  become_user: "{{site}}"
+- name: initialize git config email
+  shell:
+    cmd: "git config --global user.email {{ site }}@localhost"
+  become: yes
+  become_user: "{{site}}"
+- name: initialize git config default branch
+  shell:
+    cmd: "git config --global init.defaultBranch main"
+  become: yes
+  become_user: "{{site}}"
+
+
+- name: Ensure [alias] section exists in .gitconfig
+  lineinfile:
+    path: /omd/sites/{{site}}/.gitconfig
+    line: "[alias]"
+    state: present
+
+- name: Ensure alias "d" for git diff exists
+  lineinfile:
+    path: /omd/sites/{{site}}/.gitconfig
+    regexp: '^\\s*d\\s*=.*$'
+    line: '    d      = diff --color=always'
+    insertafter: '^\[alias\]'
+    state: present
+- name: Ensure alias "s" for git status exists
+  lineinfile:
+    path: /omd/sites/{{site}}/.gitconfig
+    regexp: '^\\s*s\\s*=.*$'
+    line: '    s      = status'
+    insertafter: '^\[alias\]'
+    state: present
+- name: Ensure alias "co" for git checkout exists
+  lineinfile:
+    path: /omd/sites/{{site}}/.gitconfig
+    regexp: '^\\s*co\\s*=.*$'
+    line: '    co     = checkout'
+    insertafter: '^\[alias\]'
+    state: present
+- name: Ensure alias "l" for git log exists
+  lineinfile:
+    path: /omd/sites/{{site}}/.gitconfig
+    regexp: '^\\s*co\\s*=.*$'
+    line: '    l      = log'
+    insertafter: '^\[alias\]'
+    state: present
+
+- name: initialize git home
+  shell:
+    cmd: git init && git add . && git commit -m 'init'
+    chdir: "/omd/sites/{{site}}"
+    creates: "/omd/sites/{{site}}/.git"
+  become: yes
+  become_user: "{{site}}"
