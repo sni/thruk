@@ -27,6 +27,60 @@ from the plugins section in the config tool.
 
 It worked if you have a new menu item under `System` -> `Agents`.
 
+### Configuration
+
+Create a example configuration file:
+
+`~/etc/thruk/thruk_local.d/agents.conf`.
+
+There is a link:#_example-configuration[example configuration] at the end.
+
+### Rules
+
+Instead of manually disabling service checks, use rules to exclude them.
+This means less work and you can easily adjust those rules for all or many
+hosts at once.
+
+You can either use the `<disable>` tag to select specific checks if supported by the plugin.
+For example to disable network device checks on localhost use this block:
+
+...................................
+    <disable network>
+      enabled != true
+      name    ~  ^(lo|.*Loopback)
+    </disable>
+...................................
+
+This provides a way to exclude services based on inventory values.
+
+Or more generic:
+
+Exclude service checks based on its name like this:
+
+...................................
+    <exclude>
+      name = check_services  # name match
+      name ~ net lo          # name regex match
+    </exclude>
+...................................
+
+#### Testing Rules
+
+It is good advice to test changed rules on the command line before applying them
+to all hosts.
+
+List all changes:
+
+```
+  %> ta -II ALL -n
+```
+
+Show detailed all changes for specific host:
+
+```
+  %> ta -II hostname -n -v
+```
+
 ### Matching Rules
 
 Some rule blocks like `extra_service_opts`, `extra_host_opts` or `extra_service_checks`
@@ -110,13 +164,102 @@ host = !localhost
 tags = tag1 && !tag2
 ...................................
 
-### Configuration
+### Tips & Tricks
 
-Create a example configuration file:
+#### Add Additional Service Checks
 
-`~/etc/thruk/thruk_local.d/agents.conf`.
+In case you would like to add additional service check which are
+not created from the inventory, you can add rules to do so.
 
-For example:
+For example, add a ping check to all hosts.
+
+...................................
+    <extra_service_checks>
+      host    = ANY
+      section = ANY
+      tags    = ANY
+
+      name    = ping  # the actual service description
+      # add arbitray naemon config attributes here as well
+      check_command = check-host-alive!$HOSTADDRESS$
+      first_notification_delay = 30
+    </extra_service_checks>
+...................................
+
+#### Adjust Host / Service Attributes
+
+Using the `extra_service_opts` or `extra_host_opts` is a good way to
+programatically adjust host/service object attributes.
+
+Here are a few examples:
+
+*set / overwrite attributes*
+
+...................................
+    <extra_service_opts>
+      # match all services named 'cpu'
+      service  = cpu
+
+      # set/overwrite contacts and timeperiod to a new value
+      contacts            = admin
+      notification_period = office_hours
+    </extra_service_opts>
+...................................
+
+
+*append to list attributes*
+
+...................................
+    <extra_service_opts>
+      # set all contacts to this one
+      contacts = admin
+    </extra_service_opts>
+
+    # extend special services
+    <extra_service_opts>
+      # match all services named 'memory'
+      service  = memory
+
+      # extend list of contacts
+      contacts = +manager
+    </extra_service_opts>
+...................................
+
+*remove from list attributes*
+
+...................................
+    <extra_service_opts>
+      # first set all contacts to these
+      contacts = admin, manager, customer
+    </extra_service_opts>
+
+    # extend special services
+    <extra_service_opts>
+      # match all services named 'memory'
+      service  = memory
+
+      # remove from list of contacts
+      contacts = !manager
+      contacts = !customer
+    </extra_service_opts>
+...................................
+
+#### Always OK Inventory Check
+
+In case the inventory check should always be OK, ex.: because it is used
+in dashboards, simply use the `--always-ok` option.
+
+Apply this option to all inventory checks:
+
+...................................
+    <extra_service_opts>
+      service = agent inventory
+      args    = --always-ok
+    </extra_service_opts>
+...................................
+
+
+### Example Configuration
 
 ...................................
 <Component Thruk::Agents>
@@ -293,142 +436,4 @@ For example:
     </extra_service_checks>
   </snclient>
 </Component>
-...................................
-
-### Rules
-
-Instead of manually disabling service checks, use rules to exclude them.
-This means less work and you can easily adjust those rules for all or many
-hosts at once.
-
-You can either use the `<disable>` tag to select specific checks if supported by the plugin.
-For example to disable network device checks on localhost use this block:
-
-...................................
-    <disable network>
-      enabled != true
-      name    ~  ^(lo|.*Loopback)
-    </disable>
-...................................
-
-Or more generic:
-
-Exclude service checks based on its name like this:
-
-...................................
-    <exclude>
-      name = check_services  # name match
-      name ~ net lo          # name regex match
-    </exclude>
-...................................
-
-#### Testing Rules
-
-It is good advice to test changed rules on the command line before applying them
-to all hosts.
-
-List all changes:
-
-```
-  %> ta -II ALL -n
-```
-
-Show detailed all changes for specific host:
-
-```
-  %> ta -II hostname -n -v
-```
-
-### Tips & Tricks
-
-#### Always OK Inventory Check
-
-In case the inventory check should always be OK, ex.: because it is used
-in dashboards, simply use the `--always-ok` option.
-
-Apply this option to all inventory checks:
-
-...................................
-    <extra_service_opts>
-      service = agent inventory
-      args    = --always-ok
-    </extra_service_opts>
-...................................
-
-#### Add Additional Service Checks
-
-In case you would like to add additional service check which are
-not created from the inventory, you can add rules to do so.
-
-For example, add a ping check to all hosts.
-
-...................................
-    <extra_service_checks>
-      host    = ANY
-      section = ANY
-      tags    = ANY
-
-      name    = ping  # the actual service description
-      # add arbitray naemon config attributes here as well
-      check_command = check-host-alive!$HOSTADDRESS$
-      first_notification_delay = 30
-    </extra_service_checks>
-...................................
-
-#### Adjust Host / Service Attributes
-
-Using the `extra_service_opts` or `extra_host_opts` is a good way to
-programatically adjust host/service object attributes.
-
-Here are a few examples:
-
-*set / overwrite attributes*
-
-...................................
-    <extra_service_opts>
-      # match all services named 'cpu'
-      service  = cpu
-
-      # set/overwrite contacts and timeperiod to a new value
-      contacts            = admin
-      notification_period = office_hours
-    </extra_service_opts>
-...................................
-
-
-*append to list attributes*
-
-...................................
-    <extra_service_opts>
-      # set all contacts to this one
-      contacts = admin
-    </extra_service_opts>
-
-    # extend special services
-    <extra_service_opts>
-      # match all services named 'memory'
-      service  = memory
-
-      # extend list of contacts
-      contacts = +manager
-    </extra_service_opts>
-...................................
-
-*remove from list attributes*
-
-...................................
-    <extra_service_opts>
-      # first set all contacts to these
-      contacts = admin, manager, customer
-    </extra_service_opts>
-
-    # extend special services
-    <extra_service_opts>
-      # match all services named 'memory'
-      service  = memory
-
-      # remove from list of contacts
-      contacts = !manager
-      contacts = !customer
-    </extra_service_opts>
 ...................................
