@@ -10651,6 +10651,7 @@ function overcard(options) {
 
     var doc = settings["document"] || document;
     var containerId = 'overcard';
+    jQuery("BODY").append(jQuery("#"+containerId+"_body > DIV")); // move previous content away, otherwise it would be removed as well
     // check if container div is already present
     jQuery("#"+containerId).remove();
     var containerHTML = ""
