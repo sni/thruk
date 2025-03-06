@@ -61,7 +61,7 @@
             [% IF has_sections %]
               <td>[% agent.section %]</td>
             [% END %]
-            <td class="truncate w-60 max-w-max js-agent-row">
+            <td class="truncate w-60 min-w-32 max-w-max js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between">
                 <a class="link truncate" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="edit this host">[% h.name | html %]</a>
                 <a class="w-5" href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
