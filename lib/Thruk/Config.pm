@@ -797,14 +797,14 @@ sub _add_conf_recurse {
     if($tmpfile =~ m/\.([^.]+)$/mx) { $ext = $1; }
     if(!$ext) {
         _debug2("skipped config file: ".$tmpfile.", file has no extension, please use either cfg, conf or the hostname");
-        return;
+        return $local_files;
     }
     if($ext ne 'conf' && $ext ne 'cfg') {
         # only read if the extension matches the hostname
         my $hostname = &hostname;
         if($tmpfile !~ m/\Q$hostname\E$/mx) {
             _debug2("skipped config file: ".$tmpfile.", file does not end with our hostname '$hostname'");
-            return;
+            return $local_files;
         }
     }
     push @{$local_files}, $tmpfile;
