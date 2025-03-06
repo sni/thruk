@@ -393,6 +393,7 @@ sub _set_checks_category {
             # disabled manually from previous inventory run
             if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
                 $chk->{'exists'} = 'disabled';
+                $chk->{'exclude_reason'} = "manually";
             }
             elsif($chk->{'disabled'}) {
                 # disabled by 'disable' configuration
@@ -401,7 +402,10 @@ sub _set_checks_category {
             elsif(my $res = _is_excluded($hostname, $section, $tags, $chk, $excludes)) {
                 # disabled by 'exclude' configuration
                 $chk->{'exists'} = 'disabled';
-                $chk->{'exclude_reason'} = $res;
+                my $src = $res->{'_FILE'} ? $res->{'_FILE'}.':'.$res->{'_LINE'} : 'default';
+                my $root = $ENV{'OMD_ROOT'};
+                $src =~ s=^$root/==gmx if $root;
+                $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration:\nsource: %s", $src);
             } else {
                 $chk->{'exists'} = 'new';
             }
@@ -687,12 +691,17 @@ sub check_disable {
         for my $disabled (@{Thruk::Base::list($disabled_config)}) {
             my $conf = $disabled->{$conf_key} // next;
             for my $co (@{Thruk::Base::list($conf)}) {
+                my $src = $co->{'_FILE'} ? $co->{'_FILE'}.':'.$co->{'_LINE'} : 'default';
+                my $root = $ENV{'OMD_ROOT'};
+                $src =~ s=^$root/==gmx if $root;
                 for my $attr (sort keys %{$co}) {
+                    next if $attr eq '_FILE';
+                    next if $attr eq '_LINE';
                     my $val = $data->{$attr} // '';
                     for my $pattern (@{Thruk::Base::list($co->{$attr})}) {
                         if(_check_pattern($val, $pattern)) {
-                            return sprintf("disabled by '<disable %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'",
-                                $conf_key, $attr, $pattern, $val);
+                            return sprintf("disabled by '<disable %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'\nsource: %s",
+                                $conf_key, $attr, $pattern, $val, $src);
                         }
                     }
                 }

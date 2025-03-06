@@ -50,7 +50,7 @@ my $config_defaults = {
     'extra_service_checks'        => [],
 };
 
-my $matching_keys = [qw/host match service section tag tags host_name args check/];
+my $no_object_keys = [qw/host match service section tag tags host_name args check _FILE _LINE/];
 
 =head1 METHODS
 
@@ -206,7 +206,7 @@ sub get_config_objects {
 
     my $template = $section ? _make_section_template("service", $section) : 'generic-thruk-agent-service';
 
-    my $skip_keys = Thruk::Base::array2hash($matching_keys);
+    my $skip_keys = Thruk::Base::array2hash($no_object_keys);
 
     for my $id (sort keys %{$checks_hash}) {
         next if $id eq '_host';
@@ -237,7 +237,7 @@ sub get_config_objects {
             # only save disabled information if it was disabled manually, not when disabled by config
             # and only if it wasn't orphanded
             if(!$chk->{'disabled'} && $chk->{'exists'} ne 'obsolete') {
-                push @{$settings->{'disabled'}}, $id;
+                push @{$settings->{'disabled'}}, $id if (!defined $chk->{'exclude_reason'} || $chk->{'exclude_reason'} eq 'manually');
             }
             next;
         }

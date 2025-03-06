@@ -30,6 +30,7 @@
     <tbody>
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
+      [% reason = "" %]
       <tr>
         <th>
           <div class="flex items-center min-w-max justify-between">
@@ -55,6 +56,10 @@
               [% reason = check.disabled %]
               [% IF reason == 0; reason = "manually disabled"; END %]
               [% IF reason == 1; reason = "unknown reason"; END %]
+            [% ELSIF check.defined("exclude_reason") %]
+              [% reason = check.exclude_reason %]
+            [% END %]
+            [% IF reason %]
               <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
                 <div class='text-center badge PENDING'>disabled</div>
               </a>
@@ -62,7 +67,7 @@
             [% ELSE %]
               <div class='text-center badge PENDING'>disabled</div>
             [% END %]
-            [% IF agent.exists("settings") && agent.settings.exists("disabled") && agent.settings.disabled.exists(check.id) %]
+            [% IF reason == "manually" || agent.exists("settings") && agent.settings.exists("disabled") && agent.settings.disabled.exists(check.id) %]
               <div class='text-center badge UNKNOWN' title="check has been manually disabled">manually</div>
             [% END %]
           [% END %]
@@ -77,33 +82,33 @@
         </td>
         [% END %]
         <td class="[% IF type != "exists" %]w-full[% END %]">
-          [% IF check.defined("info") %]
-            <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
-            <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
-              [% IF check.defined("disabled") %]
-              <div>
-                <h4>Disabled</h4>
-                <div class="whitespace-pre text-left">[% IF check.disabled == 0 %]manually[% ELSE %][% check.disabled | html | nl2br %][% END %]</div>
-              </div>
+          <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
+          <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
+            [% IF reason %]
+            <div>
+              <h4>Disabled</h4>
+              <div class="whitespace-pre text-left">[% reason | html | nl2br %]</div>
+            </div>
+            [% END %]
+            <div>
+              <h4>Check Command</h4>
+              <div class="whitespace-pre text-left">[% check.check | html %]</div>
+            </div>
+            <div>
+              <h4>Default Arguments</h4>
+              [% IF !check.defined("current_args") || check.current_args.size == 0 %]
+                <div class="whitespace-pre text-left">(none)</div>
+              [% ELSE %]
+                <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
               [% END %]
-              <div>
-                <h4>Check Command</h4>
-                <div class="whitespace-pre text-left">[% check.check | html %]</div>
-              </div>
-              <div>
-                <h4>Default Arguments</h4>
-                [% IF !check.defined("current_args") || check.current_args.size == 0 %]
-                  <div class="whitespace-pre text-left">(none)</div>
-                [% ELSE %]
-                  <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
-                [% END %]
-              </div>
+            </div>
+            [% IF check.defined("info") %]
               <div>
                 <h4>Attributes</h4>
                 <div class="whitespace-pre text-left">[% check.info | nl2br %]</div>
               </div>
-            </div>
-          [% END %]
+            [% END %]
+          </div>
         </td>
         [% IF type == "exists" || type == "obsolete" %]
         <td class='truncate w-1/2 max-w-xs'>

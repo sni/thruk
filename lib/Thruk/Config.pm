@@ -1174,6 +1174,10 @@ sub _parse_rows {
             if($line =~ m|^<(\w+)\s+([^>]+)>|mxo) {
                 my($k,$v) = ($1,$2);
                 my $next  = {};
+                if($ENV{'THRUK_KEEP_CFG_FILE'}) {
+                    $next->{'_FILE'} = $file;
+                    $next->{'_LINE'} = $cur_line;
+                }
                 $cur_line = _parse_rows($file, $rows, $next, $cur_line, '</'.lc($k).'>', $file.':'.$cur_line);
                 if(!defined $conf->{$k}->{$v}) {
                     $conf->{$k}->{$v} = $next;
@@ -1188,7 +1192,8 @@ sub _parse_rows {
             if($line =~ m|^<([^>]+)>|mxo) {
                 my $k = $1;
                 my $next  = {};
-                if($k eq 'peer') {
+                local $ENV{'THRUK_KEEP_CFG_FILE'} = 1 if $k eq 'snclient';
+                if($k eq 'peer' || $ENV{'THRUK_KEEP_CFG_FILE'}) {
                     $next->{'_FILE'} = $file;
                     $next->{'_LINE'} = $cur_line;
                 }
