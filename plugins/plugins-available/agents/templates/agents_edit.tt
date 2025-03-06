@@ -13,7 +13,7 @@
     [% IF type == "new" %]
       <thead>
         <tr>
-          <td align="center" colspan="5">
+          <td align="center" colspan="6">
             <button class="my-2" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
           </td>
         </tr>
@@ -21,7 +21,7 @@
     [% ELSIF type == "obsolete" %]
       <thead>
         <tr>
-          <td align="center" colspan="5">
+          <td align="center" colspan="6">
             <button class="my-2" onclick="jQuery('.js-radio-obsolete[value=\'off\']').attr('checked', true); return false;">Remove All Obsolete Checks</button>
           </td>
         </tr>
