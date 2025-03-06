@@ -2576,7 +2576,10 @@ t/data/nested_hash/thruk_local.d/more.conf
 t/data/nested_hash/thruk_local.d/unnamed.conf
 t/data/nested_subdir/thruk.conf
 t/data/nested_subdir/thruk_local.conf
+t/data/nested_subdir/thruk_local.d/aaa.conf
 t/data/nested_subdir/thruk_local.d/agents.d/sub.conf
+t/data/nested_subdir/thruk_local.d/bbb.conf.hostname
+t/data/nested_subdir/thruk_local.d/test.conf
 t/data/number_lists/thruk.conf
 t/data/number_lists/thruk_local.conf
 t/data/remove_duplicates/core.cfg

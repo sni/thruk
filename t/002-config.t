@@ -206,6 +206,7 @@ if(!$@) {
     ];
     is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'proc'},    $expected_proc,    "parsing proc from thruk_local.d");
     is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'service'}, $expected_service, "parsing service from thruk_local.d");
+    is_deeply($config->{'maximum_search_boxes'}, [1,2], "parsing from thruk_local.d");
 };
 
 ####################################################
