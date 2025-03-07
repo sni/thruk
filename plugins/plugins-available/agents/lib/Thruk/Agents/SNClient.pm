@@ -602,6 +602,7 @@ sub _extract_checks {
         };
         $chk->{'svc_conf'}->{'parents'} = $chk->{'parent'} if $chk->{'parent'};
         $chk->{'svc_conf'}->{'_GRAPH_SOURCE'} = $chk->{'_GRAPH_SOURCE'} if $chk->{'_GRAPH_SOURCE'};
+        $chk->{'svc_conf'}->{'_WORKER'}       = $chk->{'_WORKER'}       if $chk->{'_WORKER'};
         $chk->{'args'} = "";
 
         for my $attr (qw/contacts contactgroups/) {
