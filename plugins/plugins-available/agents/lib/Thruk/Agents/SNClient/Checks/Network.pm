@@ -3,7 +3,6 @@ package Thruk::Agents::SNClient::Checks::Network;
 use warnings;
 use strict;
 
-use Thruk::Agents::SNClient ();
 use Thruk::Utils::Agents ();
 
 =head1 NAME

@@ -3,8 +3,6 @@ package Thruk::Agents::SNClient::Checks::Memory;
 use warnings;
 use strict;
 
-use Thruk::Agents::SNClient ();
-
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::Memory - returns memory checks for snclient

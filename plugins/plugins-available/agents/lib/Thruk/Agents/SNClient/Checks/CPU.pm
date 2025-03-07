@@ -3,8 +3,6 @@ package Thruk::Agents::SNClient::Checks::CPU;
 use warnings;
 use strict;
 
-use Thruk::Agents::SNClient ();
-
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::CPU - returns cpu checks for snclient
