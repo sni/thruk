@@ -10651,8 +10651,11 @@ function overcard(options) {
 
     var doc = settings["document"] || document;
     var containerId = 'overcard';
-    jQuery("#"+containerId+"_body > DIV").hide();
-    jQuery("BODY").append(jQuery("#"+containerId+"_body > DIV")); // move previous content away, otherwise it would be removed as well
+    jQuery("#"+containerId+"_body").children().each(function(i, e) {
+        var pID = jQuery(e).data("parent");
+        jQuery(e).hide();
+        jQuery("#"+pID).append(jQuery(e).detach());
+    });
     // check if container div is already present
     jQuery("#"+containerId).remove();
     var containerHTML = ""
@@ -10664,7 +10667,7 @@ function overcard(options) {
         +'<div class="overflow-y-auto max-h-[88vh] '+settings['bodyCls']+'" id="'+containerId+'_body"><\/div>'
         +'<\/div>';
     jQuery(containerHTML).appendTo(jQuery("MAIN", doc));
-    container = doc.getElementById(containerId);
+    var container = doc.getElementById(containerId);
     var check = function() { element_check_visibility(container); };
     jQuery(container, doc).on('move', check);
     new ResizeObserver(check).observe(container);
@@ -10703,19 +10706,20 @@ function overcard(options) {
 
     var body = doc.getElementById(containerId+"_body");
     if(settings["bodyEl"]) {
+        var bodyEl;
         if(settings["bodyEl"] && settings["bodyEl"].tagName) {
-            jQuery(body).append(jQuery(settings["bodyEl"]));
-            showElement(settings["bodyEl"]);
+            bodyEl = settings["bodyEl"];
         } else {
-            var bodyEl = doc.getElementById(settings["bodyEl"]);
-            if(bodyEl) {
-                jQuery(body).children().each(function(i, el) {
-                    hideElement(el);
-                });
-                showElement(bodyEl);
-                jQuery(body).append(jQuery(bodyEl));
-            }
+            bodyEl = doc.getElementById(settings["bodyEl"]);
         }
+        var pID = jQuery(bodyEl).parent().attr("id");
+        if(!pID) {
+            pID = "inserted_"+Math.floor(Math.random()*1000000);
+            jQuery(bodyEl).parent().attr("id", pID);
+        }
+        jQuery(bodyEl).data("parent", pID);
+        jQuery(body).append(jQuery(bodyEl).detach());
+        showElement(settings["bodyEl"]);
     } else {
         body.innerHTML = settings["body"];
     }
