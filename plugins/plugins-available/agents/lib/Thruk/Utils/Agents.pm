@@ -32,6 +32,7 @@ returns list of checks for this host grouped by type (new, exists, obsolete, dis
 sub get_agent_checks_for_host {
     my($c, $backend, $hostname, $hostobj, $agenttype, $cli_opts, $section, $mode, $options, $tags) = @_;
     $section = $section // $hostobj->{'conf'}->{'_AGENT_SECTION'};
+    $tags = Thruk::Base::comma_separated_list($tags // '');
 
     # extract checks and group by type
     my $flat   = get_services_checks($c, $backend, $hostname, $hostobj, $agenttype, undef, $cli_opts, $section, $mode, $options, $tags);
@@ -398,18 +399,25 @@ sub _set_checks_category {
             elsif($chk->{'disabled'}) {
                 # disabled by 'disable' configuration
                 $chk->{'exists'} = 'disabled';
-            }
-            elsif(my $res = _is_excluded($hostname, $section, $tags, $chk, $excludes)) {
-                # disabled by 'exclude' configuration
-                $chk->{'exists'} = 'disabled';
-                my $src = $res->{'_FILE'} ? $res->{'_FILE'}.':'.$res->{'_LINE'} : 'default';
-                my $root = $ENV{'OMD_ROOT'};
-                $src =~ s=^$root/==gmx if $root;
-                $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration.\nsource: %s", $src);
             } else {
                 $chk->{'exists'} = 'new';
             }
         }
+
+        # disabled by 'exclude' configuration
+        if(my $res = _is_excluded($hostname, $section, $tags, $chk, $excludes)) {
+            my $src = $res->{'_FILE'} ? $res->{'_FILE'}.':'.$res->{'_LINE'} : 'default';
+            my $root = $ENV{'OMD_ROOT'};
+            $src =~ s=^$root/==gmx if $root;
+            $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration.\nsource: %s", $src);
+
+            if($chk->{'exists'} eq 'exists') {
+                $chk->{'exists'} = 'obsolete';
+            } else {
+                $chk->{'exists'} = 'disabled';
+            }
+        }
+
     }
 
     for my $name (sort keys %{$services}) {
@@ -418,7 +426,12 @@ sub _set_checks_category {
         next unless $id;
         next if $existing->{$id};
 
-        push @{$checks}, { 'id' => $id, 'name' => $name, exists => 'obsolete'};
+        push @{$checks}, {
+            'id'        => $id,
+            'name'      => $name,
+            'exists'    => 'obsolete',
+            'disabled'  => 'service is no longer discovered in inventory',
+        };
     }
 
     return;

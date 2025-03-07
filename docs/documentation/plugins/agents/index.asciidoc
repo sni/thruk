@@ -181,7 +181,8 @@ For example, add a ping check to all hosts.
 
       name    = ping  # the actual service description
       # add arbitray naemon config attributes here as well
-      check_command = check-host-alive!$HOSTADDRESS$
+      check_command            = check-host-alive!$HOSTADDRESS$
+      use                      = srv-perf,generic-service
       first_notification_delay = 30
     </extra_service_checks>
 ...................................
@@ -420,6 +421,7 @@ Apply this option to all inventory checks:
       check   = check_dns     # snclient check
       args    = -H thruk.org  # check arguments
       # add arbitray naemon config attributes here as well
+      use                      = srv-perf,generic-service
       first_notification_delay = 30
     </extra_service_checks>
 
@@ -433,6 +435,7 @@ Apply this option to all inventory checks:
       name    = ping  # the actual service description
       check_command = check-host-alive!$HOSTADDRESS$
       # add arbitray naemon config attributes here as well
+      use                      = srv-perf,generic-service
       first_notification_delay = 30
     </extra_service_checks>
   </snclient>

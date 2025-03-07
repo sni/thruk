@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 147;
+plan tests => 148;
 
 use_ok("Thruk::Utils::IO");
 
@@ -60,6 +60,7 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -II ALL -n -v',
         '/\+\s+use\s+srv-pnp,generic-thruk-agent-service,srv-perf/',
         '/\+\s+use\s+generic/',
         '/\+\s+first_notification_delay/',
+        '/extraping/',
     ],
     unlike => [
         '/disk\ \/test/',      # excluded by disable drivesize
@@ -99,6 +100,17 @@ sub _extra_config {
         use     = !srv-pnp
         first_notification_delay = 30
     </extra_service_opts>
+
+    <extra_service_checks>
+      host    = ANY
+      section = ANY
+      tags    = ANY
+
+      name    = extraping  # the actual service description
+      # add arbitray naemon config attributes here as well
+      check_command = check-host-alive!\$HOSTADDRESS\$
+      first_notification_delay = 30
+    </extra_service_checks>
   </snclient>
 </Component>
 EOT

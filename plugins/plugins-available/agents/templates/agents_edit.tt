@@ -86,14 +86,22 @@
           <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
             [% IF reason %]
             <div>
-              <h4>Disabled</h4>
-              <div class="whitespace-pre text-left">[% reason | html | nl2br %]</div>
+              <h4>[% IF check.exists == 'disabled' %]Disabled[% ELSE %]Obsolete[% END %]</h4>
+              <div class="text-left">[% reason | html | nl2br %]</div>
             </div>
             [% END %]
+            [% IF check.defined("extra_src") %]
+            <div>
+              <h4>Source</h4>
+              <div class="text-left">[% check.extra_src | html %]</div>
+            </div>
+            [% END %]
+            [% IF check.defined("check") %]
             <div>
               <h4>Check Command</h4>
-              <div class="whitespace-pre text-left">[% check.check | html %]</div>
+              <div class="text-left">[% check.check | html %]</div>
             </div>
+            [% END %]
             <div>
               <h4>Default Arguments</h4>
               [% IF !check.defined("current_args") || check.current_args.size == 0 %]
@@ -129,11 +137,32 @@
         <td class="pt-px pb-px">
           <div class="flexrow flex-nowrap gap-x-2">
             <div class="radiogroup" style="width: 135px; height: 24px;">
-              <input type="radio" value="on"  class="js-checks js-radio-[% type %] activeENABLED" id="[% check.id %]_on" name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]><label for="[% check.id %]_on">On</label>
+              <input
+                type="radio"
+                value="on"
+                class="js-checks js-radio-[% type %] activeENABLED"
+                id="[% check.id %]_on"
+                name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]
+              >
+              <label for="[% check.id %]_on" title="Enables monitoring of this check">On</label>
               [% IF type == "new" %]
-              <input type="radio" value="new" class="js-checks js-radio-[% type %]" id="[% check.id %]_new" name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]><label for="[% check.id %]_new">New</label>
+              <input
+                type="radio"
+                value="new"
+                class="js-checks js-radio-[% type %]"
+                id="[% check.id %]_new"
+                name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]
+              >
+              <label for="[% check.id %]_new" title="Keep check in the new section.">New</label>
               [% END %]
-              <input type="radio" value="off" class="js-checks js-radio-[% type %]" id="[% check.id %]_off" name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]><label for="[% check.id %]_off">Off</label>
+              <input
+                type="radio"
+                value="off"
+                class="js-checks js-radio-[% type %]"
+                id="[% check.id %]_off"
+                name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]
+              >
+              <label for="[% check.id %]_off" title="Set check into manually disabled mode">Off</label>
             </div>
           </div>
         </td>
@@ -269,10 +298,30 @@
       </div>
       <div class="head justify-between" style="flex: 0 0 40px;">
         <div class="grow"></div>
-        <span class="tabs clickable text-center text-sm w-40 active" id="sub_1" onclick="set_sub(1)">Add New (<span class="js-type-1-size">[% checks.new.size %]</span>)</span>
-        <span class="tabs clickable text-center text-sm w-40" id="sub_2" onclick="set_sub(2)">Active Checks (<span class="js-type-2-size">[% checks.exists.size %]</span>)</span>
-        <span class="tabs clickable text-center text-sm w-40" id="sub_3" onclick="set_sub(3)">Obsolete Checks (<span class="js-type-3-size">[% checks.obsolete.size %]</span>)</span>
-        <span class="tabs clickable text-center text-sm w-40" id="sub_4" onclick="set_sub(4)">Unwanted Checks (<span class="js-type-4-size">[% checks.disabled.size %]</span>)</span>
+        <span
+          class="tabs clickable text-center text-sm w-40 active"
+          id="sub_1"
+          onclick="set_sub(1)"
+          title="New checks are not yet active and created as object."
+        >Add New (<span class="js-type-1-size">[% checks.new.size %]</span>)</span>
+        <span
+          class="tabs clickable text-center text-sm w-40"
+          id="sub_2"
+          onclick="set_sub(2)"
+          title="Active checks are still actively monitored."
+        >Active Checks (<span class="js-type-2-size">[% checks.exists.size %]</span>)</span>
+        <span
+          class="tabs clickable text-center text-sm w-40"
+          id="sub_3"
+          onclick="set_sub(3)"
+          title="Obsolete services are no longer discovered but still exist as service."
+        >Obsolete Checks (<span class="js-type-3-size">[% checks.obsolete.size %]</span>)</span>
+        <span
+          class="tabs clickable text-center text-sm w-40"
+          id="sub_4"
+          onclick="set_sub(4)"
+          title="Disabled checks are not monitored."
+        >Unwanted Checks (<span class="js-type-4-size">[% checks.disabled.size %]</span>)</span>
         <div class="grow"></div>
       </div>
       <div id="checksTable" class="h-full overflow-auto">

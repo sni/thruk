@@ -781,8 +781,17 @@ sub _get_extra_service_checks {
             next if $key eq 'tags';
             next if $key eq 'check';
             next if $key eq 'args';
+            next if $key eq '_FILE';
+            next if $key eq '_LINE';
 
             $extra->{$key} = $svc->{$key};
+        }
+
+        if($svc->{'_FILE'}) {
+            $svc->{'extra_src'} = $svc->{'_FILE'}.":".$svc->{'_LINE'};
+            my $root = $ENV{'OMD_ROOT'};
+            $svc->{'extra_src'} =~ s=^$root/==gmx if $root;
+            $svc->{'extra_src'} = '<extra_service_checks> from '.$svc->{'extra_src'};
         }
 
         # everything else is a custom attribute
