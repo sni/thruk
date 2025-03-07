@@ -37,7 +37,7 @@ sub get_checks {
             'check'    => 'check_pagefile',
             'args'     => { "filter" => "name='".$page->{'name'}."'" },
             'parent'   => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($page),
+            'info'     => $page,
             'disabled' => Thruk::Utils::Agents::check_disable($page, $disabled_config, 'pagefile'),
         };
     }

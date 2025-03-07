@@ -31,6 +31,13 @@
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
       [% reason = "" %]
+      [% IF check.defined("disabled") %]
+        [% reason = check.disabled %]
+        [% IF reason == 0; reason = "manually disabled"; END %]
+        [% IF reason == 1; reason = "unknown reason"; END %]
+      [% ELSIF check.defined("exclude_reason") %]
+        [% reason = check.exclude_reason %]
+      [% END %]
       <tr>
         <th>
           <div class="flex items-center min-w-max justify-between">
@@ -52,13 +59,6 @@
             <div class='text-center badge PENDING'>new</div>
           [% END %]
           [% IF type == "disabled" %]
-            [% IF check.defined("disabled") %]
-              [% reason = check.disabled %]
-              [% IF reason == 0; reason = "manually disabled"; END %]
-              [% IF reason == 1; reason = "unknown reason"; END %]
-            [% ELSIF check.defined("exclude_reason") %]
-              [% reason = check.exclude_reason %]
-            [% END %]
             [% IF reason %]
               <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
                 <div class='text-center badge PENDING'>disabled</div>
@@ -105,7 +105,16 @@
             [% IF check.defined("info") %]
               <div>
                 <h4>Attributes</h4>
-                <div class="whitespace-pre text-left">[% check.info | nl2br %]</div>
+                <table class="w-fit striped">
+                  <tbody>
+                    [% FOREACH attr = check.info.keys.sort %]
+                      <tr>
+                        <th>[% attr | html %]</th>
+                        <td class="pl-2">[% check.info.$attr | html %]</td>
+                      </tr>
+                    [% END %]
+                  </tbody>
+                </table>
               </div>
             [% END %]
           </div>
@@ -353,7 +362,7 @@ function updateChecksTable(form) {
 
 var totals = {};
 function updateChecksTotals() {
-  jQuery("TABLE.js-checks TBODY").each(function(i, tbody) {
+  jQuery("TABLE.js-checks > TBODY").each(function(i, tbody) {
     var num = tbody.rows.length;
     jQuery("SPAN.js-type-"+(i+1)+"-size").text(num);
     totals["sub_"+(i+1)] = num;

@@ -36,7 +36,7 @@ sub get_checks {
             'name'      => $mta->{'mta'}.' queue',
             'check'     => 'check_mailq',
             'parent'    => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($mta),
+            'info'     => $mta,
             'disabled' => Thruk::Utils::Agents::check_disable($mta, $disabled_config, 'mailq'),
         };
     }

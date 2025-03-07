@@ -36,7 +36,7 @@ sub get_checks {
             'name'      => 'ntp',
             'check'     => 'check_ntp_offset',
             'parent'    => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($ntp),
+            'info'     => $ntp,
             'disabled' => Thruk::Utils::Agents::check_disable($ntp, $disabled_config, 'ntp'),
         };
     }

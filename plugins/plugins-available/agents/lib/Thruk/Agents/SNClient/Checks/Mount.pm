@@ -41,7 +41,7 @@ sub get_checks {
             'check'    => 'check_mount',
             'args'     => { "mount" => $mount->{'mount'}, "options" => $mount->{'options'}, "fstype" => $mount->{'fstype'} },
             'parent'   => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($mount),
+            'info'     => $mount,
             'disabled' => Thruk::Utils::Agents::check_disable($mount, $disabled_config, 'mount'),
             'noperf'   => 1,
         };

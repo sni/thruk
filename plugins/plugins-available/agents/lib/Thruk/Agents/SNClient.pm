@@ -618,21 +618,6 @@ sub _extract_checks {
 
 ##########################################################
 
-=head2 make_info
-
-    make_info($data)
-
-returns check info as string
-
-=cut
-sub make_info {
-    my($data) = @_;
-    return "" unless $data;
-    return(Thruk::Utils::dump_params($data, 5000, 0));
-}
-
-##########################################################
-
 =head2 make_name
 
     make_name($template, $macros)

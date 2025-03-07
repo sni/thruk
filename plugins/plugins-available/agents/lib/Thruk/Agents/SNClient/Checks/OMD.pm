@@ -38,7 +38,7 @@ sub get_checks {
             'check'    => 'check_omd',
             'args'     => [ "site='".$omd->{'site'}."'", $def_opts ],
             'parent'   => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($omd),
+            'info'     => $omd,
             'disabled' => Thruk::Utils::Agents::check_disable($omd, $disabled_config, 'omd'),
             '_GRAPH_SOURCE' => 'service_checks_rate',
         };

@@ -50,7 +50,7 @@ sub get_checks {
             'name'   => 'uptime',
             'check'  => 'check_uptime',
             'parent' => 'agent version',
-            'info'   => Thruk::Agents::SNClient::make_info($inventory->{'uptime'}->[0]),
+            'info'   => $inventory->{'uptime'}->[0],
         };
     }
 
@@ -60,7 +60,7 @@ sub get_checks {
             'name'   => 'os version',
             'check'  => 'check_os_version',
             'parent' => 'agent version',
-            'info'   => Thruk::Agents::SNClient::make_info($inventory->{'os_version'}->[0]),
+            'info'   => $inventory->{'os_version'}->[0],
         };
     }
 

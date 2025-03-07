@@ -45,7 +45,7 @@ sub get_checks {
             'check'     => 'check_temperature',
             'args'      => [ "sensor='".$temp->{'name'}."'", $def_opts ],
             'parent'    => 'agent version',
-            'info'      => Thruk::Agents::SNClient::make_info($temp),
+            'info'      => $temp,
             'disabled'  => Thruk::Utils::Agents::check_disable($temp, $disabled_config, 'temperature'),
         };
     }

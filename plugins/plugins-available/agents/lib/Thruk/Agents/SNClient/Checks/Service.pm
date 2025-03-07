@@ -62,7 +62,7 @@ sub get_checks {
             'check'    => 'check_service',
             'args'     => { "service" => $svc->{'name'} },
             'parent'   => 'agent version',
-            'info'     => Thruk::Agents::SNClient::make_info($svc),
+            'info'     => $svc,
         };
     }
 

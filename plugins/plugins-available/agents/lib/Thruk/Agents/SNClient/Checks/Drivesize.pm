@@ -52,7 +52,7 @@ sub get_checks {
                 'check'    => 'check_drivesize',
                 'args'     => { "drive" => $drive->{'drive_or_id'}, 'warn' => 'mounted = 1' },
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::make_info($drive),
+                'info'     => $drive,
                 'disabled' => Thruk::Utils::Agents::check_disable($drive, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, ['cdrom']),
             };
         } else {
@@ -63,7 +63,7 @@ sub get_checks {
                 'check'    => 'check_drivesize',
                 'args'     => [ "drive='".$drive->{'drive_or_id'}."'", $def_opts ],
                 'parent'   => 'agent version',
-                'info'     => Thruk::Agents::SNClient::make_info($drive),
+                'info'     => $drive,
                 'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $disabled_config, ['drivesize', $prefix]),
             };
         }

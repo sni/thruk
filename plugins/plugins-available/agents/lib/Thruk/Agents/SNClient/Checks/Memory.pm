@@ -36,7 +36,7 @@ sub get_checks {
                 'check'  => 'check_memory',
                 'args'   => { "type" => "physical" },
                 'parent' => 'agent version',
-                'info'   => Thruk::Agents::SNClient::make_info($mem),
+                'info'   => $mem,
             };
         }
         if($mem->{'type'} eq 'swap') {
@@ -46,7 +46,7 @@ sub get_checks {
                 'check'  => 'check_memory',
                 'parent' => 'agent version',
                 'args'   => { "type" => "swap" },
-                'info'   => Thruk::Agents::SNClient::make_info($mem),
+                'info'   => $mem,
             };
         }
     }
