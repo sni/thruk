@@ -405,7 +405,7 @@ sub _set_checks_category {
                 my $src = $res->{'_FILE'} ? $res->{'_FILE'}.':'.$res->{'_LINE'} : 'default';
                 my $root = $ENV{'OMD_ROOT'};
                 $src =~ s=^$root/==gmx if $root;
-                $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration:\nsource: %s", $src);
+                $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration.\nsource: %s", $src);
             } else {
                 $chk->{'exists'} = 'new';
             }

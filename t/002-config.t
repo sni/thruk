@@ -196,13 +196,13 @@ if(!$@) {
     my $config = Thruk::Config::set_config_env();
     ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     my $expected_proc = [
-        { 'name' => 'naemon',   'warn' => '3', 'crit' => '4' },
-        { 'name' => 'snclient', 'warn' => '2', 'crit' => '2' },
+        { 'name' => 'naemon',   'warn' => '3', 'crit' => '4', '_LINE' =>  8, '_FILE' => 't/data/nested_subdir/thruk_local.d/agents.d/sub.conf' },
+        { 'name' => 'snclient', 'warn' => '2', 'crit' => '2', '_LINE' => 14, '_FILE' => 't/data/nested_subdir/thruk_local.conf' },
     ];
     my $expected_service = [
-        { 'name' => 'httpd',           'host' => 'ANY' },
-        { 'name' => ['naemon', 'ntp'], 'host' => 'ANY' },
-        { 'name' => 'apache2',         'host' => 'ANY' },
+        { 'name' => 'httpd',           'host' => 'ANY', '_LINE' => 3, '_FILE' => 't/data/nested_subdir/thruk_local.d/agents.d/sub.conf' },
+        { 'name' => ['naemon', 'ntp'], 'host' => 'ANY', '_LINE' => 3, '_FILE' => 't/data/nested_subdir/thruk_local.conf' },
+        { 'name' => 'apache2',         'host' => 'ANY', '_LINE' => 9, '_FILE' => 't/data/nested_subdir/thruk_local.conf' },
     ];
     is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'proc'},    $expected_proc,    "parsing proc from thruk_local.d");
     is_deeply($config->{'Thruk::Agents'}->{'snclient'}->{'service'}, $expected_service, "parsing service from thruk_local.d");
