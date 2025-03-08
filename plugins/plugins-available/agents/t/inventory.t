@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 5;
+    plan tests => 6;
 }
 
 BEGIN {
