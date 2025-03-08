@@ -642,6 +642,39 @@ sub make_name {
 
 ##########################################################
 
+=head2 make_filter
+
+    make_filter($name, $attr, $expr)
+
+returns filter based on matching expression
+
+=cut
+sub make_filter {
+    my($name, $attr, $expr) = @_;
+
+    my $op  = "=";
+    my $val = $expr;
+
+    if($expr =~ m/^([\!=~]+)\s+(.*)$/mx) {
+        $op  = $1;
+        $val = $2;
+    }
+
+    my $rawval = $val;
+    if($op eq '~') {
+        $val = "/".$val."/";
+        $op  = "~~";
+    } else {
+        $val = "'".$val."'";
+    }
+
+    my $filter = sprintf('%s="%s %s %s"', $name, $attr, $op, $val);
+
+    return($filter, $rawval);
+}
+
+##########################################################
+
 =head2 get_disabled_config
 
     get_disabled_config($c, $key, $default)

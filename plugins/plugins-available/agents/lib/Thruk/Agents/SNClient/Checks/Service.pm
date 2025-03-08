@@ -42,28 +42,33 @@ sub get_checks {
     }
 
     # specifically configured service checks
-    my $wanted = {};
     my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
     for my $cfg (@{$configs}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($cfg->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($cfg->{'section'} // 'ANY'));
         next unless $cfg->{'service'};
         for my $n (@{Thruk::Base::list($cfg->{'service'})}) {
-            $wanted->{$n} = $cfg;
+            for my $svc (@{$services}) {
+                next if($svc->{'active'} && $svc->{'active'} eq 'inactive');
+                my $m = Thruk::Utils::Agents::check_wildcard_match($svc->{'name'}, $n);
+                next unless defined $m;
+                my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "name", $m);
+                my $args;
+                if($v eq $svc->{'name'}) {
+                    $args = sprintf("service='%s'", $v);
+                } else {
+                    $args = $f;
+                }
+                push @{$checks}, {
+                    'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
+                    'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
+                    'check'    => 'check_service',
+                    'args'     => $args,
+                    'parent'   => 'agent version',
+                    'info'     => $svc,
+                };
+            }
         }
-    }
-    for my $svc (@{$services}) {
-        next if($svc->{'active'} && $svc->{'active'} eq 'inactive');
-        next unless $wanted->{$svc->{'name'}};
-        my $cfg = $wanted->{$svc->{'name'}};
-        push @{$checks}, {
-            'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
-            'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
-            'check'    => 'check_service',
-            'args'     => { "service" => $svc->{'name'} },
-            'parent'   => 'agent version',
-            'info'     => $svc,
-        };
     }
 
     return $checks;

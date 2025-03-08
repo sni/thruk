@@ -96,23 +96,30 @@ sub get_checks {
             ];
             my $match;
             if($cfg->{'match'}) {
-                $match = $cfg->{'match'};
-                ## no critic
-                next unless $p->{'command_line'} =~ m|$match|i;
-                ## use critic
-
-                push @{$args}, "filter='command_line ~~ /".$match."/'";
+                my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'command_line'}, $cfg->{'match'});
+                next unless defined $m;
+                if($m ne 'ANY') {
+                    my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "command_line", $m);
+                    push @{$args}, $f;
+                    $match = $v;
+                }
             } elsif($cfg->{'name'}) {
-                $match = $cfg->{'name'};
-                next unless $p->{'exe'} eq $match;
-                push @{$args}, "process='".$match."'";
-                $cfg->{'_name'} = "process ".$match;
+                my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'exe'}, $cfg->{'name'});
+                next unless defined $m;
+                my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "exe", $m);
+                $match = $v;
+                $cfg->{'_name'} = "process ".$v;
+                if($v eq $cfg->{'name'}) {
+                    push @{$args}, sprintf("process='%s'", $v);
+                } else {
+                    push @{$args}, $f;
+                }
             }
 
             my $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, ($cfg->{'user'} // 'ANY'));
             next unless $user;
             if($user ne 'ANY') {
-                push @{$args}, "filter='username ~~ /".$user."/'";
+                push @{$args}, Thruk::Agents::SNClient::make_filter("filter", "username", $user);
             }
             my $username = $user ne 'ANY' ? $p->{'username'} : "";
 

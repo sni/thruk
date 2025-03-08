@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 148;
+plan tests => 149;
 
 use_ok("Thruk::Utils::IO");
 
@@ -61,6 +61,7 @@ TestUtils::test_command({ cmd => '/usr/bin/env thruk agents -II ALL -n -v',
         '/\+\s+use\s+generic/',
         '/\+\s+first_notification_delay/',
         '/extraping/',
+        '/xinet/',
     ],
     unlike => [
         '/disk\ \/test/',      # excluded by disable drivesize
@@ -111,6 +112,10 @@ sub _extra_config {
       check_command = check-host-alive!\$HOSTADDRESS\$
       first_notification_delay = 30
     </extra_service_checks>
+
+    <proc>
+      name ~ xinet
+    </proc>
   </snclient>
 </Component>
 EOT
