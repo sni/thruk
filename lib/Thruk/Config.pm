@@ -1210,13 +1210,9 @@ sub _parse_rows {
         }
 
         # simple key / value pairs
-        my($k,$v) = split(/\s*=\s*/mxo, $line, 2);
+        my($k,$v) = _split_value($line);
         if(!defined $v) {
-            # try split by space
-            ($k,$v) = split(/\s+/mxo, $line, 2);
-            if(!defined $v) {
-                die("unknow config entry: ".$line." in ".$file.":".$cur_line);
-            }
+            die("unknow config entry: ".$line." in ".$file.":".$cur_line);
         }
         if(substr($v,0,1) eq '"') {
             $v =~ s|^"(.*)"$|$1|gmxo;
@@ -1239,6 +1235,31 @@ sub _parse_rows {
         die(sprintf("unclosed '<%s>' block, started in: %s", $block, $until_source));
     }
     return($cur_line);
+}
+
+######################################
+sub _split_value {
+    my($line) = @_;
+
+    # split by equal sign regex
+    if($line =~ m/^\s*(\S+)\s*=\s*(.*?)\s*$/mxo) {
+        return($1, $2);
+    }
+
+    # split by other operators
+    if($line =~ m/^\s*(\S+)\s*([\!=~]+\s*.*?)\s*$/mxo) {
+        return($1, $2);
+    }
+
+    # split by =
+    my($k,$v) = split(/\s*=\s*/mxo, $line, 2);
+    return($k, $v) if defined $v;
+
+    # try split by space
+    ($k,$v) = split(/\s+/mxo, $line, 2);
+    return($k, $v) if defined $v;
+
+    return;
 }
 
 ######################################

@@ -7,7 +7,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 24;
+    plan tests => 25;
 }
 
 BEGIN {
@@ -245,6 +245,37 @@ EOT
 
     $opts = Thruk::Agents::SNClient::_get_extra_opts_hst($c, "localhost", "", ["tag1", "tag2", "tag3"]);
     ok(scalar @{$opts} == 0, "combined exclude match IV");
+}
+
+###########################################################
+# match with equals
+{
+    my $conf = <<EOT;
+<Component Thruk::Agents>
+  <snclient>
+    <proc>
+      name     = ssh controlmaster %u
+      match    ~ /usr/bin/ssh.*ControlMaster=yes
+      user     = mon
+    </proc>
+  </snclient>
+</Component>
+EOT
+
+    my $expect = {
+        '_FILE' => '<inline>',
+        '_LINE' => 2,
+        'proc'  => {
+                    '_FILE' => '<inline>',
+                    '_LINE' => 3,
+                    'match' => '~ /usr/bin/ssh.*ControlMaster=yes',
+                    'name' => 'ssh controlmaster %u',
+                    'user' => 'mon'
+        },
+    };
+
+    my $xtr = Thruk::Config::parse_config_from_text($conf);
+    is_deeply($xtr->{'Thruk::Agents'}->{'snclient'}, $expect, "parsed config correctly");
 }
 
 ###########################################################
