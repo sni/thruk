@@ -166,6 +166,65 @@ host = !localhost
 tags = tag1 && !tag2
 ...................................
 
+### Process Checks
+
+The `<proc>` block is used to define process checks. There is a simple variant
+which only matches the process name and a advanced variant to match on the full
+command line.
+
+By default no specific process checks will be created, you have to set a list
+of processes to check.
+
+#### Basic
+
+This example will create a service check for all processes named `snclient` or `httpd`.
+...................................
+<proc>
+  name = snclient
+  name = httpd
+  user = ANY
+</proc>
+...................................
+
+#### Advanced
+
+The advanced variant allows to match on the full command line of the process.
+It also allows to set the service name.
+
+...................................
+<proc>
+  # service name (available placeholder: %u - user | %e - executable)
+  name     = ssh controlmaster %u
+  match    ~ /usr/bin/ssh.*ControlMaster=yes
+  user     = ANY
+  #host    = ANY     # restrict to specific hosts
+  #section ~ test # apply this process check only to sections containing "test"
+  #warn    = 1:5  # warning threshold for number of processes (low:high)
+  #crit    = 1:10 # critical threshold
+</proc>
+...................................
+
+### Services Checks
+
+The `<service>` block is used to define checks for windows or linux services.
+
+By default no specific service checks will be created, you have to set a list
+of processes to check.
+
+...................................
+<service>
+  # service name (available placeholder: %s - service name)
+  name     = service %s
+  service  = apache2   # service name exact match
+  service  ~ winlogon  # match all services containing 'winlogon'
+
+  #host    = ANY  # restrict to specific hosts
+  #section ~ test # apply this service only to sections containing "test"
+  #tags    = prod # apply this service only to hosts with tag "prod"
+</service>
+...................................
+
+
 ### Tips & Tricks
 
 #### Add Additional Service Checks
@@ -336,31 +395,30 @@ Apply this option to all inventory checks:
     # include services in discovery
     <service>
       # service name (available placeholder: %s - service name)
-      name  = service %s
-      service = snclient
-      service = apache2
-      service = postfix
-      service = ssh
-      service = exim4
-      service = mariadb
-      service = ntp
-      service = squid
+      name     = service %s
+      service  = snclient
+      service  = apache2
+      service  = postfix
+      service  = ssh
+      service  = exim4
+      service  = mariadb
+      service  = ntp
+      service  = squid
 
-      # restrict to specific hosts (regular expression)
-      #host = ANY
+      #host    = ANY  # restrict to specific hosts
       #section ~ test # apply this service only to sections containing "test"
+      #tags    = prod # apply this service only to hosts with tag "prod"
     </service>
 
     <proc>
-      # service name (available placeholder: %u - user | %e - executable)
-      name  = ssh controlmaster %u
-      match = /usr/bin/ssh.*ControlMaster=yes
-      user  = mon
-      # restrict to specific hosts (regular expression)
-      #host = ANY
+      # service description (available placeholder: %u - user | %e - executable)
+      name     = ssh controlmaster %u
+      match    ~ /usr/bin/ssh.*ControlMaster=yes
+      user     = mon
+      #host    = ANY     # restrict to specific hosts
       #section ~ test # apply this process check only to sections containing "test"
-      #warn = 1:5  # warning threshold for number of processes (low:high)
-      #crit = 1:10 # critical threshold
+      #warn    = 1:5  # warning threshold for number of processes (low:high)
+      #crit    = 1:10 # critical threshold
     </proc>
 
     <proc>
@@ -384,9 +442,8 @@ Apply this option to all inventory checks:
     # set extra service attributes (if multiple blocks match, each is applied in order and overwrites previous values)
     # block can be used multiple times
     <extra_service_opts>
-      service  = ^cpu$ # regex match on service description
-      # restrict to specific hosts (regular expression)
-      #host    = ANY
+      service  ~ ^cpu$ # regex match on service description
+      #host    = ANY # restrict to specific hosts
       #section ~ test # apply this attributes only to sections containing "test"
       tags     = ANY
 
