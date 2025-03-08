@@ -1359,6 +1359,7 @@ sub BINMODE {
 ##############################################
 sub PRINTF {
     my($self, $fmt, @data) = @_;
+    return unless defined $self;
     return($self->PRINT(sprintf($fmt, @data)));
 }
 
@@ -1366,7 +1367,7 @@ sub PRINTF {
 sub PRINT {
     my($self, @data) = @_;
 
-    return unless $self;
+    return unless defined $self;
     my $fh = $self->{'fh'};
     return unless $fh;
 

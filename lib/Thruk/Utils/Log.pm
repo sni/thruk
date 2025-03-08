@@ -419,6 +419,7 @@ sub BINMODE {
 ##############################################
 sub PRINTF {
     my($self, $fmt, @data) = @_;
+    return unless defined $self;
     return($self->PRINT(sprintf($fmt, @data)));
 }
 
@@ -426,6 +427,7 @@ sub PRINTF {
 sub PRINT {
     my($self, @data) = @_;
 
+    return unless defined $self;
     my $last_newline = $self->{'newline'};
     $self->{'newline'} = (join("", @data) =~ m/\n$/mx) ? 1 : 0;
 
