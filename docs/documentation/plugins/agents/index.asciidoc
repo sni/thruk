@@ -9,7 +9,7 @@ lightbox: true
 
 Agent configuration for SNClient+ agents in Naemon.
 
-The idea of the agents plugin is to programatically run an inventory scan on the snclient
+The idea of the agents plugin is to programmatically run an inventory scan on the snclient
 agents and create hosts / services checks with as little manual work as possible.
 
 ++++
@@ -40,6 +40,8 @@ There is a link:#_example-configuration[example configuration] at the end.
 Instead of manually disabling service checks, use rules to exclude them.
 This means less work and you can easily adjust those rules for all or many
 hosts at once.
+
+Rules are applied in the order of appearance in the configuration file.
 
 You can either use the `<disable>` tag to select specific checks if supported by the plugin.
 For example to disable network device checks on localhost use this block:
@@ -180,7 +182,7 @@ For example, add a ping check to all hosts.
       tags    = ANY
 
       name    = ping  # the actual service description
-      # add arbitray naemon config attributes here as well
+      # add arbitrary naemon config attributes here as well
       check_command            = check-host-alive!$HOSTADDRESS$
       use                      = srv-perf,generic-service
       first_notification_delay = 30
