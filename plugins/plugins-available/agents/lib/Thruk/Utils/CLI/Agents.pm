@@ -38,7 +38,7 @@ Available commands are:
        --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
   -n | --dryrun     only print changes     (available in add/update mode)
   -d | --diff       print diff of changes  (available in add/update mode)
-  -t | --tags <tag> list only specific tag (available in list mode)
+  -t | --tags <tag> list/add only tag      (available in add/list mode)
 
 =back
 
@@ -436,6 +436,7 @@ sub _run_add_host {
             "#",
             "address: ".($opt->{'address'} // $hostobj->{'conf'}->{'address'}),
             "section: ".($opt->{'section'} // $hostobj->{'conf'}->{'_AGENT_SECTION'}),
+            "tags:    ".join(",", @{Thruk::Base::comma_separated_list($opt->{'tags'} // $hostobj->{'conf'}->{'_AGENT_TAGS'})}),
             "#",
             "# services:",
             "# short legend: (e)nable - (k)eep - (n)ew - (o)bsolete - (d)isabled - (u)pdate (complete legend at the end of this file)",
@@ -481,6 +482,7 @@ sub _run_add_host {
             elsif($m eq 'u') { $checks_config->{'check.'.$id} = "on"; }
             elsif($m eq 'address:') { $data->{'address'} = $id; next; }
             elsif($m eq 'section:') { $data->{'section'} = $id; next; }
+            elsif($m eq 'tags:')    { $data->{'tags'}    = $id; next; }
 
             $checks_config->{'args.'.$id} = $args;
         }
@@ -804,12 +806,12 @@ sub _get_checks {
         'mode'     => $mode,
         'port'     => $port,
         'ip'       => $opt->{'address'} || $hst->{'address'},
-        'tags'     => '',
+        'tags'     => $opt->{'tags'} // '',
     };
     if($hostobj) {
         $data->{'ip'}       = $hostobj->{'conf'}->{'address'}         unless $data->{'ip'};
         $data->{'password'} = $hostobj->{'conf'}->{'_AGENT_PASSWORD'} unless $data->{'password'};
-        $data->{'tags'}     = $hostobj->{'conf'}->{'_AGENT_TAGS'} // '';
+        $data->{'tags'}     = $hostobj->{'conf'}->{'_AGENT_TAGS'}     unless $data->{'tags'};
         if($opt->{'clear_manual'}) {
             # remove manual disabled settings
             my $settings = $hostobj->{'conf'}->{'_AGENT_CONFIG'} ? decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'}) : {};
