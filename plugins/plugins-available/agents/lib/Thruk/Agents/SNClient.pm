@@ -398,16 +398,21 @@ sub get_services_checks {
     my($self, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags) = @_;
     my $datafile = $c->config->{'var_path'}.'/agents/hosts/'.$hostname.'.json';
 
-    if($cli_opts->{'cached'}) {
+    my $data;
+    if($cli_opts->{'cached'} && ref $cli_opts->{'cached'} eq 'HASH') {
+        $data = $cli_opts->{'cached'};
+    } elsif($cli_opts->{'cached'}) {
         $datafile = $cli_opts->{'cached'};
         _debug("using %s as inventory file", $datafile);
     }
-    if(!-r $datafile) {
-        return([]);
+    if(!$data) {
+        if(!-r $datafile) {
+            return([]);
+        }
+        $data = Thruk::Utils::IO::json_lock_retrieve($datafile);
     }
 
-    my $checks  = [];
-    my $data    = Thruk::Utils::IO::json_lock_retrieve($datafile);
+    my $checks   = [];
     my $settings = {};
     if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
         $settings = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});

@@ -63,7 +63,7 @@ sub get_checks {
                     'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
                     'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
                     'check'    => 'check_service',
-                    'args'     => $args,
+                    'args'     => [$args],
                     'parent'   => 'agent version',
                     'info'     => $svc,
                 };
