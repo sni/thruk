@@ -1,7 +1,7 @@
 use warnings;
 use strict;
-use Test::More;
 use Cpanel::JSON::XS qw/decode_json/;
+use Test::More;
 
 use Thruk::Config 'noautoload';
 
@@ -23,6 +23,7 @@ if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
     unshift @INC, 'plugins/plugins-available/agents/lib';
 }
 
+use_ok 'Thruk::Base';
 use_ok 'Thruk::Config';
 use_ok 'Thruk::Controller::agents';
 use_ok 'Thruk::Agents::SNClient';
