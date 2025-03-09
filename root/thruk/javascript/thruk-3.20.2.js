@@ -4098,18 +4098,19 @@ function update_recurring_type_select(select_id) {
 
 /* make table header selectable */
 var lastActiveSub;
-function set_sub(nr, hash) {
+function set_sub(nr, hash, prefix) {
+    if(!prefix) { prefix = "sub"; }
     lastActiveSub = nr;
     for(var x=1;x<=20;x++) {
         /* reset table rows */
         if(x != nr) {
-            jQuery(".sub_"+x).css("display", "none");
-            jQuery("#sub_"+x).removeClass("active");
+            jQuery("."+prefix+"_"+x).css("display", "none");
+            jQuery("#"+prefix+"_"+x).removeClass("active");
         }
     }
 
-    jQuery(".sub_"+nr).css("display", "");
-    jQuery("#sub_"+nr).addClass("active");
+    jQuery("."+prefix+"_"+nr).css("display", "");
+    jQuery("#"+prefix+"_"+nr).addClass("active");
 
     if(hash) {
         set_hash(hash);
@@ -10594,16 +10595,18 @@ Y8,        ,8P    `8b d8'     88          88    `8b   Y8,            d8""""""""8
 // replaces the previous overlib library
 function overcard(options) {
     var settings = {
-        'document': null,
-        'body':     '',
-        'bodyEl':   null,
-        'bodyCls':  '',
-        'caption':  '',
-        'width':    '',
-        'minWidth': 500,
-        'callback': null,
+        'document':  null,
+        'body':      '',
+        'bodyEl':    null,
+        'bodyCls':   '',
+        'caption':   '',
+        'width':     '',
+        'minWidth':  500,
+        'callback':  null,
         'draggable': false,
-        'resizable': false
+        'resizable': false,
+        'mainCls':   '',
+        'fixedPos':  false
     };
 
     if(!has_jquery_ui() && (settings['draggable'] || settings['resizable'])) {
@@ -10659,7 +10662,7 @@ function overcard(options) {
     // check if container div is already present
     jQuery("#"+containerId).remove();
     var containerHTML = ""
-        +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen overflow-hidden" id="'+containerId+'">'
+        +'<div class="fixed card shadow-float z-50 max-w-full max-h-screen overflow-hidden '+settings["mainCls"]+'" id="'+containerId+'">'
         +'<div class="head justify-between">'
         +'<h3 id="'+containerId+'_head"><\/h3>'
         +'<button class="iconOnly medium" onClick="toggleElement('+"'"+containerId+"'"+'); removeOvercardIframe(); return false;"><i class="uil uil-times"></i></button>'
@@ -10724,18 +10727,20 @@ function overcard(options) {
         body.innerHTML = settings["body"];
     }
 
-    // place it next to the mouse position
-    var posX = mouseX + document.documentElement.scrollLeft + 50;
-    var posY = mouseY + document.documentElement.scrollTop;
+    if(!settings["fixedPos"]) {
+        // place it next to the mouse position
+        var posX = mouseX + document.documentElement.scrollLeft + 50;
+        var posY = mouseY + document.documentElement.scrollTop;
 
-    if(iframe) {
-        iframe.style.left  = posX+'px';
-        iframe.style.top   = posY+'px';
-        if(settings["width"])    { iframe.style.width    = settings["width"]+'px'; }
-        if(settings["minWidth"]) { iframe.style.minWidth = settings["minWidth"]+'px'; }
-    } else {
-        container.style.left = posX+'px';
-        container.style.top  = posY+'px';
+        if(iframe) {
+            iframe.style.left  = posX+'px';
+            iframe.style.top   = posY+'px';
+            if(settings["width"])    { iframe.style.width    = settings["width"]+'px'; }
+            if(settings["minWidth"]) { iframe.style.minWidth = settings["minWidth"]+'px'; }
+        } else {
+            container.style.left = posX+'px';
+            container.style.top  = posY+'px';
+        }
     }
 
     if(iframe) {

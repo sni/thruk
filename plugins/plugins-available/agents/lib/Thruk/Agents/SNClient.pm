@@ -617,6 +617,9 @@ sub _extract_checks {
                 $chk->{'svc_conf'}->{$attr} = join(",", @{$data});
             }
         }
+
+        # get list of applied rules
+        $chk->{'rules'} = _get_extra_opts_svc($c, $chk->{'name'}, $hostname, $section, $tags);
     }
 
     return $checks;
@@ -792,9 +795,10 @@ sub _get_extra_opts_svc {
 ##########################################################
 sub _get_extra_service_checks {
     my($c, $hostname, $section, $tags) = @_;
-    my $config = &config;
-    my $checks = Thruk::Base::list($config->{'extra_service_checks'});
-    my $res    = [];
+    my $config    = &config;
+    my $checks    = Thruk::Base::list($config->{'extra_service_checks'});
+    my $res       = {};
+    my $skip_keys = Thruk::Base::array2hash($no_object_keys);
     for my $chk (@{$checks}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($chk->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($chk->{'section'} // 'ANY'));
@@ -811,17 +815,10 @@ sub _get_extra_service_checks {
 
         my $extra = {};
         for my $key (keys %{$svc}) {
+            next if $skip_keys->{$key};
             next if $key eq 'extra';
             next if $key eq 'id';
             next if $key eq 'name';
-            next if $key eq 'host';
-            next if $key eq 'section';
-            next if $key eq 'tag';
-            next if $key eq 'tags';
-            next if $key eq 'check';
-            next if $key eq 'args';
-            next if $key eq '_FILE';
-            next if $key eq '_LINE';
 
             $extra->{$key} = $svc->{$key};
         }
@@ -836,10 +833,10 @@ sub _get_extra_service_checks {
         # everything else is a custom attribute
         $svc->{'extra'} = $extra;
 
-        push @{$res}, $svc;
+        $res->{$svc->{'id'}} = $svc;
     }
 
-    return $res;
+    return([values %{$res}]);
 }
 
 ##########################################################

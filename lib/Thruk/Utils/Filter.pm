@@ -848,7 +848,7 @@ sub name2id {
     my $name       = shift;
     my $opt_prefix = shift || '';
     my $return = $name;
-    $return =~ s/[^a-zA-Z0-9\-_\.]*//gmx;
+    $return =~ s/[^a-zA-Z0-9\-_]*//gmx;
     if($return =~ m/^\d+/gmx) {
         $return = $opt_prefix."_".$return;
     }

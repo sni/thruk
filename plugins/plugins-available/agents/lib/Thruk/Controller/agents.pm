@@ -267,6 +267,7 @@ sub _process_edit {
     my $backend  = $c->req->parameters->{'backend'};
     my $type     = $c->req->parameters->{'type'} // Thruk::Utils::Agents::default_agent_type($c);
     my $section  = $c->req->parameters->{'section'};
+    my $tags     = $c->req->parameters->{'tags'};
 
     my $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
     $c->stash->{config_backends}       = $config_backends;
@@ -292,7 +293,7 @@ sub _process_edit {
             'mode'     => $obj->{'_AGENT_MODE'}     // 'https',
             'peer_key' => $backend,
             'settings' => decode_json($obj->{'_AGENT_CONFIG'} // "{}"),
-            'tags'     => [split(/\s*,\s*/mx, ($obj->{'_AGENT_TAGS'} // ''))],
+            'tags'     => [split(/\s*,\s*/mx, ($tags // $obj->{'_AGENT_TAGS'} // ''))],
         };
         if($agent->{'settings'}->{'disabled'}) {
             $agent->{'settings'}->{'disabled'} = Thruk::Base::array2hash($agent->{'settings'}->{'disabled'});
@@ -302,7 +303,7 @@ sub _process_edit {
     $c->stash->{'default_port'} = $c->config->{'Thruk::Agents'}->{$type}->{'default_port'} // 8443;
 
     # extract checks
-    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, undef, ($section // $agent->{'section'}), $agent->{'tags'});
+    my($checks, $checks_num) = Thruk::Utils::Agents::get_agent_checks_for_host($c, $backend, $hostname, $hostobj, $type, undef, ($section // $agent->{'section'}), undef, undef, $agent->{'tags'});
 
     my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { host_name => $hostname }], backend => $backend );
     $services = Thruk::Base::array2hash($services, "description");

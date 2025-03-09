@@ -13,7 +13,7 @@
     [% IF type == "new" %]
       <thead>
         <tr>
-          <td align="center" colspan="6">
+          <td align="center" colspan="7">
             <button class="my-2" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
           </td>
         </tr>
@@ -21,7 +21,7 @@
     [% ELSIF type == "obsolete" %]
       <thead>
         <tr>
-          <td align="center" colspan="6">
+          <td align="center" colspan="7">
             <button class="my-2" onclick="jQuery('.js-radio-obsolete[value=\'off\']').attr('checked', true); return false;">Remove All Obsolete Checks</button>
           </td>
         </tr>
@@ -31,9 +31,8 @@
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
       [% reason = "" %]
-      [% IF check.defined("disabled") %]
+      [% IF check.defined("disabled") && check.disabled %]
         [% reason = check.disabled %]
-        [% IF reason == 0; reason = "manually disabled"; END %]
         [% IF reason == 1; reason = "unknown reason"; END %]
       [% ELSIF check.defined("exclude_reason") %]
         [% reason = check.exclude_reason %]
@@ -60,10 +59,10 @@
           [% END %]
           [% IF type == "disabled" %]
             [% IF reason %]
-              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% check.id %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
+              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% name2id(check.id) | html %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
                 <div class='text-center badge PENDING'>disabled</div>
               </a>
-              <div id="disabled_[% check.id %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
+              <div id="disabled_[% name2id(check.id) | html %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
             [% ELSE %]
               <div class='text-center badge PENDING'>disabled</div>
             [% END %]
@@ -75,57 +74,22 @@
         [% IF type == "new" || type == "exists" || type == "obsolete" %]
         <td class="truncate max-w-xs text-left" title="additional check arguments&#013;ex.: override thresholds: warn='load > 5'">
           [% IF type == "new" %]
-            <input type="text" name="args.[% check.id %]" class="js-checks ml-1" placeholder="additional arguments" onkeyup="jQuery('INPUT[name=\'check.[% check.id %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();" onchange="checkSaveButtonColor();">
+            <input type="text" name="args.[% check.id | html %]" class="js-checks ml-1" placeholder="additional arguments" onkeyup="jQuery('INPUT[name=\'check.[% check.id | html %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();" onchange="checkSaveButtonColor();">
           [% ELSE %]
-            <input type="text" name="args.[% check.id %]" class="js-checks ml-1" value="[% IF check.defined("args") %][% check.args | html %][% END %]" onkeyup="checkSaveButtonColor();" onchange="checkSaveButtonColor();">
+            <input type="text" name="args.[% check.id | html %]" class="js-checks ml-1" value="[% IF check.defined("args") %][% check.args | html %][% END %]" onkeyup="checkSaveButtonColor();" onchange="checkSaveButtonColor();">
+          [% END %]
+        </td>
+        <td title="this service matches [% check.rules.size %] existing rules" class="clickable" onClick="jQuery('#info_link_[% name2id(check.id) | html %]').click(); set_sub(3, false, 'infosub_[% name2id(check.id) | html %]'); return false;">
+          [% IF check.rules.size == 0 %]
+          <span class="opacity-70">-</span>
+          [% ELSE %]
+            <span>[% check.rules.size %]</span>
           [% END %]
         </td>
         [% END %]
         <td class="[% IF type != "exists" %]w-full[% END %]">
-          <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% check.id %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); return false;">(info)</a>
-          <div id="info_[% check.id %]" class="hidden overflow-auto min-h-32 flexcol flex-nowrap">
-            [% IF reason %]
-            <div>
-              <h4>[% IF check.exists == 'disabled' %]Disabled[% ELSE %]Obsolete[% END %]</h4>
-              <div class="text-left">[% reason | html | nl2br %]</div>
-            </div>
-            [% END %]
-            [% IF check.defined("extra_src") %]
-            <div>
-              <h4>Source</h4>
-              <div class="text-left">[% check.extra_src | html %]</div>
-            </div>
-            [% END %]
-            [% IF check.defined("check") %]
-            <div>
-              <h4>Check Command</h4>
-              <div class="text-left">[% check.check | html %]</div>
-            </div>
-            [% END %]
-            <div>
-              <h4>Default Arguments</h4>
-              [% IF !check.defined("current_args") || check.current_args.size == 0 %]
-                <div class="whitespace-pre text-left">(none)</div>
-              [% ELSE %]
-                <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
-              [% END %]
-            </div>
-            [% IF check.defined("info") %]
-              <div>
-                <h4>Attributes</h4>
-                <table class="w-fit striped">
-                  <tbody>
-                    [% FOREACH attr = check.info.keys.sort %]
-                      <tr>
-                        <th>[% attr | html %]</th>
-                        <td class="pl-2">[% check.info.$attr | html %]</td>
-                      </tr>
-                    [% END %]
-                  </tbody>
-                </table>
-              </div>
-            [% END %]
-          </div>
+          <a href="" id="info_link_[% name2id(check.id) | html %]" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'mainCls': 'modalFG min-h-[500px]', 'fixedPos': true, 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% name2id(check.id) | html %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); set_sub(1, false, 'infosub_[% name2id(check.id) | html %]'); return false;">(info)</a>
+          [% PROCESS _info_popup %]
         </td>
         [% IF type == "exists" || type == "obsolete" %]
         <td class='truncate w-1/2 max-w-xs'>
@@ -141,28 +105,28 @@
                 type="radio"
                 value="on"
                 class="js-checks js-radio-[% type %] activeENABLED"
-                id="[% check.id %]_on"
-                name="check.[% check.id %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]
+                id="[% name2id(check.id) | html %]_on"
+                name="check.[% check.id | html %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]
               >
-              <label for="[% check.id %]_on" title="Enables monitoring of this check">On</label>
+              <label for="[% name2id(check.id) | html %]_on" title="Enables monitoring of this check">On</label>
               [% IF type == "new" %]
               <input
                 type="radio"
                 value="new"
                 class="js-checks js-radio-[% type %]"
-                id="[% check.id %]_new"
-                name="check.[% check.id %]"[% IF type == "new" %]checked="checked"[% END %]
+                id="[% name2id(check.id) | html %]_new"
+                name="check.[% check.id | html %]"[% IF type == "new" %]checked="checked"[% END %]
               >
-              <label for="[% check.id %]_new" title="Keep check in the new section.">New</label>
+              <label for="[% name2id(check.id) | html %]_new" title="Keep check in the new section.">New</label>
               [% END %]
               <input
                 type="radio"
                 value="off"
                 class="js-checks js-radio-[% type %]"
-                id="[% check.id %]_off"
-                name="check.[% check.id %]"[% IF type == "disabled" %]checked="checked"[% END %]
+                id="[% name2id(check.id) | html %]_off"
+                name="check.[% check.id | html %]"[% IF type == "disabled" %]checked="checked"[% END %]
               >
-              <label for="[% check.id %]_off" title="Set check into manually disabled mode">Off</label>
+              <label for="[% name2id(check.id) | html %]_off" title="Set check into manually disabled mode">Off</label>
             </div>
           </div>
         </td>
@@ -179,6 +143,124 @@
   </table>
 [% END %]
 
+[% BLOCK _info_popup %]
+  <div id="info_[% name2id(check.id) | html %]" class="hidden max-h-[calc(88vh-40px)] h-full min-h-32 flexcol flex-nowrap">
+    <div class="head justify-between" style="flex: 0 0 40px;">
+      <div class="grow"></div>
+      <span class="tabs clickable text-center text-sm w-40 active" id="infosub_[% name2id(check.id) | html %]_1" onclick="set_sub(1, false, 'infosub_[% name2id(check.id) | html %]')">Info</span>
+      [% IF check.defined("info") %]
+        <span class="tabs clickable text-center text-sm w-40" id="infosub_[% name2id(check.id) | html %]_2" onclick="set_sub(2, false, 'infosub_[% name2id(check.id) | html %]')">Attributes</span>
+      [% END %]
+      <span class="tabs clickable text-center text-sm w-40" id="infosub_[% name2id(check.id) | html %]_3" onclick="set_sub(3, false, 'infosub_[% name2id(check.id) | html %]')">Rules</span>
+      <div class="grow"></div>
+    </div>
+    <div class="infosub_[% name2id(check.id) | html %]_1">
+      [% IF reason %]
+      <div>
+        <h4>[% IF check.exists == 'disabled' %]Disabled[% ELSE %]Obsolete[% END %]</h4>
+        <div class="text-left">[% reason | html | nl2br %]</div>
+      </div>
+      [% END %]
+      [% IF check.defined("extra_src") %]
+      <div>
+        <h4>Source</h4>
+        <div class="text-left">[% check.extra_src | html %]</div>
+      </div>
+      [% END %]
+      [% IF check.defined("check") %]
+      <div>
+        <h4>Check Command</h4>
+        <div class="text-left">[% check.check | html %]</div>
+      </div>
+      [% END %]
+      <div>
+        <h4>Default Arguments</h4>
+        [% IF !check.defined("current_args") || check.current_args.size == 0 %]
+          <div class="whitespace-pre text-left">(none)</div>
+        [% ELSE %]
+          <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
+        [% END %]
+      </div>
+    </div>
+    <div class="infosub_[% name2id(check.id) | html %]_2" style="display: none;">
+      [% IF check.defined("info") %]
+        These attributes can be used in thresholds and filters.
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            [% FOREACH attr = check.info.keys.sort %]
+              <tr>
+                <th>[% attr | html %]</th>
+                <td class="pl-2">[% check.info.$attr | html %]</td>
+              </tr>
+            [% END %]
+          </tbody>
+        </table>
+      [% END %]
+    </div>
+    <div class="infosub_[% name2id(check.id) | html %]_3 h-full overflow-auto" style="display: none;">
+      <div class="mb-5">The following rules apply to this service:</div>
+      [% already_set = {} %]
+      [% FOREACH r = check.rules.reverse %]
+        [% IF !loop.first%]<hr class="my-3">[% END %]
+        <div>[% r._FILE %] line [% r._LINE %]</div>
+        <table class="body w-fit striped rowhover mb-5 cellborder border borderDefault min-w-[400px]">
+          <tbody>
+            <tr>
+              <th colspan="2">Matching</th>
+            </tr>
+            [% IF r.exists("host") %]
+              <tr>
+                <th>Host</th>
+                <td class="pl-2">[% r.host | html %]</td>
+              </tr>
+            [% END %]
+            [% IF r.exists("service") %]
+              <tr>
+                <th>Service</th>
+                <td class="pl-2">[% r.service | html %]</td>
+              </tr>
+            [% END %]
+            [% IF r.exists("match") %]
+              <tr>
+                <th>Match</th>
+                <td class="pl-2">[% r.match | html %]</td>
+              </tr>
+            [% END %]
+            [% IF r.exists("tags") %]
+              <tr>
+                <th>Tags</th>
+                <td class="pl-2">[% r.tags | html %]</td>
+              </tr>
+            [% END %]
+
+            <tr>
+              <th colspan="2" class="h-5"></th>
+            </tr>
+            <tr>
+              <th colspan="2">Attributes</th>
+            </tr>
+            [% FOREACH attr = r.keys.sort %]
+              [% IF attr == "_FILE"; NEXT; END %]
+              [% IF attr == "_LINE"; NEXT; END %]
+              [% IF attr == "host"; NEXT; END %]
+              [% IF attr == "service"; NEXT; END %]
+              [% IF attr == "tags"; NEXT; END %]
+              [% IF attr == "section"; NEXT; END %]
+              [% IF attr == "match"; NEXT; END %]
+              <tr>
+                <th class="min-w-32 [% IF already_set.exists(attr) %]line-through[% END %]">[% attr | html %]</th>
+                <td class="pl-2 [% IF already_set.exists(attr) %]textHINTsoft[% END %]">[% r.$attr | html %]</td>
+              </tr>
+              [% val = r.$attr; IF !val.match("^(\\+|\\!)") %]
+                [% already_set.$attr = 1 %]
+              [% END %]
+            [% END %]
+          </tbody>
+        </table>
+      [% END %]
+    </div>
+  </div>
+[% END %]
 
 <div class="flexrow 2xl:justify-between h-full w-full max-w-[1200px]">
   <div class="card w-full flexcol gap-0 flex-nowrap h-full min-h-[500px]">
@@ -381,12 +463,14 @@ function updateChecksTable(form) {
     var backend = jQuery(form).find("INPUT[name=backend]").val();
     var type    = jQuery(form).find("INPUT[name=type]").val();
     var section = jQuery(form).find("INPUT[name=section]").val();
+    var tags    = jQuery(form).find("INPUT[name=tags]").val();
     jQuery('#checksTable').html("<div class='spinner'><\/div>");
     var url = "agents.cgi #checksTableContent";
     var data = {
       action:   'edit',
       hostname: host,
       section:  section,
+      tags:     tags,
       backend:  backend,
       type:     type
     };
