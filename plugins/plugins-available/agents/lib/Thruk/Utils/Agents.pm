@@ -77,7 +77,7 @@ sub update_inventory {
     my $type      = $hostobj->{'conf'}->{'_AGENT'}          // default_agent_type($c);
     my $config    = get_agent_class($type)->config();
     my $password  = $opt->{'password'} || $hostobj->{'conf'}->{'_AGENT_PASSWORD'} || $config->{'default_password'};
-    my $port      = $opt->{'port'}     || $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
+    my $port      = $opt->{'port'}     // $hostobj->{'conf'}->{'_AGENT_PORT'}     // default_port($type);
     my $mode      = $opt->{'mode'}     || $hostobj->{'conf'}->{'_AGENT_MODE'}     // 'https';
 
     my $class = get_agent_class($type);
@@ -261,13 +261,13 @@ sub build_agent {
     my $class = get_agent_class($agenttype);
     my $agent = $class->new($hostdata);
 
-    my $settings = $agent->settings();
+    my $settings = $agent->config();
     # merge some attributes to top level
     for my $key (qw/type/) {
         $agent->{$key} = $settings->{$key} // '';
     }
     $agent->{'section'} = $section || $settings->{'section'} // '';
-    $agent->{'port'}    = $port    || $settings->{'default_port'} // '';
+    $agent->{'port'}    = $port    // $settings->{'default_port'} // '';
     $agent->{'mode'}    = $mode    || $settings->{'default_mode'} // 'https';
     $agent->{'tags'}    = Thruk::Base::comma_separated_list($tags // '');
 
@@ -525,7 +525,7 @@ returns default port for given agent type
 sub default_port {
     my($type) = @_;
     my $agent = get_agent_class($type);
-    my $settings = $agent->settings();
+    my $settings = $agent->config();
     return($settings->{'default_port'});
 }
 

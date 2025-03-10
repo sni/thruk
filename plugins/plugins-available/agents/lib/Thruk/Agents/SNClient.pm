@@ -29,7 +29,6 @@ my $config_defaults = {
     'check_nsc_web_extra_options' => '-t 35',
     'default_backend'             => 'LOCAL',
     'default_password'            => '',
-    'default_port'                => $global_settings->{'default_port'},
     'check_interval'              => 1,
     'retry_interval'              => 0.5,
     'max_check_attempts'          => 3,
@@ -74,19 +73,6 @@ sub new {
 
 ##########################################################
 
-=head2 settings
-
-    settings()
-
-returns global module settings
-
-=cut
-sub settings {
-    return($global_settings);
-}
-
-##########################################################
-
 =head2 config
 
     config()
@@ -100,6 +86,7 @@ sub config {
 
     my $c = $Thruk::Globals::c || die("uninitialized");
     $conf = $c->config->{'Thruk::Agents'}->{'snclient'};
+    $conf = Thruk::Config::apply_defaults_and_normalize($conf, $global_settings);
     $conf = Thruk::Config::apply_defaults_and_normalize($conf, $config_defaults);
 
     return($conf);
@@ -122,7 +109,7 @@ sub get_config_objects {
     my $ip       = $data->{'ip'}       // '';
     my $section  = $data->{'section'}  // '';
     my $password = $data->{'password'} // '';
-    my $port     = $data->{'port'}     || settings()->{'default_port'};
+    my $port     = $data->{'port'}     || config()->{'default_port'};
     my $mode     = $data->{'mode'}     || 'https';
     my $tags     = Thruk::Base::comma_separated_list($data->{'tags'} // '');
 
@@ -444,7 +431,7 @@ returns json structure from inventory api call.
 sub get_inventory {
     my($self, $c, $address, $hostname, $password, $port, $mode) = @_;
 
-    $port = $port || settings()->{'default_port'};
+    $port = $port || config()->{'default_port'};
     my $proto = "https";
     $proto = "http" if($mode && $mode eq 'http');
     die("no password supplied") unless $password;

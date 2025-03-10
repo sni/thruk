@@ -346,7 +346,7 @@
               </td>
               <th class="text-right px-0">Port</th>
               <td>
-                <input type="text" name="port" value="[% agent.port | html %]" class="w-full" placeholder="[% default_port | html %]">
+                <input type="text" name="port" value="[% IF agent.port != default_port %][% agent.port | html %][% END %]" class="w-full" placeholder="[% default_port | html %]">
               </td>
             </tr>
             <tr>
