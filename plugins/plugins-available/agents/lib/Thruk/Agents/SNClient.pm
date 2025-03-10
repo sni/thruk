@@ -658,7 +658,7 @@ returns filter based on matching expression
 
 =cut
 sub make_filter {
-    my($name, $attr, $expr) = @_;
+    my($name, $attr, $expr, $substringmatch) = @_;
 
     my $op  = "=";
     my $val = $expr;
@@ -674,6 +674,10 @@ sub make_filter {
         $op  = "~~";
     } else {
         $val = "'".$val."'";
+    }
+
+    if($op eq '=' && $substringmatch) {
+        $op = "like";
     }
 
     my $filter = sprintf('%s="%s %s %s"', $name, $attr, $op, $val);

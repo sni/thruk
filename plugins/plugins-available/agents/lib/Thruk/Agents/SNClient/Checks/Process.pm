@@ -96,10 +96,10 @@ sub get_checks {
             ];
             my $match;
             if($cfg->{'match'}) {
-                my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'command_line'}, $cfg->{'match'});
+                my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'command_line'}, $cfg->{'match'}, 1);
                 next unless defined $m;
                 if($m ne 'ANY') {
-                    my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "command_line", $m);
+                    my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "command_line", $m, 1);
                     push @{$args}, $f;
                     $match = $v;
                 }

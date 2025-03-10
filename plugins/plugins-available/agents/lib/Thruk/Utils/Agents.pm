@@ -612,13 +612,13 @@ sub scan_agent {
 
 =head2 check_wildcard_match
 
-    check_wildcard_match($string, $config)
+    check_wildcard_match($string, $config, [$substringmatch])
 
 returns true if attribute matches given config
 
 =cut
 sub check_wildcard_match {
-    my($str, $pattern) = @_;
+    my($str, $pattern, $substringmatch) = @_;
     $pattern = Thruk::Base::list($pattern);
     return "ANY" if scalar @{$pattern} == 0;
     if(!defined $str) {
@@ -633,7 +633,7 @@ sub check_wildcard_match {
         $p = "$p";
         $p =~ s=^\!==mx;
         for my $s (@{$str}) {
-            return if _check_pattern($s, $p);
+            return if _check_pattern($s, $p, $substringmatch);
         }
     }
 
@@ -655,7 +655,7 @@ sub check_wildcard_match {
                     $res = 1;
                     $sp =~ s/^\!//mx;
                     for my $s (@{$str}) {
-                        if(_check_pattern($s, $sp)) {
+                        if(_check_pattern($s, $sp, $substringmatch)) {
                             $res = 0;
                             last;
                         }
@@ -666,7 +666,7 @@ sub check_wildcard_match {
                 else {
                     $res = 0;
                     for my $s (@{$str}) {
-                        if(_check_pattern($s, $sp)) {
+                        if(_check_pattern($s, $sp, $substringmatch)) {
                             $res = 1;
                             last;
                         }
@@ -682,7 +682,7 @@ sub check_wildcard_match {
         }
 
         for my $s (@{$str}) {
-            return $p if _check_pattern($s, $p);
+            return $p if _check_pattern($s, $p, $substringmatch);
         }
     }
     return(undef);
@@ -858,7 +858,7 @@ sub migrate_hostname {
 
 ##########################################################
 sub _check_pattern {
-    my($val, $pattern) = @_;
+    my($val, $pattern, $substringmatch) = @_;
     for my $entry (@{Thruk::Base::list($pattern)}) {
         my $f = "$entry"; # make copy
         my $op = '=';
@@ -867,10 +867,10 @@ sub _check_pattern {
             $f  = $2;
         }
         if($op eq '=' || $op eq '==') {
-            return 1 if _check_wildcard_pattern($val, $f);
+            return 1 if _check_wildcard_pattern($val, $f, $substringmatch);
         }
         elsif($op eq '!=' || $op eq '!==') {
-            return 1 if !_check_wildcard_pattern($val, $f);
+            return 1 if !_check_wildcard_pattern($val, $f, $substringmatch);
         }
         elsif($op eq '~' || $op eq '~~') {
             ## no critic
@@ -890,13 +890,13 @@ sub _check_pattern {
 
 ##########################################################
 sub _check_wildcard_pattern {
-    my($str, $pattern) = @_;
+    my($str, $pattern, $substringmatch) = @_;
 
-    return 1 if $pattern eq $str;
     return 1 if $pattern eq 'ANY';
     return 1 if $pattern eq '*';
     return 1 if $pattern eq '.*';
-    if($pattern =~ m/\*/mx) {
+    return 1 if lc($pattern) eq lc($str);
+    if($substringmatch || $pattern =~ m/\*/mx) {
         my $p = "$pattern";
         $p =~ s/\.\*/*/gmx;
         $p =~ s/\*/.*/gmx;

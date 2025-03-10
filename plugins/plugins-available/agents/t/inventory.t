@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 6;
+    plan tests => 15;
 }
 
 BEGIN {
@@ -82,7 +82,15 @@ EOT
     local $cli_opts->{'cached'} = decode_json($inv);
     my $checks = Thruk::Agents::SNClient::get_services_checks(undef, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
     $checks = Thruk::Base::array2hash($checks, "id");
+    is_deeply([sort keys %{$checks}], [
+        '_host',
+        'inventory',
+        'svc',
+        'svc.snclient',
+        'version'
+    ], "process checks found");
     ok($checks->{'svc.snclient'}, "service check found");
+    is($checks->{'svc.snclient'}->{'name'},   "service snclient", "process: name");
 }
 
 ###########################################################
@@ -94,6 +102,12 @@ EOT
     <proc>
       name     = ssh controlmaster %u
       match    ~ /usr/bin/ssh.*ControlMaster=yes
+      user     = mon
+    </proc>
+
+    <proc>
+      name     = controlmaster2
+      match    = controlmaster=yes
       user     = mon
     </proc>
   </snclient>
@@ -127,7 +141,24 @@ EOT
     local $cli_opts->{'cached'} = decode_json($inv);
     my $checks = Thruk::Agents::SNClient::get_services_checks(undef, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
     $checks = Thruk::Base::array2hash($checks, "id");
-    ok($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}, "process check found");
+    is_deeply([sort keys %{$checks}], [
+        '_host',
+        'inventory',
+        'proc',
+        'proc./usr/bin/ssh._ControlMaster_yes_mon',
+        'proc.controlmaster_yes_mon',
+        'proc.zombies',
+        'version'
+    ], "process checks found");
+
+    is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'name'},   "ssh controlmaster mon", "process: name");
+    is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'parent'}, "agent version", "process: parent");
+    is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'args'},   "", "process: args");
+
+    is($checks->{'proc.controlmaster_yes_mon'}->{'name'},   "controlmaster2", "process: name");
+    is($checks->{'proc.controlmaster_yes_mon'}->{'args'},   "", "process: args");
+    is($checks->{'proc.controlmaster_yes_mon'}->{'current_args'}->[1], 'filter="command_line like \'controlmaster=yes\'"', "process: filter 1");
+    is($checks->{'proc.controlmaster_yes_mon'}->{'current_args'}->[2], 'filter="username = \'mon\'"', "process: filter 2");
 }
 
 ###########################################################
