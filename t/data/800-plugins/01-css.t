@@ -48,7 +48,7 @@ sub check_templates {
         next if substr($tag,0,2) eq '</';
         next if $tag !~ m/class=/gmx;
         # extract attributes from this tag
-        my $str = $tag; # not copying the string seems to miss some matches
+        my $str = "$tag"; # not copying the string seems to miss some matches
         $str =~ s/\[%.*?%\]/ /gmx;
         my @attributes = $str =~ m%class=("[^"]*"|'[^']*')%sgmx;
         my $cls = $attributes[0];
@@ -62,6 +62,8 @@ sub check_templates {
             next if $c =~ m/^js\-/gmx;
             next if $c =~ m/^fa\-/gmx;
             next if $c =~ m/^uil\-/gmx;
+            next if $c =~ m/^infosub_$/gmx;
+            next if $c =~ m/^_\d+$/gmx;
             next if $c eq '';
             next if $c eq '-';
             if(!defined $available_classes->{$c}) {
