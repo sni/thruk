@@ -9,7 +9,7 @@ BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     plan skip_all => 'test skipped'      if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 39;
+    plan tests => 49;
 }
 
 BEGIN {
@@ -46,6 +46,7 @@ for my $page (@{$pages}) {
 $pages = [
     { url => '/thruk/cgi-bin/agents.cgi?action=json&type=section', post => { } },
     { url => '/thruk/cgi-bin/agents.cgi?action=json&type=site',    post => { } },
+    { url => '/thruk/cgi-bin/agents.cgi?action=json&type=tags',    post => { } },
 ];
 
 for my $url (@{$pages}) {
