@@ -1580,6 +1580,9 @@ DIV.action_menu, DIV.context_menu {
         SPAN.icon {
           @apply inline-flex w-[20px] h-[20px];
         }
+        &.disabled {
+          @apply cursor-default pointer-events-none;
+        }
       }
       &.no-hover {
         @apply hover:bg-inherit;

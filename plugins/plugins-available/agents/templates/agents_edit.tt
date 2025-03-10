@@ -310,7 +310,25 @@
         <a href="agents.cgi" class="button header-button rounded w-[70px]" title="Go back to agent list"><i class="uil uil-angle-double-left"></i>Back</a>
       </div>
       <h3>[% IF agent.hostname != "new" %]Edit[% ELSE%]Add[% END %] Agent</h3>
-      <div class="w-40"></div>
+      <div class="w-40 flex justify-end relative">
+        <button class="w-fit ml-2 pr-1" onClick="toggleElement('action_menu', undefined, true); return false;">Actions <i class="uil uil-angle-down mr-0" title='More Host Actions'></i></button>
+        <div id="action_menu" style="display: none;" class="context_menu w-[160px] left-0 top-[30px]">
+          <form action="agents.cgi" method="POST">
+            <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+            <input type="hidden" name="hostname" value="[% agent.hostname | html %]">
+            <input type="hidden" name="backend" value="[% agent.peer_key | html %]">
+            <ul class="w-full">
+              <li>
+                <a href="agents.cgi?action=clone&amp;hostname=[% agent.hostname | uri %]&backend=[% agent.peer_key | uri %]" class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick=""><i class="fa-solid fa-clone text-xs"></i> Clone</a>
+              </li>
+              <li><hr></li>
+              <li class="[% IF agent.hostname != "new" %]hover-red[% END %]">
+                <a href="" class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick="if(confirm('really remove host: [% agent.hostname | html %]?')) { return send_form_in_background_and_forward(this, {action: 'remove' }, null, 'agents.cgi') }; return false;"><i class="fa-solid fa-trash text-xs"></i> Remove</a>
+              </li>
+            </ul>
+          </form>
+        </div>
+      </div>
     </div>
     <form action="agents.cgi" method="POST" class="flexcol gap-y-0 w-full h-[calc(100%-50px)]" onsubmit="setFormBtnSpinner(this)">
       <input type="submit" onclick="return false;" class="hidden"><!--do not submit on enter-->
@@ -454,9 +472,6 @@
           [% PROCESS _check_type type="obsolete" sub="sub_3" %]
           [% PROCESS _check_type type="disabled" sub="sub_4" %]
         </div>
-      </div>
-      <div class="footer" style="flex: 0 0 40px;">
-        [% IF agent.hostname != "new" %]<button name="action" value="remove" class="hover-red w-32" onclick="return(confirm('really remove host: [% agent.hostname | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
       </div>
     </form>
   </div>

@@ -5064,15 +5064,17 @@ function submitFormInBackground(form, cb, extraData) {
             'Accept': "application/json; charset=utf-8"
         },
         success: function(data, textStatus, jqXHR) {
-            showMessageFromCookie();
             if(cb) {
                 cb(form, true, data, textStatus, jqXHR);
+            } else {
+                showMessageFromCookie();
             }
         },
         error: function(jqXHR, textStatus, errorThrown) {
-            showMessageFromCookie();
             if(cb) {
                 cb(form, false, null, textStatus, jqXHR);
+            } else {
+                showMessageFromCookie();
             }
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
         }
@@ -5081,8 +5083,17 @@ function submitFormInBackground(form, cb, extraData) {
 }
 
 function send_form_in_background_and_reload(btn, extraData, skipTimeout) {
-    send_form_in_background_with_callback(btn, extraData, function() {
+    send_form_in_background_with_callback(btn, extraData, function(form, success) {
         reloadPage();
+    }, skipTimeout);
+    return(false);
+}
+
+function send_form_in_background_and_forward(btn, extraData, skipTimeout, url) {
+    send_form_in_background_with_callback(btn, extraData, function(form, success) {
+        if(success) {
+          redirect_url(url);
+        }
     }, skipTimeout);
     return(false);
 }

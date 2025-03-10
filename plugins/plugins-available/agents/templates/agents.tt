@@ -46,7 +46,7 @@
           <th class="w-20">Memory</th>
           <th class="w-20">Disk</th>
           <th class="w-24">Checks</th>
-          <th class="w-32">
+          <th class="w-20">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
               <div class="flexrow flex-nowrap gap-x-1 h-5">
                 <a href="#" onclick="return agents_run_all(this, '.js-update-btn', {})"><i class="fa-solid fa-arrows-rotate text-sm" title="Update inventory for all visible servers"></i></a>
@@ -156,6 +156,7 @@
                   <a href="#" class="js-update-btn" onclick="return send_form_in_background_and_reload(this)"><i class="fa-solid fa-arrows-rotate text-sm" title="Update inventory"></i></a>
                 </form>
                 <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>
+                <a href="agents.cgi?action=clone&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]"><i class="fa-solid fa-clone text-sm" title='Clone this host'></i></a>
                 [% PROCESS _button btn = {
                   form   => { action => 'agents.cgi', },
                   data   => { 'action' => 'remove', 'hostname' => h.name, backend => h.peer_key, CSRFtoken => get_user_token(c), },
