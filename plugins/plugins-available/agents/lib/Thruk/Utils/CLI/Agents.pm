@@ -473,6 +473,7 @@ sub _run_add_host {
             $line =~ s/^\s*//gmx;
             next if $line =~ m/^\s*$/mx;
             my($m, $id, $args) = split(/\s+/mx, $line, 3);
+            my(undef, $val) = split(/\s+/mx, $line, 2);
             next unless defined $m;
             if($m eq 'k')    { $checks_config->{'check.'.$id} = "keep"; }
             elsif($m eq 'e') { $checks_config->{'check.'.$id} = "on"; }
@@ -480,9 +481,9 @@ sub _run_add_host {
             elsif($m eq 'n') { $checks_config->{'check.'.$id} = "new"; }
             elsif($m eq 'o') { $checks_config->{'check.'.$id} = "keep"; }
             elsif($m eq 'u') { $checks_config->{'check.'.$id} = "on"; }
-            elsif($m eq 'address:') { $data->{'address'} = $id; next; }
-            elsif($m eq 'section:') { $data->{'section'} = $id; next; }
-            elsif($m eq 'tags:')    { $data->{'tags'}    = $id; next; }
+            elsif($m eq 'address:') { $data->{'address'} = $val; next; }
+            elsif($m eq 'section:') { $data->{'section'} = $val; next; }
+            elsif($m eq 'tags:')    { $data->{'tags'}    = $val; next; }
 
             $checks_config->{'args.'.$id} = $args;
         }
@@ -539,7 +540,8 @@ sub _run_add_host {
                     '_change' => sprintf("ip updated: %s -> %s", $obj->{'conf'}->{'address'}, $data->{'address'}),
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
-            } elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
+            }
+            elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
                 push @result, {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
