@@ -230,7 +230,7 @@ sub _run_list {
         next if($filter && $hst->{'name'} !~ m/$filter/mx);
         my $agent = Thruk::Utils::Agents::build_agent($hst);
         my $address = $hst->{'address'};
-        if($agent->{'port'} ne $agent->settings()->{'default_port'}) {
+        if($agent->{'port'} ne $agent->config()->{'default_port'}) {
             $address .= ':'.$agent->{'port'};
         }
         my $row = {
