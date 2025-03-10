@@ -671,7 +671,7 @@ sub make_filter {
 
     my $rawval = $val;
     if($op eq '~') {
-        $val = "/".$val."/";
+        $val = "'".$val."'";
         $op  = "~~";
     } else {
         $val = "'".$val."'";

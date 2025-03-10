@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 16;
+    plan tests => 19;
 }
 
 BEGIN {
@@ -156,11 +156,17 @@ EOT
     is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'name'},   "ssh controlmaster mon", "process: name");
     is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'parent'}, "agent version", "process: parent");
     is($checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'args'},   "", "process: args");
+    is_deeply([@{$checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'current_args'}}[1..2]], [
+        'filter="command_line ~~ \'/usr/bin/ssh.*ControlMaster=yes\'"',
+        'filter="username = \'mon\'"',
+    ], "process: filter");
+    is(scalar @{$checks->{'proc./usr/bin/ssh._ControlMaster_yes_mon'}->{'current_args'}}, 3, "process: filter count");
 
     is($checks->{'proc.controlmaster_yes_mon'}->{'name'},   "controlmaster2", "process: name");
     is($checks->{'proc.controlmaster_yes_mon'}->{'args'},   "", "process: args");
     is($checks->{'proc.controlmaster_yes_mon'}->{'current_args'}->[1], 'filter="command_line like \'controlmaster=yes\'"', "process: filter 1");
     is($checks->{'proc.controlmaster_yes_mon'}->{'current_args'}->[2], 'filter="username = \'mon\'"', "process: filter 2");
+    is(scalar @{$checks->{'proc.controlmaster_yes_mon'}->{'current_args'}}, 3, "process: filter count");
 }
 
 ###########################################################
