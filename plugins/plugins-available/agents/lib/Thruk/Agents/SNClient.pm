@@ -237,7 +237,7 @@ sub get_config_objects {
             # only save disabled information if it was disabled manually, not when disabled by config
             # and only if it wasn't orphanded
             if(!$chk->{'disabled'} && $chk->{'exists'} ne 'obsolete') {
-                push @{$settings->{'disabled'}}, $id if (!defined $chk->{'exclude_reason'} || $chk->{'exclude_reason'} eq 'manually');
+                push @{$settings->{'disabled'}}, $id if $chk->{'excluded_manually'};
             }
             next;
         }

@@ -30,13 +30,6 @@
     <tbody>
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
-      [% reason = "" %]
-      [% IF check.defined("disabled") && check.disabled %]
-        [% reason = check.disabled %]
-        [% IF reason == 1; reason = "unknown reason"; END %]
-      [% ELSIF check.defined("exclude_reason") %]
-        [% reason = check.exclude_reason %]
-      [% END %]
       <tr>
         <th>
           <div class="flex items-center min-w-max justify-between">
@@ -58,16 +51,15 @@
             <div class='text-center badge PENDING'>new</div>
           [% END %]
           [% IF type == "disabled" %]
-            [% IF reason %]
-              <a href="" class="link" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'resizable': true, 'bodyEl': 'disabled_[% name2id(check.id) | html %]', 'caption': 'Details for disabled check: [% check.name | html %]', 'width': 900 }); return false;">
-                <div class='text-center badge PENDING'>disabled</div>
-              </a>
-              <div id="disabled_[% name2id(check.id) | html %]" class="hidden whitespace-pre text-left">[% reason | html | nl2br %]</div>
+            [% IF check.defined("disabled") && check.disabled %]
+              <div class='text-center badge PENDING clickable' onClick="jQuery('#info_link_[% name2id(check.id) | html %]').click(); return false;">disabled</div>
+            [% ELSIF check.defined("exclude_reason") %]
+              <div class='text-center badge PENDING clickable' onClick="jQuery('#info_link_[% name2id(check.id) | html %]').click(); return false;">excluded</div>
             [% ELSE %]
               <div class='text-center badge PENDING'>disabled</div>
             [% END %]
-            [% IF reason == "manually" || agent.exists("settings") && agent.settings.exists("disabled") && agent.settings.disabled.exists(check.id) %]
-              <div class='text-center badge UNKNOWN' title="check has been manually disabled">manually</div>
+            [% IF check.defined("excluded_manually") && check.excluded_manually %]
+              <div class='text-center badge UNKNOWN clickable' title="check has been manually disabled" onClick="jQuery('#info_link_[% name2id(check.id) | html %]').click(); return false;">manually</div>
             [% END %]
           [% END %]
         </td>
@@ -148,43 +140,84 @@
     <div class="head justify-between" style="flex: 0 0 40px;">
       <div class="grow"></div>
       <span class="tabs clickable text-center text-sm w-40 active" id="infosub_[% name2id(check.id) | html %]_1" onclick="set_sub(1, false, 'infosub_[% name2id(check.id) | html %]')">Info</span>
-      [% IF check.defined("info") %]
-        <span class="tabs clickable text-center text-sm w-40" id="infosub_[% name2id(check.id) | html %]_2" onclick="set_sub(2, false, 'infosub_[% name2id(check.id) | html %]')">Attributes</span>
-      [% END %]
+      <span class="tabs clickable text-center text-sm w-40" id="infosub_[% name2id(check.id) | html %]_2" onclick="set_sub(2, false, 'infosub_[% name2id(check.id) | html %]')">Attributes</span>
       <span class="tabs clickable text-center text-sm w-40" id="infosub_[% name2id(check.id) | html %]_3" onclick="set_sub(3, false, 'infosub_[% name2id(check.id) | html %]')">Rules</span>
       <div class="grow"></div>
     </div>
-    <div class="infosub_[% name2id(check.id) | html %]_1">
-      [% IF reason %]
+    <div class="infosub_[% name2id(check.id) | html %]_1 h-full max-h-[calc(88vh-40px)] overflow-auto">
+      [% IF check.defined("disabled") && check.disabled %]
       <div>
-        <h4>[% IF check.exists == 'disabled' %]Disabled[% ELSE %]Obsolete[% END %]</h4>
-        <div class="text-left">[% reason | html | nl2br %]</div>
+        <h4>Disabled</h4>
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            [% FOREACH row = check.disabled %]
+              <tr>
+                <th>[% row.0 | html %]</th>
+                <td class="pl-2">[% row.1 | html %]</td>
+              </tr>
+            [% END %]
+          </tbody>
+        </table>
+      </div>
+      [% ELSIF check.defined("exclude_reason") %]
+      <div>
+        <h4>Excluded</h4>
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            [% FOREACH row = check.exclude_reason %]
+              <tr>
+                <th>[% row.0 | html %]</th>
+                <td class="pl-2">[% row.1 | html %]</td>
+              </tr>
+            [% END %]
+          </tbody>
+        </table>
       </div>
       [% END %]
       [% IF check.defined("extra_src") %]
       <div>
         <h4>Source</h4>
-        <div class="text-left">[% check.extra_src | html %]</div>
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            <tr>
+              <td>[% check.extra_src | html %]</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       [% END %]
       [% IF check.defined("check") %]
-      <div>
+      <div class="mt-5">
         <h4>Check Command</h4>
-        <div class="text-left">[% check.check | html %]</div>
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            <tr>
+              <td>[% check.check | html %]</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       [% END %]
-      <div>
+      <div class="mt-5">
         <h4>Default Arguments</h4>
         [% IF !check.defined("current_args") || check.current_args.size == 0 %]
-          <div class="whitespace-pre text-left">(none)</div>
+          <div class="text-left">(none)</div>
         [% ELSE %]
-          <div class="whitespace-pre text-left">[% FOREACH a = check.current_args %][% a | html %]<br>[% END %]</div>
+          <table class="body w-fit striped rowhover cellborder border borderDefault">
+            <tbody>
+              [% FOREACH a = check.current_args %]
+                <tr>
+                  <td>[% a | html %]</td>
+                </tr>
+              [% END %]
+            </tbody>
+          </table>
         [% END %]
       </div>
     </div>
-    <div class="infosub_[% name2id(check.id) | html %]_2" style="display: none;">
+    <div class="infosub_[% name2id(check.id) | html %]_2 h-full max-h-[calc(88vh-40px)] overflow-auto" style="display: none;">
+      <div>These attributes can be used in thresholds and filters.</div>
       [% IF check.defined("info") %]
-        These attributes can be used in thresholds and filters.
         <table class="body w-fit striped rowhover cellborder border borderDefault">
           <tbody>
             [% FOREACH attr = check.info.keys.sort %]
@@ -195,16 +228,21 @@
             [% END %]
           </tbody>
         </table>
+      [% ELSE %]
+        <div class="textHINT">no specific attributes available.</div>
       [% END %]
     </div>
-    <div class="infosub_[% name2id(check.id) | html %]_3 h-full overflow-auto" style="display: none;">
-      <div class="mb-5">The following rules apply to this service:</div>
+    <div class="infosub_[% name2id(check.id) | html %]_3 h-full max-h-[calc(88vh-40px)] overflow-auto" style="display: none;">
+      <div>The following rules apply to this service:</div>
       [% already_set = {} %]
       [% FOREACH r = check.rules.reverse %]
         [% IF !loop.first%]<hr class="my-3">[% END %]
-        <div>[% r._FILE %] line [% r._LINE %]</div>
         <table class="body w-fit striped rowhover mb-5 cellborder border borderDefault min-w-[400px]">
           <tbody>
+            <tr>
+              <th>Source</th>
+              <td class="pl-2">[% strip_site_path(r._FILE) %] line [% r._LINE %]</td>
+            </tr>
             <tr>
               <th colspan="2">Matching</th>
             </tr>
@@ -257,6 +295,9 @@
             [% END %]
           </tbody>
         </table>
+      [% END %]
+      [% IF check.rules.size == 0 %]
+        <div class="textHINT">no specific rules available.</div>
       [% END %]
     </div>
   </div>

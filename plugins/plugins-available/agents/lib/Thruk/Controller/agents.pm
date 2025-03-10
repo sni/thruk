@@ -43,6 +43,7 @@ sub index {
     $c->stash->{template}      = 'agents.tt';
 
     $c->stash->{build_agent}   = \&Thruk::Utils::Agents::build_agent;
+    $c->stash->{strip_site_path} = \&Thruk::Utils::Agents::strip_site_path;
 
     $c->stash->{no_tt_trim}    = 1;
     $c->stash->{'plugin_name'} = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);

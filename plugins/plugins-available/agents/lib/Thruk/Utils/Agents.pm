@@ -383,6 +383,7 @@ sub _set_checks_category {
         $existing->{$chk->{'id'}} = 1;
         my $svc = $services_by_id->{$chk->{'id'}} // $services->{$name};
         delete $chk->{'exclude_reason'};
+        delete $chk->{'excluded_manually'};
         if($svc && $svc->{'conf'}->{'_AGENT_AUTO_CHECK'}) {
             $chk->{'exists'} = 'exists';
             $chk->{'_svc'}   = $svc;
@@ -394,7 +395,8 @@ sub _set_checks_category {
             # disabled manually from previous inventory run
             if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
                 $chk->{'exists'} = 'disabled';
-                $chk->{'exclude_reason'} = "manually";
+                $chk->{'exclude_reason'}    =  [["source", "manually"]];
+                $chk->{'excluded_manually'} = 1;
             }
             elsif($chk->{'disabled'}) {
                 # disabled by 'disable' configuration
@@ -406,10 +408,11 @@ sub _set_checks_category {
 
         # disabled by 'exclude' configuration
         if(my $res = _is_excluded($hostname, $section, $tags, $chk, $excludes)) {
-            my $src = $res->{'_FILE'} ? $res->{'_FILE'}.':'.$res->{'_LINE'} : 'default';
-            my $root = $ENV{'OMD_ROOT'};
-            $src =~ s=^$root/==gmx if $root;
-            $chk->{'exclude_reason'} = sprintf("disabled by '<exclude>' configuration.\nsource: %s", $src);
+            my $src = $res->{'_FILE'} ? strip_site_path($res->{'_FILE'}).' line '.$res->{'_LINE'} : 'default';
+            $chk->{'exclude_reason'} = [
+                ["excluded by",     '<exclude>'],
+                ["source",          $src],
+            ];
 
             if($chk->{'exists'} eq 'exists') {
                 $chk->{'exists'} = 'obsolete';
@@ -430,7 +433,7 @@ sub _set_checks_category {
             'id'        => $id,
             'name'      => $name,
             'exists'    => 'obsolete',
-            'disabled'  => 'service is no longer discovered in inventory',
+            'disabled'  => [['reason', 'service is no longer discovered in inventory']],
         };
     }
 
@@ -704,17 +707,19 @@ sub check_disable {
         for my $disabled (@{Thruk::Base::list($disabled_config)}) {
             my $conf = $disabled->{$conf_key} // next;
             for my $co (@{Thruk::Base::list($conf)}) {
-                my $src = $co->{'_FILE'} ? $co->{'_FILE'}.':'.$co->{'_LINE'} : 'default';
-                my $root = $ENV{'OMD_ROOT'};
-                $src =~ s=^$root/==gmx if $root;
+                my $src = $co->{'_FILE'} ? strip_site_path($co->{'_FILE'}).' line '.$co->{'_LINE'} : 'default';
                 for my $attr (sort keys %{$co}) {
                     next if $attr eq '_FILE';
                     next if $attr eq '_LINE';
                     my $val = $data->{$attr} // '';
                     for my $pattern (@{Thruk::Base::list($co->{$attr})}) {
                         if(_check_pattern($val, $pattern)) {
-                            return sprintf("disabled by '<disable %s>' configuration:\nmatching filter '%s %s'\ncurrent value: '%s'\nsource: %s",
-                                $conf_key, $attr, $pattern, $val, $src);
+                            return([
+                                ["disabled by",     sprintf('<disable %s>', $conf_key)],
+                                ["matching filter", sprintf('%s %s', $attr, $pattern)],
+                                ["current value",   sprintf('"%s"', $val)],
+                                ["source",          $src],
+                            ]);
                         }
                     }
                 }
@@ -854,6 +859,24 @@ sub migrate_hostname {
     unlink($df2);
 
     return;
+}
+
+##########################################################
+
+=head2 strip_site_path
+
+    strip_site_path($path)
+
+return path with OMD_ROOT trimmed
+
+=cut
+sub strip_site_path {
+    my($str) = @_;
+
+    my $root = $ENV{'OMD_ROOT'};
+    $str =~ s=^$root/==gmx if $root;
+
+    return($str);
 }
 
 ##########################################################
