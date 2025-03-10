@@ -335,6 +335,9 @@
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type="hidden" name="old_hostname" value="[% IF agent.hostname != "new"; agent.hostname | html; END %]">
       <input type="hidden" name="old_backend" value="[% agent.peer_key | html %]">
+      [% IF agent.exists("cloned_from") %]
+      <input type="hidden" name="cloned_from" value="[% agent.cloned_from | html %]">
+      [% END %]
       <input type="hidden" name="type" value="[% agent.type | html %]">
       [% IF ! has_multiple_backends %]
       <input type="hidden" name="backend" value="[% (agent.peer_key || config_backends.keys.0) | html %]">
@@ -520,15 +523,17 @@ function updateChecksTable(form) {
     var type    = jQuery(form).find("INPUT[name=type]").val();
     var section = jQuery(form).find("INPUT[name=section]").val();
     var tags    = jQuery(form).find("INPUT[name=tags]").val();
+    var cloned  = jQuery(form).find("INPUT[name=cloned_from]").val();
     jQuery('#checksTable').html("<div class='spinner'><\/div>");
     var url = "agents.cgi #checksTableContent";
     var data = {
-      action:   'edit',
-      hostname: host,
-      section:  section,
-      tags:     tags,
-      backend:  backend,
-      type:     type
+      action:      'edit',
+      hostname:    host,
+      section:     section,
+      tags:        tags,
+      backend:     backend,
+      cloned_from: cloned,
+      type:        type
     };
     jQuery('#checksTable').load(url, data, function(text, status, req) {
       if(status == "error") {

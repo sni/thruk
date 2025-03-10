@@ -68,7 +68,17 @@
               </div>
             </td>
             [% IF has_tags %]
-              <td><div class="flexrow flex-nowrap gap-x-0.5">[% FOREACH t = agent.tags %]<div class="badge w-min min-w-min">[% t | html %]</div>[% END %]</div></td>
+              <td
+                [% FOREACH t = agent.tags %]
+                  data-tag[% loop.index %]="t:[% t | html %]:"
+                [% END %]
+              >
+                <div class="flexrow flex-nowrap gap-x-0.5">
+                  [% FOREACH t = agent.tags %]
+                    <div class="badge w-min min-w-min clickable" onclick="setTableSearchFilter('t:[% t | html %]:')" title="show all hosts with tag : [% t | html %]">[% t | html %]</div>
+                  [% END %]
+                </div>
+              </td>
             [% END %]
             <td class="w-20">
               [% state  = 'PENDING' %]
@@ -85,10 +95,10 @@
               <td>[% peer_name(h) | html %]</td>
             [% END %]
             [% IF state == "OK" %]
-            <td>
+            <td data-version="v:[% info.$hostname.version | html %]:">
               <div class="flexrow flex-nowrap gap-x-1">
                 <div class="w-5 h-5 m-0 p-0 min-w-fit"><img src="[% url_prefix %]plugins/[% plugin_name %]/images/[% agent.icon | uri %]" alt="[% agent.type | html %]" width=25 height=25></div>
-                [% IF info.exists(hostname) %]<div class="w-full h-full" title="[% info.$hostname.full_version | html %]">[% info.$hostname.version | html %]</div>[% END %]
+                [% IF info.exists(hostname) %]<div class="w-full h-full clickable" title="[% info.$hostname.full_version | html %]" onclick="setTableSearchFilter('v:[% info.$hostname.version | html %]:')">[% info.$hostname.version | html %]</div>[% END %]
               </div>
             </td>
             <td title="[% info.$hostname.os_version_full | html %]" class="truncate w-60 max-w-max">

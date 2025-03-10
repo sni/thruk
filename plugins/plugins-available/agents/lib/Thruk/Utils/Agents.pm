@@ -393,8 +393,8 @@ sub _set_checks_category {
             }
         } else {
             # disabled manually from previous inventory run
-            if($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'})) {
-                $chk->{'exists'} = 'disabled';
+            if($chk->{'excluded_manually'} || ($settings && $settings->{'disabled'} && Thruk::Base::array_contains($chk->{'id'}, $settings->{'disabled'}))) {
+                $chk->{'exists'}            = 'disabled';
                 $chk->{'exclude_reason'}    =  [["source", "manually"]];
                 $chk->{'excluded_manually'} = 1;
             }
@@ -434,6 +434,7 @@ sub _set_checks_category {
             'name'      => $name,
             'exists'    => 'obsolete',
             'disabled'  => [['reason', 'service is no longer discovered in inventory']],
+            'rules'     => [],
         };
     }
 

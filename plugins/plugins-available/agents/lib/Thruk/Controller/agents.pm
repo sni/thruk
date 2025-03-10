@@ -69,6 +69,7 @@ sub index {
        if($action eq 'show')   { _process_show($c); }
     elsif($action eq 'new')    { _process_new($c); }
     elsif($action eq 'edit')   { _process_edit($c); }
+    elsif($action eq 'clone')  { _process_clone($c); }
     elsif($action eq 'scan')   { _process_scan($c); }
     elsif($action eq 'save')   { _process_save($c); }
     elsif($action eq 'remove') { _process_remove($c); }
@@ -261,6 +262,37 @@ sub _process_new {
 }
 
 ##########################################################
+sub _process_clone {
+    my($c) = @_;
+
+    my $hostname = $c->req->parameters->{'hostname'};
+    my $backend  = $c->req->parameters->{'backend'};
+    return unless Thruk::Utils::Agents::set_object_model($c, $backend);
+
+    my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+    if(!$objects || scalar @{$objects} == 0) {
+        return _process_new($c);
+    }
+    my $hostobj = $objects->[0];
+    my $obj = $hostobj->{'conf'};
+    my $agent = {
+        'type'        => $obj->{'_AGENT'},
+        'cloned_from' => $hostname,
+        'hostname'    => "new",
+        'ip'          => '',
+        'section'     => $obj->{'_AGENT_SECTION'} // '',
+        'port'        => $obj->{'_AGENT_PORT'}     // '',
+        'password'    => $obj->{'_AGENT_PASSWORD'} // '',
+        'mode'        => $obj->{'_AGENT_MODE'}     // 'https',
+        'peer_key'    => $backend,
+        'settings'    => decode_json($obj->{'_AGENT_CONFIG'} // "{}"),
+        'tags'        => [split(/\s*,\s*/mx, ($obj->{'_AGENT_TAGS'} // ''))],
+    };
+
+    return _process_edit($c, $agent);
+}
+
+##########################################################
 sub _process_edit {
     my($c, $agent) = @_;
 
@@ -269,6 +301,7 @@ sub _process_edit {
     my $type     = $c->req->parameters->{'type'} // Thruk::Utils::Agents::default_agent_type($c);
     my $section  = $c->req->parameters->{'section'};
     my $tags     = $c->req->parameters->{'tags'};
+    my $cloned   = $c->req->parameters->{'cloned_from'};
 
     my $config_backends = Thruk::Utils::Conf::set_backends_with_obj_config($c);
     $c->stash->{config_backends}       = $config_backends;
@@ -278,7 +311,7 @@ sub _process_edit {
     my $hostobj;
     if(!$agent && $hostname) {
         return unless Thruk::Utils::Agents::set_object_model($c, $backend);
-        my $objects = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+        my $objects = $c->{'obj_db'}->get_objects_by_name('host', $cloned || $hostname);
         if(!$objects || scalar @{$objects} == 0) {
             return _process_new($c);
         }
@@ -370,6 +403,7 @@ sub _process_save {
         ip       => $ip,
         tags     => $tags,
     };
+    $data->{'cloned_from'} = $c->req->parameters->{'cloned_from'} if $c->req->parameters->{'cloned_from'};
 
     my $class   = Thruk::Utils::Agents::get_agent_class($type);
     my $agent   = $class->new();
@@ -414,6 +448,12 @@ sub _process_save {
     Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
 
     Thruk::Utils::set_message( $c, 'success_message', "changes saved successfully");
+
+    # run initial scan
+    if($data->{'cloned_from'}) {
+        _process_scan($c);
+    }
+
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
 }
 

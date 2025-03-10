@@ -104,20 +104,21 @@ returns list of Monitoring::Objects for the host / services along with list of o
 sub get_config_objects {
     my($self, $c, $data, $checks_config, $cli_opts) = @_;
 
-    my $backend  = $data->{'backend'}  || die("missing backend");
-    my $hostname = $data->{'hostname'} || die("missing hostname");
-    my $ip       = $data->{'ip'}       // '';
-    my $section  = $data->{'section'}  // '';
-    my $password = $data->{'password'} // '';
-    my $port     = $data->{'port'}     || config()->{'default_port'};
-    my $mode     = $data->{'mode'}     || 'https';
-    my $tags     = Thruk::Base::comma_separated_list($data->{'tags'} // '');
+    my $backend     = $data->{'backend'}  || die("missing backend");
+    my $hostname    = $data->{'hostname'} || die("missing hostname");
+    my $ip          = $data->{'ip'}       // '';
+    my $section     = $data->{'section'}  // '';
+    my $password    = $data->{'password'} // '';
+    my $port        = $data->{'port'}     || config()->{'default_port'};
+    my $mode        = $data->{'mode'}     || 'https';
+    my $tags        = Thruk::Base::comma_separated_list($data->{'tags'} // '');
+    my $cloned_from = $data->{'cloned_from'};
 
     $section =~ s|^\/*||gmx if $section;
     $section =~ s|\/*$||gmx if $section;
     $section =~ s|\/+|/|gmx if $section;
     my $filename = $section ? sprintf('agents/%s/%s.cfg', $section, $hostname) : sprintf('agents/%s.cfg', $hostname);
-    my $objects  = $c->{'obj_db'}->get_objects_by_name('host', $hostname);
+    my $objects  = $c->{'obj_db'}->get_objects_by_name('host', ($cloned_from||$hostname));
     my $hostobj;
     if(!$objects || scalar @{$objects} == 0) {
         # create new one
@@ -168,7 +169,7 @@ sub get_config_objects {
     }
 
     # save services
-    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, $hostname, $hostobj, "snclient", $password, $cli_opts, $section, $mode, $settings->{'options'}, $tags);
+    my $checks = Thruk::Utils::Agents::get_services_checks($c, $backend, ($cloned_from||$hostname), $hostobj, "snclient", $password, $cli_opts, $section, $mode, $settings->{'options'}, $tags);
     my $checks_hash = Thruk::Base::array2hash($checks, "id");
 
     if(!$checks || scalar @{$checks} == 0) {
@@ -224,7 +225,7 @@ sub get_config_objects {
             # only save disabled information if it was disabled manually, not when disabled by config
             # and only if it wasn't orphanded
             if(!$chk->{'disabled'} && $chk->{'exists'} ne 'obsolete') {
-                push @{$settings->{'disabled'}}, $id if $chk->{'excluded_manually'};
+                push @{$settings->{'disabled'}}, $id;
             }
             next;
         }
@@ -319,6 +320,19 @@ sub get_config_objects {
     $hostobj->{'conf'} = $hostdata;
 
     _add_templates($c, \@list, $section);
+
+    if($cloned_from) {
+        @remove = ();
+        my @cloned = ();
+        for my $obj (@list) {
+            my $clone = $obj->clone();
+            $clone->{'_filename'} = $obj->{'_filename'};
+            $clone->{'conf'}->{'host_name'} = $hostname;
+            $clone->{'conf'}->{'alias'}     = $hostname if $clone->{'conf'}->{'alias'};
+            push @cloned, $clone;
+        }
+        @list = @cloned;
+    }
 
     return(\@list, \@remove);
 }

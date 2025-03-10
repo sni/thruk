@@ -90,6 +90,30 @@ sub parse {
 
 ##########################################################
 
+=head2 clone
+
+    clone()
+
+returns copy of given object
+
+=cut
+
+sub clone {
+    my($self) = @_;
+
+    require Thruk::Utils;
+    my $clone = Monitoring::Config::Object->new(
+        type     => $self->{'type'},
+        coretype => $self->{'file'}->{'coretype'},
+        conf     => Thruk::Utils::dclone($self->{'conf'}),
+        comments => Thruk::Utils::dclone($self->{'comments'}),
+    );
+
+    return($clone);
+}
+
+##########################################################
+
 =head2 disable
 
 disable this object
