@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 15;
+    plan tests => 16;
 }
 
 BEGIN {
@@ -89,6 +89,8 @@ EOT
         'svc.snclient',
         'version'
     ], "process checks found");
+    is($checks->{'inventory'}->{'svc_conf'}->{'_WORKER'}, "local", "local inventory");
+
     ok($checks->{'svc.snclient'}, "service check found");
     is($checks->{'svc.snclient'}->{'name'},   "service snclient", "process: name");
 }
