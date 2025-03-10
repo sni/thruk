@@ -186,6 +186,8 @@ This example will create a service check for all processes named `snclient` or `
 </proc>
 ...................................
 
+The `name` expression is applied on the process executable name.
+
 #### Advanced
 
 The advanced variant allows to match on the full command line of the process.
@@ -203,6 +205,8 @@ It also allows to set the service name.
   #crit    = 1:10 # critical threshold
 </proc>
 ...................................
+
+The `match` expression is applied as sub string match on the hole command line.
 
 ### Services Checks
 
