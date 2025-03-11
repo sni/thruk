@@ -292,7 +292,15 @@ sub _run_show {
         return($output, $rc);
     }
 
-    my($checks, $checks_num, $hst, $hostobj, undef) = _get_checks($c, $hostname, $opt, 0);
+    my($checks, $checks_num, $hst, $hostobj);
+    eval {
+        ($checks, $checks_num, $hst, $hostobj, undef) = _get_checks($c, $hostname, $opt, 0);
+    };
+    my $err = $@;
+    if($err) {
+        _error(_clean_error($err));
+        return("", 3);
+    }
     unless($checks) {
         _error("something went wrong");
         return("", 3);
@@ -411,7 +419,15 @@ sub _run_add {
 sub _run_add_host {
     my($c, $hostname, $opt, $edit_only) = @_;
 
-    my($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
+    my($checks, $checks_num, $hst, $hostobj, $data);
+    eval {
+        ($checks, $checks_num, $hst, $hostobj, $data) = _get_checks($c, $hostname, $opt, $edit_only ? 0 : 1);
+    };
+    my $err = $@;
+    if($err) {
+        _error(_clean_error($err));
+        return("", 3);
+    }
     if($opt->{'fresh'} && !$hst && !$hostobj) {
         _error("no host found by name: %s (add new hosts with -I / add)", $hostname);
         return("", 3);
@@ -651,10 +667,7 @@ sub _check_inventory {
     my $err = $@;
     if($err) {
         _debug("inventory failed: %s", $err);
-        $err =~ s/^UNKNOWN\ \-\ //gmx;
-        $err =~ s/\s+at\s+.*?\.pm\s+line\s+\d+\.//gmx;
-        $err =~ s/("https?:\/\/.*?)\/[^"]*"/$1\/..."/gmx;
-        return(sprintf("UNKNOWN - %s", $err), 3);
+        return(sprintf("UNKNOWN - %s", _clean_error($err)), 3);
     }
     return(sprintf("UNKNOWN - no host found with enabled agent and name: %s\n", $hostname), 3) unless $hst;
     return(sprintf("UNKNOWN - no host found by name: %s\n", $hostname), 3) unless $hostobj;
@@ -830,15 +843,13 @@ sub _get_checks {
             my($inv, $err) = Thruk::Utils::Agents::update_inventory($c, $hostname, $hostobj, $data);
             if($err) {
                 _debug($err);
-                _error(_strip_line($err));
-                exit(1);
+                die($err);
             }
         } else {
             my $err = Thruk::Utils::Agents::scan_agent($c, $data);
             if($err) {
                 _debug($err);
-                _error(_strip_line($err));
-                exit(1);
+                die($err);
             }
         }
     }
@@ -1012,6 +1023,19 @@ sub _join_lists {
     }
 
     return($cleaned);
+}
+
+##############################################
+sub _clean_error {
+    my($err) = @_;
+
+    $err = _strip_line($err);
+
+    $err =~ s/^\[ERROR\]\ //gmx;
+    $err =~ s/^UNKNOWN\ \-\ //gmx;
+    $err =~ s/("https?:\/\/.*?)\/[^"]*"/$1\/..."/gmx;
+
+    return($err);
 }
 
 ##############################################

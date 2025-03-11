@@ -3,15 +3,15 @@
 [% PROCESS _message.tt %]
 [% PROCESS _blocks.tt %]
 
-<div class="card w-full mt-5" style="min-width: 800px;">
-  <div class="head p-0 justify-between border-0">
-    <div class="mx-2">
+<div class="card w-full" style="min-width: 800px;">
+  <div class="mainTableHeader">
+    <div>
       [% PROCESS _table_search_field.tt ids=["agentTable"] %]
     </div>
-    <div class="grow"></div>
-    <span class="tabs active">Agents</span>
-    <div class="grow"></div>
-    <div class="w-72 flexrow flex-nowrap gap-x-1">
+    <div>
+      [% PROCESS _pager.tt %]
+    </div>
+    <div>
       <div class="w-40">
         [% IF reload_required %]
         [% PROCESS _button btn = {
@@ -22,9 +22,12 @@
         [% END %]
       </div>
       <a href="agents.cgi?action=new" class="button green w-40 mx-2"><i class="fa-solid fa-plus"></i> add new host</a>
+
+      [% PROCESS _pager_per_page.tt %]
     </div>
   </div>
-  <div class="mainTable [% IF main_table_full %]fullsize[% ELSE %]max-h-full[% END %]">
+
+  <div class="mainTable [% IF main_table_full %]fullsize[% END %] border-t-0" style="max-height: calc(100vh - 155px);">
     <table class="mainTable js-striped" id="agentTable">
       <thead>
         <tr>

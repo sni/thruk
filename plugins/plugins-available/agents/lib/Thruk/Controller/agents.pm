@@ -108,6 +108,7 @@ sub _process_show {
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                               'custom_variables' => { '~' => 'AGENT .+' },
                                             ],
+                                  pager => 1,
                                  );
     for my $hst (@{$hosts}) {
         Thruk::Utils::set_allowed_rows_data($hst, 1);

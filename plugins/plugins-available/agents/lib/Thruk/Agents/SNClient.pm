@@ -182,6 +182,7 @@ sub get_config_objects {
     }
     my $section_changed = (!defined $hostdata->{'_AGENT_SECTION'} || $hostdata->{'_AGENT_SECTION'} ne $section);
     $hostdata->{'_AGENT_SECTION'}  = $section;
+    delete $hostdata->{'_AGENT_SECTION'} unless $hostdata->{'_AGENT_SECTION'};
     $hostdata->{'_AGENT_PORT'}     = $port;
     delete $hostdata->{'_AGENT_MODE'};
     if($mode && $mode ne 'https') {
@@ -290,6 +291,9 @@ sub get_config_objects {
         if(scalar @{$settings->{'disabled'}} == 0) {
             delete $settings->{'disabled'};
         }
+    }
+    if(defined $settings->{'options'} && scalar keys %{$settings->{'options'}} == 0) {
+        delete $settings->{'options'};
     }
     my $settings_str = $json->encode($settings);
     if($settings_str ne ($hostdata->{'_AGENT_CONFIG'}//"")) {
