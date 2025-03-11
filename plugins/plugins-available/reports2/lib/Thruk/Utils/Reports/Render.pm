@@ -653,7 +653,7 @@ An empty string will be returned if no PNP graph can be exported.
 sub get_pnp_image {
     my($hst, $svc, $start, $end, $width, $height, $source) = @_;
     my $c = $Thruk::Globals::c or die("not initialized!");
-    my $imgdata = Thruk::Utils::get_perf_image($c, {
+    my($imgdata) = Thruk::Utils::get_perf_image($c, {
         host           => $hst,
         service        => $svc,
         start          => $start,

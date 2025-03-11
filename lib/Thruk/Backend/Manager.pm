@@ -3018,6 +3018,9 @@ sub rpc {
         die("no such backend");
     }
     if($backend->{'type'} ne 'http') {
+        $backend = $backend->get_http_fallback_peer();
+    }
+    if(!$backend || $backend->{'type'} ne 'http') {
         die("only supported for http backends");
     }
     _debug(sprintf("[%s] rpc: %s", $backend->{'name'}, $function));
