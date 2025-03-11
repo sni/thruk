@@ -389,21 +389,24 @@ sub _run_add {
         }
     }
 
+    $rc = 0;
     for my $hostname (@{$hosts}) {
-        my($out, $rc) = _run_add_host($c, $hostname, $opt, $edit_only);
+        my($out, $rc2) = _run_add_host($c, $hostname, $opt, $edit_only);
         print(Thruk::Base::trim_whitespace($out)."\n");
-        if($rc > 0) {
-            return("", $rc);
+        if($rc2 > $rc) {
+            $rc = $rc2;
+            next;
         }
-        next if $opt->{'dryrun'};
 
-        Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
-        Thruk::Utils::Agents::sort_config_objects($c);
+        if(!$opt->{'dryrun'} && $rc2 != -1) {
+            Thruk::Utils::Agents::remove_orphaned_agent_templates($c);
+            Thruk::Utils::Agents::sort_config_objects($c);
 
-        if($c->{'obj_db'}->commit($c)) {
-            $c->stash->{'obj_model_changed'} = 1;
+            if($c->{'obj_db'}->commit($c)) {
+                $c->stash->{'obj_model_changed'} = 1;
+            }
+            Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
         }
-        Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'});
     }
 
     my $out = "";
@@ -412,7 +415,7 @@ sub _run_add {
     } elsif(!$opt->{'reload'}) {
         $out .= "\n(use -R to activate changes)\n";
     }
-    return($out, 0);
+    return($out, $rc);
 }
 
 ##############################################
@@ -425,7 +428,7 @@ sub _run_add_host {
     };
     my $err = $@;
     if($err) {
-        _error(_clean_error($err));
+        _error($hostname.": "._clean_error($err));
         return("", 3);
     }
     if($opt->{'fresh'} && !$hst && !$hostobj) {
@@ -567,7 +570,7 @@ sub _run_add_host {
             }
         }
         if(!$opt->{'dryrun'}) {
-            if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 1)) {
+            if(!$c->{'obj_db'}->update_object($obj, $obj->{'conf'}, $obj->{'comments'}, 0)) {
                 _error("%s: unable to save changes", $hostname);
                 return("", 2);
             }
@@ -589,7 +592,7 @@ sub _run_add_host {
         }
     }
 
-    return(sprintf("%s: no changes made.\n", $hostname), 0) if scalar @result == 0;
+    return(sprintf("%s: no changes made.\n", $hostname), -1) if scalar @result == 0;
 
     if($opt->{'dryrun'}) {
         for my $row (@result) {
@@ -605,7 +608,7 @@ sub _run_add_host {
                 ],
         data => \@result,
     );
-    printf("%s:\n%s\n", $hostname, $out);
+    printf("%s:\n%s\n", $hostname, Thruk::Base::trim_whitespace($out));
     return("", 0);
 }
 
@@ -1034,6 +1037,8 @@ sub _clean_error {
     $err =~ s/^\[ERROR\]\ //gmx;
     $err =~ s/^UNKNOWN\ \-\ //gmx;
     $err =~ s/("https?:\/\/.*?)\/[^"]*"/$1\/..."/gmx;
+
+    $err = Thruk::Base::trim_whitespace($err);
 
     return($err);
 }
