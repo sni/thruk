@@ -77,7 +77,7 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     # count services by hostname
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/csv/services?columns=count(*):num,host_name&sort=-count(*)\'',
-        like => ['/8;localhost/'],
+        like => ['/10;localhost/'],
     });
     # count services by hostname and state
     TestUtils::test_command({

@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 378;
+    plan tests => 454;
 
     use lib('t');
     require TestUtils;
@@ -26,6 +26,10 @@ my $pages = [{
         post         => { 'start_time' => 'now' },
         like         => ['Command successfully submitted'],
     }, {
+        url          => '/services/localhost/Disk%20%2Fvar%2Flog/cmd/schedule_forced_svc_check',
+        post         => { 'start_time' => 'now' },
+        like         => ['Command successfully submitted'],
+    }, {
         url          => '/csv/services?q=***description ~ http and description !~ cert***&columns=description',
         like         => ['Https'],
         unlike       => ['Cert'],
@@ -36,7 +40,7 @@ my $pages = [{
         content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/csv/services?columns=count(*):num,host_name&sort=-count(*)',
-        like         => ['8;localhost'],
+        like         => ['10;localhost'],
         content_type => 'text/plain; charset=utf-8',
     }, {
         url          => '/services/'.$host.'/'.$service.'/cmd/schedule_svc_downtime',
@@ -132,13 +136,13 @@ for my $test (@{$pages}) {
         url => '/thruk/r/services?columns=host_name,description',
     );
     my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
-    is(scalar @{$tstdata}, 9, "number of services");
+    is(scalar @{$tstdata}, 12, "number of services");
 
     $page = TestUtils::test_page(
         url => '/thruk/r/services?columns=host_name,description&offset=1',
     );
     my $data = Cpanel::JSON::XS::decode_json($page->{'content'});
-    is(scalar @{$data}, 8, "number of services");
+    is(scalar @{$data}, 11, "number of services");
     is($data->[0]->{'host_name'}, $tstdata->[1]->{'host_name'}, "got correct index");
     is($data->[0]->{'description'}, $tstdata->[1]->{'description'}, "got correct index");
 
@@ -272,5 +276,61 @@ for my $test (@{$pages}) {
         'like'         => ['time_indeterminate_nodata'],
     );
 };
+
+################################################################################
+# test service totals / stats with host custom vars
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services?columns=host_name,description&q=***description = "Disk /var/log" and _HOSTTEST = "test var host"***',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['Disk', 'UPPERC'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services/totals?q=***description = "Disk /var/log" and _HOSTTEST = "test var host"***',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"total" : 1,'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services/totals?q=***_HOSTTEST = "test var host"***',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"total" : 1,'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services/totals?_HOSTTEST=test%20var%20host',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"total" : 1,'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services/totals?description=Disk%20%2Fvar%2Flog&_HOSTTEST=test%20var%20host',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"total" : 1,'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/checks/stats?description=Disk%20%2Fvar%2Flog&_HOSTTEST=test%20var%20host',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"hosts_active_sum" : 3,', 'services_active_sum'],
+    );
+}
+
+################################################################################
+# test service perf data containing slashes
+{
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services?description=Disk%20%2Fvar%2Flog&columns=%2Fvar%2Flog',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['/var/log', '231490977792'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services?description=Disk%20%2Fvar%2Flog&columns=`/var/log`',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['/var/log', '231490977792'],
+    );
+}
 
 ################################################################################

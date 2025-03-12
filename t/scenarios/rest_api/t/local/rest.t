@@ -30,6 +30,6 @@ TestUtils::test_command({
 {
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/hosts?columns=num_services_crit+num_services_unknown+num_services_warn as num_services_problems"',
-        like => ['/"num_services_problems" : 3/'],
+        like => ['/"num_services_problems" : 2/'],
     });
 };

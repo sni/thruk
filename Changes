@@ -15,6 +15,7 @@ next:
             - outages: fix filtering by host/service query
             - fix double encoded error messages
             - performance improvements
+            - fix stats/totals queries using custom variable filters
           - Node-Control:
             - prevent running multiple updates from cron in parallel
           - Reports:
