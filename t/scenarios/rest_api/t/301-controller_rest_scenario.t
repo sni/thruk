@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 454;
+    plan tests => 479;
 
     use lib('t');
     require TestUtils;
@@ -27,6 +27,14 @@ my $pages = [{
         like         => ['Command successfully submitted'],
     }, {
         url          => '/services/localhost/Disk%20%2Fvar%2Flog/cmd/schedule_forced_svc_check',
+        post         => { 'start_time' => 'now' },
+        like         => ['Command successfully submitted'],
+    }, {
+        url          => '/services/localhost/Http/cmd/schedule_forced_svc_check',
+        post         => { 'start_time' => 'now' },
+        like         => ['Command successfully submitted'],
+    }, {
+        url          => '/services/localhost/Https/cmd/schedule_forced_svc_check',
         post         => { 'start_time' => 'now' },
         like         => ['Command successfully submitted'],
     }, {
@@ -330,6 +338,12 @@ for my $test (@{$pages}) {
         'url'          => '/thruk/r/services?description=Disk%20%2Fvar%2Flog&columns=`/var/log`',
         'content_type' => 'application/json; charset=utf-8',
         'like'         => ['/var/log', '231490977792'],
+    );
+
+    TestUtils::test_page(
+        'url'          => '/thruk/r/services?description=Ping&columns=rta*0,rta/0',
+        'content_type' => 'application/json; charset=utf-8',
+        'like'         => ['"rta\*0" : 0', '"rta/0" : ""'],
     );
 }
 

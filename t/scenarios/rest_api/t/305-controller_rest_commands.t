@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/305-controller_rest_commands.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 1083;
+    plan tests => 1069;
 
     use lib('t');
     require TestUtils;
@@ -47,6 +47,7 @@ for my $type (sort keys %{$cmds}) {
         next if $cmd eq 'del_downtime';
         next if $cmd =~ m/^shutdown_pro/mx;
         next if $cmd =~ m/^restart_pro/mx;
+        next if $cmd =~ m/^stop_exec/mx;
         my $test = {
             'content_type' => 'application/json; charset=utf-8',
             'url'          => '/thruk/r/'.$rest_path.'/cmd/'.$cmd,

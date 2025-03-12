@@ -1125,7 +1125,7 @@ sub _apply_calc_column {
         if(   $op eq '+') { $res += $val; }
         elsif($op eq '-') { $res -= $val; }
         elsif($op eq '*') { $res *= $val; }
-        elsif($op eq '/') { if($res) { $res = $res / $val; } else { $res = ''; } } # avoid division by zero
+        elsif($op eq '/') { if($val) { $res = $res / $val; } else { $res = ''; } } # avoid division by zero
         else { die("unknown operator: $op in '$expr'"); }
     }
 
@@ -1149,7 +1149,7 @@ sub _get_calc_required_columns {
 
     my $extra = [];
     for my $col (@{get_request_columns($c, STRUCT) || []}) {
-        if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] eq '_calc') {
+        if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] =~ m/^(_maybe_calc|_calc)$/mx) {
             my $arg = $col->{'func'}->[0]->[1]->[0];
             my @token = split(/\s*([\+\*\-\/])\s*/mx, $arg);
             for my $t (@token) {
