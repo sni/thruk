@@ -25,12 +25,12 @@
 </div>
 [% END %]
 
-<div class="card min-w-[420px] max-w-[900px] w-full overflow-hidden mx-auto mt-2">
+<div class="card min-w-[420px] w-fit overflow-hidden mx-auto mt-2">
   <div class="head p-0">
     <span class="tabs text-center font-medium text-base active" id="sub_1" onclick="set_sub(1, 'user')">User Profile</span>
     <span class="tabs text-center font-medium text-base" id="sub_2" onclick="set_sub(2, 'apikeys')">API Keys</span>
   </div>
-  <div class="body sub_1">
+  <div class="body sub_1 max-w-[900px] ">
     <table class="cellspacing w-full table-fixed">
       <tr>
         <th class="w-40">Username</th>
@@ -79,10 +79,10 @@
   </div>
 
 
-  <div class="head sub_1">
+  <div class="head sub_1 max-w-[900px]">
     <h3>Timezone</h3>
   </div>
-  <div class="body sub_1">
+  <div class="body sub_1 max-w-[900px]">
     <table class="cellspacing w-full table-fixed">
       <tr>
         <th class="w-40 align-top">Set Timezone</th>
@@ -115,10 +115,10 @@
 
 
   [% IF c.config.exists('use_feature_configtool') && c.config.use_feature_configtool && !c.config.disable_user_password_change %]
-  <div class="head sub_1">
+  <div class="head sub_1 max-w-[900px]">
     <h3>Password</h3>
   </div>
-  <div class="body sub_1">
+  <div class="body sub_1 max-w-[900px]">
     <table class="cellspacing w-full table-fixed">
     <tr>
       <th class="w-40">Change Password</th>
@@ -130,10 +130,10 @@
   </div>
   [% END %]
 
-  <div class="head sub_1">
+  <div class="head sub_1 max-w-[900px]">
     <h3>Advanced Settings</h3>
   </div>
-  <div class="body sub_1">
+  <div class="body sub_1 max-w-[900px]">
     <table class="cellspacing w-full table-fixed">
       <tr>
         <th class="w-40 align-top">Debug Profiles</th>
@@ -216,8 +216,8 @@
   <div class="head sub_2" style="display: none;">
     <h3>API Keys</h3>
   </div>
-  <div class="overflow-auto sub_2" style="display: none;">
-    <table class="innercellborder w-full">
+  <div class="overflow-auto w-full sub_2" style="display: none;">
+    <table class="sub_2 innercellborder w-full" style="display: none;">
       <tr>
         <th class="text-center">Superuser</th>
         <th>Role Restriction</th>
