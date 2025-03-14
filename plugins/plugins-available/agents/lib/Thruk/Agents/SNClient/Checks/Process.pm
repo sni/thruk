@@ -116,7 +116,7 @@ sub get_checks {
                 }
             }
 
-            my $user = Thruk::Utils::Agents::check_wildcard_match($p->{'username'}, ($cfg->{'user'} // 'ANY'));
+            my $user = Thruk::Utils::Agents::check_wildcard_match(($p->{'username'}//''), ($cfg->{'user'} // 'ANY'));
             next unless $user;
             if($user ne 'ANY') {
                 my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "username", $user);
