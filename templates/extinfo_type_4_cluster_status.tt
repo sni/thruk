@@ -22,6 +22,7 @@
 
   <table class="cellspacing innercellborder">
     <tr>
+      <th></th>
       <th>Node</th>
       <th>Status</th>
       <th>Response Time</th>
@@ -31,6 +32,7 @@
     </tr>
     [% FOREACH n = c.cluster.nodes %]
     <tr id="row_node_[% loop.index %]">
+      <td class="text-center px-1">[% IF c.cluster.is_it_me(n) %]<i class="fa-solid fa-arrow-right" title="this node served the current request."></i>[% END %]</td>
       <td><a href="[% n.node_url %]" target="_blank">[% n.node_url %]</a></td>
       <td style="text-align: center;">
         [% maint = c.cluster.maint(n) %]
