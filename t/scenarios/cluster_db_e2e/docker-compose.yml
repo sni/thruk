@@ -11,7 +11,7 @@ services:
         - "--entrypoints.web.address=:80"
         - "--providers.docker.exposedbydefault=false"
     ports:
-        - "127.0.0.3:60080:80"
+        - "60080:80"
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -30,7 +30,7 @@ services:
         - ../../../:/thruk:ro
         - ./omd:/provision:ro
     ports:
-        - "127.0.0.3:60557:6557"
+        - "60557:6557"
 
   thruk:
     build: thruk/

@@ -707,7 +707,7 @@ sub add_cached_defaults {
 =cut
 sub delayed_proc_info_update {
     my($c) = @_;
-    my $cached_data = $c->cache->get->{'global'} || {};
+    my $cached_data = $c->cache->get('global') || {};
     set_processinfo($c, ADD_SAFE_DEFAULTS, $cached_data);
     return;
 }

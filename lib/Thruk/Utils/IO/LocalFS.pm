@@ -17,7 +17,8 @@ use Cpanel::JSON::XS ();
 use Cwd qw/abs_path/;
 use Errno qw(EEXIST);
 use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
-use File::Copy qw/move copy/;
+use File::Copy ();
+use Storable ();
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 use Thruk::Utils::IO ();
@@ -279,6 +280,54 @@ sub unlink {
 
 ##############################################
 
+=head2 move
+
+  move($from, $to)
+
+move file to new location
+
+=cut
+
+sub move {
+    my($from, $to) = @_;
+
+    my $t1 = [gettimeofday];
+
+    File::Copy::move($from, $to);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
+    return 1;
+}
+
+##############################################
+
+=head2 copy
+
+  copy($from, $to)
+
+copy file to new location
+
+=cut
+
+sub copy {
+    my($from, $to) = @_;
+
+    my $t1 = [gettimeofday];
+
+    File::Copy::copy($from, $to);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
+    return 1;
+}
+
+##############################################
+
 =head2 ensure_permissions
 
   ensure_permissions($mode, $path)
@@ -447,9 +496,9 @@ sub file_lock {
                     # we have to move and copy the file itself, otherwise
                     # the orphaned process may overwrite the file
                     # and the later flock() might hang again
-                    copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
-                    move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
-                    move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
+                    File::Copy::copy($file, $file.'.copy') or confess("cannot copy file $file: $!");
+                    File::Copy::move($file, $file.'.orphaned') or confess("cannot move file $file to .orphaned: $!");
+                    File::Copy::move($file.'.copy', $file) or confess("cannot move file ".$file.".copy: $!");
                     CORE::unlink($file.'.orphaned');
                     _warn("removed orphaned lock for ".$file) unless $ENV{'TEST_IO_NOWARNINGS'};
                     $retrys = 0; # start over...
@@ -538,6 +587,28 @@ sub file_exists {
 
 ##############################################
 
+=head2 folder_exists
+
+  folder_exists($path)
+
+returns true if the folder exists
+
+=cut
+
+sub folder_exists {
+    my($path) = @_;
+    my $t1 = [gettimeofday];
+
+    my $rc = -d $path;
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+    return $rc;
+}
+
+##############################################
+
 =head2 file_not_empty
 
   file_not_empty($path)
@@ -593,6 +664,36 @@ remove empty folder
 sub rmdir {
     my($path) = @_;
     return(rmdir($path));
+}
+
+##############################################
+
+=head2 storable_store
+
+  storable_store($data, $filename)
+
+Uses Storable to store data to disk.
+
+=cut
+
+sub storable_store {
+    my($data, $file) = @_;
+    return(Storable::store($data, $file));
+}
+
+##############################################
+
+=head2 storable_retrieve
+
+  storable_retrieve($file)
+
+Uses Storable to retrieve data from disk.
+
+=cut
+
+sub storable_retrieve {
+    my($file) = @_;
+    return(Storable::retrieve($file));
 }
 
 ##############################################
@@ -666,7 +767,7 @@ sub json_store {
     }
 
 
-    move($tmpfile, $file) or confess("cannot replace $file with $tmpfile: $!");
+    File::Copy::move($tmpfile, $file) or confess("cannot replace $file with $tmpfile: $!");
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
@@ -841,8 +942,9 @@ create file if not exists and update timestamp
 
 =cut
 sub touch {
-    my($file) = @_;
-    &write($file, "", Time::HiRes::time(), 1);
+    my($file, $mtime) = @_;
+    $mtime = Time::HiRes::time() unless $mtime;
+    &write($file, "", $mtime, 1);
     return;
 }
 

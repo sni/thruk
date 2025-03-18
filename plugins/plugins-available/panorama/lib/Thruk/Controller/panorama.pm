@@ -1710,7 +1710,7 @@ sub _task_site_status {
     my($c) = @_;
 
     if(!$c->stash->{'pi_detail'} || scalar keys %{$c->stash->{'pi_detail'}} == 0) {
-        my $cached_data = $c->cache->get->{'global'} || {};
+        my $cached_data = $c->cache->get('global') || {};
         Thruk::Action::AddDefaults::set_processinfo($c, undef, undef, $cached_data, 1);
     }
 

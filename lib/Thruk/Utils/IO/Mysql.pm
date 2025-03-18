@@ -23,7 +23,12 @@ use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
 ##############################################
+
+my $table_name = 'thruk_var_files';
+
+##############################################
 # TODO:
+#    - check stdout/stderr of jobs
 #    - check reports log files
 #    - check cron.log
 #    - check why mtime has no milliseconds
@@ -112,7 +117,7 @@ sub _tables_exist {
 
     # check if our tables exist
     my $dbh = $self->_dbh;
-    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "files"')};
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$table_name.'"')};
     if(scalar @tables >= 1) {
         return 1;
     }
@@ -125,7 +130,7 @@ sub _tables_exist {
 sub _drop_tables {
     my($self) = @_;
     my $dbh = $self->_dbh;
-    $dbh->do("DROP TABLE IF EXISTS `files`") || confess $dbh->errstr;
+    $dbh->do("DROP TABLE IF EXISTS `".$table_name."`") || confess $dbh->errstr;
     return;
 }
 
@@ -134,8 +139,8 @@ sub _create_tables {
     my($self) = @_;
     my $dbh = $self->_dbh;
     my @statements = (
-        "DROP TABLE IF EXISTS `files`",
-        "CREATE TABLE `files` (
+        "DROP TABLE IF EXISTS `".$table_name."`",
+        "CREATE TABLE `".$table_name."` (
           path varchar(255) NOT NULL,
           mtime decimal(14,3) DEFAULT NULL,
           permission varchar(5),
@@ -227,7 +232,7 @@ sub saferead {
     my $t1 = [gettimeofday];
 
     my $dbh  = $self->_dbh;
-    my $data = $dbh->selectcol_arrayref("SELECT content FROM files WHERE path = ".$dbh->quote($path)." LIMIT 1");
+    my $data = $dbh->selectcol_arrayref("SELECT content FROM ".$table_name." WHERE path = ".$dbh->quote($path)." LIMIT 1");
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
@@ -304,11 +309,11 @@ sub write {
 
     $content = $dbh->quote($content);
     if($append) {
-        $dbh->do("INSERT INTO files (path,content,mtime)"
+        $dbh->do("INSERT INTO ".$table_name." (path,content,mtime)"
                 ." VALUES(".$dbh->quote($path).", ".$content.", ".$mtime.")"
                 ." ON DUPLICATE KEY UPDATE mtime=".$mtime.",content=CONCAT(content, ".$content.")");
     } else {
-        $dbh->do("INSERT INTO files (path,content,mtime)"
+        $dbh->do("INSERT INTO ".$table_name." (path,content,mtime)"
                 ." VALUES(".$dbh->quote($path).", ".$content.", ".$mtime.")"
                 ." ON DUPLICATE KEY UPDATE mtime=".$mtime.",content=".$content);
     }
@@ -334,13 +339,64 @@ sub unlink {
     my $t1 = [gettimeofday];
 
     my $dbh = $self->_dbh;
-    $dbh->do("DELETE FROM files WHERE path = ".$dbh->quote($path));
+    $dbh->do("DELETE FROM ".$table_name." WHERE path = ".$dbh->quote($path));
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
     $c->stash->{'total_io_time'} += $elapsed if $c;
 
     return 1;
+}
+
+
+##############################################
+
+=head2 move
+
+  move($from, $to)
+
+move file to new location
+
+=cut
+
+sub move {
+    my($self, $from, $to) = @_;
+
+    my $t1 = [gettimeofday];
+
+    my $dbh = $self->_dbh;
+    $dbh->do("UPDATE ".$table_name." SET path = ".$dbh->quote($to)." WHERE path = ".$dbh->quote($from));
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
+    return 1;
+}
+
+##############################################
+
+=head2 copy
+
+  copy($from, $to)
+
+copy file to new location
+
+=cut
+
+sub copy {
+    my($self, $from, $to) = @_;
+
+    my $t1 = [gettimeofday];
+
+    my $data = &read($from);
+    my $rc   = &write($to, $data);
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+
+    return($rc);
 }
 
 ##############################################
@@ -358,7 +414,36 @@ sub file_exists {
     my $t1 = [gettimeofday];
 
     my $dbh  = $self->_dbh;
-    my $data = $dbh->selectcol_arrayref("SELECT path FROM files WHERE path = ".$dbh->quote($path)." LIMIT 1");
+    my $data = $dbh->selectcol_arrayref("SELECT path FROM ".$table_name." WHERE path = ".$dbh->quote($path)." LIMIT 1");
+
+    my $elapsed = tv_interval($t1);
+    my $c = $Thruk::Globals::c || undef;
+    $c->stash->{'total_io_time'} += $elapsed if $c;
+    return(1) if scalar @{$data} > 0;
+    ## no critic
+    $! = &Errno::ENODATA;
+    ## use critic
+    return(0);
+}
+
+##############################################
+
+=head2 folder_exists
+
+  folder_exists($path)
+
+returns true if the folder exists
+
+=cut
+
+sub folder_exists {
+    my($self, $path) = @_;
+    my $t1 = [gettimeofday];
+
+    $path =~ s/\/$//gmxo;
+
+    my $dbh  = $self->_dbh;
+    my $data = $dbh->selectcol_arrayref("SELECT path FROM ".$table_name." WHERE path LIKE '".$path."/%' LIMIT 1");
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
@@ -385,7 +470,7 @@ sub file_not_empty {
     my $t1 = [gettimeofday];
 
     my $dbh  = $self->_dbh;
-    my $data = $dbh->selectcol_arrayref("SELECT length(content) FROM files WHERE path = ".$dbh->quote($path)." AND content != '' LIMIT 1");
+    my $data = $dbh->selectcol_arrayref("SELECT length(content) FROM ".$table_name." WHERE path = ".$dbh->quote($path)." AND content != '' LIMIT 1");
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
@@ -412,7 +497,7 @@ sub stat {
     my $t1 = [gettimeofday];
 
     my $dbh  = $self->_dbh;
-    my $data = $dbh->selectcol_arrayref("SELECT mtime FROM files WHERE path = ".$dbh->quote($path)." LIMIT 1");
+    my $data = $dbh->selectcol_arrayref("SELECT mtime FROM ".$table_name." WHERE path = ".$dbh->quote($path)." LIMIT 1");
 
     my $elapsed = tv_interval($t1);
     my $c = $Thruk::Globals::c || undef;
@@ -465,7 +550,7 @@ sub ensure_permissions {
     }
 
     my $dbh = $self->_dbh;
-    $dbh->do("UPDATE files SET permission = ".$dbh->quote($mode)." WHERE path = ".$dbh->quote($path));
+    $dbh->do("UPDATE ".$table_name." SET permission = ".$dbh->quote($mode)." WHERE path = ".$dbh->quote($path));
 
     return;
 }
@@ -494,7 +579,7 @@ sub file_rlock {
     while($retrys < 3) {
         eval {
             alarm(10);
-            $self->_dbh->do('LOCK TABLES files READ') || confess('Cannot lock_sh file: '.$file.': '.$!);
+            $self->_dbh->do('LOCK TABLES '.$table_name.' READ') || confess('Cannot lock_sh file: '.$file.': '.$!);
         };
         $err = $@;
         alarm(0);
@@ -546,7 +631,7 @@ sub file_lock {
     while($retrys < 3) {
         alarm(10);
         eval {
-            $self->_dbh->do('LOCK TABLES files WRITE') || confess('Cannot lock_ex file: '.$file.': '.$!);
+            $self->_dbh->do('LOCK TABLES '.$table_name.' WRITE') || confess('Cannot lock_ex file: '.$file.': '.$!);
         };
         $err = $@;
         alarm(0);
@@ -597,6 +682,41 @@ sub file_unlock {
     }
 
     return;
+}
+
+##############################################
+
+=head2 storable_store
+
+  storable_store($data, $filename)
+
+Uses Storable to store data to disk.
+
+=cut
+
+sub storable_store {
+    my($self, $data, $file) = @_;
+    my $serialized = Storable::freeze($data);
+    return($self->write($file, $serialized));
+}
+
+##############################################
+
+=head2 storable_retrieve
+
+  storable_retrieve($file)
+
+Uses Storable to retrieve data from disk.
+
+=cut
+
+sub storable_retrieve {
+    my($self, $file) = @_;
+    my $serialized = $self->read($file);
+    if(!defined $serialized) {
+        return;
+    }
+    return(Storable::thaw($serialized));
 }
 
 ##############################################
@@ -652,7 +772,7 @@ sub json_store {
 
     my $dbh = $self->_dbh;
     my $content = $dbh->quote($write_out || $json->encode($data));
-    $dbh->do("INSERT INTO files (path,content,mtime) VALUES(".$dbh->quote($file).", ".$content.", ".$mtime.") ON DUPLICATE KEY UPDATE mtime=".$mtime.",content=".$content);
+    $dbh->do("INSERT INTO ".$table_name." (path,content,mtime) VALUES(".$dbh->quote($file).", ".$content.", ".$mtime.") ON DUPLICATE KEY UPDATE mtime=".$mtime.",content=".$content);
 
     if(!$options->{'skip_validate'}) {
         my $config = Thruk::Config::get_config();
@@ -808,8 +928,9 @@ create file if not exists and update timestamp
 
 =cut
 sub touch {
-    my($self, $file) = @_;
-    $self->write($file, "", Time::HiRes::time(), 1);
+    my($self, $file, $mtime) = @_;
+    $mtime = Time::HiRes::time() unless $mtime;
+    $self->write($file, "", $mtime, 1);
     return;
 }
 
@@ -832,7 +953,7 @@ sub find_files {
 
 # TODO: should not list sub folders...
     my $dbh = $self->_dbh;
-    my @res = @{$dbh->selectall_arrayref("SELECT path FROM files WHERE path LIKE '".$dir."/%'", { Slice => {} })};
+    my @res = @{$dbh->selectall_arrayref("SELECT path FROM ".$table_name." WHERE path LIKE '".$dir."/%'", { Slice => {} })};
     for my $r (@res) {
         my $file = $r->{'path'};
         # if its a file, make sure it matches our pattern
@@ -863,7 +984,7 @@ sub remove_folder {
     $dir =~ s/'//gmxo;
 
     my $dbh = $self->_dbh;
-    $dbh->do("DELETE FROM files WHERE path LIKE '".$dir."/%'");
+    $dbh->do("DELETE FROM ".$table_name." WHERE path LIKE '".$dir."/%'");
 
     return;
 }

@@ -80,8 +80,6 @@
     until: result.status == 200
     retries: 180
     delay: 1
-  - name: "thruk filesystem import"
-    shell: sudo su - demo -c "thruk filesystem import"
   - name: "thruk cron install"
     shell: sudo su - demo -c "thruk cron install"
 # TODO: fix

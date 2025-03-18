@@ -1,13 +1,13 @@
 Entry Point
 ===========
 
- - http://127.0.0.3:60080/demo/thruk/ (traefik loadbalancer)
+ - http://127.0.0.1:60080/demo/thruk/ (traefik loadbalancer)
  - Login is omdadmin / omd
 
 Setup
 =====
 
- - 2 clustered thruk nodes based on the thruk/ folder
+ - 3 clustered thruk nodes based on the thruk/ folder
  - 1 traefik load balancer
  - 1 omd site used as backend for the thruk nodes
      also used as mysql database

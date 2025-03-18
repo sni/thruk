@@ -4,7 +4,6 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
-use Storable ();
 
 use Monitoring::Config::Object ();
 use Thruk::Utils ();
@@ -814,7 +813,7 @@ sub _get_extra_service_checks {
         next unless Thruk::Utils::Agents::check_wildcard_match($tags, ($chk->{'tags'} // $chk->{'tag'} // 'ANY'));
 
         # create a copy, because it will be changed in the process of creating checks
-        my $svc = Storable::dclone($chk);
+        my $svc = Thruk::Utils::dclone($chk);
 
         # args should be a list
         $svc->{'args'} = Thruk::Base::list($svc->{'args'}) if($svc->{'args'});

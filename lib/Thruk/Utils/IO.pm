@@ -13,10 +13,12 @@ IO Utilities Collection for Thruk
 use warnings;
 use strict;
 use Carp qw/confess longmess/;
+use File::Copy ();
 use IO::Select ();
 use IPC::Open3 qw/open3/;
 use POSIX ":sys_wait_h";
 use Scalar::Util 'blessed';
+use Storable ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Base ();
@@ -33,9 +35,6 @@ $Thruk::Utils::IO::var_db   = undef;
 eval {
     require Clone;
 };
-if($@) {
-    require Storable;
-}
 
 ##############################################
 =head1 METHODS
@@ -214,6 +213,69 @@ sub unlink {
 
 ##############################################
 
+=head2 move
+
+  move($from, $to)
+
+move file to new location
+
+=cut
+
+sub move {
+    my($from , $to) = @_;
+
+    # if both are local, take a shortcut
+    my($from_r) = _is_remote_fs($from);
+    my($to_r)   = _is_remote_fs($to);
+    if(!$from_r && !$to_r) {
+        return(File::Copy::move($from, $to));
+    }
+
+    # target and destination use same handler
+    if($from_r && $to_r) {
+        handle_io("move", 0, $from, [$from, $to]);
+    }
+
+    # target and destination are different
+    my $data = &read($from);
+    &write($to, $data);
+    &unlink($from);
+
+    return 1;
+}
+
+##############################################
+
+=head2 copy
+
+  copy($from, $to)
+
+copy file to new location
+
+=cut
+
+sub copy {
+    my($from , $to) = @_;
+
+    # if both are local, take a shortcut
+    my($from_r) = _is_remote_fs($from);
+    my($to_r)   = _is_remote_fs($to);
+    if(!$from_r && !$to_r) {
+        return(File::Copy::copy($from, $to));
+    }
+
+    # target and destination use same handler
+    if($from_r && $to_r) {
+        handle_io("copy", 0, $from, [$from, $to]);
+    }
+
+    # target and destination are different
+    my $data = &read($from);
+    return(&write($to, $data));
+}
+
+##############################################
+
 =head2 file_exists
 
   file_exists($path)
@@ -225,6 +287,21 @@ returns true if the file exists
 sub file_exists {
     my($path) = @_;
     return(handle_io("file_exists", 0, $path, \@_));
+}
+
+##############################################
+
+=head2 folder_exists
+
+  folder_exists($path)
+
+returns true if the folder exists
+
+=cut
+
+sub folder_exists {
+    my($path) = @_;
+    return(handle_io("folder_exists", 0, $path, \@_));
 }
 
 ##############################################
@@ -330,6 +407,36 @@ unlocks file lock previously with file_lock exclusivly. Returns nothing.
 sub file_unlock {
     my($file) = @_;
     return(handle_io("file_unlock", 0, $file, \@_));
+}
+
+##############################################
+
+=head2 storable_store
+
+  storable_store($data, $filename)
+
+Uses Storable to store data to disk.
+
+=cut
+
+sub storable_store {
+    my($data, $file) = @_;
+    return(handle_io("storable_store", 0, $file, \@_));
+}
+
+##############################################
+
+=head2 storable_retrieve
+
+  storable_retrieve($file)
+
+Uses Storable to retrieve data from disk.
+
+=cut
+
+sub storable_retrieve {
+    my($file) = @_;
+    return(handle_io("storable_retrieve", 0, $file, \@_));
 }
 
 ##############################################
@@ -491,19 +598,29 @@ wrapper to io functions
 =cut
 sub handle_io {
     my($method, $idx, $path, $args) = @_;
+    my($remotepath, $hdl) = _is_remote_fs($path);
+    if($remotepath && $hdl) {
+        my @arg_copy = @{$args}; # required to not override source references
+        $arg_copy[$idx] = $path;
+        return($hdl->$method(@arg_copy));
+    }
+    my $f = \&{"Thruk::Utils::IO::LocalFS::".$method};
+    return(&{$f}(@{$args}));
+}
+
+########################################
+sub _is_remote_fs {
+    my($path) = @_;
     if($Thruk::Utils::IO::var_path && !$ENV{'THRUK_FORCE_LOCAL_VAR_PATH'}) {
         my $var_path = $Thruk::Utils::IO::var_path;
         if($path !~ m=/local/=mx && $path =~ s=^$var_path=VAR::=mx) {
             my $hdl = ($Thruk::Utils::IO::var_db //= _init_var_db());
-                if($hdl && $hdl ne "-1") {
-                my @arg_copy = @{$args}; # required to not override source references
-                $arg_copy[$idx] = $path;
-                return($hdl->$method(@arg_copy));
+            if($hdl && $hdl ne "-1") {
+                return($path, $hdl);
             }
         }
     }
-    my $f = \&{"Thruk::Utils::IO::LocalFS::".$method};
-    return(&{$f}(@{$args}));
+    return;
 }
 
 ########################################
@@ -552,20 +669,20 @@ sub sync_db_fs {
     }
 
     local $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'} = 1 if $from eq 'fs';
-    my $files = Thruk::Utils::IO::find_files($c->config->{'var_path'});
+    my $files = &find_files($c->config->{'var_path'});
     delete $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'};
 
     for my $file (sort @{$files}) {
         _debugs("writing %s %s:", $to eq 'db' ? 'to db' : 'to local fs', $file);
         local $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'} = 1 if $from eq 'fs';
-        my @stat    = Thruk::Utils::IO::stat($file);
-        my $content = Thruk::Utils::IO::saferead($file);
+        my @stat    = &stat($file);
+        my $content = &saferead($file);
         delete $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'};
 
         local $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'} = 1 if $to eq 'fs';
         my $dir = Thruk::Base::dirname($file);
-        Thruk::Utils::IO::mkdir_r($dir);
-        Thruk::Utils::IO::write($file, $content, $stat[9]);
+        &mkdir_r($dir);
+        &write($file, $content, $stat[9]);
         _debug(" OK");
         delete $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'};
     }
@@ -573,12 +690,12 @@ sub sync_db_fs {
     # remove all files which do not exist on source
     if($opts->{'delete'}) {
         local $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'} = 1 if $to eq 'fs';
-        my $destfiles = Thruk::Utils::IO::find_files($c->config->{'var_path'});
+        my $destfiles = &find_files($c->config->{'var_path'});
         my $existing = Thruk::Base::array2hash($files);
 
         for my $file (sort @{$destfiles}) {
             _debug("removing %s:", $file);
-            Thruk::Utils::IO::unlink($file) if !defined $existing->{$file};
+            &unlink($file) if !defined $existing->{$file};
         }
         delete $ENV{'THRUK_FORCE_LOCAL_VAR_PATH'};
     }

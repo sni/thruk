@@ -18,7 +18,6 @@ use Data::Dumper qw/Dumper/;
 use File::Copy qw/move copy/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
-use Storable ();
 use Time::HiRes qw/time/;
 
 use Thruk::Action::AddDefaults ();
@@ -202,7 +201,7 @@ sub perl {
 
         # save stash
         _clean_unstorable_refs($c->stash);
-        Storable::store(\%{$c->stash}, $dir."/stash");
+        Thruk::Utils::IO::storable_store(\%{$c->stash}, $dir."/stash");
         Thruk::Utils::IO::write($dir."/stash.dump", Dumper($c->stash)) if Thruk::Base->debug;
         die($err) if $err; # die again after cleanup
     };
@@ -212,6 +211,7 @@ sub perl {
     wrap_prefix_output_stop();
     if($conf->{'log_archive'}) {
         eval {
+            # TODO: check
             copy($conf->{'log_archive'}, $dir."/stdout.new") or die("copy failed: $!");
             unlink($dir."/stdout");
             move($dir."/stdout.new", $dir."/stdout");
@@ -420,7 +420,7 @@ sub get_status {
     confess("got no id") unless $id;
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
-    return unless -d $dir;
+    return unless Thruk::Utils::IO::folder_exists($dir);
 
     _reap_pending_childs();
 
@@ -522,7 +522,7 @@ sub get_result {
         return unless $user eq $c->stash->{'remote_user'};
     }
 
-    if(!-d $dir) {
+    if(!Thruk::Utils::IO::folder_exists($dir)) {
         return('', 'no such job: '.$id, 0, $dir, undef, 1, undef);
     }
 
@@ -562,14 +562,14 @@ sub get_result {
         $end[9] = Time::HiRes::time();
         $err    = 'job was killed';
         _error('killed job: '.$dir);
+# TODO: check
         my $folder = Thruk::Utils::IO::cmd("ls -la $dir");
         _error($folder);
     }
 
     my $time = $end[9] - $start[9];
 
-# TODO: ...
-    my $stash = -f $dir."/stash" ? Storable::retrieve($dir."/stash") : undef;
+    my $stash = Thruk::Utils::IO::file_exists($dir."/stash") ? Thruk::Utils::IO::storable_retrieve($dir."/stash") : undef;
 
     my $rc = Thruk::Utils::IO::saferead($dir."/rc") // -1;
     chomp($rc);
@@ -995,13 +995,13 @@ sub init_external {
     my $cutoff = 5;
     my $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, $cutoff);
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
-    while(-d $dir) {
+    while(Thruk::Utils::IO::folder_exists($dir)) {
         $cutoff++;
         $id  = substr(Thruk::Utils::Crypt::hexdigest($$."-".Time::HiRes::time()), 0, $cutoff);
         $dir = $c->config->{'var_path'}."/jobs/".$id;
     }
     for my $mdir ($c->config->{'var_path'}, $c->config->{'var_path'}."/jobs", $dir) {
-        if(! -d $mdir) {
+        if(!Thruk::Utils::IO::folder_exists($mdir)) {
             Thruk::Utils::IO::mkdir($mdir) or do {
                 Thruk::Utils::set_message( $c, 'fail_message', 'background job failed to start, mkdir failed '.$mdir.': '.$! );
                 die("mkdir $mdir failed: $!");

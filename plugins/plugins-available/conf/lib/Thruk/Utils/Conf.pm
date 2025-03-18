@@ -5,8 +5,6 @@ use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Scalar::Util qw/weaken/;
-use Storable qw/store retrieve/;
-use Time::HiRes qw(stat);
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Constants qw/:peer_states/;
@@ -43,7 +41,7 @@ sub set_object_model {
     $c->stash->{'param_backend'} = $peer_key if $peer_key;
     $peer_key = $c->stash->{'param_backend'} if $c->stash->{'param_backend'};
     delete $c->stash->{set_object_model_err};
-    my $cached_data = $c->cache->get->{'global'} || {};
+    my $cached_data = $c->cache->get('global') || {};
     Thruk::Action::AddDefaults::set_processinfo($c, 2) unless $c->stash->{'processinfo_time'}; # Thruk::Constants::ADD_CACHED_DEFAULTS
     $c->stash->{has_obj_conf} = scalar keys %{set_backends_with_obj_config($c, $peer_key)};
 
@@ -673,8 +671,8 @@ sub store_model_retention {
             'release_date' => $c->config->{'released'},
             'version'      => Thruk::Config::get_thruk_version(),
         };
-        store($data, $file);
-        $c->config->{'conf_retention'}      = [stat($file)];
+        Thruk::Utils::IO::storable_store($data, $file);
+        $c->config->{'conf_retention'}      = [Thruk::Utils::IO::stat($file)];
         $c->config->{'conf_retention_file'} = $file;
         $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
@@ -720,7 +718,7 @@ sub get_model_retention {
     }
 
     # don't read retention file when current data is newer
-    my @stat = stat($file);
+    my @stat = Thruk::Utils::IO::stat($file);
     if( $model->cache_exists($backend)
         and defined $c->config->{'conf_retention'}
         and $stat[9] <= $c->config->{'conf_retention'}->[9]
@@ -744,7 +742,7 @@ sub get_model_retention {
     # try to retrieve retention data
     my $rc = 1;
     eval {
-        my $data = retrieve($file);
+        my $data = Thruk::Utils::IO::storable_retrieve($file);
         if(defined $data->{'release_date'}
            and $data->{'release_date'} eq $c->config->{'released'}
            and defined $data->{'version'}

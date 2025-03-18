@@ -12,7 +12,6 @@ Cache Utilities Collection for Thruk
 
 use warnings;
 use strict;
-use Storable qw(retrieve);
 
 use Thruk::Utils::IO ();
 
@@ -157,7 +156,7 @@ update file stat to current date
 sub touch {
     my($self) = @_;
     my $mtime = time();
-    utime($mtime, $mtime, $self->{'_cachefile'});
+    Thruk::Utils::IO::touch($self->{'_cachefile'}, $mtime);
     return;
 }
 
@@ -197,7 +196,7 @@ store cache to disk
 sub _store {
     my($self) = @_;
     Thruk::Utils::IO::json_lock_store($self->{'_cachefile'}, $self->{'_data'} // {});
-    my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
+    my @stat = Thruk::Utils::IO::stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
     $self->{'_stat'} = \@stat;
     return;
 }
@@ -221,7 +220,7 @@ sub _retrieve {
     if($err) {
         # try old storable format
         eval {
-            $data = retrieve($self->{'_cachefile'});
+            $data = Thruk::Utils::IO::storable_retrieve($self->{'_cachefile'});
         };
         # clear error if read succeeded
         $err = undef unless $@;

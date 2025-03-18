@@ -130,7 +130,7 @@ sub set_dynamic_attributes {
 
     if($use_cached) {
         _debug("using cached user data") if Thruk::Base->verbose;
-        my $cache = $c->cache->get->{'users'};
+        my $cache = $c->cache->get('users');
         $data = {};
         if(ref $cache eq 'HASH') {
             $data = $cache->{$username} || {};
