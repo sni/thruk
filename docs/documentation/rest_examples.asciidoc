@@ -49,7 +49,7 @@ Putting a service into downtime can be done by either the `thruk` cli tool:
 or by sending a http request, for example with curl:
 
 ------
-  %> curl -d "start_time=now" -d "end_time=+60m" -d "comment_data='downtime comment'" http://0:3000/thruk/r/services/<host>/<svc>/cmd/schedule_svc_downtime
+  %> curl -d "start_time=now" --data-urlencode "end_time=+60m" -d "comment_data='downtime comment'" http://0:3000/thruk/r/services/<host>/<svc>/cmd/schedule_svc_downtime
 ------
 
 Note that you don't have to set all parameters, only the required ones are

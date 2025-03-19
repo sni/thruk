@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 33;
+plan tests => 40;
 
 ###########################################################
 # test thruks script path
@@ -58,4 +58,20 @@ TestUtils::test_command({
         my $duration = $t2 - $t1;
         ok($duration == 60, "downtime duration should be 60s but is ".$duration."s");
     }
+
+    # then with curl
+    $test = {
+        cmd    => '/usr/bin/env curl -s -u testuser:testuser -d "comment_data=test" --data-urlencode "end_time=+1m" http://localhost:5000/demo/thruk/r/hosts/localhost/cmd/schedule_host_downtime',
+        like => ['/COMMAND/', '/Command successfully submitted/', '/SCHEDULE_HOST_DOWNTIME/'],
+    };
+    TestUtils::test_command($test);
+    ($t1, $t2) = ($test->{'stdout'} =~ m/SCHEDULE_HOST_DOWNTIME;localhost;(\d+);(\d+);/gmx);
+    if(!$t1) {
+        fail("cannot parse timestamps from stdout: ".$test->{'stdout'});
+    } else {
+        my $duration = $t2 - $t1;
+        ok($duration == 60, "downtime duration should be 60s but is ".$duration."s");
+    }
 }
+
+###########################################################
