@@ -10196,6 +10196,7 @@ function set_histou_img(start, end, id, source, skip_hash) {
     if(theme.match(/dark/i)) {
         newUrl = newUrl.replace("&theme=light", "")
         newUrl = newUrl+'&theme=dark';
+        histou_url = histou_url.replace("&theme=light", "&theme=dark");
     } else {
         newUrl = newUrl.replace("&theme=light", "")
         newUrl = newUrl+'&theme=light';

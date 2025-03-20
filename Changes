@@ -9,6 +9,7 @@ next:
           - improve randomness when generating uuids
           - migrate sound files to webm
           - add test page for sound file in user preferences
+          - make grafana popups and links use dark mode automatically
           - Rest:
             - add peer_section attribute
             - outages: fix extracting timeperiod
