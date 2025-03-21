@@ -75,6 +75,20 @@ use constant {
 
 ##########################################################
 
+END {
+    # close all connections at the end
+    return unless $INC{"DBI.pm"};
+    DBI->visit_handles(sub {
+        my($dbh) = @_;
+        if($dbh->{'Type'} eq 'db') {
+            $dbh->disconnect;
+        }
+        return 1;
+    });
+}
+
+##########################################################
+
 =head2 new
 
 create new manager
@@ -161,7 +175,7 @@ try to connect to database and return database handle
 =cut
 sub _dbh {
     my($self) = @_;
-    if(!defined $self->{'mysql'}) {
+    if(!defined $self->{'mysql'} || $self->{'mysql'}->ping()) {
         &timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
         if(!$self->{'modules_loaded'}) {
             load DBI;
@@ -172,7 +186,7 @@ sub _dbh {
         my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
-        $self->{'mysql'} = DBI->connect($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1, mysql_local_infile => 1});
+        $self->{'mysql'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1, mysql_local_infile => 1});
         $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
         $self->{'mysql'}->do("SET myisam_stats_method=nulls_ignored");
         &timing_breakpoint('connected');
