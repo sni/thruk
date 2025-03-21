@@ -11,7 +11,6 @@ const puppeteer = require('puppeteer');
 const os        = require('os');
 const path      = require('path');
 
-
 var url       = process.argv[2];
 var output    = process.argv[3];
 var width     = process.argv[4];
@@ -19,6 +18,9 @@ var height    = process.argv[5];
 var sessionid = process.argv[6];
 var is_report = process.argv[7];
 var waitTimeout = 20000;
+var debug     = false;
+
+let _debug = debug ? console.log : function() {};
 
 // Set XDG_CONFIG_HOME and XDG_CACHE_HOME if not already set (chrome >= ~ 128 does not start otherwise)
 var tempDir = "";
@@ -57,7 +59,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       await browser.close();
       process.exit(2);
     }
-    //console.debug("response:", response.url(), response.status());
+    _debug("response:", response.url(), response.status());
   })
 
   // extract panelId parameter from url
@@ -72,7 +74,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       const response = await page.goto(source_url);
       if(!response.ok()) {
         console.log("fetching url "+source_url+" failed: "+response.status()+" "+response.statusText())
-        //console.log(response.text())
+        _debug(response.text())
         await browser.close();
         process.exit(2);
       }
@@ -108,7 +110,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
         const response = await page.goto(api_url);
         if(!response.ok()) {
           console.log("fetching url "+api_url+" failed: "+response.status()+" "+response.statusText())
-          //console.log(response.text())
+          _debug(response.text())
           await browser.close();
           process.exit(2);
         }
@@ -133,7 +135,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
   const response = await page.goto(url);
   if(!response.ok()) {
     console.log("fetching url "+url+" failed: "+response.status()+" "+response.statusText())
-    //console.log(response.text())
+    _debug(response.text())
     await browser.close();
     process.exit(2);
   }
@@ -166,6 +168,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
       }, async () => {
         if(!errorMsg) {
           errorMsg = "timeout while waiting for chart, export failed";
+          _debug(errorMsg);
           //const pageSourceHTML = await page.content();
           //console.log(pageSourceHTML);
         }
@@ -184,7 +187,7 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
   process.exit(0);
 
   async function createScreenshot(output, page) {
-    //console.debug("creating screenshot");
+    _debug("creating screenshot");
     if(output.match(/\.pdf$/)) {
       // pdf reports in din a4 format
       if(is_report == 1) {
