@@ -112,6 +112,6 @@ TestUtils::test_command({
 # extract text from image and check for a valid graph
 TestUtils::test_command({
     cmd     => '/usr/bin/env tesseract tmp/test.png -',
-    like    => ['/Home/', '/Dashboards/', '/Ping/', '/test/', '/pl-warn/'],
+    like    => ['/Home/', '/Dashboards/', '/Ping/', '/test/', '/acknowledgement/'],
     errlike => undef,
 });
