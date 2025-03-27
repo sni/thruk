@@ -169,4 +169,3 @@ TestUtils::test_page(
     post    => { start_time => 'now' },
     like    => ['Command successfully submitted'],
 );
-
