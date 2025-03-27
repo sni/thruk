@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 287;
+    plan tests => 294;
 
     use lib('t');
     require TestUtils;
@@ -162,3 +162,11 @@ for my $test (@{$pages}) {
     my $page = TestUtils::test_page(%{$test});
     #BAIL_OUT("failed") unless Test::More->builder->is_passing;
 }
+
+# reschedule remaining hosts
+TestUtils::test_page(
+    url     => '/thruk/r/hosts/UPPERCASE/cmd/schedule_forced_host_check',
+    post    => { start_time => 'now' },
+    like    => ['Command successfully submitted'],
+);
+
