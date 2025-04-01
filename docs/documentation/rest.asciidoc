@@ -2149,6 +2149,10 @@ update business processes configuration partially for given number.
 
 remove business processes for given number.
 
+=== POST /thruk/bp/<nr>/refresh
+
+recalculate business processes status for given number.
+
 === GET /thruk/broadcasts
 
 lists broadcasts

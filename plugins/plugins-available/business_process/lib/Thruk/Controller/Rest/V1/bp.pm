@@ -130,5 +130,23 @@ sub _rest_get_thruk_bp_by_id_crud {
 }
 
 ##########################################################
+# REST PATH: POST /thruk/bp/<nr>/refresh
+# recalculate business processes status for given number.
+Thruk::Controller::rest_v1::register_rest_path_v1(['POST'], qr%^/thruk/bp/(\d+)/refresh$%mx, \&_rest_get_thruk_bp_by_id_refresh);
+sub _rest_get_thruk_bp_by_id_refresh {
+    my($c, undef, $nr) = @_;
+    require Thruk::BP::Utils;
+
+    my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $nr, drafts => 1 });
+    if(!$bps->[0]) {
+        return({ 'message' => 'no such business process', code => 404 });
+    }
+    my $bp = $bps->[0];
+    $bp->update_status($c);
+
+    return({ 'message' => 'business process refreshed sucessfully' });
+}
+
+##########################################################
 
 1;

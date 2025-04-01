@@ -7,7 +7,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 51;
+    plan tests => 59;
 
     use lib('t');
     require TestUtils;
@@ -49,7 +49,12 @@ test_page({
     like    => ['"name" : "Test Business Process"', '"id" : "1",', '"state_type" : "both",'],
 });
 
-
+################################################################################
+# update status
+test_page({
+    url     => 'POST /thruk/bp/1/refresh',
+    like    => ['business process refreshed sucessfully'],
+});
 
 ################################################################################
 sub test_page {

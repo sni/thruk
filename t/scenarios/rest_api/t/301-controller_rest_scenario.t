@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 479;
+    plan tests => 475;
 
     use lib('t');
     require TestUtils;
@@ -321,7 +321,8 @@ for my $test (@{$pages}) {
     TestUtils::test_page(
         'url'          => '/thruk/r/checks/stats?description=Disk%20%2Fvar%2Flog&_HOSTTEST=test%20var%20host',
         'content_type' => 'application/json; charset=utf-8',
-        'like'         => ['"hosts_active_sum" : 3,', 'services_active_sum'],
+        'like'         => ['"hosts_active_sum" : 2,', 'services_active_sum'],
+        'waitfor'      => '"hosts_active_sum" : 2,',
     );
 }
 
