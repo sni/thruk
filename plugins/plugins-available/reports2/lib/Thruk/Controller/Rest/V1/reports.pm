@@ -27,6 +27,10 @@ sub _rest_get_thruk_reports {
     require Thruk::Utils::Reports;
 
     my $reports = _clean_reports(Thruk::Utils::Reports::get_report_list($c));
+
+    require Thruk::Utils::Avail;
+    Thruk::Utils::Avail::reset_req_parameters($c);
+
     return $reports;
 }
 
