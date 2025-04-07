@@ -965,7 +965,8 @@ sub _get_subfilter {
 ##########################################################
 # replace column name with correct table column
 sub _replace_column_name {
-    my($self, $col, $val) = @_;
+    my($self, $col, $val, $op) = @_;
+    $op = '=' unless defined $op;
     if($col eq 'contact_name') {
         return("c.name", $val);
     }
@@ -978,7 +979,7 @@ sub _replace_column_name {
             if(scalar @keys == 1) {
                 my $op = $keys[0];
                 $val = $val->{$op};
-                my($col, $id) = $self->_replace_column_name($col, $val);
+                my($col, $id) = $self->_replace_column_name($col, $val, $op);
                 return($col, { $op => $id });
             }
             # no replacement possible
@@ -986,6 +987,9 @@ sub _replace_column_name {
         }
         $self->{'query_meta'}->{'host_lookup'} = _get_host_lookup($self->{'query_meta'}->{'dbh'},undef,$self->{'query_meta'}->{'prefix'}, 1) unless defined $self->{'query_meta'}->{'host_lookup'};
         my $id = $self->{'query_meta'}->{'host_lookup'}->{$val} // -1; # always replace host_name. Using the name leads to zero results but skips the index
+        if($id == -1 && ($op ne '==' && $op ne '!=')) {
+            return($col, $val); # in case of regex matches, fallback to host_name again
+        }
         return('l.host_id', $id);
     }
     return($col, $val);
