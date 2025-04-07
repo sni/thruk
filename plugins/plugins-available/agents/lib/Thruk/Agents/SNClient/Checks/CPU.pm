@@ -31,7 +31,7 @@ sub get_checks {
             'check'     => 'check_cpu',
             'parent'    => 'agent version',
             'info'      => $inventory->{'cpu'}->[0],
-            '_GRAPH_SOURCE' => 'total',
+            '_GRAPH_SOURCE' => 'total 1m',
         };
     }
     if($inventory->{'cpu_utilization'}) {
