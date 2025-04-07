@@ -184,7 +184,7 @@
   </div>
   <div class="mainTableFooter">
     <div class="flex-1 self-center">
-      [% PROCESS _pager_total_items.tt pager = { total_items => data.size } %]
+      [% PROCESS _pager_total_items.tt %]
     </div>
   </div>
 </div>
