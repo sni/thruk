@@ -10193,15 +10193,6 @@ function set_histou_img(start, end, id, source, skip_hash) {
     var getParamTo = "&to=" + (toUnixtime(end)*1000);
     var newUrl = histou_frame_url + getParamFrom + getParamTo + '&panelId='+source;
 
-    if(theme.match(/dark/i)) {
-        newUrl = newUrl.replace("&theme=light", "")
-        newUrl = newUrl+'&theme=dark';
-        histou_url = histou_url.replace("&theme=light", "&theme=dark");
-    } else {
-        newUrl = newUrl.replace("&theme=light", "")
-        newUrl = newUrl+'&theme=light';
-    }
-
     //add timerange to iconlink, so the target graph matches the preview
     jQuery("#histou_graph_link").attr("href", url_prefix + "#" + histou_url + getParamFrom + getParamTo);
 

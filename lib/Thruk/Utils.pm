@@ -1566,7 +1566,8 @@ sub get_histou_url {
         next unless defined $obj->{$type};
         my $regex = $c->config->{'grafana_url_regex'};
         if($obj->{$type} =~ m%$regex%mx) {
-            return(proxifiy_url($c, $obj, $obj->{$type}));
+            my $url = _enhance_histou_url($c, $obj->{$type}, $obj);
+            return(proxifiy_url($c, $obj, $url));
         }
     }
 
@@ -2010,6 +2011,7 @@ sub get_action_url {
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx || $action_url =~ m/\/grafana\//mx) {
+        $action_url = _enhance_histou_url($c, $action_url, $obj);
         my $custvars = get_custom_vars($c, $obj, $obj_prefix);
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
@@ -4252,6 +4254,26 @@ sub get_affected_backends {
         $affected_backends->{$obj->{'peer_key'}} = 1;
     }
     return([sort keys %{$affected_backends}]);
+}
+
+##############################################
+# replaces dark themen in the histou url and
+# sets the spannulls value
+sub _enhance_histou_url {
+    my($c, $url, $obj) = @_;
+
+    return($url) unless $url =~ m/histou.js/mx;
+
+    if(($c->stash->{'theme'}//'') =~ m/dark/mxi) {
+        $url =~ s/\&theme=light/\&theme=dark/gmx;
+    }
+
+    if($obj->{'check_interval'}) {
+        my $interval_length = $c->stash->{'pi_detail'}->{$obj->{'peer_key'}}->{'interval_length'} // 60;
+        $url = $url.'&spannulls='.($obj->{'check_interval'} * $interval_length * 2);
+    }
+
+    return($url);
 }
 
 ##############################################

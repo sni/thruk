@@ -1,8 +1,5 @@
 ﻿[% USE date %]
 [% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/').replace('/d/', '/d-solo/') %]
-[% IF theme.match('/dark/') %]
-  [% histou_url = histou_url.replace('&theme=light', '&theme=dark') %]
-[% END %]
 <script>
   var histou_url        = "[% histou_url %]";
   var histou_frame_url  = "[% histou_frame_url %]";

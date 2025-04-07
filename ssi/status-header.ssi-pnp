@@ -16,15 +16,6 @@ jQuery(document).ready(function() {
         popup_pos_x  = e.pageX - popup_width - 5;
       }
 
-      if(theme.match(/dark/i)) {
-        url = url.replace("&theme=light", "&theme=dark");
-        var link = jQuery(e.target).parent("A").attr("href");
-        if(link) {
-          link = link.replace("&theme=light", "&theme=dark");
-          jQuery(e.target).parent("A").attr("href", link);
-        }
-      }
-
       var showPopup = function(url) {
         jQuery("#tooltip").remove();
         jQuery("body").append("<div id='tooltip'><iframe src='"+url+"' width='"+popup_width+"' height='"+popup_height+"' frameBorder='0' scrolling='no' onload='resizeGraphIFrame(this)'><\/iframe><\/div>");
