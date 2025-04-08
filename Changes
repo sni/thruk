@@ -36,6 +36,8 @@ next:
             - extra_opts may extend or modify lists
             - add clone button
             - show active rules
+          - Apache:
+            - add UnsafeAllow3F for Ubuntu packages
 
 3.20.2   Wed Dec 18 17:43:10 CET 2024
           - unescape escaped characters in expanded command

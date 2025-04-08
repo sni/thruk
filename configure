@@ -98,13 +98,20 @@ $options->{'thruk-libs'} = '' if $options->{'nolibs'};
 
 # recent apaches might require the UnsafeAllow3F flag
 if(!$options->{'nounsafeallow3f'} && !$options->{'unsafeallow3f'}) {
-    # try to autodetect
-    my($os, $ver) = _get_os();
-    if($os eq 'rhel' && $ver >= 8) {
-        $options->{'unsafeallow3f'} = 1;
-    }
-    if($os eq 'debian' && ($ver eq 'sid' || $ver >= 11)) {
-        $options->{'unsafeallow3f'} = 1;
+    my($apache_bin, $module_dir) = _get_apache();
+    if($apache_bin && $module_dir) {
+        my $src = _read('./support/apache-test-unsafeallow.conf');
+        require File::Temp;
+        my($fh, $tmpfile) = File::Temp::tempfile();
+        $src =~ s%###APACHE_MODULE_DIR###%$module_dir%g;
+        print $fh $src;
+        close($fh);
+        my $cmd = "$apache_bin -t -f $tmpfile  2>&1";
+        `$cmd 2>&1`;
+        if($? == 0) {
+            $options->{'unsafeallow3f'} = 1;
+        }
+        unlink($tmpfile);
     }
 }
 if($options->{'nounsafeallow3f'}) {
@@ -201,53 +208,34 @@ EOT
 
 exit;
 
-# try to detect os and version
-sub _get_os {
-    my($os, $version) = ("", 0);
-    local $/ = undef;
+# try to detect apache
+sub _get_apache {
+    my($apache_bin, $module_dir);
 
-    # right now, we only need rhel/rocky/alma
-    if(-e '/etc/redhat-release') {
-        my $release_file = '/etc/redhat-release';
-        open(my $fh, '<', $release_file) or die("cannot read $release_file: $!");
-        my $release_info = <$fh>;
-        close $fh;
-
-        if ($release_info =~ /^(.*?)(?: release)? ([\d.]+)/) {
-            my $version = $2;
-            $version =~ s/\..*$//gmx; # we only need the major number
-            return("rhel", 0+$version);
-        } else {
-            die(sprintf("Unable to detect distribution and version from %s:\n%s", $release_file, $release_info));
-        }
-    } elsif(-e '/etc/os-release') {
-        my $release_file = '/etc/os-release';
-        open(my $fh, '<', $release_file) or die("cannot read $release_file: $!");
-        my $release_info = <$fh>;
-        close $fh;
-
-        for my $line (split/\n/mx, $release_info) {
-            if($line =~ /^ID="?(.*?)"?$/mx) {
-                $os = $1;
-            }
-            if($line =~ /^VERSION_ID="?(.*?)"?$/mx) {
-                $version = $1;
-                $version =~ s/\..*$//gmx; # we only need the major number
-            }
-            if($line =~ /^PRETTY_NAME=.*\/sid\"$/mx) {
-                $version = "sid";
-            }
-        }
-
-        if ($os && $version) {
-            return($os, $version) if $version eq 'sid';
-            return($os, 0+$version);
-        } else {
-            die(sprintf("Unable to detect distribution and version from %s:\n%s", $release_file, $release_info));
+    for my $bin (qw(/sbin/apache2 /usr/sbin/apache2 /usr/sbin/httpd usr/sbin/httpd2-prefork)) {
+        if(-x $bin) {
+            $apache_bin = $bin;
+            last;
         }
     }
 
-    return($os, $version);
+    for my $dir (qw(/usr/lib64/httpd/modules /usr/lib/apache2/modules /usr/lib64/apache2-prefork /usr/lib64/httpd/modules)) {
+        if(-x $dir) {
+            $module_dir = $dir;
+            last;
+        }
+    }
+
+    return($apache_bin, $module_dir);
+}
+
+sub _read {
+    my($file) = @_;
+    local $/ = undef;
+    open(my $fh, '<', $file) or die("cannot read file: $file: $!");
+    my $data = <$fh>;
+    close($fh);
+    return $data;
 }
 
 1;
