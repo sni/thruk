@@ -65,7 +65,7 @@ sub handle_oauth_login {
             _debug(sprintf("oauth login step2: fetching token from: %s", $auth->{'token_url'})) if Thruk::Base->debug;
         }
         if(defined $auth->{'ssl_verify_hostnames'} && !$auth->{'ssl_verify_hostnames'}) {
-            $ua->disable_verify_hostname();
+            Thruk::UserAgent::disable_verify_hostname($ua);
         }
         my $token_data = {
             client_id       => $auth->{'client_id'},
