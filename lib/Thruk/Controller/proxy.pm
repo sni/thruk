@@ -208,7 +208,7 @@ sub _cleanup_response {
             $body =~ s%("|')/[^/]+/thruk/cgi-bin/%$1${url_prefix}cgi-bin/%gmx;
         } else {
             # if its thruk itself, insert a message at the top
-            if($body =~ m/(site_panel_container|id="mainframe")/mx) {
+            if(!$c->req->parameters->{'minimal'} && $body =~ m/(site_panel_container|id="mainframe")/mx) {
                 my $header = "";
                 # we actually connect to the last http peer in chain, so show that name
                 my $proxy_peer = $peer->{'name'};

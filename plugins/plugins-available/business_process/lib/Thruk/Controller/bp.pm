@@ -146,6 +146,13 @@ sub index {
                 $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
                 return $c->redirect_to($proxyurl);
             }
+            if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
+                $proxyurl = Thruk::Utils::proxifiy_me($c, $c->config->{'Thruk::Plugin::BP'}->{'result_backend'});
+                if($proxyurl) {
+                    $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
+                    return $c->redirect_to($proxyurl);
+                }
+            }
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
             return _bp_start_page($c);
         }
@@ -393,8 +400,15 @@ sub index {
                 $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
                 return $c->redirect_to($proxyurl);
             }
+            if($c->config->{'Thruk::Plugin::BP'}->{'result_backend'}) {
+                $proxyurl = Thruk::Utils::proxifiy_me($c, $c->config->{'Thruk::Plugin::BP'}->{'result_backend'});
+                if($proxyurl) {
+                    $proxyurl =~ s/bp=[^:]*:/bp=/gmx;
+                    return $c->redirect_to($proxyurl);
+                }
+            }
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
-            return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
+            return _bp_start_page($c);
         }
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
