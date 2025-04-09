@@ -546,9 +546,9 @@ return runtime filename for given dashboard number and current user
 
 =cut
 sub get_runtime_file {
-    my($c, $nr) = @_;
+    my($c, $nr, $no_user) = @_;
     my $user = '';
-    if(!$c->stash->{'is_admin'}) {
+    if(!$c->stash->{'is_admin'} && !$no_user) {
         # save runtime data to user file
         $user = $c->stash->{'remote_user'};
         $user =~ s/[^a-zA-Z\d_\-]/_/gmx;
@@ -615,7 +615,10 @@ sub save_runtime_file {
     }
 
     my $runtime_file = get_runtime_file($c, $nr);
-    Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
+    if(defined $runtime && scalar %{$runtime} > 0) {
+        Thruk::Utils::write_data_file($runtime_file, $runtime, 1);
+    }
+    $runtime_file = get_runtime_file($c, $nr, 1);
     Thruk::Utils::IO::touch($runtime_file); # update timestamp because thats what we use for last_used
 
     return;

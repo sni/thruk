@@ -3055,10 +3055,9 @@ sub _task_dashboard_list {
     # add last_used data
     for my $d (@{$dashboards}) {
         $d->{'last_used'} = 0;
-        for my $file (glob($c->config->{'var_path'}.'/panorama/'.$d->{'nr'}.'.tab.*runtime')) {
-            my @stat = stat($file);
-            $d->{'last_used'} = $stat[9] if $d->{'last_used'} < $stat[9];
-        }
+        my $file = Thruk::Utils::Panorama::get_runtime_file($c, $d->{'nr'}, 1);
+        my @stat = stat($file);
+        $d->{'last_used'} = $stat[9] if $d->{'last_used'} < $stat[9];
     }
 
     $c->req->parameters->{'entries'} = $c->req->parameters->{'limit'} // 'all';
@@ -3560,7 +3559,7 @@ sub _merge_dashboard_into_hash {
             $data->{$id} = $dashboard->{'tab'};
 
             # touch runtime file, since thats what we use to reflect last_used date
-            my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $dashboard->{'nr'});
+            my $runtime_file = Thruk::Utils::Panorama::get_runtime_file($c, $dashboard->{'nr'}, 1);
             Thruk::Utils::IO::touch($runtime_file);
         }
     }
