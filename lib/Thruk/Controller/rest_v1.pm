@@ -43,17 +43,19 @@ my $aggregation_functions      = Thruk::Base::array2hash($aggregation_function_n
 my $disaggregation_functions   = Thruk::Base::array2hash($disaggregation_function_names);
 
 my $op_translation_words       = {
-    'eq'     => '=',
-    'ne'     => '!=',
-    'like'   => '~~',
-    'regex'  => '~~',
-    'unlike' => '!~~',
-    'nregex' => '!~~',
-    'gt'     => '>',
-    'gte'    => '>=',
-    'lt'     => '<',
-    'lte'    => '<=',
-    'notin'  => '!>=',
+    'eq'      => '=',
+    'ne'      => '!=',
+    'sregex'  => '~',
+    'snregex' => '!~',
+    'like'    => '~~',
+    'regex'   => '~~',
+    'unlike'  => '!~~',
+    'nregex'  => '!~~',
+    'gt'      => '>',
+    'gte'     => '>=',
+    'lt'      => '<',
+    'lte'     => '<=',
+    'notin'   => '!>=',
 };
 
 use constant {
