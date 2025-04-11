@@ -365,14 +365,14 @@
                   </td>
                 [% END %]
 
-              [%# show error messages after backend column #%]
+              [%# show error messages after omd version column #%]
               [% ELSIF error_lines.size > 0 %]
-                [% IF !hide_remaining_columns && ( col == "backend" || col == "hostname" ) %]
+                [% IF !hide_remaining_columns && ( col == "omd" ) %]
                   [% hide_remaining_columns = 1 %]
                   [% clickable = 0 %]
                   <td
                     colspan="[% loop.size - loop.index - 2 %]"
-                    style="max-width: 40vw;"
+                    style="max-width: 30vw;"
                     [% IF error_lines.size > 1; clickable = 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); jQuery('#errors_[% s.peer_key | html %]').removeClass('filter_hidden'); reapplyAllStripes(); return false;"
                     [% ELSIF s.installing_failed && s.logs.defined("install"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=install&peer=[% s.peer_key | html %]&modal=1'); return false;"
                     [% ELSIF s.updating_failed && s.logs.defined("update"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&type=update&peer=[% s.peer_key | html %]&modal=1'); return false;"
