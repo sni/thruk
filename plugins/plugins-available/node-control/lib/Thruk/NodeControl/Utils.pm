@@ -79,6 +79,23 @@ sub get_peers {
         }
     }
 
+    # apply excludes
+    my $config = config($c);
+    if($config->{'excludes'}) {
+        my @cleaned;
+        my $exclude = Thruk::Base::comma_separated_list($config->{'excludes'});
+        for my $p (@peers) {
+            my $skip = 0;
+            for my $ex (@{$exclude}) {
+                $skip = 1 if $p->{'name'} =~ m/$ex/mx;
+                $skip = 1 if $p->{'key'}  =~ m/$ex/mx;
+                last if $skip;
+            }
+            push @cleaned, $p unless $skip;
+        }
+        @peers = @cleaned;
+    }
+
     clean_old_json_files($c, \@peers);
 
     $c->stats->profile(end => "get_peers");

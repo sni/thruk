@@ -101,6 +101,9 @@ thruk_local.conf:
   # set to 1 to not require confirm on all actions
   #skip_confirms = 0
 
+  # exclude sites (by name or id) from node-control (comma separated regular expressions)
+  #excludes = site1,site2
+
   # command used to cleanup unused omd versions
   #cmd_omd_cleanup       = sudo -n omd cleanup
 
