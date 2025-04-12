@@ -245,6 +245,13 @@ case "$*" in
       chkconfig --add thruk
     %endif
 
+    # activate cookie in existing default ssl virtual hosts
+    for file in /etc/httpd/conf.d/ssl.conf; do
+        if test -e $file && ! grep thruk_cookie_auth.include $file >/dev/null 2>&1; then
+            sed -i -e 's|</VirtualHost>|\n    Include /usr/share/thruk/thruk_cookie_auth.include\n</VirtualHost>|g' $file
+        fi
+    done
+
     rm -rf /var/cache/thruk/*
     /usr/bin/thruk -a clearcache,installcron --local > /dev/null
 
@@ -288,6 +295,11 @@ if [ -d /tmp/thruk_update/ssi/. ]; then
   rm -f /etc/thruk/ssi/*
   cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
 fi
+# deactivate cookie in existing default ssl virtual hosts
+for file in /etc/httpd/conf.d/ssl.conf; do
+  test -e $file && sed -i -e '/Include \/usr\/share\/thruk\/thruk_cookie_auth.include/d' $file
+done
+
 rm -rf /tmp/thruk_update
 exit 0
 
