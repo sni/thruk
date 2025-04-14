@@ -215,7 +215,8 @@ sub _fetch_user_data {
     my($can_submit_commands,$alias,$email);
     my $src_peers = [];
     confess("no db") unless $c->db();
-    my $data = $c->db->get_can_submit_commands($self->{'username'});
+    my $groups;
+    my $data   = $c->db->get_can_submit_commands($self->{'username'});
     if(defined $data) {
         for my $dat (@{$data}) {
             $alias = $dat->{'alias'} if defined $dat->{'alias'};
@@ -224,11 +225,16 @@ sub _fetch_user_data {
                 $can_submit_commands = $dat->{'can_submit_commands'};
                 push @{$src_peers} , $dat->{'peer_key'};
             }
+            if(defined $dat->{'groups'}) {
+                $groups = [] unless defined $groups;
+                push(@{$groups}, @{$dat->{'groups'}});
+            }
         }
     }
 
     # add roles from groups in cgi.cfg
-    my $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}];
+    $groups = [sort keys %{$c->db->get_contactgroups_by_contact($self->{'username'})}] unless defined $groups;
+    $groups = Thruk::Base::array_uniq($groups);
 
     return($alias, $email, $can_submit_commands, $groups, $src_peers);
 }

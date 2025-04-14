@@ -359,11 +359,13 @@ sub get_can_submit_commands {
         $options->{wrapped_json} = 1;
     }
 
+    my $columns = [qw/can_submit_commands alias email groups/];
+    $columns = $self->_clean_columns("contacts", $columns);
+
     $data = $self->_optimize(
                 $self->{'live'}
                     ->table('contacts')
-                    ->columns(qw/can_submit_commands
-                                 alias email/)
+                    ->columns(@{$columns})
                     ->filter({ name => $user })
                     ->options($options),
             )
