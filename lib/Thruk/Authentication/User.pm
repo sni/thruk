@@ -139,10 +139,10 @@ sub set_dynamic_attributes {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
     }
-
     $self->_apply_user_data($c, $data);
 
     $self->clean_roles($roles, $force_roles);
+    $self->clean_roles($self->{'roles_restriction'}, $force_roles) if $self->{'roles_restriction'};
 
     if($self->check_user_roles('admin')) {
         $self->grant('admin');
@@ -150,9 +150,11 @@ sub set_dynamic_attributes {
 
     $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
 
-    if(!$skip_db_access) {
+    if(!$skip_db_access && !$roles) {
         $c->cache->set('users', $username, $data);
     }
+
+    $self->{'roles_restriction'} = $roles if defined $roles;
 
     $c->stats->profile(end => "User::set_dynamic_attributes");
     return $self;
