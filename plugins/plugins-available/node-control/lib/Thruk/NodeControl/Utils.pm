@@ -688,13 +688,14 @@ sub _omd_update_step2 {
 
     if($config->{'hook_update_pre'}) {
         print "*** hook_update_pre:\n";
-        my $rc;
+        my $rc = -1;
         eval {
             $rc = _remote_run_hook($c, $peer, $config->{'hook_update_pre'}, $env);
-            print "*** hook_update_pre rc: $rc\n";
+            printf("*** hook_update_pre rc: %d\n", $rc);
         };
-        if($@) {
-            return _set_job_errored($c, 'updating', $peer->{'key'}, $@);
+        my $err = $@;
+        if($err) {
+            return _set_job_errored($c, 'updating', $peer->{'key'}, $err);
         }
         if($rc ne '0') {
             return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
@@ -723,10 +724,11 @@ sub _omd_update_step2 {
         my $rc = -1;
         eval {
             $rc = _remote_run_hook($c, $peer, $config->{'hook_update_post'}, $env);
-            print "*** hook_update_post rc: $rc\n";
+            printf("*** hook_update_post rc: %d\n", $rc);
         };
-        if($@) {
-            _info("hook_update_post failed: ".$@);
+        my $err = $@;
+        if($err) {
+            _info("hook_update_post failed: ".$err);
         }
         $post_hooks_failed = 1 if $rc ne '0';
     }
@@ -998,6 +1000,9 @@ sub _remote_cmd {
         }
     }
 
+    # redirect stderr
+    $cmd = sprintf("( %s ) 2>&1", $cmd);
+
     if(!$peer->{'ssh_ok'} && ($peer->is_local() || $peer->is_peer_machine_reachable_by_http())) {
         eval {
             ($rc, $out) = $peer->cmd($c, $cmd, $background_options, $env);
@@ -1198,6 +1203,9 @@ sub _local_run_hook {
         $hook = $1;
     }
 
+    # redirect stderr
+    $hook = sprintf("( %s ) 2>&1", $hook);
+
     my($rc, $out) = Thruk::Utils::IO::cmd($hook, { env => $env, print_prefix => "" });
 
     return($rc, $out);
@@ -1216,11 +1224,14 @@ sub _remote_run_hook {
         ($rc, $out) = _convert_ansible_script_result($rc, $jobdata);
         print $out;
     } else {
+        # redirect stderr
+        $hook = sprintf("( %s ) 2>&1", $hook);
         ($rc, $job) = _remote_cmd($c, $peer, $hook, { env => $env }, $env);
         $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 1, $timeout, 1);
         ($rc, $out) = _convert_ansible_script_result($rc, $jobdata);
     }
 
+    $rc = -1 unless defined $rc;
     return($rc);
 }
 
