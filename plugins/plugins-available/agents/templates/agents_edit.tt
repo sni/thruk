@@ -348,7 +348,7 @@
             <tr>
               <th class="text-right px-0">Hostname</th>
               <td>
-                <input class="w-full min-w-20" type="text" name="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'[% IF agent.hostname != 'new' %]rename this host[% ELSE %]create new host[% END %]', autosubmit:false })">
+                <input class="w-full min-w-20" type="text" name="hostname" id="hostname" value="[% IF agent.hostname != 'new' %][% agent.hostname | html %][% END %]" required placeholder="enter existing or new hostname" onfocus="this.click()" onclick="ajax_search.init(this, 'host', { url: 'status.cgi?format=search&amp;type=hosts', emptymsg:'[% IF agent.hostname != 'new' %]rename this host[% ELSE %]create new host[% END %]', autosubmit:false })">
               </td>
               <th class="text-right px-0">IP Address</th>
               <td>
@@ -641,7 +641,7 @@ jQuery(document).ready(function() {
 
   /* command line wizard / plugins */
   jQuery('button.js-ip-wzd-button').unbind("click").click(function() {
-      var host = jQuery("INPUT[name=hostname]").val();
+      var host = jQuery("#hostname").val();
       if(host == undefined) {
           return false;
       }

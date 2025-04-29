@@ -155,7 +155,6 @@ sub index {
     return 1;
 }
 
-
 ##########################################################
 # return json list for ajax search
 sub _process_json_page {

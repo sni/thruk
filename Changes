@@ -1,5 +1,9 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - Agents:
+            - fix hostname/ip wizard
+
 3.22     Sat Apr 12 18:07:06 CEST 2025
           - migrate sound files to webm
           - add test page for sound file in user preferences
