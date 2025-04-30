@@ -1897,15 +1897,25 @@ sub _rest_get_thruk_sessions {
         $is_admin = 1;
     }
 
-    my $data = [];
+    my $data         = [];
     my $total_number = 0;
     my $total_5min   = 0;
-    my $min5 = time() - (5*60);
-    my $uniq = {};
-    my $uniq5min = {};
+    my $min5         = time() - (5*60);
+    my $uniq         = {};
+    my $uniq5min     = {};
     for my $file (sort glob($c->config->{'var_path'}."/sessions/*")) {
         $total_number++;
-        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file);
+        my($json, $active);
+        eval {
+            $json = Thruk::Utils::IO::json_retrieve($file);
+            $active = (stat($file))[9];
+        };
+        my $err = $@;
+        if($err) {
+            _debug("error reading session file %s: %s", $file, $err);
+            next;
+        }
+        my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, file => $file, data => $json, active => $active);
         next unless $session_data;
         if($session_data->{'active'} > $min5) {
             $total_5min++;
@@ -1917,8 +1927,8 @@ sub _rest_get_thruk_sessions {
         if($id) {
             next unless($session_data->{'hashed_key'} eq $id);
         }
-        delete $session_data->{'hash'};       # basic auth token is never public
-        delete $session_data->{'csrf_token'}; # also not public
+        delete $session_data->{'hash'};          # basic auth token is never public
+        delete $session_data->{'csrf_token'};    # also not public
         delete $session_data->{'current_roles'}; # for internal use
         push @{$data}, $session_data;
     }
@@ -1934,6 +1944,7 @@ sub _rest_get_thruk_sessions {
     $c->metrics->set('sessions_uniq_user_total', scalar keys %{$uniq}, "total number of uniq users");
     $c->metrics->set('sessions_active_5min_total', $total_5min, "total number of active thruk sessions (active during the last 5 minutes)");
     $c->metrics->set('sessions_uniq_user_5min_total', scalar keys %{$uniq5min}, "total number of uniq users active during the last 5 minutes");
+
     return($data);
 }
 

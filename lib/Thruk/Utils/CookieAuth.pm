@@ -366,6 +366,7 @@ sub store_session {
 =head2 retrieve_session
 
   retrieve_session(file => $sessionfile, config => $config)
+  retrieve_session(file => $sessionfile, config => $config, data => $data, active => $active)
   retrieve_session(id   => $sessionid,   config => $config)
 
 returns session data as hash
@@ -417,14 +418,22 @@ sub retrieve_session {
     my $sdir = $config->{'var_path'}.'/sessions';
     $sessionfile = $sdir.'/'.$hashed_key.'.'.$digest_name;
 
-    my $data;
-    return unless -e $sessionfile;
-    my @stat = stat(_);
-    eval {
-        $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
-    };
-    my $err = $@;
-    _warn("failed to read sessionfile: $sessionfile: $err") if $err;
+    my $data   = $args{'data'};
+    my $active = $args{'active'};
+    if(!$data) {
+        return unless -e $sessionfile;
+        my @stat = stat(_);
+        $active  = $stat[9];
+        eval {
+            $data = Thruk::Utils::IO::json_lock_retrieve($sessionfile);
+        };
+        my $err = $@;
+        _warn("failed to read sessionfile: $sessionfile: $err") if $err;
+    }
+    if(!$active) {
+        my @stat = stat($sessionfile);
+        $active  = $stat[9];
+    }
 
     return unless defined $data;
 
@@ -436,7 +445,7 @@ sub retrieve_session {
     $data->{file}        = $sessionfile;
     $data->{hashed_key}  = $hashed_key;
     $data->{digest}      = $digest_name;
-    $data->{active}      = $stat[9];
+    $data->{active}      = $active;
     $data->{roles}       = [] unless $data->{roles};
     $data->{private_key} = $sessionid if $sessionid;
 
