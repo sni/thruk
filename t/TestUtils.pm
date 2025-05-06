@@ -1002,7 +1002,8 @@ sub _external_request {
         my $r = _external_request($login_page, undef, undef, $agent);
         $login_page =~ s/nocookie&//gmx;
            $r = _external_request($login_page, undef, { password => $pass, login => $user, submit => 'login', referer => $referer }, $agent, undef, undef, 0);
-        $req  = _external_request($r->{'_headers'}->{'location'}, $start_to, $post, $agent, undef, undef, 0);
+        $req  = _external_request($r->{'_headers'}->{'location'} // $url, $start_to, $post, $agent, undef, undef, 0);
+
     }
     return $req;
 }

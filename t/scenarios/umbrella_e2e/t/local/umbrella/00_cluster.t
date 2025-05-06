@@ -8,7 +8,11 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 29;
+plan tests => 36;
+
+$ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
+$ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'https://127.0.0.1/demo';
+$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'}  = 0;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -45,4 +49,6 @@ TestUtils::test_command({
     like => ['/heartbeat send/'],
 });
 
+###########################################################
+TestUtils::test_page( url => '/thruk/cgi-bin/bp.cgi?view_mode=json&no_drafts=1&type=all', like => ['Test Business Process'] );
 ###########################################################

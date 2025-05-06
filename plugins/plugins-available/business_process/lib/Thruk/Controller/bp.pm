@@ -593,8 +593,12 @@ sub _bp_start_page {
     if($view_mode eq 'json') {
         my $data = {};
         for my $bp (@{$bps}) {
-            $bp->load_runtime_data() unless $bp->{'remote'};
-            $data->{$bp->{'id'}} = $bp->TO_JSON();
+            if($bp->{'remote'}) {
+                $data->{$bp->{'fullid'}} = $bp;
+            } else {
+                $bp->load_runtime_data();
+                $data->{$bp->{'id'}} = $bp->TO_JSON();
+            }
         }
         return $c->render(json => $data);
     }

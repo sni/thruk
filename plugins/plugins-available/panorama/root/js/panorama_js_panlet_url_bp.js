@@ -28,7 +28,7 @@ Ext.define('TP.PanletBP', {
 
         /* available graphs loader */
         panel.updateGraphs = function() {
-            var url    = 'bp.cgi?view_mode=json&no_drafts=1';
+            var url    = 'bp.cgi?view_mode=json&no_drafts=1&type=all';
             Ext.Ajax.request({
                 url: url,
                 method: 'POST',
@@ -40,7 +40,7 @@ Ext.define('TP.PanletBP', {
                             var row = data[key];
                             newdata[row['id']] = {
                                 name: row['name'],
-                                id:   row['id']
+                                id:   row['id'] || row['fullid']
                             };
                         }
                         var graph_combo = TP.getFormField(panel.gearitem.down('form'), 'graph');
