@@ -7546,10 +7546,14 @@ function collectFormData(form_id) {
 
 /* return scroll position */
 function getPageScroll() {
-    var main = jQuery("MAIN").first();
+    var main = jQuery("MAIN");
     var scroll = "";
-    scroll +=     Number(main.scrollLeft()).toFixed(0);
-    scroll += "_"+Number(main.scrollTop()).toFixed(0);
+    if(main.length > 0) {
+        scroll +=     Number(main.scrollLeft()).toFixed(0);
+        scroll += "_"+Number(main.scrollTop()).toFixed(0);
+    } else {
+        scroll += "0_0";
+    }
 
     var mainTable = jQuery(".mainTable").first();
     if(mainTable.length > 0) {
