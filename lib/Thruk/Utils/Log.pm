@@ -226,6 +226,17 @@ sub _log {
         $line = (delete $log->{'_thr'}->{$thread_str}).$line;
     }
     local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth+2;
+
+    # set timezone to local server settings
+    my $usertz;
+    if($ENV{'THRUK_SERVER_TZ'} and $ENV{'TZ'}) {
+        $usertz = $ENV{'TZ'};
+        ## no critic
+        $ENV{'TZ'} = $ENV{'THRUK_SERVER_TZ'};
+        ## use critic
+        POSIX::tzset();
+    }
+
     for my $l (split/\n/mx, $line) {
         $l = '[cron] '.$l if $ENV{'THRUK_CRON'};
         $l = $ENV{'THRUK_LOG_PREFIX'}.$l if $ENV{'THRUK_LOG_PREFIX'};
@@ -241,6 +252,15 @@ sub _log {
             $appender->layout($layouts->{'original'});
         }
     }
+
+    # restore user timezone
+    if($usertz) {
+        ## no critic
+        $ENV{'TZ'} = $usertz;
+        ## use critic
+        POSIX::tzset();
+    }
+
     return;
 }
 

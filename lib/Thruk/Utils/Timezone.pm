@@ -37,6 +37,7 @@ sub set_timezone {
 
     ## no critic
     $ENV{'TZ'} = $timezone;
+    $ENV{'THRUK_SERVER_TZ'} = $config->{'_server_timezone'};
     ## use critic
     POSIX::tzset();
 
