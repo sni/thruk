@@ -17,80 +17,80 @@
             <input type='hidden' id="opt_persistent" name='persistent' value="comments">
             <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full" onclick="toggleElement('command_select', null, true); jQuery(this).blur(); return false;">
               [% IF c.config.cmd_quick_status.reschedule %]
-                <option hidden value="1" [% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END%]>Reschedule Next Check</option>
+                <option hidden value="1" [% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END%]>Reschedule next check</option>
               [% END %]
               [% IF c.config.cmd_quick_status.downtime %]
-                <option hidden value="2" [% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END%]>Add Downtime</option>
-                <option hidden value="5" [% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END%]>Remove Downtimes</option>
+                <option hidden value="2" [% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END%]>Add downtime</option>
+                <option hidden value="5" [% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END%]>Remove downtimes</option>
               [% END %]
               [% IF c.config.cmd_quick_status.comment %]
-                <option hidden value="3" [% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END%]>Add Comment</option>
-                <option hidden value="6" [% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END%]>Remove Comments</option>
+                <option hidden value="3" [% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END%]>Add comment</option>
+                <option hidden value="6" [% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END%]>Remove comments</option>
               [% END %]
               [% IF c.config.cmd_quick_status.acknowledgement %]
-                <option hidden value="4" [% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END%]>Add Acknowledgement</option>
-                <option hidden value="7" [% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END%]>Remove Acknowledgement</option>
+                <option hidden value="4" [% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END%]>Add acknowledgement</option>
+                <option hidden value="7" [% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END%]>Remove acknowledgement</option>
               [% END %]
               [% IF c.config.cmd_quick_status.active_checks %]
-                <option hidden value="8" [% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END%]>Enable Active Checks</option>
-                <option hidden value="9" [% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END%]>Disable Active Checks</option>
+                <option hidden value="8" [% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END%]>Enable active checks</option>
+                <option hidden value="9" [% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END%]>Disable active checks</option>
               [% END %]
               [% IF c.config.cmd_quick_status.notifications %]
-                <option hidden value="10" [% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END%]>Enable Notifications</option>
-                <option hidden value="11" [% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>Disable Notifications</option>
+                <option hidden value="10" [% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END%]>Enable notifications</option>
+                <option hidden value="11" [% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>Disable notifications</option>
               [% END %]
               [% IF c.config.cmd_quick_status.eventhandler %]
-                <option hidden value="15" [% IF c.config.cmd_quick_status.default == "enable eventhandler" %] selected[% END%]>Enable Eventhandler</option>
-                <option hidden value="16" [% IF c.config.cmd_quick_status.default == "disable eventhandler" %] selected[% END%]>Disable Eventhandler</option>
+                <option hidden value="15" [% IF c.config.cmd_quick_status.default == "enable eventhandler" %] selected[% END%]>Enable eventhandler</option>
+                <option hidden value="16" [% IF c.config.cmd_quick_status.default == "disable eventhandler" %] selected[% END%]>Disable eventhandler</option>
               [% END %]
               [% IF c.config.cmd_quick_status.submit_result %]
-                <option hidden value="12" [% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>Submit Passive Check Result</option>
+                <option hidden value="12" [% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>Submit passive check result</option>
               [% END %]
               [% IF c.config.cmd_quick_status.reset_attributes %]
-                <option hidden value="14" [% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>Reset Modified Attributes</option>
+                <option hidden value="14" [% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>Reset modified attributes</option>
               [% END %]
             </select>
             <div class="card shadow-float absolute w-[376px] rounded-t-none overflow-hidden" style="display: none;" id="command_select">
               <div class="actionbox less-padding">
               [% IF c.config.cmd_quick_status.reschedule %]
-                <div><a onclick="selectCommand(1); return false;" class="flex" href="#"><i class="fa-solid fa-clock"></i> Reschedule Next Check</a></div>
+                <div><a onclick="selectCommand(1); return false;" class="flex" href="#"><i class="fa-solid fa-clock"></i>Reschedule next check</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.downtime %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(2); return false;" class="flex" href="#"><i class="fa-solid fa-moon"></i>Add Downtime</a></div>
-                <div><a onclick="selectCommand(5); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-moon"></i>Remove Downtimes</a></div>
+                <div><a onclick="selectCommand(2); return false;" class="flex" href="#"><i class="fa-solid fa-moon"></i>Add downtime</a></div>
+                <div><a onclick="selectCommand(5); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-moon"></i>Remove downtimes</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.comment %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(3); return false;" class="flex" href="#"><i class="fa-solid fa-comment"></i> Add Comment</a></div>
-                <div><a onclick="selectCommand(6); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-comment"></i>Remove Comments</a></div>
+                <div><a onclick="selectCommand(3); return false;" class="flex" href="#"><i class="fa-solid fa-comment"></i>Add Comment</a></div>
+                <div><a onclick="selectCommand(6); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-comment"></i>Remove comments</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.acknowledgement %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(4); return false;" class="flex" href="#"><i class="fa-solid fa-person-digging"></i> Add Acknowledgement</a></div>
-                <div><a onclick="selectCommand(7); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-person-digging"></i> Remove Acknowledgement</a></div>
+                <div><a onclick="selectCommand(4); return false;" class="flex" href="#"><i class="fa-solid fa-person-digging"></i>Add acknowledgement</a></div>
+                <div><a onclick="selectCommand(7); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-person-digging"></i>Remove acknowledgement</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.active_checks %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(8); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Active Checks</a></div>
-                <div><a onclick="selectCommand(9); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Active Checks</a></div>
+                <div><a onclick="selectCommand(8); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i>Enable active checks</a></div>
+                <div><a onclick="selectCommand(9); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i>Disable active checks</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.notifications %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(10); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Notifications</a></div>
-                <div><a onclick="selectCommand(11); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Notifications</a></div>
+                <div><a onclick="selectCommand(10); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i>Enable notifications</a></div>
+                <div><a onclick="selectCommand(11); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i>Disable notifications</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.eventhandler %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(15); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i> Enable Eventhandler</a></div>
-                <div><a onclick="selectCommand(16); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i> Disable Eventhandler</a></div>
+                <div><a onclick="selectCommand(15); return false;" class="flex" href="#"><i class="fa-solid fa-check"></i>Enable eventhandler</a></div>
+                <div><a onclick="selectCommand(16); return false;" class="flex hover-red-text" href="#"><i class="fa-solid fa-xmark"></i>Disable eventhandler</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.submit_result %]
                 <hr class="pt-px mb-px">
-                <div><a onclick="selectCommand(12); return false;" class="flex" href="#"><i class="uil uil-left-arrow-to-left small"></i> Submit Passive Check Result</a></div>
+                <div><a onclick="selectCommand(12); return false;" class="flex" href="#"><i class="uil uil-left-arrow-to-left small"></i>Submit passive check result</a></div>
               [% END %]
               [% IF c.config.cmd_quick_status.reset_attributes %]
-                <div><a onclick="selectCommand(14); return false;" class="flex" href="#"><i class="fa-solid fa-broom"></i> Reset Modified Attributes</a></div>
+                <div><a onclick="selectCommand(14); return false;" class="flex" href="#"><i class="fa-solid fa-broom"></i>Reset modified attributes</a></div>
               [% END %]
               </div>
             </div>
@@ -125,7 +125,7 @@
           <td class="p-0">
             <table class="w-full cellspacing-x">
               <tr>
-                <td class="pt-0">Child Hosts</td>
+                <td class="pt-0">Child hosts</td>
                 <td class="pt-0">
                   <select name="childoptions" class="w-full">
                     <option value="0"[% IF c.config.cmd_defaults.childoptions == 0 %] selected[% END %]>Do nothing with child hosts</option>
@@ -172,17 +172,17 @@
           <th class="align-top">Options</th>
           <td class="p-0">
             <table class="w-auto cellspacing-x">
-              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt1')">Force Check</td><td class="pt-0"><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
-              <tr><td class="pt-0">Spread Checks</td><td>
+              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt1')">Force check</td><td class="pt-0"><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
+              <tr><td class="pt-0">Spread checks</td><td>
                 <select name="spread">
-                  <option value="0"[% IF c.config.cmd_defaults.reschedule_spread == 0 %] selected[% END%]>No</option>
-                  <option value="10"[% IF c.config.cmd_defaults.reschedule_spread == 10 %] selected[% END%]>10 Seconds</option>
-                  <option value="30"[% IF c.config.cmd_defaults.reschedule_spread == 30 %] selected[% END%]>30 Seconds</option>
-                  <option value="60"[% IF c.config.cmd_defaults.reschedule_spread == 60 %] selected[% END%]> 1 Minute</option>
-                  <option value="300"[% IF c.config.cmd_defaults.reschedule_spread == 300 %] selected[% END%]> 5 Minutes</option>
-                  <option value="900"[% IF c.config.cmd_defaults.reschedule_spread == 900 %] selected[% END%]> 15 Minutes</option>
-                  <option value="1800"[% IF c.config.cmd_defaults.reschedule_spread == 1800 %] selected[% END%]> 30 Minutes</option>
-                  <option value="3600"[% IF c.config.cmd_defaults.reschedule_spread == 3600 %] selected[% END%]> 1 Hour</option>
+                  <option value="0"[% IF c.config.cmd_defaults.reschedule_spread == 0 %] selected[% END%]>no</option>
+                  <option value="10"[% IF c.config.cmd_defaults.reschedule_spread == 10 %] selected[% END%]>10 seconds</option>
+                  <option value="30"[% IF c.config.cmd_defaults.reschedule_spread == 30 %] selected[% END%]>30 seconds</option>
+                  <option value="60"[% IF c.config.cmd_defaults.reschedule_spread == 60 %] selected[% END%]> 1 minute</option>
+                  <option value="300"[% IF c.config.cmd_defaults.reschedule_spread == 300 %] selected[% END%]> 5 minutes</option>
+                  <option value="900"[% IF c.config.cmd_defaults.reschedule_spread == 900 %] selected[% END%]> 15 minutes</option>
+                  <option value="1800"[% IF c.config.cmd_defaults.reschedule_spread == 1800 %] selected[% END%]> 30 minutes</option>
+                  <option value="3600"[% IF c.config.cmd_defaults.reschedule_spread == 3600 %] selected[% END%]> 1 hour</option>
                 </select>
               </td></tr>
             </table>
@@ -192,10 +192,10 @@
           <th class="align-top">Options</th>
           <td class="p-0">
             <table class="w-auto cellspacing-x">
-              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt2')">Sticky Acknowledgement</td><td class="pt-0"><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></td></tr>
-              <tr><td class="clickable" onclick="toggleCheckBox('opt3')">Send Notification</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification || force_send_notification %] checked[% END %][% IF force_send_notification %] disabled[% END %]></td></tr>
-              <tr><td class="clickable" onclick="toggleCheckBox('opt4')">Persistent Comment</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td></tr>
-              <tr id="opt_expire"><td class="clickable" onclick="toggleCheckBox('opt5')">Use Expire Time</td><td><input type='checkbox' id="opt5" name='use_expire'[% IF c.config.cmd_defaults.use_expire %] checked[% END %] onchange="if(this.checked == true) {showElement('row_expire')} else { hideElement('row_expire')};"></td></tr>
+              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt2')">Sticky acknowledgement</td><td class="pt-0"><input type='checkbox' id="opt2" name='sticky_ack'[% IF c.config.cmd_defaults.sticky_ack || force_sticky_ack %] checked[% END %][% IF force_sticky_ack %] disabled[% END %]></td></tr>
+              <tr><td class="clickable" onclick="toggleCheckBox('opt3')">Send notification</td><td><input type='checkbox' id="opt3" name='send_notification'[% IF c.config.cmd_defaults.send_notification || force_send_notification %] checked[% END %][% IF force_send_notification %] disabled[% END %]></td></tr>
+              <tr><td class="clickable" onclick="toggleCheckBox('opt4')">Persistent comment</td><td><input type='checkbox' id="opt4" name='persistent_ack'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td></tr>
+              <tr id="opt_expire"><td class="clickable" onclick="toggleCheckBox('opt5')">Use expire time</td><td><input type='checkbox' id="opt5" name='use_expire'[% IF c.config.cmd_defaults.use_expire %] checked[% END %] onchange="if(this.checked == true) {showElement('row_expire')} else { hideElement('row_expire')};"></td></tr>
             </table>
           </td>
         </tr>
@@ -215,8 +215,8 @@
           <th class="align-top">Options</th>
           <td class="p-0">
             <table class="w-auto cellspacing-x">
-              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt7')">Active Downtimes</td><td><input type='checkbox' id="opt7" name='active_downtimes' checked></td></tr>
-              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt8')">Future Downtimes</td><td><input type='checkbox' id="opt8" name='future_downtimes'></td></tr>
+              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt7')">Active downtimes</td><td><input type='checkbox' id="opt7" name='active_downtimes' checked></td></tr>
+              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt8')">Future downtimes</td><td><input type='checkbox' id="opt8" name='future_downtimes'></td></tr>
             </table>
           </td>
         </tr>
@@ -225,7 +225,7 @@
           <td class="p-0">
             <table class="w-full cellspacing-x">
               <tr>
-                <td class="pt-0">Check Result</td>
+                <td class="pt-0">Check result</td>
                 <td class="pt-0">
                   <select name="plugin_state" class="w-full">
                     <option value="0">OK</option>
@@ -236,11 +236,11 @@
                 </td>
               </tr>
               <tr>
-                <td>Check Output</td>
+                <td>Check output</td>
                 <td><input type="text" value="" name="plugin_output" id="plugin_output" class="w-full"></td>
               </tr>
               <tr>
-                <td>Performance Data</td>
+                <td>Performance data</td>
                 <td><input type="text" value="" name="performance_data" class="w-full"></td>
               </tr>
             </table>
