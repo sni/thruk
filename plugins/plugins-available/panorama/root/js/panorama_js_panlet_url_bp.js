@@ -28,7 +28,7 @@ Ext.define('TP.PanletBP', {
 
         /* available graphs loader */
         panel.updateGraphs = function() {
-            var url    = 'bp.cgi?view_mode=json&no_drafts=1&type=all';
+            var url = 'bp.cgi?view_mode=json&no_drafts=1&type=all';
             Ext.Ajax.request({
                 url: url,
                 method: 'POST',

@@ -1285,7 +1285,8 @@ function bp_no_more_events(evt) {
 
 /* redraw nodes and stuff */
 var maxX = 0, maxY = 0, minY = -1, graphW = 0, graphH = 0;
-function bp_redraw(evt) {
+function bp_redraw(evt, retries) {
+    if(!retries) { retries = 0; }
     if(!bp_graph_layout) { return false; }
 
     maxX = 0;
@@ -1327,6 +1328,18 @@ function bp_redraw(evt) {
     }
     var zoom = zoomY;
     if(zoomX < zoomY) { zoom = zoomX; }
+
+    if(zoom < 0.1) {
+        // probably not finished rendering yet
+        retries++;
+        if(retries <= 4) {
+            window.setTimeout(function() {
+                bp_redraw(evt, retries);
+            }, 500*retries);
+        }
+        return;
+    }
+
     if(zoom < 1) {
         bp_zoom(zoom);
     } else {
