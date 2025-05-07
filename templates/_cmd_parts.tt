@@ -307,7 +307,7 @@
 [% BLOCK cmd_form_expire_acks %]
   [% IF has_expire_acks %]
   <tr>
-    <th class="w-1/4 clickable" onclick="jQuery('[name=use_expire]').click()">Use Expire Time</th>
+    <th class="w-1/4 clickable" onclick="jQuery('[name=use_expire]').click()">Use expire time</th>
     <td><input type='checkbox' name='use_expire' onchange="if(this.checked == true) {showElement('expire_row')} else { hideElement('expire_row')};"[% IF c.config.cmd_defaults.use_expire %] checked[% END %]></td>
   </tr>
   <tr id="expire_row"[% IF !c.config.cmd_defaults.use_expire %] style="display:none"[% END %]>
