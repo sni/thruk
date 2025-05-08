@@ -1410,6 +1410,10 @@ sub _fixup_livestatus_filter {
                 _fixup_livestatus_filter($c, $filter->{$f}, $ref_columns);
             } else {
                 if($ref_columns && !$ref_columns->{$f}) {
+                    my $tst = $f;
+                    if($tst =~ s/^service_//mxo) { $f = $tst if($ref_columns->{$tst}); }
+                }
+                if($ref_columns && !$ref_columns->{$f}) {
                     # normalize filter
                     if(ref $filter->{$f} ne 'HASH') {
                         my $val = $filter->{$f};
