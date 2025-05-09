@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - add "for all services" option for status quick commands
           - fix logs timezone (#1438)
           - Agents:
             - fix hostname/ip wizard

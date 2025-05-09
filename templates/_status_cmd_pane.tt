@@ -246,6 +246,14 @@
             </table>
           </td>
         </tr>
+        <tr id="row_hostservice_options">
+          <th class="align-top">Options</th>
+          <td class="p-0">
+            <table class="w-auto cellspacing-x">
+              <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt9')">For all services too</td><td class="pt-0"><input type='checkbox' id="opt9" name='hostserviceoptions'[% IF c.config.cmd_defaults.hostserviceoptions %] checked[% END %]></td></tr>
+            </table>
+          </td>
+        </tr>
         <tr>
           <td></td>
           <td><button id="multi_cmd_submit_button" onClick="return collectFormData('quick_cmd_form')" class="w-full submit"></button></td>

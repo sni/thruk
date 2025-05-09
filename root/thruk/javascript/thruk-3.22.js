@@ -7635,14 +7635,18 @@ function check_selected_command() {
     if(value == 7) { /* remove acknowledgement */
     }
     if(value == 8) { /* enable active checks */
+        enableFormElement('row_hostservice_options');
     }
     if(value == 9) { /* disable active checks */
         enableFormElement('row_comment_disable_cmd');
+        enableFormElement('row_hostservice_options');
     }
     if(value == 10) { /* enable notifications */
+        enableFormElement('row_hostservice_options');
     }
     if(value == 11) { /* disable notifications */
         enableFormElement('row_comment_disable_cmd');
+        enableFormElement('row_hostservice_options');
     }
     if(value == 12) { /* submit passive check result */
         enableFormElement('row_submit_options');
@@ -7654,7 +7658,21 @@ function check_selected_command() {
 
 /* hide all form element rows */
 function disableAllFormElement() {
-    var elems = new Array('row_start', 'row_end', 'row_comment', 'row_comment_disable_cmd', 'row_downtime_options', 'row_reschedule_options', 'row_ack_options', 'row_comment_options', 'row_submit_options', 'row_expire', 'opt_expire', 'row_down_options');
+    var elems = [
+        'row_start',
+        'row_end',
+        'row_comment',
+        'row_comment_disable_cmd',
+        'row_downtime_options',
+        'row_reschedule_options',
+        'row_ack_options',
+        'row_comment_options',
+        'row_submit_options',
+        'row_expire',
+        'opt_expire',
+        'row_down_options',
+        'row_hostservice_options'
+    ];
     jQuery.each(elems, function(index, id) {
         var obj = document.getElementById(id);
         if(obj) {

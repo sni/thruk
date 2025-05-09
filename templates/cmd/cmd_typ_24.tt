@@ -18,6 +18,9 @@
     [% ELSE %]
         ENABLE_HOST_NOTIFICATIONS;[% sprintf("%s",host_name) %]
     [% END %]
+    [% IF c.request.parameters.hostserviceoptions %]
+      ENABLE_HOST_SVC_NOTIFICATIONS;[% sprintf("%s",host_name) %]
+    [% END %]
 [% END %]
 
 [%# definition of the html form data #%]
