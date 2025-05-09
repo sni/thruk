@@ -1682,7 +1682,7 @@ sub get_comments_filter {
 
     my $num;
 
-    # LMD can simple search comments and downtimes, no need for a subquery (since version 2.2.2)
+    # LMD can simply search comments and downtimes, no need for a subquery (since version 2.2.2)
     if($ENV{'THRUK_USE_LMD'} && Thruk::Utils::version_compare(Thruk::Utils::LMD::get_lmd_version($c->config), '2.2.2')) {
         if($op eq '=' or $op eq '~~') {
             push @hostfilter,          { -or  => [ comments_with_info => { $op => $value }, downtimes_with_info => { $op => $value } ]};

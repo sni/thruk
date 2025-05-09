@@ -501,8 +501,11 @@ sub get_lmd_version {
 
     my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
     $config->{'lmd_version'} = $output;
+
     if($output && $output =~ m/version\s+([\S]+)\s+/mx) {
-        return $1;
+        my $v = $1;
+        $config->{'lmd_version'} = $v;
+        return($v);
     }
 
     return;

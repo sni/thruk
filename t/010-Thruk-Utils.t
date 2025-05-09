@@ -14,7 +14,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 115;
+    plan tests => 116;
 
     use lib('t');
     require TestUtils;
@@ -197,6 +197,7 @@ is(Thruk::Utils::version_compare('1.0.1',       '1.0.0'),   1, 'version_compare:
 is(Thruk::Utils::version_compare('1.0.0',       '1.0.1b1'), 0, 'version_compare: 1.0.0 vs. 1.0.1b1');
 is(Thruk::Utils::version_compare('1.0.1b1',     '1.0.1b2'), 0, 'version_compare: 1.0.1b1 vs. 1.0.1b2');
 is(Thruk::Utils::version_compare('2.0-shinken', '1.1.3'),   1, 'version_compare: 2.0-shinken vs. 1.1.3');
+is(Thruk::Utils::version_compare('2.4.2',       '2.2.2'),   1, 'version_compare: 2.4.2 vs. 2.2.2');
 
 #########################
 {
