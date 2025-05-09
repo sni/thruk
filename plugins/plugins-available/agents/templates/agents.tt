@@ -65,9 +65,19 @@
               <td>[% agent.section %]</td>
             [% END %]
             <td class="truncate w-60 min-w-32 max-w-max js-agent-row">
-              <div class="flexrow flex-nowrap gap-x-1 justify-between">
-                <a class="link truncate" href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="edit this host">[% h.name | html %]</a>
-                <a class="w-5" href="status.cgi?host=[% h.name | uri %]" title="view service details for this host"><i class="fa-solid fa-bars"></i></a>
+              <div class="flexrow flex-nowrap gap-x-1 justify-between items-center">
+                <div class="flex-1">
+                  <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
+                </div>
+                [% comment_count = h.comments.size;
+                   PROCESS _status_host_attributes
+                      hostprefix=""
+                      host=h
+                      host_comment_count=comment_count
+                      with_status=1
+                      skip_graph=1
+                      loop_index=loop.index
+                %]
               </div>
             </td>
             [% IF has_tags %]
