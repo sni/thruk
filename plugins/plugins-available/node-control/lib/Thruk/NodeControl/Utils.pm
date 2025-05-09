@@ -1552,6 +1552,9 @@ sub _die_connection_error {
     _debug("http(s) connection failed\n".$http_err) if $http_err;
     _debug("ssh connection failed\n".$ssh_err)      if $ssh_err;
 
+    $http_err = _strip_line($http_err) if $http_err;
+    $ssh_err  = _strip_line($ssh_err)  if $ssh_err;
+
     if(($http_err//'') =~ m/^OMD:/mx) {
         die($http_err."\nssh failed: ".$ssh_err) if $ssh_err;
         die($http_err);
@@ -1569,9 +1572,9 @@ sub _die_connection_error {
         die($http_err);
     }
 
-    die("http(s) and ssh connection failed\nhttp(s):\n"._strip_line($http_err)."\n\nssh:\n"._strip_line($ssh_err)) if($http_err && $ssh_err);
-    die("http(s) connection failed\n"._strip_line($http_err)) if $http_err;
-    die("ssh connection failed\n"._strip_line($ssh_err))      if $ssh_err;
+    die("http(s) and ssh connection failed\nhttp(s):\n".$http_err."\n\nssh:\n".$ssh_err) if($http_err && $ssh_err);
+    die("http(s) connection failed\n".$http_err) if $http_err;
+    die("ssh connection failed\n".$ssh_err)      if $ssh_err;
     die("no http(s) control connection available.\n");
 }
 
