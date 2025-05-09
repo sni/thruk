@@ -106,7 +106,7 @@ sub _process_show {
     $c->stash->{has_tags}     = 0;
     my $info = {};
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
-                                              'custom_variables' => { '~' => 'AGENT .+' },
+                                              'custom_variables' => { '=' => 'AGENT snclient' },
                                             ],
                                   pager => 1,
                                  );
@@ -145,8 +145,8 @@ sub _process_show {
     $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
 
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
-                                         'host_custom_variables' => { '~' => 'AGENT .+' },
-                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk.*|os version)$' },
+                                         'host_custom_variables' => { '=' => 'AGENT snclient' },
+                                         'description' => { '~' => '^(agent version|agent inventory|memory|cpu|disk /|disk C:|os version)$' },
                                         ],
                                         'extra_columns' => [qw/long_plugin_output/],
                                  );
