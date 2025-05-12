@@ -1415,6 +1415,12 @@ sub _js_diag_error {
         );
         $known = 1;
     }
+    if($e->{'type'} && $e->{'type'} eq 'debug') {
+        diag("not failing on debug lvl console message");
+        return;
+    } else {
+        fail("got js error");
+    }
     if($e->{'stackTrace'} && ref $e->{'stackTrace'} eq 'HASH' && $e->{'stackTrace'}->{'callFrames'}) {
         diag("Stack Trace:");
         for my $frame (@{$e->{'stackTrace'}->{'callFrames'}}) {
@@ -1426,11 +1432,7 @@ sub _js_diag_error {
             ));
         }
     }
-    if($e->{'type'} && $e->{'type'} eq 'debug') {
-        diag("not failing on debug lvl console message");
-    } else {
-        fail("got js error");
-    }
+
     diag("unknown error: ".Dumper($e)) unless $known;
 }
 
