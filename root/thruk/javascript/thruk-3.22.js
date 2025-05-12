@@ -3681,6 +3681,7 @@ function do_table_search(preserve_hash) {
                 do_table_search_table(id, table, value);
             }
         }
+        jQuery(table).removeClass('hide_on_page_load');
     });
 }
 

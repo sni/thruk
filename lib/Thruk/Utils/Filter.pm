@@ -437,6 +437,9 @@ sub uri_with {
     for my $key (sort keys %uri_filter) {
         $data->{$key} = $uri_filter{$key} unless exists $data->{$key};
     }
+    if($data->{'page'} && $data->{'page'} eq "1") {
+        $data->{'page'} = undef;
+    }
 
     my @old_param = $uri->query_form();
     my @new_param;
@@ -457,6 +460,7 @@ sub uri_with {
         next if $k eq '_page'; # skip new base url
         push(@new_param, $k, $data->{$k}) if(defined $data->{$k} && $data->{$k} ne 'undef');
     }
+    $uri->query(""); # clear old query part
     $uri->query_form(@new_param);
     if($data->{'_page'}) {
         if($data->{'_page'} =~ m/\//mx) {
@@ -477,6 +481,7 @@ sub uri_with {
     if($has_perc20_space) {
         $uri =~ s/\+/%20/gmx;
     }
+    $uri =~ s/\?$//gmx;
     return($uri) if $skip_escape;
     return(&escape_html($uri));
 }

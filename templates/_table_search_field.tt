@@ -18,11 +18,11 @@
         jQuery('#table_search_input').val(filter);
     }
 
-jQuery(document).ready(function() {
-    // preserve hash
-    jQuery("TABLE#[% id %] A").on('click', preserve_hash);
-    jQuery("#table_search_input").focus();
-});
+    jQuery(document).ready(function() {
+        // preserve hash
+        jQuery("TABLE#[% id %] A").on('click', preserve_hash);
+        jQuery("#table_search_input").focus();
+    });
 [%+ END +%]
 -->
 </script>

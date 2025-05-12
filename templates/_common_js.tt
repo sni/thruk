@@ -94,6 +94,9 @@
       switchTheme(cookieTheme);
     });
   }
+  if (window.location.hash) {
+    document.documentElement.classList.add('page-has-hash');
+  }
   [% END %]
 -->
 </script>
