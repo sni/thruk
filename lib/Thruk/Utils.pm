@@ -3723,7 +3723,7 @@ sub dump_params {
     my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = Thruk::Base::clean_credentials_from_string($dump);
-    $dump    = Thruk::Base::shorten($dump, $max_length);
+    $dump    = Thruk::Base::shorten($dump, $max_length) if $max_length;
     $dump    =~ s%;$%%gmx;
     return($dump);
 }
