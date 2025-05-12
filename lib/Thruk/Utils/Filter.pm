@@ -2181,9 +2181,7 @@ return true if variable is defined in stash
 sub defined {
     my($name) = @_;
     my $c = $Thruk::Globals::c;
-    return 0 unless $c->{'stash'};
-    return 0 unless $c->{'stash'}->{$name};
-    return 1;
+    return(defined $c->stash->{$name} ? 1 : 0);
 }
 
 ########################################
