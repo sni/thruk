@@ -46,6 +46,9 @@
   var is_executing_timeout = [% 1000 * c.config.is_executing_timeout %];
   var sort_options        = [% json_encode(data_sorted) %];
   var menuState           = [% json_encode(menu_states) %];
+  [% IF pager %]
+  var pager = [% json_encode(pager) %];
+  [% END %]
   [%- PROCESS _common_js_bugs.tt -%]
 
   [%- IF disable_backspace -%]

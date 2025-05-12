@@ -328,6 +328,7 @@ sub get_default_stash {
         'refresh_rate'              => 0,
         'auto_reload_fn'            => '',
         'page'                      => '',
+        'pager'                     => '',
         'title'                     => '',
         'extrahtmlclass'            => '',
         'extrabodyclass'            => '',

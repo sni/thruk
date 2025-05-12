@@ -1758,6 +1758,10 @@ function toQueryParams(str) {
         }
         str = window.location.href.slice(i + 1);
     }
+    if(str.match(/^https?:/)) {
+        str = str.replace(/.*?\?/, '');
+        str = str.replace(/\#.*$/, '');
+    }
     if (str == "") { return vars; };
     str = str.replace(/#.*$/g, '');
     str = str.split('&');
@@ -1878,7 +1882,7 @@ function uriWith(uri, params, removeParams) {
 
     var newParams = toQueryString(urlArgs);
 
-    var newUrl = uri.replace(/\?.*$/g, '');
+    var newUrl = uri.replace(/\?.*$/g, '').replace(/\#.*$/g, '');
     if(newParams != '') {
         newUrl = newUrl + '?' + newParams;
     }
@@ -3681,7 +3685,6 @@ function do_table_search(preserve_hash) {
                 do_table_search_table(id, table, value);
             }
         }
-        jQuery(table).removeClass('hide_on_page_load');
     });
 }
 
@@ -3693,6 +3696,53 @@ function do_table_search_table(id, table, value) {
         table.style.width = table.offsetWidth+"px";
     }
     table.dataset["search"] = value;
+
+    // in case the page uses paged data, we need to fetch all rows
+    if(window.pager && window.pager.entries < window.pager.total_items && !table.dataset["origUrl"]) {
+        var origUrl = ""+window.location.href;
+        var url = uriWith(window.location.href, {'entries': 'all'});
+        var origTable = table;
+        var container = jQuery('<div class="relative"><\/div>');
+        jQuery(table.parentNode).prepend(container);
+        var tableLoc  = jQuery('<div class="hidden"><\/div>');
+        jQuery(container).prepend(tableLoc);
+        jQuery(origTable).addClass('disabled');
+        var spinner = jQuery('<div class="spinner absolute top-0 left-0 z-30"><\/div>');
+        jQuery(container).prepend(spinner);
+        jQuery(tableLoc).load(url+" #"+id, {}, function(text, status, req) {
+            if(status == "error") {
+                origTable.removeClass('disabled');
+                container.remove();
+                spinner.remove();
+                thruk_xhr_error("loading data failed: ", text, status, req);
+            } else {
+                table = document.getElementById(id);
+                table.dataset["search"]  = value;
+                table.dataset["origUrl"] = origUrl;
+                table.style.width = origTable.style.width;
+                do_table_search_table_filter(id, table, value);
+                jQuery(table).removeClass('hide_on_page_load');
+                origTable.remove();
+                spinner.remove();
+                tableLoc.removeClass('hidden');
+                table_search_post(id);
+            }
+        });
+        return;
+    }
+    if(value == "" && table.dataset["origUrl"]) {
+        // filter cleared, restore previous layout
+        var uri = table.dataset["origUrl"];
+        uri = uriWith(uri.replace(/\#.*$/, ''), {}, { page: null, entries: null });
+        redirect_url(uri);
+        return;
+    }
+
+    do_table_search_table_filter(id, table, value);
+    jQuery(table).removeClass('hide_on_page_load');
+}
+
+function do_table_search_table_filter(id, table, value) {
     var startWith = 1;
     if(table.tagName == "TBODY") { startWith = 0; }
     if(jQuery(table).hasClass('header2')) {
@@ -3764,7 +3814,11 @@ function do_table_search_table(id, table, value) {
             }
         });
     }
+    table_search_post(id);
+}
 
+// update pager count and call callback
+function table_search_post(id) {
     updatePagerCount(id);
     if(table_search_cb[id] != undefined) {
         try {

@@ -4063,6 +4063,10 @@ sub page_data {
         $c->stash->{'data'} = $data;
     }
 
+    if($pager->{'entries'} && $pager->{'entries'} =~ m/^\d+$/mx) {
+        $pager->{'entries'} = 0 + $pager->{'entries'};
+    }
+
     return $data;
 }
 
