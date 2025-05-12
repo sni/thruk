@@ -2170,4 +2170,23 @@ sub peer_address_list {
 
 ########################################
 
+=head2 defined
+
+  defined($varname)
+
+return true if variable is defined in stash
+
+=cut
+
+sub defined {
+    my($name) = @_;
+    my $c = $Thruk::Globals::c;
+    return 0 unless $c->{'stash'};
+    return 0 unless $c->{'stash'}->{$name};
+    return 1;
+}
+
+########################################
+
+
 1;
