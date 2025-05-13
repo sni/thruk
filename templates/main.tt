@@ -1,6 +1,6 @@
 ﻿[% PROCESS _header.tt
-    js           => [ "vendor/billboard-3.5.1/billboard.pkgd.min.js" ],
-    css          => [ "vendor/billboard-3.5.1/billboard.css" ]
+    js           => [ "vendor/billboard-3.15.1/billboard.pkgd.min.js" ],
+    css          => [ "vendor/billboard-3.15.1/billboard.min.css" ]
 %]
 [% PROCESS _message.tt %]
 [% USE date %]
@@ -325,22 +325,6 @@ function getToolTipTemplateRow(name, value, color, cls) {
 }
 
 function initGraphs() {
-  // chrome sometimes draws panels to big on refresh, delay rendering graphs until the cards have a sane size
-  var inner = jQuery(document).innerWidth() * 0.8;
-  var ready = true;
-  jQuery(".js-graph-container").each(function(i, el) {
-    var w = jQuery(el).innerWidth();
-    if(w == 0 || w > inner) {
-      ready = false;
-    }
-  });
-  if(!ready) {
-    window.setTimeout(function() {
-      initGraphs();
-    }, 80);
-    return;
-  }
-
   try {
     drawGraphs();
   } catch(e) {
@@ -372,6 +356,9 @@ function drawGraphs() {
       size: {
         height: 210
       },
+      resize: {
+        auto: "parent"
+      },
       bindto: "#backends-gaugeChart"
     });
 
@@ -394,6 +381,9 @@ function drawGraphs() {
         },
         size: {
           height: 210
+        },
+        resize: {
+          auto: "parent"
         },
         interaction: {
           enabled: true,
@@ -441,6 +431,9 @@ function drawGraphs() {
     },
     size: {
       height: 210
+    },
+    resize: {
+      auto: "parent"
     },
     interaction: {
       enabled: true
@@ -491,6 +484,9 @@ function drawGraphs() {
     size: {
       height: 210
     },
+    resize: {
+      auto: "parent"
+    },
     interaction: {
       enabled: true
     },
@@ -534,6 +530,9 @@ function drawGraphs() {
     size: {
       height: 210
     },
+    resize: {
+      auto: "parent"
+    },
     axis: {
       x: {
         type: "category"
@@ -574,6 +573,9 @@ function drawGraphs() {
     },
     size: {
       height: 210
+    },
+    resize: {
+      auto: "parent"
     },
     axis: {
       x: {
