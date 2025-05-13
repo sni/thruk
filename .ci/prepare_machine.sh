@@ -10,10 +10,10 @@ apt-get -y install \
     apache2-utils \
     apt-transport-https \
     chrpath \
+    coreutils \
     cpanminus \
     curl \
     debhelper \
-    expect \
     git \
     libclass-inspector-perl \
     libconfig-general-perl \
