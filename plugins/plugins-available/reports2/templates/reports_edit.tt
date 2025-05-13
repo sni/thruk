@@ -23,7 +23,40 @@
           <tbody>
             <tr>
               <th class="min-w-[240px]">Name <span class="required">*</span></th>
-              <td colspan=2><input type="text" name="name" value="[% r.name | html %]" class="w-full"></td>
+              <td colspan=2>
+                <div class="flexrow flex-nowrap gap-x-1">
+                  <input type="text" name="name" value="[% r.name | html %]" class="w-full">
+                  <div>
+                    <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'bodyEl': 'macro_help', 'caption': 'Help', 'width': 500 }); return false;">
+                      <i class="fa-solid fa-circle-question"></i>
+                    </a>
+                    <div class="hidden" id="macro_help">
+                      <p>Macros are replaced by the report engine during rendering of the report.</p>
+                      <p>Macros can be used in the name and description of the report.</p>
+                      <p>Examples:</p>
+                      <p class="mt-4">
+                        <ul>
+                          <li><b class="js-copy-to-clipboard clickable">{{ date:start, &quot;format&quot;}}</b> - inserts report start date with given format</li>
+                          <li><b class="js-copy-to-clipboard clickable">{{ date:end, &quot;format&quot;}}</b> - inserts report end date with given format</li>
+                          <li><b class="js-copy-to-clipboard clickable">{{ date:now, &quot;format&quot;}}</b> - inserts current date with given format</li>
+                        </ul>
+                      </p>
+                      <p class="mt-4">Date format uses POSIX format strings, ex.:</p>
+                      <p>
+                        <ul>
+                          <li><b>%Y</b> - year</li>
+                          <li><b>%m</b> - month</li>
+                          <li><b>%b</b> - month in current locale</li>
+                          <li><b>%d</b> - day</li>
+                          <li><b>%H</b> - hour</li>
+                          <li><b>%M</b> - minute</li>
+                          <li><b>%S</b> - second</li>
+                        </ul>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </td>
             </tr>
             <tr>
               <th class="align-top">Description</th>

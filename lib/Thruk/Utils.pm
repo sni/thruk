@@ -64,7 +64,7 @@ sub parse_date {
 
 =head2 format_date
 
-  my $date_string = format_date($string, $format)
+  my $date_string = format_date($timestamp, $format)
 
 return date from timestamp in given format
 

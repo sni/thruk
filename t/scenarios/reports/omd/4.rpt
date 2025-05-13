@@ -1,0 +1,59 @@
+{
+   "backends" : {
+      "backends" : []
+   },
+   "cc" : "",
+   "desc" : "from {{ date:start, \"%d.%m.%Y %H:%M:%S\"}} to {{ date:end, \"%d.%m.%Y %H:%M:%S\"}}",
+   "failed_backends" : "cancel",
+   "is_public" : 0,
+   "name" : "Report Macros: {{ date:now, \"%d.%m.%y %H:%M:%S\"}}",
+   "params" : {
+      "assumeinitialstates" : "yes",
+      "attach_json" : "no",
+      "breakdown" : "months",
+      "dateformat" : "",
+      "datetimeformat" : "",
+      "decimals" : "2",
+      "details_max_level" : "100",
+      "filter" : {
+         "dfl_s0_hostprops" : "0",
+         "dfl_s0_hoststatustypes" : "15",
+         "dfl_s0_op" : "=",
+         "dfl_s0_serviceprops" : "0",
+         "dfl_s0_servicestatustypes" : "31",
+         "dfl_s0_type" : "host",
+         "dfl_s0_val_pre" : "",
+         "dfl_s0_value" : "localhost"
+      },
+      "filter_type" : "Both",
+      "graph_min_sla" : "90",
+      "hostnameformat" : "hostname",
+      "hostnameformat_cust" : "",
+      "includesoftstates" : "no",
+      "initialassumedhoststate" : "0",
+      "initialassumedservicestate" : "0",
+      "language" : "en",
+      "mail_max_level" : -1,
+      "max_outages_pages" : -1,
+      "max_pnp_sources" : "1",
+      "max_worst_pages" : "1",
+      "overview_max_level" : -1,
+      "rpttimeperiod" : "",
+      "servicenameformat" : "servicedescription",
+      "servicenameformat_cust" : "",
+      "sla" : "98",
+      "timeperiod" : "last24hours",
+      "unavailable" : [
+         "down",
+         "unreachable",
+         "critical",
+         "unknown"
+      ]
+   },
+   "permissions" : [],
+   "send_types" : [],
+   "template" : "sla_report.tt",
+   "to" : "",
+   "user" : "omdadmin",
+   "var" : {}
+}

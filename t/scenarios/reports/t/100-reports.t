@@ -1,9 +1,10 @@
 use warnings;
 use strict;
+use POSIX ();
 use Test::More;
 
 BEGIN {
-    plan tests => 245;
+    plan tests => 283;
 
     use lib('t');
     require TestUtils;
@@ -74,6 +75,7 @@ BEGIN {
         'skip_js_check'  => 1,
     );
 
+    # report 3
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/reports2.cgi',
         'like'   => ['Reports', 'report scheduled for update'],
@@ -92,6 +94,31 @@ BEGIN {
         'skip_js_check'  => 1,
     );
 
+    # report 4
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/reports2.cgi',
+        'like'   => ['Reports', 'report scheduled for update'],
+        'post'   => { report => '4', action => 'update' },
+        'follow' => 1,
+    );
+    TestUtils::test_page(
+        'url'     => '/thruk/cgi-bin/reports2.cgi',
+        'like'    => ['Reports'],
+        'waitfor' => qr(\Qreports2.cgi?report=4&amp;refreshreport=0&amp;html=1\E),
+    );
+    my $year = POSIX::strftime('%Y', localtime());
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/reports2.cgi?report=4&refreshreport=0&html=1',
+        'like'           => ["from.*".$year.".*to.*.$year"],
+        'skip_html_lint' => 1,
+        'skip_js_check'  => 1,
+    );
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/reports2.cgi',
+        'like'           => ["from.*".$year.".*to.*.$year"],
+    );
+
+    # logout
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
         'like'   => ['>User<.*?>omdadmin<', 'authorized_for_admin', 'from cgi.cfg'],
