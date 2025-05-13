@@ -64,7 +64,7 @@ sub parse_date {
 
 =head2 format_date
 
-  my $date_string = format_date($string, $format)
+  my $date_string = format_date($timestamp, $format)
 
 return date from timestamp in given format
 
@@ -3723,7 +3723,7 @@ sub dump_params {
     my $dump = ref $params ? Dumper($params) : $params;
     $dump    =~ s%^\$VAR1\s*=\s*%%gmx;
     $dump    = Thruk::Base::clean_credentials_from_string($dump);
-    $dump    = Thruk::Base::shorten($dump, $max_length);
+    $dump    = Thruk::Base::shorten($dump, $max_length) if $max_length;
     $dump    =~ s%;$%%gmx;
     return($dump);
 }
@@ -4061,6 +4061,10 @@ sub page_data {
             $data = [splice(@{$data}, $entries*($pager->{'page'}-1), $entries)];
         }
         $c->stash->{'data'} = $data;
+    }
+
+    if($pager->{'entries'} && $pager->{'entries'} =~ m/^\d+$/mx) {
+        $pager->{'entries'} = 0 + $pager->{'entries'};
     }
 
     return $data;

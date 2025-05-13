@@ -647,6 +647,15 @@ sub generate_report {
         return(_report_die($c, $nr, $err, $logfile));
     }
 
+    # replace macros in name and description
+    for my $key (qw/name desc/) {
+        $c->stash->{'r'}->{$key} = _replace_report_macros($c, $c->stash->{'r'}->{$key});
+    }
+    Thruk::Utils::IO::json_lock_patch($report_file, { var => {
+        name => $c->stash->{'r'}->{'name'},
+        desc => $c->stash->{'r'}->{'desc'},
+    }}, { pretty => 1 });
+
     # render report
     $c->stash->{'param'}->{'mail_max_level_count'} = 0;
     my $reportdata;
@@ -1958,5 +1967,55 @@ sub get_report_themes {
     }
     return($report_themes);
 }
+
+##########################################################
+# replaces {{...}} macros in report
+sub _replace_report_macros {
+    my($c, $value) = @_;
+
+    $value =~ s/(\{\{)
+                (.*?)
+                (\}\})
+               /&_replace_report_macro($c, $1,$2,$3)/gemxis;
+
+    return($value);
+}
+
+##########################################################
+sub _replace_report_macro {
+    my($c, $pre,$macro,$post) = @_;
+
+    my $r = $c->stash->{'r'};
+    if($macro =~ m/^\s*(\w+)\s*:\s*(.*)\s*$/gmx) {
+        my($name, $args) = ($1, $2);
+        if($name eq 'date') {
+            my @args = split(/\s*,\s*/mx, $args);
+            my($type, $format) = @args;
+            $type   = 'now' unless $type;
+            $format = '%d %b %Y, %H:M:%S' unless $format;
+            my $ts;
+            if($type eq 'now') {
+                $ts = time();
+            } elsif($type eq 'start') {
+                $ts = $c->stash->{'start'}; # set in Avail.pm
+            } elsif($type eq 'end') {
+                $ts = $c->stash->{'end'};
+            } else {
+                return("unsupported date type, choose from: start, end, now");
+            }
+            $format =~ s/^"(.*)"$/$1/gmx;
+            $format =~ s/^'(.*)'$/$1/gmx;
+            return(POSIX::strftime($format, localtime($ts)));
+        } else {
+            return("unsupported macro");
+        }
+    } else {
+        return("invalid macro syntax");
+    }
+
+    return($macro);
+}
+
+##########################################################
 
 1;

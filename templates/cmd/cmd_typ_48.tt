@@ -17,13 +17,11 @@
     [% comment_data         = c.request.parameters.com_data_disable_cmd %]
     [% END %]
 
-    DISABLE_HOST_CHECK;[% sprintf("%s",host_name) %]
+    DISABLE_HOST_CHECK;[% sprintf("%s",host_name) +%]
     [% IF c.stash.require_comments_for_disable_cmds %]
       ADD_HOST_COMMENT;[% sprintf("%s;1;%s;DISABLE_HOST_CHECK: %s",host_name,comment_author,comment_data) %]
-    [% END %]
-    [% IF c.request.parameters.hostserviceoptions %]
-      DISABLE_HOST_SVC_CHECKS;[% sprintf("%s",host_name) %]
-    [% END %]
+    [% END +%]
+    [%+ IF c.request.parameters.hostserviceoptions %]DISABLE_HOST_SVC_CHECKS;[% sprintf("%s",host_name) %][% END %]
 [% END %]
 
 [%# definition of the html form data #%]

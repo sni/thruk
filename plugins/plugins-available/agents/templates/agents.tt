@@ -28,7 +28,7 @@
   </div>
 
   <div class="mainTable [% IF main_table_full %]fullsize[% END %] border-t-0" style="max-height: calc(100vh - 155px);">
-    <table class="mainTable js-striped" id="agentTable">
+    <table class="mainTable js-striped hide_on_page_load" id="agentTable">
       <thead>
         <tr>
           [% IF has_sections %]

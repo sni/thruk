@@ -1383,6 +1383,10 @@ DIV.deleteicon {
   @apply hidden;
 }
 
+.page-has-hash .hide_on_page_load {
+  @apply hidden;
+}
+
 DIV.singlefilterpane {
   @apply border-l border-b borderDefault;
   &:first-child {

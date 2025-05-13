@@ -19,18 +19,13 @@
       owner: demo
       group: demo
   - copy:
-      src: /root/1.rpt
+      src: "{{ item }}"
       dest: /omd/sites/demo/var/thruk/reports/
       owner: demo
       group: demo
-  - copy:
-      src: /root/2.rpt
-      dest: /omd/sites/demo/var/thruk/reports/
-      owner: demo
-      group: demo
-  - copy:
-      src: /root/3.rpt
-      dest: /omd/sites/demo/var/thruk/reports/
-      owner: demo
-      group: demo
+    with_items:
+      - /root/1.rpt
+      - /root/2.rpt
+      - /root/3.rpt
+      - /root/4.rpt
   - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test_contact test"

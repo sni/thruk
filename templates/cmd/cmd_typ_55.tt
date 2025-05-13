@@ -27,10 +27,8 @@
         SCHEDULE_AND_PROPAGATE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %]
     [% ELSE %]
         SCHEDULE_HOST_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %]
-    [% END %]
-    [% IF c.request.parameters.hostserviceoptions == 1 %]
-        SCHEDULE_HOST_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %]
-    [% END %]
+    [% END +%]
+    [%+ IF c.request.parameters.hostserviceoptions == 1 %]SCHEDULE_HOST_SVC_DOWNTIME;[% sprintf("%s;%lu;%lu;%d;%lu;%lu;%s;%s",host_name,start_time_unix,end_time_unix,fixed,triggered_by,duration,comment_author,comment_data) %][% END %]
 [% END %]
 
 [% IF c.request.parameters.start_time; SET start_time = c.request.parameters.start_time; ELSE; SET start_time = format_date(date.now,                   '%Y-%m-%d %H:%M:00'); END %]

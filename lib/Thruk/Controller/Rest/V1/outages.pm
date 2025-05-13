@@ -517,7 +517,7 @@ sub _rest_availability {
     $c->req->parameters->{'t2'} = $c->req->parameters->{'end'};
 
     require Thruk::Utils::Avail;
-    my $avail = Thruk::Utils::Avail::calculate_availability($c);
+    my $avail = Thruk::Utils::Avail::calculate_availability($c, $c->req->parameters);
 
     # add percentage values
     my $duration = $avail->{'avail'}->{'total'}->{'duration'};
@@ -574,7 +574,7 @@ sub _rest_outages {
     $c->req->parameters->{'t2'} = $c->req->parameters->{'end'};
 
     require Thruk::Utils::Avail;
-    Thruk::Utils::Avail::calculate_availability($c);
+    Thruk::Utils::Avail::calculate_availability($c, $c->req->parameters);
 
     return($c->stash->{'outages'});
 }

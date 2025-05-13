@@ -518,7 +518,7 @@ sub report_email {
             $c->stash->{size} = -s $attachment;
         }
     }
-    $c->stash->{subject} = $r->{'subject'} || 'Report: '.$r->{'name'};
+    $c->stash->{subject} = $r->{'var'}->{'name'} || $r->{'subject'} || 'Report: '.$r->{'name'};
     $c->stash->{r}       = $r;
 
     Thruk::Utils::ssi_include($c);

@@ -15,7 +15,7 @@
     <div class="card w-[500px]">
       <div class="head gap-2">
         <a href="reports2.cgi" class="link hoverable rounded" title="Go back to report list"><i class="uil uil-angle-double-left text-2xl leading-6 mx-2"></i> </a>
-        <h3>E-Mail: [% r.name %]</h3>
+        <h3 class="mightOverflowBlock">E-Mail: [% IF r.defined("var") && r.var.defined("name") %][% r.var.name | html %][% ELSE %][% r.name | html %][% END %]</h3>
       </div>
       <div class="body">
         <table class="w-full cellspacing">
@@ -33,7 +33,7 @@
           </tr>
           <tr>
             <th>Description</th>
-            <td><textarea name="desc" wrap="hard" class="w-full h-20">[% r.desc %]</textarea></td>
+            <td><textarea name="desc" wrap="hard" class="w-full h-20">[% IF r.defined("var") && r.var.defined("desc") %][% r.var.desc | html %][% ELSE %][% r.desc | html %][% END %]</textarea></td>
           </tr>
           <tr>
             <th>Attachments</th>

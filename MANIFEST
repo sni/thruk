@@ -3069,6 +3069,7 @@ t/scenarios/reports/Makefile
 t/scenarios/reports/omd/1.rpt
 t/scenarios/reports/omd/2.rpt
 t/scenarios/reports/omd/3.rpt
+t/scenarios/reports/omd/4.rpt
 t/scenarios/reports/omd/Dockerfile
 t/scenarios/reports/omd/playbook.yml
 t/scenarios/reports/omd/test.cfg

@@ -53,9 +53,11 @@
       </thead>
       <tbody>
         [% FOREACH r = reports %]
+        [% name = r.name; IF (r.defined("var") && r.var.defined("name")); name = r.var.name; END %]
+        [% desc = r.desc; IF (r.defined("var") && r.var.defined("desc")); desc = r.var.desc; END %]
         <tr class="report[% r.nr +%] [% IF r.user == remote_user %] my[% END %][% IF r.is_public %] public[% ELSE %] other[% END %]">
-          <td class="truncate w-1/4 max-w-xs" title="[% r.name | html %]">[% r.name | html %]</td>
-          <td class="truncate w-1/4 max-w-xs">[% IF r.desc.length > 50 %]<span title="[% r.desc | html %]">[% r.desc.substr(0,50) | html %]...</span>[% ELSE %][% r.desc | html %][% END %]</td>
+          <td class="truncate w-1/4 max-w-xs" title="[% name | html %]">[% name | html %]</td>
+          <td class="truncate w-1/4 max-w-xs">[% IF desc.length > 50 %]<span title="[% desc | html %]">[% desc.substr(0,50) | html %]...</span>[% ELSE %][% desc | html %][% END %]</td>
           <td class="text-center">[% IF r.is_public %]yes[% ELSE %]no[% END %]</td>
           <td class="text-center js-usercol">[% r.user | html %]</td>
           <td class="text-center">[% IF ( r.to || r.cc ) && r.send_types.size > 0 %]yes[% ELSE %]no[% END %]</td>
