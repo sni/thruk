@@ -7,6 +7,7 @@ next:
             - fix hostname/ip wizard
           - Reports:
             - add date macros for name and description
+            - fix outage calculation with soft recovery
 
 3.22     Sat Apr 12 18:07:06 CEST 2025
           - migrate sound files to webm

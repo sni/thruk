@@ -831,8 +831,8 @@ sub _process_log_line {
         $self->_log($data);
     }
 
-    # only hard states?
-    if(exists $data->{'hard'} && !$report_options_includesoftstates && $data->{'hard'} != 1) {
+    # only hard states? soft OK/Recovery will be included
+    if(exists $data->{'hard'} && !$report_options_includesoftstates && $data->{'hard'} != 1 && $data->{'state'} ne "0") {
         $self->_log('  -> skipped soft state') if $verbose;
         return;
     }
