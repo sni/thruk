@@ -62,7 +62,7 @@ sub new {
     confess('no core type!') unless defined $coretype;
 
     # dont save relative paths
-    if(!$force && $file =~ m/\.\./mx) {
+    if(!$force && _is_nasty_filename($file)) {
         warn("won't open relative path: $file");
         return;
     }
@@ -655,6 +655,15 @@ sub try_merge {
     my $error = "unable to merge local disk changes:\n".$out;
     $error .= ":\n".$rej if $rej;
     push @{$self->{'errors'}}, $error;
+    return;
+}
+
+##########################################################
+sub _is_nasty_filename {
+    my($name) = @_;
+    confess("no name") unless defined $name;
+    return(1) if $name =~ m%^\.\./%mx;
+    return(1) if $name =~ m%/\.\./%mx;
     return;
 }
 

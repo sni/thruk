@@ -431,9 +431,9 @@ returns true if nasty characters have been found and the filename is NOT safe fo
 sub check_for_nasty_filename {
     my($name) = @_;
     confess("no name") unless defined $name;
-    if($name =~ m/(\.\.|\/|\n)/mx) {
-        return(1);
-    }
+    return(1) if $name =~ m%^\.\./%mx;
+    return(1) if $name =~ m%/\.\./%mx;
+    return(1) if $name =~ m%(\/|\n)%mx;
     return;
 }
 
