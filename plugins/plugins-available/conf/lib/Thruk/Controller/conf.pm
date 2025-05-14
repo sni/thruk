@@ -2514,9 +2514,15 @@ sub _get_git_commit {
 sub _get_git_blame {
     my($c, $path, $line_start, $line_end) = @_;
     my $dir = Thruk::Base::dirname($path);
-    my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."'";
-    my $output = Thruk::Utils::IO::cmd($cmd);
+    my $cmd = "cd '".$dir."' && git blame -swp -L $line_start,$line_end '".$path."' 2>&1";
+    my($rc, $output) = Thruk::Utils::IO::cmd($cmd);
+
     my $blame = {lines => [], commits => {}};
+    if($rc != 0) {
+        _error("git blame (rc:%d) for %s failed: %s", $rc, $path, $output);
+        Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'git blame failed, please have look at the logs' } );
+        return $blame;
+    }
     my($state, $block, $commit) = (0, {}, {});
     for my $line (split/\n/mx, $output) {
         # new commit header starts
