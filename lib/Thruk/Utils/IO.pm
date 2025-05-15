@@ -909,6 +909,7 @@ sub cmd {
         }
         CORE::close($wtr);
 
+        my $printContinue;
         while(my @ready = $sel->can_read()) {
             for my $fh (@ready) {
                 my $line;
@@ -919,26 +920,27 @@ sub cmd {
                     $sel->remove($fh);
                     next;
                 } else {
+                    my($chomped);
                     if(defined $options->{'print_prefix'}) {
-                        my $l = "$line";
-                        my $prefix = $options->{'print_prefix'};
-                        my $chomped = chomp($l);
+                        my $l       = "$line";
+                           $chomped = chomp($l);
+                        my $prefix  = ref $options->{'print_prefix'} ? &{$options->{'print_prefix'}}() : $options->{'print_prefix'};
                         $l =~ s|\n|\n$prefix|gmx;
-                        $l = $prefix.$l.($chomped ? "\n" : "");
+                        $l = ($printContinue ? '' : $prefix).$l.($chomped ? "\n" : "");
                         print $l;
                     }
                     if($options->{'output_prefix'}) {
-                        my $prefix = $options->{'output_prefix'};
-                        if(ref $prefix eq 'CODE') {
-                            $prefix = &{$prefix}();
-                        }
-                        my $l = "$line";
-                        my $chomped = chomp($l);
+                        my $l       = "$line";
+                           $chomped = chomp($l);
+                        my $prefix = ref $options->{'output_prefix'} ? &{$options->{'output_prefix'}}() : $options->{'output_prefix'};
                         $l =~ s|\n|\n$prefix|gmx;
-                        $l = $prefix.$l.($chomped ? "\n" : "");
+                        $l = ($printContinue ? '' : $prefix).$l.($chomped ? "\n" : "");
                         push @lines, $l;
                     } else {
                         push @lines, $line;
+                    }
+                    if(defined $options->{'print_prefix'} || $options->{'output_prefix'}) {
+                        $printContinue = $chomped ? 0 : 1;
                     }
                 }
             }
