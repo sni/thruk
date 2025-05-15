@@ -567,7 +567,9 @@ ex.:
 === basic_auth_enabled
 {% include new_since.ad version="2.36" %}
 Show the basic auth user / password formular. Enabled when using cookie auth.
-You may want to disable this if you only use oauth2 authentication.
+You may want to set this to 0 if you only use oauth2 authentication.
+Set it to 2, if you want to only show the oauth2 authentication but also have
+a toggle button, which can display the basic auth login form as a fallback.
 
 ex.:
 
