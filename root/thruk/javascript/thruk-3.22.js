@@ -616,6 +616,14 @@ function toggleIconImage(icon) {
     jQuery(img).addClass("uil-arrow-from-top");
     jQuery(img).removeClass("uil-top-arrow-to-top");
   }
+  else if(jQuery(img).hasClass("uil-angle-down")) {
+    jQuery(img).addClass("uil-angle-up");
+    jQuery(img).removeClass("uil-angle-down");
+  }
+  else if(jQuery(img).hasClass("uil-angle-up")) {
+    jQuery(img).addClass("uil-angle-down");
+    jQuery(img).removeClass("uil-angle-up");
+  }
 }
 
 function setFormBtnSpinner(form) {
