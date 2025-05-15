@@ -519,7 +519,7 @@ function hideElement(id, icon) {
     pane.style.visibility = 'hidden';
   }
 
-  toogleIconImage(icon);
+  toggleIconImage(icon);
 }
 
 /* show a element by id */
@@ -555,7 +555,7 @@ function showElement(id, icon, bodyclose, bodycloseelement, bodyclosecallback) {
     pane.style.visibility = 'visible';
   }
 
-  toogleIconImage(icon);
+  toggleIconImage(icon);
 
   if(bodyclose) {
     add_body_close(id, icon, bodycloseelement, bodyclosecallback);
@@ -602,7 +602,7 @@ function add_body_close(id, icon, bodycloseelement, bodyclosecallback) {
     }, 50);
 }
 
-function toogleIconImage(icon) {
+function toggleIconImage(icon) {
   if(!icon) { return; }
   var img = document.getElementById(icon);
   if(!img) { return; }
