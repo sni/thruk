@@ -38,7 +38,7 @@ sub check_proc {
     return if $config->{'lmd_remote'};
 
     my $lmd_dir    = $config->{'tmp_path'}.'/lmd';
-    my $logfile    = $lmd_dir.'/lmd.log';
+    my $logfile    = $ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}."/var/log/lmd.log" : $lmd_dir.'/lmd.log';
     my $size       = -s $logfile;
     my $keep       = $config->{'lmd_rotate_keep_logs'} || 3;
     my $rotatesize = ($config->{'lmd_rotate_size'} || 20 ) *1024*1024; # rotate logfile if its more than 20mb
@@ -427,7 +427,7 @@ sub write_lmd_config {
     # gather configs
     my $site_config = "Listen = ['".$lmd_dir."/live.sock']\n\n";
 
-    $site_config .= "LogFile = '".$lmd_dir."/lmd.log'\n\n";
+    $site_config .= "LogFile = '".$lmd_dir."/lmd.log'\n\n" unless $ENV{'OMD_ROOT'};
     $site_config .= "LogLevel = 'Warn'\n\n";
 
     if(!$config->{'ssl_verify_hostnames'}) {

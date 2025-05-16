@@ -474,7 +474,8 @@ sub _lmd_checks  {
         }
     }
 
-    for my $log ($c->config->{'tmp_path'}.'/lmd/lmd.log') {
+    my $logfiles = [$ENV{'OMD_ROOT'} ? $ENV{'OMD_ROOT'}."/var/log/lmd.log" : $c->config->{'tmp_path'}.'/lmd/lmd.log'];
+    for my $log (@{$logfiles}) {
         next unless -e $log; # may not exist either
         # count errors
         my @out = split(/\n/mx, Thruk::Utils::IO::cmd("grep 'Panic:' $log"));
