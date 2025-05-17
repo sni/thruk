@@ -5,6 +5,8 @@ if [ "x$VERBOSE" = "x" ]; then
   VERBOSE=0
 fi
 
+cd /omd/sites/demo && \
+OMD_ROOT=/omd/sites/demo \
 PERL5LIB=/thruk/lib/:/omd/versions/default/lib/perl5/lib/perl5/ \
 PATH=/thruk/script:/omd/versions/default/bin:$PATH \
 THRUK_CONFIG=/omd/sites/demo/etc/thruk \
