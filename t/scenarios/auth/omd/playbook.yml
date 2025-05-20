@@ -20,6 +20,22 @@
         NAGFLUX=on
         INFLUXDB=on
         PNP4NAGIOS=off
+#  - lineinfile:
+#      path: /opt/omd/sites/demo/etc/nagflux/config.gcfg
+#      regexp: '^\s*MinSeverity\s*='
+#      line: '        MinSeverity = "TRACE"'
+#  - lineinfile:
+#      path: /opt/omd/sites/demo/etc/naemon/naemon.cfg
+#      regexp: 'debug_level='
+#      line: 'debug_level=-1'
+#  - lineinfile:
+#      path: /opt/omd/sites/demo/etc/naemon/naemon.cfg
+#      regexp: 'debug_verbosity='
+#      line: 'debug_verbosity=2'
+#  - lineinfile:
+#      path: /opt/omd/sites/demo/etc/naemon/naemon.cfg
+#      regexp: 'max_debug_file_size='
+#      line: 'max_debug_file_size=100000000'
   - copy:
       src: "/root/thruk_local.conf"
       dest: "/omd/sites/demo/etc/thruk/thruk_local.conf"
