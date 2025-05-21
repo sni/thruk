@@ -188,7 +188,7 @@ sub calculate_availability {
         # Any ok state always resets the current problem, so no matter if a ok is soft or hard, we have
         # to count it in. Otherwise we could end up with a critical last entry in the logfile, even if
         # the current state is ok.
-        $softlogfilter = { -or => [ state_type => 'SOFT', state => 0 ]};
+        $softlogfilter = { -or => [ state_type => 'HARD', state => 0 ]};
     }
 
     my $logs;
