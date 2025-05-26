@@ -114,16 +114,16 @@
     [% FOREACH l = outages %]
       <tr>
         [% UNLESS host %]
-        <td>[% l.host | html %]</td>
-        <td>[% l.service | html %]</td>
+          <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% l.host | uri %]">[% l.host | html %]</a></td>
+          <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% l.host | uri %]&amp;service=[% l.service | uri %]">[% l.service | html %]</a></td>
         [% END %]
         <td>[% date_format(c, l.start) %]</td>
         [% IF l.end != "" %]
-        <td>[% date_format(c, l.end) %]</td>
-        <td>[% duration(l.end - l.start) %]</td>
+          <td>[% date_format(c, l.end) %]</td>
+          <td>[% duration(l.end - l.start) %]</td>
         [% ELSE %]
-        <td>...</td>
-        <td>[% duration(l.duration) %]</td>
+          <td title="outage is still ongoing">...</td>
+          <td>[% duration(l.duration) %]</td>
         [% END %]
         <td class="[% l.class.upper | html %]">[% l.type %]</td>
         <td class="truncate max-w-[600px]">[% log_line_plugin_output(l) %]</td>
