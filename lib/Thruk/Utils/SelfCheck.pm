@@ -12,6 +12,7 @@ Utilities Collection for Checking Thruks Integrity
 
 use warnings;
 use strict;
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Constants ':peer_states';
 use Thruk::Utils ();
@@ -61,6 +62,9 @@ return:
 sub self_check {
     my($self, $c, $type) = @_;
     my($rc, $msg, $details);
+
+    my $t1 = [gettimeofday];
+
     my $results = [];
     my($selected, $dont) = ({}, {});
     for my $t (@{Thruk::Base::comma_separated_list($type)}) {
@@ -129,6 +133,10 @@ sub self_check {
             $details .= $res->{'output'};
         }
         $c->stats->profile(end => "selfcheck: metrics");
+
+        # add check runtime metric
+        my $elapsed = tv_interval($t1);
+        $details .= sprintf(" runtime=%.3fs;;;;", $elapsed);
     }
 
     return($rc, $msg, $details);
