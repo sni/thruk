@@ -48,7 +48,9 @@
   [% IF stacktrace %]
     [% PROCESS _stacktrace.tt stacktrace=stacktrace %]
   [% END %]
-  [% DEFAULT errorDebugInfo = [] %]
+  [% DEFAULT errorDebugInfo    = [] %]
+  [% DEFAULT errorDebugInfoRaw = [] %]
+  [% list = errorDebugInfo; IF errorDebugInfoRaw.list.size > 0; errorDebugInfo = errorDebugInfoRaw; END %]
   [% IF errorDebugInfo.list.size > 0 %]
     <div class='card w-fit min-w-[400px] mx-auto mt-2'>
       <div class="head">

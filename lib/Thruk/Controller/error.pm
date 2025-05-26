@@ -286,11 +286,13 @@ sub index {
             $stack = Thruk::Base::clean_credentials_from_string($stack) if $stack;
             my $raw_msg   = "".($c->stash->{'error_data'}->{'msg'} // '');
             my $raw_descr = "".($c->stash->{'error_data'}->{'descr'} // '');
+            my $raw_debug = "".($c->stash->{'error_data'}->{'debug_information'} // '');
             Thruk::Utils::Filter::html_escape_recursive($c->stash->{'error_data'});
             $c->stash->{'error_data'}->{'skip_escape'} = 1;
             $c->stash->{'error_data'}->{'stacktrace'}  = $stack if $stack;
             $c->stash->{'error_data'}->{'msg_raw'} = $raw_msg;
             $c->stash->{'error_data'}->{'descr_raw'} = $raw_descr;
+            $c->stash->{'error_data'}->{'debug_raw'} = $raw_debug;
         }
         $c->stash->{errorMessage}       = $c->stash->{'error_data'}->{'msg'};
         $c->stash->{errorDescription}   = $c->stash->{'error_data'}->{'descr'} // "";
@@ -298,6 +300,7 @@ sub index {
         $log_req                        = $c->stash->{'error_data'}->{'log'} if defined $c->stash->{'error_data'}->{'log'};
         $c->stash->{errorDebugInfo}     = $c->stash->{'error_data'}->{'debug_information'} if $c->stash->{'error_data'}->{'debug_information'};
         $c->stash->{'stacktrace'}      .= $c->stash->{'error_data'}->{'stacktrace'} if $c->stash->{'error_data'}->{'stacktrace'};
+        $c->stash->{errorDebugInfoRaw}  = $c->stash->{'error_data'}->{'debug_raw'};
     }
 
     if($arg1 == 13 and $c->config->{'show_error_reports'}) {
@@ -376,10 +379,11 @@ sub index {
             message     => $c->stash->{errorMessage},
             code        => $code,
         };
-        $json->{'details'}     = $c->stash->{errorDetails}     if $c->stash->{errorDetails};
-        $json->{'description'} = $c->stash->{errorDescription} if $c->stash->{errorDescription};
-        $json->{'message'}     = $c->stash->{'error_data'}->{'msg_raw'}   if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'msg_raw'});
-        $json->{'description'} = $c->stash->{'error_data'}->{'descr_raw'} if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'descr_raw'});
+        $json->{'details'}           = $c->stash->{errorDetails}     if $c->stash->{errorDetails};
+        $json->{'description'}       = $c->stash->{errorDescription} if $c->stash->{errorDescription};
+        $json->{'message'}           = $c->stash->{'error_data'}->{'msg_raw'}   if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'msg_raw'});
+        $json->{'description'}       = $c->stash->{'error_data'}->{'descr_raw'} if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'descr_raw'});
+        $json->{'debug_information'} = $c->stash->{'error_data'}->{'debug_raw'} if($c->stash->{'error_data'} && $c->stash->{'error_data'}->{'debug_raw'});
         return $c->render(json => $json);
     }
 
