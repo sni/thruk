@@ -1,0 +1,53 @@
+use strict;
+use warnings;
+use Test::More;
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+plan tests => 23;
+
+###########################################################
+# verify that we use the correct thruk binary
+TestUtils::test_command({
+    cmd  => '/bin/bash -c "type thruk"',
+    like => ['/\/thruk\/script\/thruk/'],
+}) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+# wait 60 seconds for mail to arrive
+TestUtils::test_command({
+    cmd     => '/bin/bash -c "cat /var/spool/mail/demo" 2>&1',
+    like    => ['/report.pdf/'],
+    waitfor => 'report.pdf',
+});
+
+if(! -s '/var/spool/mail/demo') {
+    diag(`ls -la /var/spool/mail/`);
+    diag(`cat /var/spool/mail/demo`);
+    BAIL_OUT("mail spool is empty, no mail received");
+}
+
+my $year = POSIX::strftime('%Y', localtime());
+TestUtils::test_command({
+    cmd     => '/bin/bash -c "cat /var/spool/mail/demo" 2>&1',
+    like    => [
+        '/report.pdf/',
+        '/From: OMD site demo/',
+        '/Subject:/',
+        '/To: demo@/',
+        '/Report Timeperiod/',
+        '/from.*'.$year.'.*to.*'.$year.'/',
+    ],
+    unlike => [
+        '/ERROR/',
+        '/date:end/',
+        '/date:start/',
+        '/date:now/',
+    ],
+});
+
+###########################################################

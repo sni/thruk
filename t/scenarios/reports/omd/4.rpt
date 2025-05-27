@@ -2,11 +2,11 @@
    "backends" : {
       "backends" : []
    },
-   "cc" : "",
+   "name" : "Report Macros: {{ date:now, \"%d.%m.%y %H:%M:%S\"}}",
    "desc" : "from {{ date:start, \"%d.%m.%Y %H:%M:%S\"}} to {{ date:end, \"%d.%m.%Y %H:%M:%S\"}}",
+   "cc" : "",
    "failed_backends" : "cancel",
    "is_public" : 0,
-   "name" : "Report Macros: {{ date:now, \"%d.%m.%y %H:%M:%S\"}}",
    "params" : {
       "assumeinitialstates" : "yes",
       "attach_json" : "no",
@@ -53,7 +53,7 @@
    "permissions" : [],
    "send_types" : [],
    "template" : "sla_report.tt",
-   "to" : "",
+   "to" : "demo@localhost",
    "user" : "omdadmin",
    "var" : {}
 }

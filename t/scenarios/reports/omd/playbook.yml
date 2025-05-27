@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - role: common
+    - role: local_tests
     - role: thruk_developer
     - role: sendmail
   tasks:
@@ -29,3 +30,5 @@
       - /root/3.rpt
       - /root/4.rpt
   - shell: sudo su - demo -c "htpasswd -b etc/htpasswd test_contact test"
+  - shell: sudo su - demo -c "mkdir -p etc/thruk/templates/reports"
+  - shell: sudo su - demo -c "ln -sfn /test/formlist_report.tt etc/thruk/templates/reports/formlist_report.tt"

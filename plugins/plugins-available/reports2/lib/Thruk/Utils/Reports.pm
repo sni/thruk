@@ -280,6 +280,9 @@ sub report_send {
         $subject = $subj_prepend . $subject;
     }
 
+    $subject  = _replace_report_macros($c, $subject);
+    $mailbody = _replace_report_macros($c, $mailbody);
+
     my $msg = MIME::Lite->new();
     $msg->build(
              From    => $from // '',

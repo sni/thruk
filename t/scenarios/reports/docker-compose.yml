@@ -1,5 +1,5 @@
 services:
-  site:
+  omd:
     build: omd/
     ports:
         - "127.0.0.3:60080:80"
