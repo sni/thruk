@@ -78,4 +78,4 @@ b) the GNU General Public License as published by the Free Software Foundation;
 `SPDX-License-Identifier: Artistic-1.0-Perl OR GPL-1.0-or-later`
 
 Vendor specific libraries below `./root/thruk/vendor/` may have different
-licenes. See `THANKS` file for details.
+licenses. See `THANKS` file for details.
