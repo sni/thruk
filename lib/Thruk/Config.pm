@@ -26,7 +26,7 @@ Generic Access to Thruks Config
 
 ######################################
 
-our $VERSION = '3.22';
+our $VERSION = '3.22.2';
 our $GIT_HASH = ""; # set by dailydist make target
 
 our $config;
@@ -35,7 +35,7 @@ our $project_root = home() || confess('could not determine project_root from inc
 my $base_defaults = {
     'name'                                  => 'Thruk',
     'fileversion'                           => $VERSION,
-    'released'                              => 'April 12, 2025',
+    'released'                              => 'May 28, 2025',
     'compression_format'                    => 'gzip',
     'ENCODING'                              => 'utf-8',
     'image_path'                            => $project_root.'/root/thruk/images',
