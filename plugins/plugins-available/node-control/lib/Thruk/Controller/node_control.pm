@@ -33,6 +33,11 @@ sub index {
     # no permissions at all
     return $c->detach('/error/index/8') unless $c->check_user_roles("admin");
 
+    my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
+    if($view_mode eq 'json') {
+        return $c->redirect_to($c->stash->{'url_prefix'}."r/thruk/nc/nodes");
+    }
+
     $c->stash->{title}                 = 'Node Control';
     $c->stash->{template}              = 'node_control.tt';
     $c->stash->{infoBoxTitle}          = 'Node Control';

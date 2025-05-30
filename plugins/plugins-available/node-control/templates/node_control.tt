@@ -65,7 +65,9 @@
     <span class="tabs w-32 text-center js-tabs clickable" id="view_outdated" onclick="omd_view('outdated'); return false;">Outdated</span>
     <span class="tabs w-32 text-center js-tabs clickable" id="view_failed"   onclick="omd_view('failed')  ; return false;">Failed</span>
     <div class="grow"></div>
-    <div class="w-48"></div>
+    <div class="w-48 flexrow place-content-end mr-2">
+      [% PROCESS _json_export.tt %]
+    </div>
   </div>
   <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
     <table class="mainTable js-striped" id="msTable">
