@@ -1478,7 +1478,7 @@ sub _update_logcache {
             _debug($error);
             $error = $short_err;
         }
-        _cronerror('logcache '.$mode.' failed: '.$error); # don't fill the log with errors from cronjobs
+        _cronerror('logcache '.$mode.' failed: '._strip_line($error)); # don't fill the log with errors from cronjobs
         die($error);
     }
 
@@ -2239,7 +2239,7 @@ sub _import_peer_logfiles {
 
 	# all blocks failed
     if($err && $good == 0) {
-        die($err);
+        die(_strip_line($err));
     }
 
     if($mode eq 'import') {
