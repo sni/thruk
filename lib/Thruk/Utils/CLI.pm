@@ -1274,7 +1274,7 @@ sub _authorize_function {
     elsif($function eq 'get_contact_names')     { return _extend_filter($c, $opt, 'filter', 'contacts'); }
     elsif($function eq 'get_contactgroups')     { return _extend_filter($c, $opt, 'filter', 'contactgroups'); }
     elsif($function eq 'get_contactgroup_names'){ return _extend_filter($c, $opt, 'filter', 'contactgroups'); }
-    elsif($function eq 'get_logs' || $function eq 'get_logs_start_end') {
+    elsif($function eq 'get_logs' || $function eq 'get_logs_start_end'|| $function eq '_get_logs_start_end') {
         return _extend_filter($c, $opt, 'filter', 'log');
     } elsif($function eq 'get_timeperiods' || $function eq 'get_timeperiod_names') {
         _extend_filter($c, $opt, 'filter', 'timeperiods');
