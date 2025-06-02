@@ -143,17 +143,24 @@ sub _debug_http_response {
 sub _strip_line {
     my($error, $all_lines) = @_;
     chomp($error);
+
+    my $re = qr/\ at\ .+?\ line\ \d+\.$/mx;
     my @lines = split/\n/mx, $error;
-	# ex.: 400: Failed validation of service as type service (argument 0) at /src/thruk/lib/Monitoring/Livestatus.pm line 1568, <GEN7> line 1.
-    if($lines[0] =~ s/\ at\ .+?\ line\ \d+\.$//gmx) {
-        return($lines[0]);
-    }
+
     if($all_lines) {
-        for my $line (@lines) {
-            $line =~ s/\ at\ .+?\ line\ \d+\.$//gmx;
+        for(my $x = 0; $x < scalar @lines; $x++) {
+            $lines[$x] =~ s/$re//gmx;
         }
         $error = join("\n", @lines);
+        return($error);
     }
+
+    my @lines = split/\n/mx, $error;
+	# ex.: 400: Failed validation of service as type service (argument 0) at /src/thruk/lib/Monitoring/Livestatus.pm line 1568, <GEN7> line 1.
+    if($lines[0] =~ s/$re//gmx) {
+        return($lines[0]);
+    }
+
     return($error);
 }
 

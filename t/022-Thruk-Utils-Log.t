@@ -10,15 +10,26 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 
 use_ok('Thruk::Utils::Log');
 
+##############################################
 open(my $ph, '-|', 'bash -c "find ./lib ./plugins/plugins-available/*/lib -type f" 2>&1 | grep -v results/') or die('find failed: '.$!);
 while(<$ph>) {
     my $line = $_;
     chomp($line);
     check_logger($line);
 }
+
+##############################################
+eval {
+    die("test");
+};
+my $tst = $@;
+is(Thruk::Utils::Log::_strip_line($tst), "test", "strip_line works");
+my $multiline = "test\n".$tst;
+is(Thruk::Utils::Log::_strip_line($multiline, 1), "test\ntest", "strip_line works");
+
 done_testing();
 
-
+##############################################
 sub check_logger {
     my($file) = @_;
     ok($file, $file);
@@ -36,3 +47,5 @@ sub check_logger {
     }
     return;
 }
+
+##############################################
