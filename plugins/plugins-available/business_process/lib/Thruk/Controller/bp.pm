@@ -642,7 +642,7 @@ sub _add_remote_bps {
     my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), { 'custom_variable_names' => { '>=' => 'THRUK_BP_ID' } } ] );
     for my $svc (@{$services}) {
         my $vars = Thruk::Utils::get_custom_vars($c, $svc);
-        next unless $vars->{'THRUK_NODE_ID'} eq 'node1';
+        next unless($vars->{'THRUK_NODE_ID'} && $vars->{'THRUK_NODE_ID'} eq 'node1');
         my $fullid = $vars->{'THRUK_BP_ID'}.':'.$svc->{'description'};
         # skip the ones we have already
         next if $uniq->{$fullid};
