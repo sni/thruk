@@ -393,12 +393,15 @@ sub _create_output {
         STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
     };
 
-    $macros->{RAW} = $result->[0]->{'result'} // '';
+    $macros->{RAW} = $result->[0]->{'result'} // $result->[0]->{'data'} // '';
     my $x = 0;
     for my $r (@{$result}) {
-        $macros->{'RAW'.$x} = $r->{'result'} // '';
+        $macros->{'RAW'.$x} = $r->{'result'} // $r->{'data'} // '';
         $x++;
     }
+
+    _debug("output macros:");
+    _debug($macros);
 
     $output = $totals->{'output'};
     $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
@@ -415,9 +418,11 @@ sub _append_performance_data {
     my($opt, $result) = @_;
     my @perf_data;
     my $totals = $result->[0];
-    for my $key (sort keys %{$totals->{'data'}}) {
-        my $perfdata = _append_performance_data_string($key, $totals->{'data'}->{$key}, $totals);
-        push @perf_data, @{$perfdata} if $perfdata;
+    if(ref $totals->{'data'} eq 'HASH') {
+        for my $key (sort keys %{$totals->{'data'}}) {
+            my $perfdata = _append_performance_data_string($key, $totals->{'data'}->{$key}, $totals);
+            push @perf_data, @{$perfdata} if $perfdata;
+        }
     }
     return("|".join(" ", @perf_data));
 }
@@ -514,6 +519,9 @@ sub _calculate_data_totals {
         push @{$perfunits}, @{$r->{'perfunit'}}    if $r->{'perfunit'};
         push @{$perffilter}, @{$r->{'perffilter'}} if $r->{'perffilter'};
     }
+    if(scalar @{$result} == 1) {
+        $totals->{'data'} = $result->[0]->{'data'};
+    }
     $totals->{perfunits} = {};
     for my $p (@{$perfunits}) {
         my($label, $unit) = split(/:/mx, $p, 2);
@@ -564,6 +572,9 @@ sub _replace_output {
             if(!$ok) {
                 $error = "error:$v does not exist";
             }
+        }
+        if(ref $val) {
+            $val = Cpanel::JSON::XS->new->canonical->encode($val);
         }
         push @processed, $val;
     }
