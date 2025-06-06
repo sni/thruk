@@ -23,8 +23,10 @@ The rest command is a cli interface to the rest api.
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Cwd ();
 use Getopt::Long ();
 use POSIX ();
+use Template ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
