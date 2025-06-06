@@ -869,7 +869,7 @@ sub get_toolkit_config {
         },
         'PRE_DEFINE'                            => {
                     # subs from Thruk::Utils::Filter will be added automatically
-                    'dump'                          => \&Thruk::Utils::Filter::debug,
+                    'dump'                          => \&Thruk::Utils::Filter::dump,
                     'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
                     'command_disabled'              => \&Thruk::Utils::command_disabled,
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,

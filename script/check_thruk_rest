@@ -92,7 +92,9 @@ check_thruk_rest - Monitoring Plugin to check things from the Thruk REST API
     -V, --version                 Print version
     -b, --backend=<backend>       Comma seperated list of backends/sites
                                   which should be used for querys.
-    -o, --output=<template>       Define output text template. Format see below.
+    -o, --output=<template txt>   Define output text template. Format see below.
+        --template=<file>         Define a template toolkit template which will be
+                                  used to create the output text.
         --perfunit=<label>:<unit> Set performance data unit for given label.
         --perffilter=<regex>      Filter performance data output by given regex.
 
@@ -229,6 +231,27 @@ Details on the thresholdformat can be found here: https://www.monitoring-plugins
 
 Lists can be enumerated like this {hits::0}
 
+=head1 TEMPLATE TOOLKIT
+
+Using --template=<file> will use a template toolkit template to create the output text.
+Find the documentation for the template syntax here: https://template-toolkit.org/docs/manual/
+
+The exit code is parsed from the template output. Either make the output start with a
+naemon/nagios exit code like this: OK - ... or CRITICAL - ... or print the text:
+{EXITCODE:OK} or {EXITCODE:3} anywhere in the output.
+
+An example template could look like this:
+
+    [% IF RAW.0.state == 0 %]
+       OK - [% RAW.0.description %]
+    [% ELSE %]
+      CRITICAL - [% RAW.0.description %]
+    [% END %]
+
+Or another example to get started:
+
+    [% dump(macros) %][%# pretty print all available variables #%]
+    {EXITCODE:OK}
 
 =head1 RETURN VALUE
 

@@ -1,5 +1,8 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - check_thruk_rest: add template option to set output from template toolkit file
+
 3.22.2   Wed May 28 17:14:48 CEST 2025
           - add "for all services" option for status quick commands
           - fix logs timezone (#1438)

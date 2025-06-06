@@ -61,6 +61,7 @@ sub cmd {
     # return here for simple requests
     if(scalar @{$result} == 1
         && !$result->[0]->{'output'}
+        && !$result->[0]->{'template'}
         && (!$result->[0]->{'warning'}  || scalar @{$result->[0]->{'warning'}}  == 0 )
         && (!$result->[0]->{'critical'} || scalar @{$result->[0]->{'critical'}} == 0 )
         && (!$result->[0]->{'rename'}   || scalar @{$result->[0]->{'rename'}}   == 0 )
@@ -186,6 +187,7 @@ sub _parse_args {
             'headers'    => [],
             'perffilter' => [],
             'format'     => '',
+            'template'   => '',
         };
         Getopt::Long::GetOptionsFromArray($s,
             "H|header=s"      =>  $opt->{'headers'},
@@ -193,6 +195,7 @@ sub _parse_args {
             "d|data=s"        =>  sub { _set_postdata($opt, 0, $src, @_); },
             "D|rawdata=s"     =>  sub { _set_postdata($opt, 1, $src, @_); },
             "o|output=s"      => \$opt->{'output'},
+              "template=s"    => \$opt->{'template'},
             "w|warning=s"     =>  $opt->{'warning'},
             "c|critical=s"    =>  $opt->{'critical'},
               "perfunit=s"    =>  $opt->{'perfunit'},
@@ -370,6 +373,13 @@ sub _create_output {
             }
             $totals->{'output'} = $r->{'output'};
         }
+        if($r->{'template'}) {
+            if($totals->{'template'}) {
+                _set_rc(3, "multiple --template parameter are not supported.");
+                return;
+            }
+            $totals->{'template'} = $r->{'template'};
+        }
 
         # apply thresholds
         _apply_threshold('warning', $r, $totals);
@@ -378,9 +388,13 @@ sub _create_output {
         $rc = $r->{'rc'} if $r->{'rc'} > $rc;
         return($r->{'output'}, 3) if $r->{'rc'} == 3;
     }
+    if($totals->{'template'} && $totals->{'output'}) {
+        _set_rc(3, "do not mix -o/--output with --template. Use only one of them.");
+        return;
+    }
 
     # if there is no format, simply concatenate the output
-    if(!$totals->{'output'}) {
+    if(!$totals->{'output'} && !$totals->{'template'}) {
         for my $r (@{$result}) {
             $output .= $r->{'result'};
         }
@@ -399,16 +413,50 @@ sub _create_output {
         $macros->{'RAW'.$x} = $r->{'result'} // $r->{'data'} // '';
         $x++;
     }
+    $macros->{RC}       = $rc;
+    $macros->{PERFDATA} = _append_performance_data($opt, $result);
 
     _debug("output macros:");
     _debug($macros);
 
-    $output = $totals->{'output'};
-    $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
-    $output =~ s/\\n/\n/gmx; # support adding newlines
+    if($totals && $totals->{'template'}) {
+        if(!-e $totals->{'template'}) {
+            _set_rc(3, $totals->{'template'}.": ".$!);
+            return;
+        }
+        my $tpl = Cwd::abs_path($totals->{'template'});
+        $macros->{"macros"} = $macros;
+        _debug("using template: ".$tpl);
+        my $settings = Thruk::Config::get_toolkit_config();
+        $settings->{'RELATIVE'}    = 1;
+        $settings->{'ABSOLUTE'}    = 1;
+        $settings->{'PRE_CHOMP'}   = 1;
+        $settings->{'POST_CHOMP'}  = 1;
+        $settings->{'TRIM'}        = 1;
+        my $tt = Template->new($settings);
+        $tt->process($tpl, $macros, \$output) || die("failed to process template ".$tpl.": ".$tt->error());
+        delete $macros->{"macros"};
 
-    chomp($output);
-    $output .= _append_performance_data($opt, $result);
+        # extract exit code from template
+        if($output =~ s/^\{\s*exitcode:(\w+)\s*\}//mxi) {
+            $rc = $1;
+        }
+        if($output =~ m/^(OK|WARNING|CRITICAL|UNKNOWN)\s+/smxi) {
+            $rc = $1;
+        }
+        my $nr = Thruk::Utils::Filter::text2state($rc);
+        if(defined $nr) {
+            $rc = $nr;
+        }
+        chomp($output);
+    } else {
+        $output = $totals->{'output'};
+        $output =~ s/\{([^\}]+)\}/&_replace_output($1, $result, $macros)/gemx;
+        $output =~ s/\\n/\n/gmx; # support adding newlines
+
+        chomp($output);
+        $output .= $macros->{PERFDATA};
+    }
     $output .= "\n";
     return($output, $rc);
 }

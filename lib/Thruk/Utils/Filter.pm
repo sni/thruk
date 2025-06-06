@@ -1323,6 +1323,24 @@ sub dump2str {
 
 ##############################################
 
+=head2 dump
+
+  dump($anything, [$max_length])
+
+returns string from object
+
+=cut
+sub dump {
+    my($any, $max_length) = @_;
+    if(ref $any eq "") {
+        return($any);
+    }
+    $max_length = 0 unless defined $max_length;
+    return(Thruk::Utils::dump_params($any, $max_length, 0));
+}
+
+##############################################
+
 =head2 peer_name
 
   get peer_name from dataset
