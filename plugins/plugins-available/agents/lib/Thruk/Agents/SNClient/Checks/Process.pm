@@ -55,7 +55,7 @@ sub get_checks {
                     'filter'        => "state=zombie",
                     'empty-state'   => 0,
                     'perf-config'   => 'rss(ignored:true) virtual(ignored:true) cpu(ignored:true)',
-                    'detail-syntax' => '\\n%(process): pid: %(pid) / user: %(username) / age: %(creation_unix | age | duration)',
+                    'detail-syntax' => '\\n%(process): pid: %(pid) / user: %(username) / age: %(creation | age | duration)',
             },
             'parent'   => 'agent version',
         };
