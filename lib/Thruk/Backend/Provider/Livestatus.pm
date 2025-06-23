@@ -53,6 +53,7 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [qw/
 /];
 $Thruk::Backend::Provider::Livestatus::extra_host_columns = [qw/
     contacts contact_groups long_plugin_output services comments_with_info downtimes_with_info last_update
+    hard_state last_hard_state last_hard_state_change last_state
 /];
 $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns = [qw/
     num_hosts
@@ -91,6 +92,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [qw/
 /];
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
     contacts contact_groups long_plugin_output comments_with_info downtimes_with_info host_contacts host_contact_groups last_update
+    last_hard_state last_hard_state_change last_state
 /];
 $Thruk::Backend::Provider::Livestatus::extra_servicegroup_columns = [qw/
     num_services
