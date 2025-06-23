@@ -78,6 +78,8 @@ and configure it with Issuance Transformation Rules that release
 User-Principal-Name. Using AD FS introduces a dependency on Crypt::JWT to
 decode and validate the attribute assertions.
 
+Available scopes can be retrieved from https://.../adfs/.well-known/openid-configuration
+
 ```
 <auth_oauth>
   <provider>
@@ -96,7 +98,7 @@ decode and validate the attribute assertions.
 </auth_oauth>
 ```
 
-=== Microsoft Azure ID
+=== Microsoft Entra ID (Azure AD)
 
 ```
 <auth_oauth>
@@ -106,8 +108,8 @@ decode and validate the attribute assertions.
     client_id     = $APPLICATIONID
     client_secret = $SECRET
     scopes        = openid profile email
-    auth_url      = https://login.microsoftonline.com/$TENANTID/oauth2/v2.0/authorize
-    token_url     = https://login.microsoftonline.com/$TENANTID/oauth2/v2.0/token
+    auth_url      = https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize
+    token_url     = https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token
     login_field   = preferred_username
   </provider>
 </auth_oauth>
