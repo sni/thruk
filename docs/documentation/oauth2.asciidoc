@@ -39,15 +39,15 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
 ```
 <auth_oauth>
   <provider>
-    login = "Google Account Login"
-    icon = "uil uil-google"
-    client_id = ...
-    client_secret = ...
-    scopes = openid profile email
-    auth_url = https://accounts.google.com/o/oauth2/v2/auth
-    token_url = https://oauth2.googleapis.com/token
-    api_url = https://openidconnect.googleapis.com/v1/userinfo
-    login_field = email
+    login         = "Google Account Login"
+    icon          = "uil uil-google"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile email"
+    auth_url      = "https://accounts.google.com/o/oauth2/v2/auth"
+    token_url     = "https://oauth2.googleapis.com/token"
+    api_url       = "https://openidconnect.googleapis.com/v1/userinfo"
+    login_field   = "email"
   </provider>
 </auth_oauth>
 ```
@@ -58,15 +58,15 @@ You need to create a new "OAuth 2.0 Client ID"  here: https://console.cloud.goog
 ```
 <auth_oauth>
   <provider>
-    login = "Login with Okta"
-    icon = "uil uil-okta"
-    client_id = ...
-    client_secret = ...
-    scopes = openid profile email groups
-    auth_url = https://dev-....okta.com/oauth2/v1/authorize
-    token_url = https://dev-....okta.com/oauth2/v1/token
-    api_url = https://dev-....okta.com/oauth2/v1/userinfo
-    login_field = email
+    login         = "Login with Okta"
+    icon          = "uil uil-okta"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile email groups"
+    auth_url      = "https://dev-....okta.com/oauth2/v1/authorize"
+    token_url     = "https://dev-....okta.com/oauth2/v1/token"
+    api_url       = "https://dev-....okta.com/oauth2/v1/userinfo"
+    login_field   = "email"
   </provider>
 </auth_oauth>
 ```
@@ -83,34 +83,36 @@ Available scopes can be retrieved from https://.../adfs/.well-known/openid-confi
 ```
 <auth_oauth>
   <provider>
-    login = "Login with AD FS"
-    icon = "uil uil-windows"
-    client_id = ...
-    client_secret = ...
-    scopes = openid profile
-    auth_url = https://fs.contoso.com/adfs/oauth2/authorize/?resource=urn:microsoft:userinfo
-    token_url = https://fs.contoso.com/adfs/oauth2/token/
-    jwks_url = https://fs.contoso.com/adfs/discovery/keys
+    login         = "Login with AD FS"
+    icon          = "uil uil-windows"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile"
+    auth_url      = "https://fs.contoso.com/adfs/oauth2/authorize/?resource=urn:microsoft:userinfo"
+    token_url     = "https://fs.contoso.com/adfs/oauth2/token/"
+    jwks_url      = "https://fs.contoso.com/adfs/discovery/keys"
     # You can also configure explicit key trust for the JWK signing key:
     # jwk_key = {"kty":"RSA","n":"0vx7agoebG...L6tSoc_BJECP","e":"AQAB"}
-    login_field = upn
+    login_field   = "upn"
   </provider>
 </auth_oauth>
 ```
 
 === Microsoft Entra ID (Azure AD)
 
+Get supported scopes here: https://login.microsoftonline.com/$TENANT/.well-known/openid-configuration
+
 ```
 <auth_oauth>
   <provider name>
     login         = "Login with $COMPANY SSO"
-    icon          = "uil uil-enter"
-    client_id     = $APPLICATIONID
-    client_secret = $SECRET
-    scopes        = openid profile email
-    auth_url      = https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize
-    token_url     = https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token
-    login_field   = preferred_username
+    icon          = "uil uil-windows"
+    client_id     = "$APPLICATIONID"
+    client_secret = "$SECRET"
+    scopes        = "openid profile email"
+    auth_url      = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize"
+    token_url     = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token"
+    login_field   = "preferred_username"
   </provider>
 </auth_oauth>
 ```
