@@ -118,7 +118,7 @@ sub duration {
     confess("undef duration in duration(): ".$duration) unless defined $duration;
     if($duration < 0) {
         $duration = $duration * -1;
-        $minus    = '-';
+        $minus    = '-' if $duration >= 1;
     }
 
     $options = 1 unless defined $options;

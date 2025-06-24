@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 10;
+plan tests => 12;
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Filter');
@@ -45,3 +45,9 @@ is($res, "1.2s", "duration is ok");
 
 $res = Thruk::Utils::Filter::duration(0.212, 6);
 is($res, "212ms", "duration is ok");
+
+$res = Thruk::Utils::Filter::duration(0.212, 4);
+is($res, "0s", "duration is ok");
+
+$res = Thruk::Utils::Filter::duration(-0.212, 4);
+is($res, "0s", "duration is ok");
