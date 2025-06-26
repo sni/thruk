@@ -6,6 +6,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
+use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
@@ -142,7 +143,7 @@ sub index {
     elsif ( $style eq 'hostdetail' ) {
         return unless _process_hostdetails_page($c);
     }
-    elsif ( $style =~ m/overview$/mx ) {
+    elsif ( $style =~ /overview$/gmx ) {
         $style = 'overview';
         _process_overview_page($c);
     }
@@ -701,152 +702,19 @@ sub _process_hostdetails_page {
 }
 
 ##########################################################
-# create the status details page
+# create the host/status groups overview page
 sub _process_overview_page {
     my( $c ) = @_;
 
-    $c->stash->{'paneprefix'} = 'ovr_';
-    $c->stash->{'columns'} = $c->req->parameters->{'columns'} || 3;
+    Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_overview'});
+    $c->stash->{'paneprefix'}                       = 'ovr_';
+    $c->stash->{'columns'}                          = $c->req->parameters->{'columns'} || 3;
 
-    # which host to display?
-    my($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_filter($c, 'ovr_');
-    return 1 if $c->stash->{'has_error'};
-
-    die("no substyle!") unless defined $c->stash->{substyle};
-
-    # we need the hostname, address etc...
-    my $host_data;
-    my $services_data;
-    my $tmp_host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
-    if( defined $tmp_host_data ) {
-        for my $host ( @{$tmp_host_data} ) {
-            $host_data->{ $host->{'name'} } = $host;
-        }
-    }
-
-    # we have to sort in all services and states
-    my $tmp_services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ], columns => [ qw /description has_been_checked state host_name display_name custom_variable_names custom_variable_values/ ] );
-    if( defined $tmp_services ) {
-        for my $service ( @{$tmp_services} ) {
-            next if $service->{'description'} eq '';
-            $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
-        }
-    }
-
-    # get all host/service groups
-    my $groups;
-    if( $c->stash->{substyle} eq 'host' ) {
-        $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
-        $c->stash->{'status_search_add_default_filter'} = "hostgroup";
-    }
-    else {
-        $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
-        $c->stash->{'status_search_add_default_filter'} = "servicegroup";
-    }
-
-    # join our groups together
-    my %joined_groups;
-    for my $group ( @{$groups} ) {
-
-        next if scalar @{ $group->{'members'} } == 0;
-
-        my $name = $group->{'name'};
-        if( !defined $joined_groups{$name} ) {
-            $joined_groups{$name}->{'name'}  = $group->{'name'};
-            $joined_groups{$name}->{'alias'} = $group->{'alias'};
-            $joined_groups{$name}->{'hosts'} = {};
-        }
-
-        if( $c->stash->{substyle} eq 'host' ) {
-            for my $hostname ( @{ $group->{'members'} } ) {
-
-                # show only hosts with proper authorization
-                next unless defined $host_data->{$hostname};
-
-                if( !defined $joined_groups{$name}->{'hosts'}->{$hostname} ) {
-
-                    # clone hash data
-                    for my $key ( keys %{ $host_data->{$hostname} } ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
-                    }
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
-                }
-
-                for my $servicename (keys %{$services_data->{$hostname}}) {
-                    my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
-                    my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
-                    if( !$has_been_checked ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}++;
-                    }
-                    elsif ( $state == 0 ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}++;
-                    }
-                    elsif ( $state == 1 ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}++;
-                    }
-                    elsif ( $state == 2 ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'}++;
-                    }
-                    elsif ( $state == 3 ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}++;
-                    }
-                }
-            }
-        }
-        else {
-            my $uniq = {};
-            for my $member ( @{ $group->{'members'} } ) {
-                my( $hostname, $servicename ) = @{$member};
-
-                # filter duplicates
-                next if exists $uniq->{$hostname}->{$servicename};
-                $uniq->{$hostname}->{$servicename} = 1;
-
-                # show only hosts with proper authorization
-                next unless defined $host_data->{$hostname};
-                next unless defined $services_data->{$hostname}->{$servicename};
-
-                if( !defined $joined_groups{$name}->{'hosts'}->{$hostname} ) {
-
-                    # clone hash data
-                    for my $key ( keys %{ $host_data->{$hostname} } ) {
-                        $joined_groups{$name}->{'hosts'}->{$hostname}->{$key} = $host_data->{$hostname}->{$key};
-                    }
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
-                }
-
-                my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
-                my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
-                if( !$has_been_checked ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'pending'}++;
-                }
-                elsif ( $state == 0 ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'ok'}++;
-                }
-                elsif ( $state == 1 ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'warning'}++;
-                }
-                elsif ( $state == 2 ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'critical'}++;
-                }
-                elsif ( $state == 3 ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'unknown'}++;
-                }
-            }
-        }
-
-        # remove empty groups
-        if( scalar keys %{ $joined_groups{$name}->{'hosts'} } == 0 ) {
-            delete $joined_groups{$name};
-        }
+    if($c->req->parameters->{'servicegroup'} || ($c->req->parameters->{'style'} && $c->req->parameters->{'style'} eq 'serviceoverview')) {
+        _process_overview_page_by_servicegroup($c);
+    } else {
+        $c->stash->{substyle} = 'host';
+        _process_overview_page_by_hostgroup($c);
     }
 
     $c->stash->{'show_column_select'} = 1;
@@ -856,9 +724,193 @@ sub _process_overview_page {
     $c->stash->{'table_columns'}->{'ovr_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'ovr_'}, $selected_columns);
     $c->stash->{'has_user_columns'}->{'ovr_'} = ($user_data->{'columns'}->{'ovr'} || $c->req->parameters->{'ovr_columns'}) ? 1 : 0;
 
-    my $sortedgroups = Thruk::Backend::Manager::sort_result($c, [(values %joined_groups)], { 'ASC' => 'name'});
-    Thruk::Utils::set_paging_steps($c, Thruk::Base->config->{'group_paging_overview'});
-    Thruk::Utils::page_data($c, $sortedgroups);
+    return 1;
+}
+
+##########################################################
+# create the services overview by hostgroup page
+sub _process_overview_page_by_hostgroup {
+    my($c) = @_;
+
+    $c->stash->{'status_search_add_default_filter'} = "hostgroup";
+
+    # which host to display?
+    my($hostfilter, $servicefilter, $hostgroupfilter, undef) = Thruk::Utils::Status::do_filter($c, 'ovr_');
+    return 1 if $c->stash->{'has_error'};
+    $c->stash->{'hostgroup'} = 'all' unless $c->stash->{'has_service_filter'};
+    $c->stash->{'hostgroup'} = $c->req->parameters->{'hostgroup'} if $c->req->parameters->{'hostgroup'};
+
+    my $groups;
+    if($c->stash->{'hostgroup'} ne 'all') {
+        $groups = [$c->stash->{'hostgroup'}];
+    } else {
+        $groups = $c->db->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
+    }
+    my $paged  = Thruk::Utils::page_data($c, $groups);
+    my(@hostfilter, @servicefilter , @hostgroupfilter);
+    for my $group (@{$paged}) {
+        push @hostfilter,      { groups      => { '>=' => $group } };
+        push @servicefilter,   { host_groups => { '>=' => $group } };
+        push @hostgroupfilter, { name => $group };
+    }
+    if(scalar @{$paged} > 0 && scalar @{$paged} <= 100) {
+        $hostfilter      = Thruk::Utils::combine_filter('-and', [$hostfilter,      Thruk::Utils::combine_filter('-or', \@hostfilter)]);
+        $servicefilter   = Thruk::Utils::combine_filter('-and', [$servicefilter,   Thruk::Utils::combine_filter('-or', \@servicefilter)]);
+        $hostgroupfilter = Thruk::Utils::combine_filter('-and', [$hostgroupfilter, Thruk::Utils::combine_filter('-or', \@hostgroupfilter)]);
+    }
+
+    # we need the hostname, address etc...
+    my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                  columns => [ @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}  ]);
+    my $hosts_data = Thruk::Base::array2hash($hosts, "name");
+    $c->stash->{'hosts_data'} = $hosts_data;
+
+    # sort in all services and states
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                        columns => [qw/host_name description state has_been_checked/]);
+    my $services_data = Thruk::Base::array2hash($services, "host_name", "description");
+
+    $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ] );
+
+    # join our groups together
+    my $group_names = Thruk::Base::array2hash( $groups, 'name' );
+    my $groups_data = {};
+    for my $group ( @{$groups} ) {
+        next unless $group_names->{$group->{'name'}};
+        next if scalar @{ $group->{'members'} } == 0;
+
+        my $name = $group->{'name'};
+        if( !defined $groups_data->{$name} ) {
+            $groups_data->{$name} = {
+                group => $group,
+                hosts => {},
+            };
+        }
+
+        for my $hostname ( @{ $group->{'members'} } ) {
+            # show only hosts with proper authorization
+            next unless defined $hosts_data->{$hostname};
+
+            if(!$groups_data->{$name}->{'hosts'}->{$hostname}) {
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
+            }
+
+            for my $servicename (keys %{$services_data->{$hostname}}) {
+                my $state            = $services_data->{$hostname}->{$servicename}->{'state'};
+                my $has_been_checked = $services_data->{$hostname}->{$servicename}->{'has_been_checked'};
+                if( !$has_been_checked ) {
+                    $groups_data->{$name}->{'hosts'}->{$hostname}->{'pending'}++;
+                }
+                elsif ( $state == 0 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'ok'}++;       }
+                elsif ( $state == 1 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'warning'}++;  }
+                elsif ( $state == 2 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'critical'}++; }
+                elsif ( $state == 3 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'unknown'}++;  }
+            }
+        }
+    }
+
+    $c->stash->{'groups_data'} = $groups_data;
+
+    return 1;
+}
+
+##########################################################
+# create the services overview by servicegroup page
+sub _process_overview_page_by_servicegroup {
+    my( $c ) = @_;
+
+    $c->stash->{'status_search_add_default_filter'} = "servicegroup";
+
+    # which host to display?
+    my($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter) = Thruk::Utils::Status::do_filter($c, 'ovr_');
+    return 1 if $c->stash->{'has_error'};
+    $c->stash->{'servicegroup'} = 'all' unless $c->stash->{'has_service_filter'};
+    $c->stash->{'servicegroup'} = $c->req->parameters->{'servicegroup'} if $c->req->parameters->{'servicegroup'};
+
+    my $groups;
+    if($c->stash->{'servicegroup'} ne 'all') {
+        $groups = [$c->stash->{'servicegroup'}];
+    } else {
+        $groups = $c->db->get_servicegroup_names_from_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ] );
+    }
+    my $paged  = Thruk::Utils::page_data($c, $groups);
+    my( @servicefilter , @servicegroupfilter);
+    for my $group (@{$paged}) {
+        push @servicefilter,      { groups => { '>=' => $group } };
+        push @servicegroupfilter, { name => $group };
+    }
+    if(scalar @{$paged} > 0 && scalar @{$paged} <= 100) {
+        $servicefilter      = Thruk::Utils::combine_filter('-and', [$servicefilter,      Thruk::Utils::combine_filter('-or', \@servicefilter)]);
+        $servicegroupfilter = Thruk::Utils::combine_filter('-and', [$servicegroupfilter, Thruk::Utils::combine_filter('-or', \@servicegroupfilter)]);
+    }
+
+    # sort in all services and states
+    my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
+                                        columns => Thruk::Base::array_uniq([
+                                                qw/host_name description state has_been_checked groups/,
+                                                (map { "host_".$_ } @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}),
+                                            ]),
+                                        );
+
+    $groups = $c->db->get_servicegroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), $servicegroupfilter ] );
+
+    my $hosts_data = {};
+    $c->stash->{'hosts_data'} = $hosts_data;
+
+    # join our groups together
+    my $group_names = Thruk::Base::array2hash( $groups, 'name' );
+    my $groups_data = {};
+    for my $svc ( @{$services} ) {
+        for my $name ( @{$svc->{'groups'}} ) {
+            my $group = $group_names->{$name};
+            next unless $group;
+            next if scalar @{ $group->{'members'} } == 0;
+
+            if( !defined $groups_data->{$name} ) {
+                $groups_data->{$name} = {
+                    group => $group,
+                    hosts => {},
+                };
+            }
+
+            my $hostname = $svc->{'host_name'};
+            if(!$groups_data->{$name}->{'hosts'}->{$hostname}) {
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'pending'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'ok'}       = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'warning'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'unknown'}  = 0;
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'critical'} = 0;
+            }
+
+            if(!$hosts_data->{$hostname}) {
+                my $host = {};
+                for my $key (@{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}) {
+                    my $val = $svc->{'host_'.$key};
+                    my $hkey = "$key";
+                    $hkey =~ s/^host_//gmx;
+                    $host->{$hkey} = $val;
+                }
+                $host->{'peer_key'} = $svc->{'peer_key'};
+                $hosts_data->{$hostname} = $host;
+            }
+
+            my $state            = $svc->{'state'};
+            my $has_been_checked = $svc->{'has_been_checked'};
+            if( !$has_been_checked ) {
+                $groups_data->{$name}->{'hosts'}->{$hostname}->{'pending'}++;
+            }
+            elsif ( $state == 0 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'ok'}++;       }
+            elsif ( $state == 1 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'warning'}++;  }
+            elsif ( $state == 2 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'critical'}++; }
+            elsif ( $state == 3 ) { $groups_data->{$name}->{'hosts'}->{$hostname}->{'unknown'}++;  }
+        }
+    }
+
+    $c->stash->{'groups_data'} = $groups_data;
 
     return 1;
 }
@@ -1011,9 +1063,7 @@ sub _process_summary_page {
     if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
         my $host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                              columns => [ qw/action_url_expanded notes_url_expanded icon_image_alt icon_image_expanded address has_been_checked name
-                                                              state display_name custom_variable_names custom_variable_values groups scheduled_downtime_depth acknowledged
-                                                              checks_enabled check_type/ ],
+                                          columns => [ @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}, qw/groups/ ],
                                              );
         for my $host ( @{$host_data} ) {
             for my $group ( @{ $host->{'groups'} } ) {
@@ -1024,11 +1074,14 @@ sub _process_summary_page {
         $c->stash->{'status_search_add_default_filter'} = "hostgroup";
     }
     # create a hash of all services
+    my $service_columns = Thruk::Base::array_uniq([
+        @{$Thruk::Backend::Provider::Livestatus::minimal_service_columns},
+        (map { "host_".$_ } @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}),
+        qw/groups host_groups/,
+    ]);
     my $services_data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                                 columns => [ qw/description state host_name acknowledged has_been_checked
-                                                                 host_state host_has_been_checked host_acknowledged host_scheduled_downtime_depth host_checks_enabled host_groups host_check_type
-                                                                 checks_enabled check_type scheduled_downtime_depth groups/ ],
-                                                );
+                                             columns => $service_columns,
+                                            );
 
     my $groupsname = "host_groups";
     if( $c->stash->{substyle} eq 'service' ) {

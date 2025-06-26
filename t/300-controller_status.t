@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1305;
+    plan tests => 1338;
 }
 
 BEGIN {
@@ -51,6 +51,8 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&dfl_columns=name%2Cstate%2Clast_check%2Cduration%2Cpeer_name%2Cplugin_output%2Clatency',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostdetail&dfl_columns=name%2Cstate%2Clast_check%2Cduration%2Cpeer_name%2Cplugin_output%2Ccomments',
 
+    '/thruk/cgi-bin/status.cgi?style=hostoverview',
+    '/thruk/cgi-bin/status.cgi?style=hostoverview&entries=all',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostoverview',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostsummary',
     '/thruk/cgi-bin/status.cgi?hostgroup=all&style=hostgrid',
@@ -76,6 +78,7 @@ my $pages = [
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=detail',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=summary',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=grid',
+    '/thruk/cgi-bin/status.cgi?style=overview',
     '/thruk/cgi-bin/status.cgi?servicegroup=all&style=overview',
     '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=detail',
     '/thruk/cgi-bin/status.cgi?servicegroup='.$servicegroup.'&style=summary',
