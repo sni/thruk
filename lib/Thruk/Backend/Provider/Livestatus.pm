@@ -35,10 +35,9 @@ $Thruk::Backend::Provider::Livestatus::callbacks = {
 
 # minimal columns required for hosts in service details
 $Thruk::Backend::Provider::Livestatus::minimal_host_columns = [qw/
-    accept_passive_checks
-    acknowledged action_url_expanded active_checks_enabled address check_type comments has_been_checked icon_image_expanded
+    accept_passive_checks acknowledged action_url_expanded active_checks_enabled address check_type checks_enabled
+    comments custom_variable_names custom_variable_values display_name has_been_checked icon_image_alt icon_image_expanded
     is_executing is_flapping name notes_url_expanded notifications_enabled scheduled_downtime_depth state
-    display_name custom_variable_names custom_variable_values checks_enabled
     / ];
 $Thruk::Backend::Provider::Livestatus::default_host_columns = [
     @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}, qw/
@@ -47,7 +46,7 @@ $Thruk::Backend::Provider::Livestatus::default_host_columns = [
     check_options check_period childs current_attempt
     current_notification_number event_handler event_handler_enabled execution_time
     first_notification_delay flap_detection_enabled
-    high_flap_threshold icon_image icon_image_alt
+    high_flap_threshold icon_image
     last_check last_notification last_state_change
     latency low_flap_threshold max_check_attempts
     next_check notes notes_expanded notes_url notification_interval
@@ -74,10 +73,8 @@ $Thruk::Backend::Provider::Livestatus::extra_hostgroup_columns = [qw/
 
 # minimal columns required for services in details
 $Thruk::Backend::Provider::Livestatus::minimal_service_columns = [qw/
-    accept_passive_checks
-    acknowledged check_type checks_enabled description has_been_checked
-    host_name state scheduled_downtime_depth
-    display_name custom_variable_names custom_variable_values
+    accept_passive_checks acknowledged check_type checks_enabled custom_variable_names custom_variable_values
+    description display_name has_been_checked host_name state icon_image_alt icon_image_expanded scheduled_downtime_depth
     / ];
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [
     @{$Thruk::Backend::Provider::Livestatus::minimal_service_columns}, qw/
@@ -95,7 +92,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [
     host_is_executing host_is_flapping host_notes host_notes_url_expanded
     host_notifications_enabled host_accept_passive_checks
     host_last_state_change
-    icon_image icon_image_alt icon_image_expanded is_executing is_flapping
+    icon_image is_executing is_flapping
     last_check last_notification last_state_change latency
     low_flap_threshold max_check_attempts next_check notes notes_expanded
     notes_url notes_url_expanded notification_interval notification_period
