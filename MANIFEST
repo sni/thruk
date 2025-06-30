@@ -3219,6 +3219,7 @@ templates/_status_totals_header.tt
 templates/_table_search_field.tt
 templates/_third_graph.tt
 templates/_timeperiods_select_options.tt
+templates/_user_profile_frame.tt
 templates/_user_roles.tt
 templates/_wizard_list.tt
 templates/avail_outages.tt
@@ -3408,6 +3409,7 @@ templates/trends_report.tt
 templates/trends_step_1.tt
 templates/trends_step_2.tt
 templates/trends_step_3.tt
+templates/user_api_keys.tt
 templates/user_ext_host_info.tt
 templates/user_ext_service_info.tt
 templates/user_profile.tt

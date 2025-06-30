@@ -1,0 +1,40 @@
+﻿[% USE date %]
+[% PROCESS _header.tt %]
+[% PROCESS _message.tt %]
+
+[% PROCESS _infobox.tt %]
+
+<h1 class="mt-5">User Profile</h1>
+
+<div class="card min-w-[420px] w-fit overflow-hidden mx-auto mt-2">
+  <div class="head p-0">
+    <span class="tabs w-52 text-center[% IF tab == 'user'    %] active[% END %]"><a class="block" href="user.cgi">User Profile</a></span>
+    <span class="tabs w-52 text-center[% IF tab == 'apikeys' %] active[% END %]"><a class="block" href="user.cgi?action=apikeys">API Keys</a></span>
+  </div>
+
+  [% content %]
+
+</div>
+
+<script>
+  <!--
+  jQuery(function() {
+    var timezone = getBrowserTimezone();
+    jQuery('#browser_tz').html(timezone);
+  });
+
+  function setRoles(roles) {
+    jQuery('input:checkbox[name="roles"]').prop('checked', false);
+    jQuery.each(roles.split(","), function(n, r) {
+      jQuery('input:checkbox[name="roles"][value="'+r+'"]').prop('checked', true);
+    });
+    if(roles == "*") {
+      jQuery('input:checkbox[name="roles"]').prop('checked', true);
+      jQuery('input:checkbox[name="roles"][value="authorized_for_read_only"]').prop('checked', false);
+    }
+    return false;
+  }
+  -->
+</script>
+
+[% PROCESS _footer.tt %]
