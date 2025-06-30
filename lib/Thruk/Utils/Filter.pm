@@ -356,8 +356,10 @@ sub full_uri {
     confess("no url_prefix") unless defined $url_prefix;
     if($full) {
         $uri =~ s|(https?://[^/]+)/thruk/|$1$url_prefix|gmx;
+        $uri =~ s|(https?://[^/]+)$url_prefix|$1$url_prefix|gmx;
     } else {
         $uri =~ s|(https?://[^/]+)/thruk/|$url_prefix|gmx;
+        $uri =~ s|(https?://[^/]+)$url_prefix|$url_prefix|gmx;
     }
     return $uri;
 }
