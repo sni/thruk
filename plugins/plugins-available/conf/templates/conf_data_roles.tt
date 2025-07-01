@@ -1,0 +1,91 @@
+﻿[% USE date %]
+[% WRAPPER _conf_frame.tt %]
+
+<div class="flexcol mx-auto w-fit">
+  <form action="conf.cgi" method="GET" class="mt-5 w-full">
+    <input type="hidden" name="sub" value="roles">
+    <input type="hidden" name="action" value="change">
+    <div class="card w-full min-w-[400px]">
+      <div class="head">
+        <h3>select role to change</h3>
+      </div>
+      <table class="body cellspacing-y">
+        <tr>
+          <th class="w-0 pr-2">Role</th>
+          <td>
+            <input type="text" name="role" value="[% role.name | html %]" onclick="ajax_search.init(this, 'role', {url:'conf.cgi?action=json', autosubmit:true})" class="w-full">
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2 class="pb-2">
+            <div class="flexrow justify-evenly">
+              <a class="button" style="width:80px" href="conf.cgi">cancel</a>
+              <input type="submit" name="send" value="show" style="width:80px">
+            </div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </form>
+
+  [% IF show_role %]
+    <form action="conf.cgi" method="POST" autocomplete="off" onsubmit="setFormBtnSpinner(this)">
+      <input type="submit" name="send" value="save" style="display:none">
+      <input type="hidden" name="sub" value="roles">
+      <input type="hidden" name="action" value="store">
+      <input type="hidden" name="role" value="[% role.name | html %]">
+      <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+      <div class="card min-w-[400px]">
+        <div class="head">
+          <h3>Editing: [% role.name | html %]</h3>
+        </div>
+        <div class="body flexrow flex-nowrap">
+
+          <table>
+            <tr>
+              <th>CGI Roles</th>
+              <td>
+                <div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Include Roles</th>
+              <td>
+                <div class="tags-input">
+                  <input
+                    type="text"
+                    name="tags"
+                    value="[% role.includes.join(', ') | html %]"
+                    placeholder="include additional roles"
+                    onfocus="this.click()"
+                    onclick="ajax_search.init(this, 'role', { url: 'conf.cgi?action=json&type=roles', autosubmit:false, onselect:tags_input_cb, filter: filter_own_role })"
+                  >
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+        <div class="footer flexrow justify-evenly">
+          <a class="button" style="width:80px" href="conf.cgi?sub=roles">cancel</a>
+          <button class="submit green" style="width:120px"><i class="uil uil-save"></i>save</button>
+        </div>
+
+      </div>
+    </form>
+  [% END %]
+
+</div>
+
+<script>
+<!--
+function filter_own_role(value) {
+  if(value === '[% role.name | html %]') {
+    return false;
+  }
+  return true;
+}
+-->
+</script>
+
+[% END %]

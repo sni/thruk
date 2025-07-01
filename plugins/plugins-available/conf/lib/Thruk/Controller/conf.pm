@@ -138,6 +138,10 @@ sub index {
         return if Thruk::Action::AddDefaults::die_when_no_backends($c);
         _process_users_page($c);
     }
+    elsif($subcat eq 'roles') {
+        return if Thruk::Action::AddDefaults::die_when_no_backends($c);
+        _process_roles_page($c);
+    }
     elsif($subcat eq 'plugins') {
         _process_plugins_page($c);
     }
@@ -353,6 +357,22 @@ sub _process_json_page {
 
         my $json = [{ 'name' => $type.'s',
                       'data' => $attr,
+                   }];
+        return $c->render(json => $json);
+    }
+
+    if($type eq 'role') {
+        my @all_roles;
+        my @roles = glob($c->config->{'var_path'}."/roles/*.json");
+        for my $r (@roles) {
+            $r =~ s/^.*\///gmx;
+            $r =~ s/\.json$//gmx;
+            $r = Thruk::Utils::Encode::decode_any($r);
+            push @all_roles, $r;
+        }
+
+        my $json = [{ 'name' => $type.'s',
+                      'data' => \@all_roles,
                    }];
         return $c->render(json => $json);
     }
@@ -721,6 +741,34 @@ sub _process_users_page {
 
     $c->stash->{'subtitle'} = "User Configuration";
     $c->stash->{'template'} = 'conf_data_users.tt';
+
+    return 1;
+}
+
+##########################################################
+# create the roles config page
+sub _process_roles_page {
+    my( $c ) = @_;
+    $c->stash->{'role'}      = { 'name' => '' };
+    $c->stash->{'show_role'} = 0;
+
+    my $action = $c->req->parameters->{'action'} || 'list';
+    if($action eq 'change') {
+        my $name = $c->req->parameters->{'role'} || '';
+        $c->stash->{'role'} = {
+            'name'      => $name,
+            'cgi_roles' => [],
+            'includes'  => [],
+        };
+        $c->stash->{'show_role'} = 1;
+    }
+    if($action eq 'store') {
+        Thruk::Utils::set_message( $c, 'success_message', 'Role saved successfully.' );
+        return $c->redirect_to('conf.cgi?sub=roles&action=change&role='.$c->req->parameters->{'role'});
+    }
+
+    $c->stash->{'subtitle'} = "Roles Configuration";
+    $c->stash->{'template'} = 'conf_data_roles.tt';
 
     return 1;
 }

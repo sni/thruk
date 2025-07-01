@@ -1,0 +1,8 @@
+{
+  "roles": ["admin"],
+  "permissions": [{
+    "can_submit_commands": true,
+    "hosts": ["*"],
+    "services": ["*"]
+  }]
+}

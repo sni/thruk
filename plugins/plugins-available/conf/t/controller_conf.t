@@ -121,6 +121,7 @@ my $pages = [
     '/thruk/cgi-bin/conf.cgi?sub=users',
     '/thruk/cgi-bin/conf.cgi?sub=plugins',
     '/thruk/cgi-bin/conf.cgi?sub=users&action=change&data.username=testuser',
+    '/thruk/cgi-bin/conf.cgi?sub=roles',
     { url => '/thruk/cgi-bin/conf.cgi?sub=objects', fail_message_ok => 1 },
     '/thruk/cgi-bin/conf.cgi?edit&host='.$host,
     '/thruk/cgi-bin/conf.cgi?edit&host='.$host.'&service='.$service,

@@ -35,13 +35,16 @@ sub new {
 
     confess("no username") unless defined $username;
 
-    $self->{'username'}          = $username;
-    $self->{'roles'}             = [];
-    $self->{'groups'}            = [];
-    $self->{'alias'}             = undef;
-    $self->{'roles_from_groups'} = {};
-    $self->{'superuser'}         = $superuser ? 1 : 0;
-    $self->{'internal'}          = $internal  ? 1 : 0;
+    $self->{'username'}           = $username;
+    $self->{'roles'}              = [];
+    $self->{'groups'}             = [];
+    $self->{'alias'}              = undef;
+    $self->{'roles_from_groups'}  = {};
+    $self->{'roles_from_oauth'}   = {};
+    $self->{'roles_from_profile'} = {};
+    $self->{'roles_from_roles'}   = {};
+    $self->{'superuser'}          = $superuser ? 1 : 0;
+    $self->{'internal'}           = $internal  ? 1 : 0;
     $self->{'admin_role_from_system_and_conf'} = $c->config->{'admin_role_from_system_and_conf'} // 1;
 
     # add roles from cgi_conf
@@ -61,8 +64,25 @@ sub new {
         push @{$self->{'roles'}}, @{$sessiondata->{'roles'}};
         $self->{'roles_from_session'} = Thruk::Base::array2hash($sessiondata->{'roles'});
     }
+    $self->{'roles_from_oauth'} = {};
+    if($sessiondata && $sessiondata->{'oauth_roles'}) {
+        push @{$self->{'roles'}}, @{$sessiondata->{'oauth_roles'}};
+        $self->{'roles_from_oauth'} = Thruk::Base::array2hash($sessiondata->{'oauth_roles'});
+    }
+
+    # ex.: user settings from var/users/<name>
+    $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
+
+    $self->{'roles_from_profile'} = {};
+    if($self->{settings}->{'roles'}) {
+        push @{$self->{'roles'}}, @{$self->{settings}->{'roles'}};
+        $self->{'roles_from_profile'} = Thruk::Base::array2hash($self->{settings}->{'roles'});
+    }
 
     $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
+
+    # expand roles recursively
+    $self->_expand_roles($c, $self->{'roles'});
 
     # Is this user internal or an admin user?
     if($self->{'internal'} || $self->check_user_roles('admin')) {
@@ -71,13 +91,12 @@ sub new {
         $self->{'can_submit_commands_src'} = "admin role";
     }
 
-    # ex.: user settings from var/users/<name>
-    $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
-
     if($self->{'internal'} && !$self->{'timestamp'}) {
         $self->{'timestamp'}        = time();
         $self->{'contact_src_peer'} = [];
     }
+
+    $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     return $self;
 }
@@ -148,7 +167,7 @@ sub set_dynamic_attributes {
         $self->grant('admin');
     }
 
-    $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
+    $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     if(!$skip_db_access && !$roles) {
         $c->cache->set('users', $username, $data);
@@ -309,7 +328,6 @@ sub _apply_user_data {
         }
     }
 
-
     $data->{'roles'}                   = Thruk::Base::array_uniq($roles);
     $data->{'can_submit_commands'}     = $can_submit_commands;
     $data->{'can_submit_commands_src'} = $can_submit_commands_src;
@@ -393,8 +411,8 @@ sub check_user_roles {
         # gains the full admin role as well.
         # change this behaviour with the 'admin_role_from_system_and_conf' setting.
         if($self->{'admin_role_from_system_and_conf'}
-            && $self->check_user_roles('authorized_for_system_commands')
-            && $self->check_user_roles('authorized_for_configuration_information')
+            && $self->check_user_roles('system_commands')
+            && $self->check_user_roles('configuration_information')
         ) {
             return(1);
         }
@@ -609,9 +627,10 @@ grant role to user
 sub grant {
     my($self, $role) = @_;
     if($role eq 'admin') {
-        $self->{'roles'} = [@{$Thruk::Constants::possible_roles}];
+        push @{$self->{'roles'}}, @{$Thruk::Constants::possible_roles};
         # remove read only role
         $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
+        $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
     } else {
         confess('role '.$role.' not implemented');
     }
@@ -658,5 +677,39 @@ sub js_data {
         readonly            => $self->{'can_submit_commands'} ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
     });
 }
+
+########################################
+# expand roles from roles definitions
+sub _expand_roles {
+    my($self, $c, $roles, $already_included) = @_;
+    $already_included = {} unless defined $already_included;
+
+    my $added = 0;
+    for my $r (@{$roles}) {
+        next if $already_included->{$r};
+        if(Thruk::Base::check_for_nasty_filename($r)) {
+            _warn("invalid role name: $r");
+            next;
+        }
+
+        my $role_data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}."/roles/".$r.".json");
+        if($role_data->{'roles'}) {
+            for my $i (@{$role_data->{'roles'}}) {
+                next if $already_included->{$i};
+                push @{$roles}, $i;
+                $already_included->{$i} = $i;
+                $added++;
+                $self->{'roles_from_roles'}->{$i} = [] unless defined $self->{'roles_from_roles'}->{$i};
+                push @{$self->{'roles_from_roles'}->{$i}}, $r;
+            }
+        }
+    }
+
+    if($added > 0) {
+        $self->_expand_roles($c, $roles, $already_included);
+    }
+}
+
+########################################
 
 1;

@@ -51,6 +51,23 @@
       dest: /omd/sites/demo/etc/grafana/grafana.ini
       owner: demo
       group: demo
+  - name: Create /opt/omd/sites/demo/var/thruk/roles
+    file:
+      path: /opt/omd/sites/demo/var/thruk/roles
+      state: directory
+      mode: '0755'
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/group1.json
+      dest: /opt/omd/sites/demo/var/thruk/roles/group1.json
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/group2.json
+      dest: /opt/omd/sites/demo/var/thruk/roles/group2.json
+      owner: demo
+      group: demo
   - name: "install Dancer2::Plugin::OAuth2::Server"
     shell: "sudo su - {{ site }} -c 'cpanm -n Dancer2::Plugin::OAuth2::Server'"
     environment:

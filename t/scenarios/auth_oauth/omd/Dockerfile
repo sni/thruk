@@ -4,3 +4,5 @@ COPY playbook.yml /root/ansible_dropin/
 ENV  ANSIBLE_ROLES_PATH=/thruk/t/scenarios/_common/ansible/roles
 COPY grafana.ini /root/
 COPY thruk_local.conf /root/
+COPY group1.json /root/
+COPY group2.json /root/
