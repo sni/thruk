@@ -565,6 +565,7 @@ sub get_cgi_user_list {
     my @profiles = glob($c->config->{'var_path'}."/users/*");
     for my $profile (@profiles) {
         $profile =~ s/^.*\///gmx;
+        $profile = Thruk::Utils::Encode::decode_any($profile);
         $all_contacts->{$profile} = { name => $profile } unless defined $all_contacts->{$profile};
     }
 

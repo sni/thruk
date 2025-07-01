@@ -416,6 +416,8 @@ sub _process_cgiusers_page {
     my $contacts        = Thruk::Utils::Conf::get_cgi_user_list($c);
     delete $contacts->{'*'}; # we dont need this user here
     my $data            = [ values %{$contacts} ];
+    # sort by name
+    @{$data}            = sort {uc($a->{'name'}) cmp uc($b->{'name'})} @{$data};
     my $json            = [ { 'name' => "contacts", 'data' => $data } ];
     return $c->render(json => $json);
 }

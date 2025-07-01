@@ -149,7 +149,7 @@
                 <th>Groups</th>
                 <td>
                   [% IF profile_user.groups.size == 0 %]
-                    this contact has no groups.
+                    this contact has no contact groups.
                   [% ELSE %]
                     [% IF backends_with_obj_config.keys.size > 0 %]
                       [% FOREACH group = profile_user.groups %]
