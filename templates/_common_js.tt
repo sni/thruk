@@ -34,7 +34,7 @@
 [%- END %]
   var omd_site            = '[% omd_site %]';
   var referer             = '[% escape_js(uri_with(c, '_' => 'undef' )) %]';
-  var full_uri            = '[% escape_html(full_uri(c)).replace('&amp;', '&').replace('&amp;', '&') %]';
+  var full_uri            = '[% escape_html(full_uri(c, 1)).replace('&amp;', '&').replace('&amp;', '&') %]';
   var original_uri        = '[% IF original_url %][% original_url.replace('^http.*cgi\-bin\/', '').replace('&amp;', '&') | uri %][% END %]';
   var show_sitepanel      = '[% show_sitepanel %]';
   var param_backend       = [% json_encode(param_backend.list) %];
