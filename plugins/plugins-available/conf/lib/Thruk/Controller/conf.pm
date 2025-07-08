@@ -905,7 +905,15 @@ sub _process_backends_page {
 sub _process_objects_page {
     my( $c ) = @_;
 
-    my $rc = Thruk::Utils::Conf::set_object_model($c);
+    my $skip_remote_sync = 0;
+    # skip remote sync for config reload and check
+    if($c->req->parameters->{'apply'}) {
+        if($c->req->parameters->{'check'} || $c->req->parameters->{'reload'} || $c->req->parameters->{'discard'}) {
+            $skip_remote_sync = 1;
+        }
+    }
+
+    my $rc = Thruk::Utils::Conf::set_object_model($c, undef, undef, $skip_remote_sync);
     if($rc == -1) {
         $c->stash->{errorMessage}       = "config tool unavailable";
         $c->stash->{errorDescription}   = $c->stash->{set_object_model_err} || '';

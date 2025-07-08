@@ -2444,6 +2444,7 @@ sub _list {
 sub _remote_do {
     my($self, $c, $sub, $args) = @_;
     my $res;
+    $c->stats->profile(begin => "remote_do::$sub");
     eval {
         $res = $self->{'remotepeer'}
                     ->{'class'}
@@ -2462,9 +2463,11 @@ sub _remote_do {
         $msg    =~ s|\s+(at\s+.*?\s+line\s+\d+)||mx;
         my @text = split(/\n/mx, $msg);
         Thruk::Utils::set_message( $c, 'fail_message', $sub." failed: ".$text[0] );
+        $c->stats->profile(end => "remote_do::$sub");
         return;
     }
     die("bogus result: ".Dumper($res)) if(!defined $res || ref $res ne 'ARRAY' || !defined $res->[2]);
+    $c->stats->profile(end => "remote_do::$sub");
     return $res->[2];
 }
 
@@ -2523,6 +2526,7 @@ syncronize files from remote
 sub remote_file_sync {
     my($self, $c) = @_;
     return unless $self->is_remote();
+    _debug('remote file sync started');
     $c->stats->profile(begin => "remote_file_sync");
     my $files = {};
 
@@ -2547,7 +2551,7 @@ sub remote_file_sync {
     }
 
     Thruk::Utils::IO::mkdir_r($localdir);
-    for my $path (keys %{$remotefiles}) {
+    for my $path (sort keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
             my $localpath = $localdir.'/'.$path;
@@ -2560,7 +2564,6 @@ sub remote_file_sync {
         }
     }
     for my $f (@{$self->{'files'}}) {
-        _debug('checking file: '.$f->{'display'});
         if(!defined $remotefiles->{$f->{'display'}}) {
             _debug('deleting file: '.$f->{'display'});
             $c->req->parameters->{'refreshdata'} = 1; # must be set to save changes to tmp obj retention
@@ -2568,7 +2571,7 @@ sub remote_file_sync {
             # try removing folder as well to not keep empty folders
             rmdir(Thruk::Base::dirname($f->{'path'}));
         } else {
-            _debug('keeping file: '.$f->{'display'});
+            _trace('keeping file: '.$f->{'display'});
         }
     }
 

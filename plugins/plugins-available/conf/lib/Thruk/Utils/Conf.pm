@@ -39,7 +39,7 @@ returns 1 on success, 0 if you have to wait and it redirects or -1 on errors
 
 =cut
 sub set_object_model {
-    my($c, $no_recursion, $peer_key) = @_;
+    my($c, $no_recursion, $peer_key, $skip_remote_sync) = @_;
     $c->stash->{'param_backend'} = $peer_key if $peer_key;
     $peer_key = $c->stash->{'param_backend'} if $c->stash->{'param_backend'};
     delete $c->stash->{set_object_model_err};
@@ -121,7 +121,9 @@ sub set_object_model {
         $c->{'obj_db'}->{'remotepeer'} = $peer_conftool;
         weaken($c->{'obj_db'}->{'remotepeer'}); # avoid circular refs
     }
-    $c->{'obj_db'}->remote_file_sync($c);
+    if(!$skip_remote_sync) {
+        $c->{'obj_db'}->remote_file_sync($c);
+    }
 
     if($c->{'obj_db'}->{'cached'}) {
         $c->stats->profile(begin => "check_files_changed($refresh)");
@@ -1106,7 +1108,7 @@ sub config_check {
 
     $c->stats->profile(begin => "Conf::config_check");
 
-    set_object_model($c, 1, $backend) unless($c->stash->{'param_backend'} && $backend eq $c->stash->{'param_backend'});
+    set_object_model($c, 1, $backend, 1) unless($c->stash->{'param_backend'} && $backend eq $c->stash->{'param_backend'});
     my $obj_check_cmd = $c->stash->{'peer_conftool'}->{'obj_check_cmd'};
     $obj_check_cmd = $obj_check_cmd.' 2>&1' if($obj_check_cmd && $obj_check_cmd !~ m|>|mx);
     my $rc = 0;
@@ -1148,7 +1150,7 @@ sub config_reload {
     die("backend is required") unless $backend;
     $c->stats->profile(begin => "Conf::config_reload");
 
-    set_object_model($c, 1, $backend) unless($c->stash->{'param_backend'} && $backend eq $c->stash->{'param_backend'});
+    set_object_model($c, 1, $backend, 1) unless($c->stash->{'param_backend'} && $backend eq $c->stash->{'param_backend'});
     $c->stash->{'original_output'} = "";
     my $time = time();
     my $peer = $c->db->get_peer_by_key($backend);

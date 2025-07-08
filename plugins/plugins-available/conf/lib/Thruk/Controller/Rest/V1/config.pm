@@ -493,7 +493,7 @@ sub _rest_get_config_check {
     my $jobs = [];
     # start jobs in background
     for my $peer_key (@{$backends}) {
-        _set_object_model($c, $peer_key) || next;
+        _set_object_model($c, $peer_key, 1) || next;
         my $job = Thruk::Utils::External::perl($c, {
                                                     expr       => 'Thruk::Controller::conf::_config_check($c)',
                                                     message    => 'please stand by while configuration is being checked...',
@@ -555,7 +555,7 @@ sub _rest_get_config_reload {
     my $jobs = [];
     # start jobs in background
     for my $peer_key (@{$backends}) {
-        _set_object_model($c, $peer_key) || next;
+        _set_object_model($c, $peer_key, 1) || next;
         my $job = Thruk::Utils::External::perl($c, {
                                                     expr       => 'Thruk::Controller::conf::_config_reload($c)',
                                                     message    => 'please stand by while configuration is being reloaded...',
@@ -599,7 +599,7 @@ sub _rest_get_config_revert {
     my($backends) = $c->db->select_backends();
     my $reverted = 0;
     for my $peer_key (@{$backends}) {
-        _set_object_model($c, $peer_key) || next;
+        _set_object_model($c, $peer_key, 1) || next;
         $c->{'obj_db'}->discard_changes();
         $reverted++;
         Thruk::Utils::Conf::store_model_retention($c, $peer_key);
@@ -612,12 +612,12 @@ sub _rest_get_config_revert {
 
 ##########################################################
 sub _set_object_model {
-    my($c, $peer_key) = @_;
+    my($c, $peer_key, $skip_remote_sync) = @_;
     require Thruk::Utils::Conf;
     local $c->config->{'no_external_job_forks'} = 1;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
-    my $rc = Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
+    my $rc = Thruk::Utils::Conf::set_object_model($c, undef, $peer_key, $skip_remote_sync);
     if($rc == 0 && $c->stash->{set_object_model_err}) {
         _warn("backend %s returned error: %s", $peer_key, $c->stash->{set_object_model_err});
         return;
