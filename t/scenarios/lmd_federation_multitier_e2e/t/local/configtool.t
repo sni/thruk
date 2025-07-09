@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 57;
+plan tests => 60;
 
 ###########################################################
 # test thruks script path
@@ -22,15 +22,22 @@ TestUtils::test_command({
 
 # local files should be fetched on the first call
 TestUtils::test_command({
-    cmd     => '/usr/bin/env thruk r -d "" /sites/tier3a/config/check -v',
-    errlike => [qr%\Qupdating file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
+    cmd     => '/usr/bin/env thruk r -d "" /sites/tier3a/config/diff -v',
+    errlike => [qr%\Q[]\E%, qr%\Qremote file sync started\E%, qr%\Qupdating file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%],
     like    => [],
+});
+
+# no file updates on check
+TestUtils::test_command({
+    cmd     => '/usr/bin/env thruk r -d "" /sites/tier3a/config/check -v',
+    errlike => [qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
+    unlike  => [qr%\Qconf.d/commands.cfg\E%],
 });
 
 # local files should be checked on consecutive calls
 TestUtils::test_command({
-    cmd    => '/usr/bin/env thruk r -d "" /sites/tier3a/config/check -v',
-    errlike => [qr%\Qkeeping file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%, qr%\Q"failed" : false\E%, qr%\QThings look okay\E%],
+    cmd    => '/usr/bin/env thruk r -d "" /sites/tier3a/config/diff -vvvv',
+    errlike => [qr%\Qkeeping file: /omd/sites/demo/etc/naemon/conf.d/commands.cfg\E%],
     like    => [],
 });
 
