@@ -393,7 +393,7 @@
                     value="[% agent.tags.join(', ') | html %]"
                     placeholder="additional tags"
                     onfocus="this.click()"
-                    onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'press enter to create new tag', autosubmit:false, onselect:tags_input_cb })"
+                    onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'press enter to create new tag', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
                   >
                 </div>
               </td>

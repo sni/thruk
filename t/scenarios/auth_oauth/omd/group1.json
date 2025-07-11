@@ -1,0 +1,8 @@
+{
+  "roles": ["admin"],
+  "permissions": [{
+    "commands": "both",
+    "hosts": "",
+    "services": ""
+  }]
+}

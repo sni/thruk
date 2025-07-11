@@ -27,4 +27,4 @@
       dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
       owner: demo
       group: demo
- 
+

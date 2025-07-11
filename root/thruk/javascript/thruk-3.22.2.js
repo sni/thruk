@@ -4637,6 +4637,7 @@ function initTableRowSorting(tblId) {
         items                : 'TR.sortable',
         helper               : 'clone',
         tolerance            : 'pointer',
+        cursor               : 'pointer',
         placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
         }
@@ -5569,9 +5570,24 @@ function play_test_audio(btn, audio) {
  */
 function tags_input_init(div) {
     var input = jQuery(div).find("INPUT");
+    var inputDiv = jQuery('<div class="tags-input-container"></div>');
+    jQuery(div).prepend(inputDiv);
+    jQuery(input).detach().appendTo(inputDiv);
+    var tagsListDiv = jQuery('<div class="tags-list"></div>');
+    jQuery(div).prepend(tagsListDiv);
+    jQuery(inputDiv).off("click").on("click", function(evt) {
+        if(evt.target.tagName == "INPUT") {
+            return;
+        }
+        evt.stopPropagation();
+        input.click();
+    });
+
     var tags = jQuery(input).val();
     tags = tags.split(/\s*,\s*/);
-    jQuery(div).prepend('<div class="tags-list"></div>');
+    if(jQuery(div).hasClass("tags-sorted")) {
+        tags = tags.sort();
+    }
 
     tags_input_recreate_badges(div, tags);
 
@@ -5582,18 +5598,41 @@ function tags_input_init(div) {
         if(evt.key === 'Enter' && ajax_search.cur_select === -1) {
             tags_input_cb(evt.target);
         }
-     });
+    });
+
+    if(!jQuery(div).hasClass("tags-sorted")) {
+        // enable drag/drop of tags if not sorted already
+        jQuery(tagsListDiv).sortable({
+            items                : 'SPAN',
+            helper               : 'clone',
+            forcePlaceholderSize : true,
+            forceHelperSize      : true,
+            tolerance            : 'pointer',
+            distance             : 5,
+            placeholder          : 'sortable-placeholder',
+            update               : function( event, ui ) {
+                window.setTimeout(function() {
+                    tags_input_update_hidden_value(div);
+                }, 100);
+            }
+        });
+    }
 
     tags_input_update_hidden_value(div);
 }
 
 function tags_input_remove(evt) {
-    var span = evt.target;
-    if(span.tagName != "SPAN") {
-        jQuery(span).parents("SPAN:first").click();
+    var icon = evt.target;
+    if(icon.tagName != "I") {
+        if(icon.tagName == "SPAN") {
+            jQuery(icon).find("I").click();
+        } else {
+            jQuery(icon).parents("SPAN:first").find("I").click();
+        }
         return;
     }
-    var div = jQuery(span).parents("DIV.tags-input:first");
+    var span = jQuery(icon).parents("SPAN:first");
+    var div  = jQuery(icon).parents("DIV.tags-input:first");
     fade(span, 100, function() {
         tags_input_update_hidden_value(div);
     });
@@ -5608,7 +5647,13 @@ function tags_input_recreate_badges(div, tags) {
             jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
         }
     });
-    jQuery(div).find("span").off("click").on("click", tags_input_remove);
+    if(jQuery(div).hasClass("tags-sorted")) {
+        // remove by clicking anywhere on the badge
+        jQuery(div).find("SPAN").off("click").on("click", tags_input_remove);
+    } else {
+        // remove only from clicking the icon
+        jQuery(div).find("I").off("click").on("click", tags_input_remove);
+    }
 }
 
 // return array of existing tags
@@ -5627,10 +5672,10 @@ function tags_input_update_hidden_value(div) {
     jQuery(tagsRealInput).val(tags.join(", "));
 }
 
-function tags_input_cb(input) {
-    var div = jQuery(input).parents("DIV.tags-input:first");
+function tags_input_cb(input, value) {
+    var div  = jQuery(input).parents("DIV.tags-input:first");
     var tags = tags_input_get_existing_tags(div);
-    var val = input.value.trim();
+    var val  = input.value.trim();
     jQuery(val.split(/\s*,\s*/)).each(function(i, n) {
         if(n != "") {
             tags.push(n);
@@ -5639,10 +5684,24 @@ function tags_input_cb(input) {
 
     // make tags unique
     tags = Array.from(new Set(tags));
+    if(jQuery(div).hasClass("tags-sorted")) {
+        tags = tags.sort();
+    }
     tags_input_recreate_badges(div, tags);
     tags_input_update_hidden_value(div);
+
+    var panel = document.getElementById(ajax_search.result_pan);
+    jQuery(panel).find("LI.res[data-name='"+value+"']").addClass("hidden");
+
     input.value = "";
     ajax_search.hide_results();
+}
+
+function tags_input_filter_duplicates(val, data) {
+    var input = document.getElementById(ajax_search.input_field);
+    var div   = jQuery(input).parents("DIV.tags-input:first");
+    var tags  = tags_input_get_existing_tags(div);
+    return !tags.includes(val);
 }
 
 /*******************************************************************************
@@ -8949,8 +9008,9 @@ var ajax_search = {
      *   emptytxt:          text when empty
      *   emptyclass:        class when empty
      *   onselect:          run this function after selecting something
+     *   keepOpen:          keep search results open after selecting something
      *   onemptyclick:      when clicking on the empty button
-     *   filter:            run this function as additional filter
+     *   filter:            run this function(s) as additional filter, can be an array or functions
      *   backend_select:    append value of this backend selector
      *   button_links:      prepend links to buttons on top of result
      *   regex_matching:    match with regular expressions
@@ -9050,6 +9110,10 @@ var ajax_search = {
         ajax_search.onselect = undefined;
         if(options.onselect != undefined) {
             ajax_search.onselect = options.onselect;
+        }
+        ajax_search.keepOpen = undefined;
+        if(options.keepOpen != undefined) {
+            ajax_search.keepOpen = options.keepOpen;
         }
         ajax_search.onemptyclick = undefined;
         if(options.onemptyclick != undefined) {
@@ -9650,7 +9714,18 @@ var ajax_search = {
                       // additional filter?
                       var rt = true;
                       if(ajax_search.filter != undefined) {
-                          rt = ajax_search.filter(name, search_type);
+                          if(!is_array(ajax_search.filter)) {
+                            ajax_search.filter = [ajax_search.filter];
+                          }
+                          for(var i=0; i<ajax_search.filter.length; i++) {
+                            if(typeof(ajax_search.filter[i]) == 'function') {
+                              rt = ajax_search.filter[i](name, search_type);
+                            } else {
+                              console.log("ajax_search.filter is not a function", typeof(ajax_search.filter[i]), ajax_search.filter[i]);
+                              rt = false;
+                            }
+                            if(!rt) { break; }
+                          }
                       }
                       // only if all pattern were found
                       if(rt && found == pattern.length) {
@@ -9681,7 +9756,7 @@ var ajax_search = {
                     if(total_relevance > 0) {
                         sub_results.sort(sort_by('sorter', false));
                     }
-                    results.push(Object({ 'name': search_type.name, 'results': sub_results, 'top_hits': top_hits }));
+                    results.push(Object({ 'name': search_type.name, 'alias': search_type.alias, 'results': sub_results, 'top_hits': top_hits }));
                 }
             });
 
@@ -9745,6 +9820,9 @@ var ajax_search = {
             var name = type.name.substring(0,1).toUpperCase() + type.name.substring(1);
             if(type.results.length == 1) { name = name.substring(0, name.length -1); }
             name = name.replace(/ss$/, 's');
+            if(type.alias) {
+                name = type.alias;
+            }
             if(type.results.length >= ajax_search.limit && !ajax_search.local_data) {
                 resultHTML += '<li class="category">over ' + ( type.results.length ) + ' ' + name + '<\/li>';
                 limit_hit = true;
@@ -9930,19 +10008,21 @@ var ajax_search = {
 
         input.value = value;
         ajax_search.cur_select = -1;
-        ajax_search.hide_results(null, 1, 1);
-        input.focus();
-        if(cursorpos) {
-            setCaretToPos(input, cursorpos);
+        if(!ajax_search.keepOpen) {
+            ajax_search.hide_results(null, 1, 1);
+            input.focus();
+            if(cursorpos) {
+                setCaretToPos(input, cursorpos);
+            }
+
+            // close suggestions after select
+            window.clearTimeout(ajax_search.timer);
+            ajax_search.dont_hide=false;
+            window.setTimeout(function() { ajax_search.hide_results(null, 1, 1); }, 100);
         }
 
-        // close suggestions after select
-        window.clearTimeout(ajax_search.timer);
-        ajax_search.dont_hide=false;
-        window.setTimeout(function() { ajax_search.hide_results(null, 1, 1); }, 100);
-
         if(ajax_search.onselect != undefined) {
-            return ajax_search.onselect(input);
+            return ajax_search.onselect(input, value);
         }
 
         if(( ajax_search.autosubmit == undefined

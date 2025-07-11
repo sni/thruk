@@ -42,6 +42,11 @@
       owner: demo
       group: demo
   - copy:
+      src: /root/test.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
+      owner: demo
+      group: demo
+  - copy:
       src: /root/thruk_local.conf
       dest: /omd/sites/demo/etc/thruk/thruk_local.conf
       owner: demo
@@ -49,6 +54,23 @@
   - copy:
       src: /root/grafana.ini
       dest: /omd/sites/demo/etc/grafana/grafana.ini
+      owner: demo
+      group: demo
+  - name: Create /opt/omd/sites/demo/var/thruk/teams
+    file:
+      path: /opt/omd/sites/demo/var/thruk/teams
+      state: directory
+      mode: '0755'
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/group1.json
+      dest: /opt/omd/sites/demo/var/thruk/teams/group1.json
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/group2.json
+      dest: /opt/omd/sites/demo/var/thruk/teams/group2.json
       owner: demo
       group: demo
   - name: "install Dancer2::Plugin::OAuth2::Server"

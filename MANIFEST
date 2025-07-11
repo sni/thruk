@@ -364,6 +364,7 @@ plugins/plugins-available/conf/templates/conf.tt
 plugins/plugins-available/conf/templates/conf_backends.tt
 plugins/plugins-available/conf/templates/conf_choose_clone.tt
 plugins/plugins-available/conf/templates/conf_data.tt
+plugins/plugins-available/conf/templates/conf_data_teams.tt
 plugins/plugins-available/conf/templates/conf_data_users.tt
 plugins/plugins-available/conf/templates/conf_objects.tt
 plugins/plugins-available/conf/templates/conf_objects_apply.tt
@@ -2706,12 +2707,16 @@ t/scenarios/auth_oauth/docker-compose.yml
 t/scenarios/auth_oauth/Makefile
 t/scenarios/auth_oauth/omd/Dockerfile
 t/scenarios/auth_oauth/omd/grafana.ini
+t/scenarios/auth_oauth/omd/group1.json
+t/scenarios/auth_oauth/omd/group2.json
 t/scenarios/auth_oauth/omd/oauth2_server/config.yml
 t/scenarios/auth_oauth/omd/oauth2_server/oauth2_server.pl
 t/scenarios/auth_oauth/omd/playbook.yml
+t/scenarios/auth_oauth/omd/test.cfg
 t/scenarios/auth_oauth/omd/thruk_local.conf
 t/scenarios/auth_oauth/README
 t/scenarios/auth_oauth/t/100-auth-oauth.t
+t/scenarios/auth_oauth/t/300-teams.t
 t/scenarios/auth_oauth/thruk_local.conf
 t/scenarios/auth_oauth_pkce/docker-compose.yml
 t/scenarios/auth_oauth_pkce/Makefile
