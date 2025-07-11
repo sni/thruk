@@ -2536,6 +2536,9 @@ t/data/check_thruk_rest/nested.json
 t/data/editor_config/thruk.conf
 t/data/javascript_tests.js
 t/data/javascript_tests_login_tt.js
+t/data/list_reset/thruk.conf
+t/data/list_reset/thruk_local.conf
+t/data/list_reset/thruk_local.d/a.conf
 t/data/log4perl.conf
 t/data/mysql/archive.log
 t/data/naglint/basic/in.cfg

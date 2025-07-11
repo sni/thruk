@@ -210,6 +210,14 @@ if(!$@) {
 };
 
 ####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/list_reset';
+    my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
+    is_deeply($config->{'command_enabled'}, [99], "parsing from thruk_local.d");
+};
+
+####################################################
 
 done_testing();
 

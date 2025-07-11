@@ -56,6 +56,27 @@ results in
   </initial_menu_state>
 
 
+List values are concatenated.
+
+ex.:
+
+  command_enabled = 1-4
+  command_enabled = 33, 34
+
+results in:
+
+  command_enabled = 1-4, 33, 34
+
+However, if you want to override a list value completely, you can
+reset the list by setting it to an empty value:
+
+  command_enabled = 1-4
+  command_enabled =
+  command_enabled = 33, 34
+
+results in:
+
+  command_enabled = 33, 34
 
 === thruk.conf
 

@@ -472,6 +472,20 @@ sub apply_defaults_and_normalize {
             $config->{$key} = [$config->{$key}];
             next;
         }
+
+        # empty elements in a list resets the list
+        if(ref $config->{$key} eq "ARRAY") {
+            # find last index of array with an empty value
+            my $num = 0;
+            for my $el (reverse @{$config->{$key}}) {
+                last if(!defined $el || $el eq '');
+                $num++;
+            }
+            if($num != scalar @{$config->{$key}}) {
+                my $trimmed = [splice(@{$config->{$key}}, -$num)];
+                $config->{$key} = $trimmed;
+            }
+        }
     }
 
     return($config);
