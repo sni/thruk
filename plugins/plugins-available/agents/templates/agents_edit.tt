@@ -9,7 +9,7 @@
 </script>
 
 [% BLOCK _check_type %]
-  <table class="h-full w-full cellspacing striped rowhover [% sub | html %] js-checks" style="display: none;">
+  <table class="h-full w-full cellspacing striped rowhover rowhoverhighlight [% sub | html %] js-checks" style="display: none;">
     [% IF type == "new" %]
       <thead>
         <tr>
