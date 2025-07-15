@@ -67,7 +67,7 @@
             <td class="truncate w-60 min-w-32 max-w-max js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between items-center">
                 <div class="flex-1">
-                  <a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
+                  <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
                 </div>
                 [% comment_count = h.comments.size;
                    PROCESS _status_host_attributes
