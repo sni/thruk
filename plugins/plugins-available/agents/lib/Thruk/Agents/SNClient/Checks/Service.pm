@@ -52,12 +52,12 @@ sub get_checks {
                 next if($svc->{'active'} && $svc->{'active'} eq 'inactive');
                 my $m = Thruk::Utils::Agents::check_wildcard_match($svc->{'name'}, $n);
                 next unless defined $m;
-                my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "name", $m);
+                my($f, $v) = Thruk::Agents::SNClient::make_filter("name", $m);
                 my $args;
                 if($v eq $svc->{'name'}) {
                     $args = sprintf("service='%s'", $v);
                 } else {
-                    $args = $f;
+                    $args = sprintf('"filter=%s"', $f);
                 }
                 push @{$checks}, {
                     'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),

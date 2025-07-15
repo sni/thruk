@@ -91,6 +91,7 @@ sub get_checks {
     }
     for my $p (@{$procs}) {
         for my $cfg (@{$wanted}) {
+            my $filter = [];
             my $args = [
                 "top-syntax='%{status} - %{count} processes, memory %{rss|h}B, cpu %{cpu:fmt=%.1f}%, started %{oldest:age|duration} ago'",
             ];
@@ -99,28 +100,28 @@ sub get_checks {
                 my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'command_line'}, $cfg->{'match'}, 1);
                 next unless defined $m;
                 if($m ne 'ANY') {
-                    my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "command_line", $m, 1);
-                    push @{$args}, $f;
+                    my($f, $v) = Thruk::Agents::SNClient::make_filter("command_line", $m, 1);
+                    push @{$filter}, $f;
                     $match = $v;
                 }
             } elsif($cfg->{'name'}) {
                 my $m = Thruk::Utils::Agents::check_wildcard_match($p->{'exe'}, $cfg->{'name'});
                 next unless defined $m;
-                my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "exe", $m);
+                my($f, $v) = Thruk::Agents::SNClient::make_filter("exe", $m);
                 $match = $v;
                 $cfg->{'_name'} = "process ".$v;
                 if($v eq $cfg->{'name'}) {
                     push @{$args}, sprintf("process='%s'", $v);
                 } else {
-                    push @{$args}, $f;
+                    push @{$filter}, $f;
                 }
             }
 
             my $user = Thruk::Utils::Agents::check_wildcard_match(($p->{'username'}//''), ($cfg->{'user'} // 'ANY'));
             next unless $user;
             if($user ne 'ANY') {
-                my($f, $v) = Thruk::Agents::SNClient::make_filter("filter", "username", $user);
-                push @{$args}, $f;
+                my($f, $v) = Thruk::Agents::SNClient::make_filter("username", $user);
+                push @{$filter}, $f;
             }
             my $username = $user ne 'ANY' ? $p->{'username'} : "";
 
@@ -143,6 +144,8 @@ sub get_checks {
                 # if zero is a valid threshold, do not make check unknown
                 push @{$args}, 'empty-state=0';
             }
+
+            push @{$args}, sprintf('"filter=%s"', join(" and ", @{$filter})) if scalar @{$filter} > 0;
 
             my $id = 'proc.'.Thruk::Utils::Agents::to_id($match.'_'.($username || 'ANY'));
             next if $already_checked->{$id};
