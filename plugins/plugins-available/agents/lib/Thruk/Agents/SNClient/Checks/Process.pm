@@ -65,6 +65,7 @@ sub get_checks {
     my $already_checked = {};
     my $wanted = [];
     my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'proc'});
+
     for my $cfg (@{$configs}) {
         next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($cfg->{'host'} // 'ANY'));
         next unless Thruk::Utils::Agents::check_wildcard_match($section, ($cfg->{'section'} // 'ANY'));
@@ -75,6 +76,7 @@ sub get_checks {
                     $local->{'user'}  = $u;
                     $local->{'match'} = $n;
                     $local->{'name'}  = Thruk::Base::list($cfg->{'name'} // 'process %e %u')->[0];
+                    $local->{'_cfg'}  = $cfg;
                     push @{$wanted}, $local;
                 }
             }
@@ -82,8 +84,9 @@ sub get_checks {
             for my $name (@{Thruk::Base::list($cfg->{'name'})}) {
                 for my $u (@{Thruk::Base::list($cfg->{'user'} // 'ANY')}) {
                     my $local = Thruk::Utils::IO::dclone($cfg);
-                    $local->{'user'}  = $u;
+                    $local->{'user'} = $u;
                     $local->{'name'} = $name;
+                    $local->{'_cfg'} = $cfg;
                     push @{$wanted}, $local;
                 }
             }
@@ -153,15 +156,17 @@ sub get_checks {
             my $exe = $p->{'exe'};
             $exe =~ s/^\[//gmx;
             $exe =~ s/\]$//gmx;
-            push @{$checks}, {
-                'id'       => $id,
-                'name'     => Thruk::Agents::SNClient::make_name($cfg->{'_name'} // $cfg->{'name'} // 'proc %e %u', { '%e' => $exe, '%u' => $username }),
-                'check'    => 'check_process',
-                'args'     => $args,
-                'parent'   => 'agent version',
-                'info'     => $p,
+            my $chk = {
+                'id'            => $id,
+                'name'          => Thruk::Agents::SNClient::make_name($cfg->{'_name'} // $cfg->{'name'} // 'proc %e %u', { '%e' => $exe, '%u' => $username }),
+                'check'         => 'check_process',
+                'args'          => $args,
+                'parent'        => 'agent version',
+                'info'          => $p,
+                'cfg'           => $cfg->{'_cfg'},
                 '_GRAPH_SOURCE' => 'cpu',
             };
+            push @{$checks}, $chk;
         }
     }
 

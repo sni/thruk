@@ -198,6 +198,28 @@
         </table>
       </div>
       [% END %]
+      [% IF check.defined("cfg") %]
+      <div class="mt-5">
+        <h4>Config Source</h4>
+        <table class="body w-fit striped rowhover cellborder border borderDefault">
+          <tbody>
+            <tr>
+              <td colspan="2">[% strip_site_path(check.cfg._FILE) | html %] line [% check.cfg._LINE | html %]</td>
+            </tr>
+            [% FOREACH attr = check.cfg.keys.sort %]
+            [% IF attr == "_FILE"; NEXT; END %]
+            [% IF attr == "_LINE"; NEXT; END %]
+            [% IF attr == "warn"; NEXT; END %]
+            [% IF attr == "crit"; NEXT; END %]
+            <tr>
+              <td>[% attr | html %]</td>
+              <td>[% check.cfg.$attr | html %]</td>
+            </tr>
+            [% END %]
+          </tbody>
+        </table>
+      </div>
+      [% END %]
       <div class="mt-5">
         <h4>Default Arguments</h4>
         [% IF !check.defined("current_args") || check.current_args.size == 0 %]

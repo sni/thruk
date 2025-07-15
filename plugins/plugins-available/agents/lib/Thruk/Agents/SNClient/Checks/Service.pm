@@ -66,6 +66,7 @@ sub get_checks {
                     'args'     => [$args],
                     'parent'   => 'agent version',
                     'info'     => $svc,
+                    'cfg'      => $cfg,
                 };
             }
         }
