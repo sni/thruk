@@ -967,6 +967,10 @@ sub _log_changes_diff {
     my $txt2 = $obj->as_text();
     $obj->{'conf'} = $conf;
 
+    if($txt1 eq $txt2) {
+        return("");
+    }
+
     my ($fh1, $filename1) = File::Temp::tempfile();
     print $fh1 $txt1;
     CORE::close($fh1);
