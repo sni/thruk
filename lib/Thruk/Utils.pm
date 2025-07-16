@@ -4260,7 +4260,7 @@ sub get_affected_backends {
     return([sort keys %{$affected_backends}]);
 }
 
-##############################################
+##########################################################
 # replaces dark themen in the histou url and
 # sets the spannulls value
 sub _enhance_histou_url {
@@ -4280,6 +4280,70 @@ sub _enhance_histou_url {
     return($url);
 }
 
-##############################################
+##########################################################
+
+=head2 deep_compare
+
+  deep_compare($data1, $data2)
+
+return true if both data structures are equal, false otherwise
+
+=cut
+sub deep_compare {
+    my($obj1, $obj2) = @_;
+
+    # check type
+    return if(ref $obj1 ne ref $obj2);
+
+    if(ref $obj1 eq 'ARRAY') {
+        # check size of array
+        return if(scalar @{$obj1} ne scalar @{$obj2});
+
+        for(my $x = 0; $x < scalar @{$obj1}; $x++) {
+            return if(!deep_compare($obj1->[$x], $obj2->[$x]));
+        }
+
+        return 1;
+    }
+
+    if(ref $obj1 eq 'HASH') {
+        # check size of array
+        return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
+        for my $key (sort keys %{$obj1}) {
+            return if(!exists $obj2->{$key});
+            return if(!deep_compare($obj1->{$key}, $obj2->{$key}));
+        }
+        return 1;
+    }
+
+    return($obj1 eq $obj2);
+}
+
+##########################################################
+
+=head2 join_lists
+
+  join_lists($data)
+
+iterate over a hash and joins all array values into a comma separated string.
+
+=cut
+sub join_lists {
+    my($obj) = @_;
+
+    return unless ref $obj eq 'HASH';
+
+    my $cleaned = {};
+    for my $key (sort keys %{$obj}) {
+        $cleaned->{$key} = $obj->{$key};
+        if(ref $cleaned->{$key} eq 'ARRAY') {
+            $cleaned->{$key} = join(',', @{$cleaned->{$key}});
+        }
+    }
+
+    return($cleaned);
+}
+
+##########################################################
 
 1;

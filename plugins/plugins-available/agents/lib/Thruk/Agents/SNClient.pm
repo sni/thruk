@@ -224,7 +224,7 @@ sub get_config_objects {
         if($type eq 'off') {
             push @remove, $svc if $svc;
             # only save disabled information if it was disabled manually, not when disabled by config
-            # and only if it wasn't orphanded
+            # and only if it wasn't orphaned
             if(!$chk->{'disabled'} && $chk->{'exists'} ne 'obsolete') {
                 push @{$settings->{'disabled'}}, $id;
             }

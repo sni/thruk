@@ -1,0 +1,32 @@
+﻿<h3>Changed Services</h3>
+<div class="w-full accordion">
+[% FOREACH diff = diffs %]
+  <button class="w-full" onclick="toggleAccordion(this); return false;">[% diff.name | html %]<i class="uil uil-plus ml-auto"></i></button>
+  <div class="w-full overflow-auto"><pre>[% diff.diff %]</pre></div>
+[% END %]
+</div>
+[% IF diffs.size == 0 %]
+  <div class="text-center textHINT">no changes in services.</div>
+[% END %]
+
+[% IF removed.size > 0 %]
+  <table class="body cellspacing striped mt-5">
+    <thead>
+      <tr>
+        <th class="head" colspan="2">
+          <h3>
+            Removed Services
+          </h3>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      [% FOREACH rem = removed %]
+        <tr>
+          <th>[% rem.name | html %]</th>
+          <td class="textHINT">service will be removed</td>
+        </tr>
+      [% END %]
+    </tbody>
+  </table>
+[% END %]

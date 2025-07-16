@@ -447,8 +447,8 @@ sub _run_add_host {
         return("", 3);
     }
 
-    my $orig_checks   = _build_checks_config($checks);
-    my $checks_config = _build_checks_config($checks, $opt->{'clear_manual'});
+    my $orig_checks   = Thruk::Utils::Agents::build_checks_config($checks);
+    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'clear_manual'});
     if($opt->{'interactive'}) {
         my @lines = (
             "# edit host: ".$hostname,
@@ -484,7 +484,7 @@ sub _run_add_host {
         # start default editor for this file
         my $editor = $ENV{'editor'} // "vim";
         system("$editor $filename");
-        $checks_config = _build_checks_config($checks, $opt->{'clear_manual'});
+        $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'clear_manual'});
         for my $line (Thruk::Utils::IO::read_as_list($filename)) {
             next if $line =~ m/^\#/mx;
             $line =~ s/\#.*$//gmx;
@@ -542,7 +542,7 @@ sub _run_add_host {
             if($orig_checks->{'check.'.$id} ne $checks_config->{'check.'.$id}) {
                 $change = sprintf("%s -> %s", $orig_checks->{'check.'.$id}, $checks_config->{'check.'.$id});
             }
-            elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
+            elsif($obj->{'_prev_conf'} && !Thruk::Utils::deep_compare(Thruk::Utils::join_lists($obj->{'_prev_conf'}), Thruk::Utils::join_lists($obj->{'conf'}))) {
                 $change = "updated";
                 _log_changes_diff($obj, $opt->{'diff'});
             }
@@ -560,7 +560,7 @@ sub _run_add_host {
                 };
                 $obj->{'conf'}->{'address'} = $data->{'address'};
             }
-            elsif($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
+            elsif($obj->{'_prev_conf'} && !Thruk::Utils::deep_compare(Thruk::Utils::join_lists($obj->{'_prev_conf'}), Thruk::Utils::join_lists($obj->{'conf'}))) {
                 push @result, {
                     'id'      => "_HOST_",
                     'name'    => $obj->{'conf'}->{'host_name'},
@@ -703,13 +703,13 @@ sub _check_inventory {
 
     my $class   = Thruk::Utils::Agents::get_agent_class($data->{'type'});
     my $agent   = $class->new();
-    my $checks_config = _build_checks_config($checks);
+    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks);
     my($objects, $remove) = $agent->get_config_objects($c, $data, $checks_config, { fresh => 1 });
     my @need_update;
     for my $obj (@{$objects}) {
         next unless $obj->{'conf'}->{'service_description'};
         my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
-        if($obj->{'_prev_conf'} && !_deep_compare(_join_lists($obj->{'_prev_conf'}), _join_lists($obj->{'conf'}))) {
+        if($obj->{'_prev_conf'} && !Thruk::Utils::deep_compare(Thruk::Utils::join_lists($obj->{'_prev_conf'}), Thruk::Utils::join_lists($obj->{'conf'}))) {
             push @need_update, " - ".$obj->{'conf'}->{'service_description'};
             _log_changes_diff($obj, $opt->{'diff'});
         }
@@ -902,97 +902,15 @@ sub _user_confirm {
 }
 
 ##############################################
-sub _build_checks_config {
-    my($checks, $start_fresh) = @_;
-    my $checks_config = {};
-
-    for my $t (qw/new exists obsolete disabled/) {
-        for my $chk (@{$checks->{$t}}) {
-            $chk->{'_type'} = $t;
-            $chk->{'type'} = "new"  if $t eq 'new';
-            if($t eq 'obsolete') {
-                $chk->{'type'} = $start_fresh ? "off" : "keep";
-            }
-            $chk->{'type'} = "keep" if $t eq 'exists';
-            $chk->{'type'} = "off"  if $t eq 'disabled';
-            $checks_config->{'check.'.$chk->{'id'}} = $chk->{'type'};
-            $checks_config->{'args.'.$chk->{'id'}} = $chk->{'args'} unless $start_fresh;
-        }
-    }
-
-    return($checks_config);
-}
-
-##############################################
-sub _deep_compare {
-    my($obj1, $obj2) = @_;
-
-    # check type
-    return if(ref $obj1 ne ref $obj2);
-
-    if(ref $obj1 eq 'ARRAY') {
-        # check size of array
-        return if(scalar @{$obj1} ne scalar @{$obj2});
-
-        for(my $x = 0; $x < scalar @{$obj1}; $x++) {
-            return if(!_deep_compare($obj1->[$x], $obj2->[$x]));
-        }
-
-        return 1;
-    }
-
-    if(ref $obj1 eq 'HASH') {
-        # check size of array
-        return if(scalar keys %{$obj1} ne scalar keys %{$obj2});
-        for my $key (sort keys %{$obj1}) {
-            return if(!exists $obj2->{$key});
-            return if(!_deep_compare($obj1->{$key}, $obj2->{$key}));
-        }
-        return 1;
-    }
-
-    return($obj1 eq $obj2);
-}
-
-##############################################
 # log diff of changes
 sub _log_changes_diff {
     my($obj, $force) = @_;
 
     return if(!$force && !Thruk::Base::verbose());
 
-    my $txt1 = $obj->as_text();
-    my $conf = $obj->{'conf'};
-    $obj->{'conf'} = $obj->{'_prev_conf'};
-    my $txt2 = $obj->as_text();
-    $obj->{'conf'} = $conf;
+    my $diff = Thruk::Utils::Agents::buildObjDiff($obj);
 
-    if($txt1 eq $txt2) {
-        return("");
-    }
-
-    my ($fh1, $filename1) = File::Temp::tempfile();
-    print $fh1 $txt1;
-    CORE::close($fh1);
-
-    my ($fh2, $filename2) = File::Temp::tempfile();
-    print $fh2 $txt2;
-    CORE::close($fh2);
-
-    my $cmd = 'diff -Nuhr "'.$filename2.'" "'.$filename1.'" 2>&1';
-    my $diff = "";
-    open(my $ph, '-|', $cmd);
-    while(<$ph>) {
-        my $line = $_;
-        Thruk::Utils::Encode::decode_any($line);
-        $diff .= $line;
-    }
-    unlink($filename1);
-    unlink($filename2);
-
-    # nice file path
-    $diff =~ s/\Q$filename2\E.*/old/mx;
-    $diff =~ s/\Q$filename1\E.*/new/mx;
+    return unless $diff;
 
     if($obj->{'conf'}->{'service_description'}) {
         if($force) {
@@ -1013,23 +931,6 @@ sub _log_changes_diff {
     }
 
     return($diff);
-}
-
-##############################################
-sub _join_lists {
-    my($obj) = @_;
-
-    return unless ref $obj eq 'HASH';
-
-    my $cleaned = {};
-    for my $key (sort keys %{$obj}) {
-        $cleaned->{$key} = $obj->{$key};
-        if(ref $cleaned->{$key} eq 'ARRAY') {
-            $cleaned->{$key} = join(',', @{$cleaned->{$key}});
-        }
-    }
-
-    return($cleaned);
 }
 
 ##############################################

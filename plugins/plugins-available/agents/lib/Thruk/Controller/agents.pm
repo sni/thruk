@@ -66,14 +66,15 @@ sub index {
     my $action = $c->req->parameters->{'action'} || 'show';
     $c->stash->{action} = $action;
 
-       if($action eq 'show')   { _process_show($c); }
-    elsif($action eq 'new')    { _process_new($c); }
-    elsif($action eq 'edit')   { _process_edit($c); }
-    elsif($action eq 'clone')  { _process_clone($c); }
-    elsif($action eq 'scan')   { _process_scan($c); }
-    elsif($action eq 'save')   { _process_save($c); }
-    elsif($action eq 'remove') { _process_remove($c); }
-    elsif($action eq 'json')   { _process_json($c); }
+       if($action eq 'show')    { _process_show($c); }
+    elsif($action eq 'new')     { _process_new($c); }
+    elsif($action eq 'edit')    { _process_edit($c); }
+    elsif($action eq 'clone')   { _process_clone($c); }
+    elsif($action eq 'scan')    { _process_scan($c); }
+    elsif($action eq 'save')    { _process_save($c); }
+    elsif($action eq 'preview') { _process_save($c, 1); }
+    elsif($action eq 'remove')  { _process_remove($c); }
+    elsif($action eq 'json')    { _process_json($c); }
     else { return $c->detach_error({ msg  => 'no such action', code => 400 }); }
 
     if($backend || $c->stash->{'param_backend'} || $c->req->parameters->{'backend'}) {
@@ -356,11 +357,11 @@ sub _process_edit {
 
 ##########################################################
 sub _process_save {
-    my($c) = @_;
+    my($c, $preview) = @_;
 
     return unless Thruk::Utils::check_csrf($c);
     # don't store in demo mode
-    if($c->config->{'demo_mode'}) {
+    if(!$preview && $c->config->{'demo_mode'}) {
         Thruk::Utils::set_message( $c, 'fail_message', "save is disabled in demo mode" );
         return $c->redirect_to('agents.cgi');
     }
@@ -409,6 +410,12 @@ sub _process_save {
     my $class   = Thruk::Utils::Agents::get_agent_class($type);
     my $agent   = $class->new();
     my($objects, $remove) = $agent->get_config_objects($c, $data, $c->req->parameters);
+
+    # do not save, only show preview
+    if($preview) {
+        return _process_preview($c, $objects, $remove);
+    }
+
     if(!defined $objects) {
         Thruk::Utils::set_message( $c, 'fail_message', "failed to build services");
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$old_host."&backend=".$backend);
@@ -456,6 +463,41 @@ sub _process_save {
     }
 
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/agents.cgi?action=edit&hostname=".$hostname."&backend=".$backend);
+}
+
+##########################################################
+sub _process_preview {
+    my($c, $objects, $remove) = @_;
+
+    my $diffs = [];
+    for my $obj (@{$objects}) {
+        my $diff = Thruk::Utils::Agents::buildObjDiff($obj);
+        my $id   = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
+        if($obj->{'_prev_conf'} && !Thruk::Utils::deep_compare(Thruk::Utils::join_lists($obj->{'_prev_conf'}), Thruk::Utils::join_lists($obj->{'conf'}))) {
+            $diff =~ s/^\s*\-\-\-\s+old//gmx;
+            $diff = Thruk::Utils::beautify_diff($diff);
+            $diff =~ s/\A\s*//sgmx;
+            push @{$diffs}, {
+                "id"   => $id,
+                "name" => $obj->{'conf'}->{'service_description'} // "host",
+                "diff" => $diff,
+            };
+        }
+    }
+
+    my $removed = [];
+    for my $obj (@{$remove}) {
+        my $id = $obj->{'conf'}->{'_AGENT_AUTO_CHECK'};
+        push @{$removed}, {
+            "id"   => $id,
+            "name" => $obj->{'conf'}->{'service_description'},
+        };
+    }
+
+    $c->stash->{'diffs'}    = $diffs;
+    $c->stash->{'removed'}  = $removed;
+    $c->stash->{'template'} = 'agents_preview_changes.tt';
+    return 1;
 }
 
 ##########################################################

@@ -448,9 +448,11 @@
               <td colspan="8" align="center">
                 <div class="flexrow flex-nowrap justify-center gap-x-8">
                   <button class="w-44 js-rescan-btn [% IF checks_num == 0 %] green[% END %]" title="Connect to agent and discover services" onclick="return send_form_in_background_with_callback(this, {action: 'scan'}, scan_callback );"><i class="uil uil-search"></i> Discover Services</button>
-                  [% IF agent.hostname == "new" %]
                   <i class="uil uil-angle-double-right self-center"></i>
+                  [% IF agent.hostname == "new" %]
                   <button class="w-44" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
+                  [% ELSE %]
+                  <button class="w-44 js-preview-btn" name="action" title="Preview object configuration changes" value="save" onClick="previewChanges(this); return false;"><i class="uil uil-lightbulb"></i> Preview Changes</button>
                   [% END %]
                   <i class="uil uil-angle-double-right self-center"></i>
                   <button class="w-44 js-save-btn" name="action" title="Write object configuration" value="save" onClick="saveInitialFormValues()"><i class="uil uil-save"></i> Save Changes</button>
@@ -693,6 +695,35 @@ jQuery(document).ready(function() {
       return false;
   });
 });
+
+function previewChanges(btn) {
+  overcard({
+      'bodyCls': 'p-2',
+      'mainCls': 'modalFG min-h-[500px] w-auto m-5',
+      'body':     '<div id="preview_popup" class="min-h-40 mx-auto"><div class="flex justify-center min-h-40"><div class="p-2 h-10 w-10 spinner"></div></div><\/div>',
+      'caption':  "Preview Changes",
+      'minWidth':  800,
+      'draggable': true,
+      'resizable': true,
+      'fixedPos':  true,
+      'callback': function(doc) {
+        var container = doc.getElementById("overcard");
+        element_check_visibility(container);
+
+        send_form_in_background_with_callback(btn, { 'action': 'preview' }, function(form, success, data, textStatus, jqXHR) {
+          if(!success) {
+            var msg = getXHRerrorMsg("", textStatus, jqXHR, false);
+            doc.getElementById("preview_popup").innerHTML = "<div class='text-center textHINT mt-5'>"+msg+"</div>";
+            return;
+          }
+          doc.getElementById("preview_popup").innerHTML = data;
+        });
+        setBtnReset(btn);
+      }
+  });
+
+  return false;
+}
 
 -->
 </script>

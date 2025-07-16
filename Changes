@@ -3,6 +3,8 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - config: add support for reseting list values
           - check_thruk_rest: add template option to set output from template toolkit file
+          - Agents:
+            - add config change preview
 
 3.22.2   Wed May 28 17:14:48 CEST 2025
           - add "for all services" option for status quick commands

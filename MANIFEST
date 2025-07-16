@@ -205,6 +205,7 @@ plugins/plugins-available/agents/t/inventory.t
 plugins/plugins-available/agents/t/utils_agents.t
 plugins/plugins-available/agents/templates/agents.tt
 plugins/plugins-available/agents/templates/agents_edit.tt
+plugins/plugins-available/agents/templates/agents_preview_changes.tt
 plugins/plugins-available/business_process/description.txt
 plugins/plugins-available/business_process/lib/Thruk/BP/Components/BP.pm
 plugins/plugins-available/business_process/lib/Thruk/BP/Components/Node.pm

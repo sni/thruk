@@ -5,6 +5,7 @@ use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/decode_json/;
 use File::Copy qw/move/;
+use File::Temp ();
 
 use Monitoring::Config::Object ();
 use Thruk::Controller::conf ();
@@ -992,6 +993,83 @@ sub _is_excluded {
         }
     }
     return;
+}
+
+##########################################################
+
+=head2 build_checks_config
+
+    build_checks_config($checks)
+
+returns checks config used to build service objects
+
+=cut
+sub build_checks_config {
+    my($checks, $start_fresh) = @_;
+    my $checks_config = {};
+
+    for my $t (qw/new exists obsolete disabled/) {
+        for my $chk (@{$checks->{$t}}) {
+            $chk->{'_type'} = $t;
+            $chk->{'type'} = "new"  if $t eq 'new';
+            if($t eq 'obsolete') {
+                $chk->{'type'} = $start_fresh ? "off" : "keep";
+            }
+            $chk->{'type'} = "keep" if $t eq 'exists';
+            $chk->{'type'} = "off"  if $t eq 'disabled';
+            $checks_config->{'check.'.$chk->{'id'}} = $chk->{'type'};
+            $checks_config->{'args.'.$chk->{'id'}} = $chk->{'args'} unless $start_fresh;
+        }
+    }
+
+    return($checks_config);
+}
+
+##########################################################
+
+=head2 buildObjDiff
+
+    buildObjDiff($obj)
+
+returns diff for given object, comparing current configuration with previous one
+
+=cut
+sub buildObjDiff {
+    my($obj) = @_;
+    my $txt1 = $obj->as_text();
+    my $conf = $obj->{'conf'};
+    $obj->{'conf'} = $obj->{'_prev_conf'};
+    my $txt2 = $obj->as_text();
+    $obj->{'conf'} = $conf;
+
+    if($txt1 eq $txt2) {
+        return("");
+    }
+
+    my ($fh1, $filename1) = File::Temp::tempfile();
+    print $fh1 $txt1;
+    CORE::close($fh1);
+
+    my ($fh2, $filename2) = File::Temp::tempfile();
+    print $fh2 $txt2;
+    CORE::close($fh2);
+
+    my $cmd = 'diff -Nuhr "'.$filename2.'" "'.$filename1.'" 2>&1';
+    my $diff = "";
+    open(my $ph, '-|', $cmd);
+    while(<$ph>) {
+        my $line = $_;
+        Thruk::Utils::Encode::decode_any($line);
+        $diff .= $line;
+    }
+    unlink($filename1);
+    unlink($filename2);
+
+    # nice file path
+    $diff =~ s/\Q$filename2\E.*/old/mx;
+    $diff =~ s/\Q$filename1\E.*/new/mx;
+
+    return($diff);
 }
 
 ##########################################################

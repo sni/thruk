@@ -10,7 +10,7 @@ BEGIN {
 
 $ENV{'THRUK_TEST_AUTH'}               = 'omdadmin:omd';
 $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} = 'http://127.0.0.1/demo';
-plan tests => 222;
+plan tests => 233;
 
 ###########################################################
 # test thruks script path
@@ -43,7 +43,7 @@ TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=save',
             'check.version'   => 'on',
             'check.inventory' => 'on',
             'check.cpu'       => 'on',
-            'check.memory'    => 'on',
+            'check.mem'       => 'on',
             'check.net.eth0'  => 'on',
             'check.disk./'    => 'on',
         },
@@ -58,6 +58,24 @@ TestUtils::test_page( url => '/thruk/cgi-bin/conf.cgi',
             'sub'    => 'objects',
         },
         like => ['Reloading naemon configuration'],
+);
+
+TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=preview',
+        post => {
+            'type'            => 'snclient',
+            'ip'              => '127.0.0.1',
+            'hostname'        => 'host-ls',
+            'backend'         => 'demo',
+            'check.version'   => 'on',
+            'check.inventory' => 'on',
+            'check.cpu'       => 'off',
+            'check.mem'       => 'on',
+            'args.mem'        => 'debug=1',
+            'check.net.eth0'  => 'on',
+            'check.disk./'    => 'on',
+        },
+        like => ['Changed Services', 'debug=1', 'service will be removed'],
+        skip_doctype => 1,
 );
 
 TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi', like => ['host-ls'] );
@@ -76,7 +94,7 @@ TestUtils::test_page( url => '/thruk/cgi-bin/agents.cgi?action=save',
             'check.version'   => 'on',
             'check.inventory' => 'on',
             'check.cpu'       => 'on',
-            'check.memory'    => 'on',
+            'check.mem'       => 'on',
             'check.net.eth0'  => 'on',
             'check.disk./'    => 'on',
         },
