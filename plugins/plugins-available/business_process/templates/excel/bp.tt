@@ -46,11 +46,15 @@
           [% ELSIF col == "Status Information"       %]<cell>[% escape_xml(b.status_text) %]</cell>
           [% ELSE %]
             [% val = "";
-               field = col.replace('^_+', '');
-               cust_vars = get_custom_vars(c, b,'',1);
-               IF cust_vars.exists(field); val = cust_vars.$field;
-               ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
-               END;
+              cust_vars = get_custom_vars(c, b,'',1);
+              IF cust_vars.exists(col); val = cust_vars.$col;
+              ELSIF cust_vars.exists('HOST' _ col); col = 'HOST' _ col; val = cust_vars.$col;
+              ELSE;
+                field = col.replace('^_', '');
+                IF cust_vars.exists(field); val = cust_vars.$field;
+                ELSIF cust_vars.exists('HOST' _ field); field = 'HOST' _ field; val = cust_vars.$field;
+                END;
+              END;
             %]
             <cell>[% escape_xml(val) %]</cell>
           [% END %]

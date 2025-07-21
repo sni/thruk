@@ -78,9 +78,16 @@
             [%- END -%]
           </cell>
         [% ELSE %]
-          [% cust_vars = get_custom_vars(c, h) %]
-          [% col = col.replace('^_', '') %]
-          <cell>[% IF cust_vars.exists(col); escape_xml(cust_vars.$col); END %]</cell>
+          [% val = "";
+             cust_vars = get_custom_vars(c, h);
+             IF cust_vars.exists(col); val = cust_vars.$col;
+             ELSE;
+               field = col.replace('^_', '');
+               IF cust_vars.exists(field); val = cust_vars.$field;
+               END;
+             END;
+          %]
+          <cell>[% escape_xml(val) %]</cell>
         [% END %]
         [% END %]
       </row>
