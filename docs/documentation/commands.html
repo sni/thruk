@@ -16,6 +16,13 @@ breadcrumb: [ "configuration.html", "Configuration", "Commands" ]
   </div>
 </div>
 
+<script>
+  jQuery(document).ready(function() {
+    // sort by number initially
+    jQuery("TABLE.table TH").first().click();
+  });
+</script>
+
 <table class="table table-striped table-bordered table-hover sortable" cellspacing="0" width="100%">
   <thead>
     <tr>
