@@ -454,10 +454,10 @@ sub check_user_roles {
 
  check_permissions('host', $hostname)
  check_permissions('service', $servicename, $hostname)
- check_permissions('hostgroup', $hostgroupname)
- check_permissions('servicegroup', $servicegroupname)
- check_permissions(contact', $contactname)
- check_permissions(contactgroup', $contactgroupname)
+ check_permissions('hostgroup', $hostgroup_name)
+ check_permissions('servicegroup', $servicegroup_name)
+ check_permissions(contact', $contact_name)
+ check_permissions(contactgroup', $contactgroup_name)
 
  for example:
  $c->check_permissions('service', $service, $host)
@@ -564,6 +564,14 @@ sub check_cmd_permissions {
     $type   = '' unless defined $type;
     $value  = '' unless defined $value;
     $value2 = '' unless defined $value2;
+
+    # cache permissions for this request
+    my $cache_key = join(';', $type, $value, $value2);
+    return($c->stash->{'_cmd_perm_cache'}->{$cache_key} //= $self->_check_cmd_permissions($c, $type, $value, $value2));
+}
+
+sub _check_cmd_permissions {
+    my($self, $c, $type, $value, $value2) = @_;
 
     return 0 if $self->check_user_roles('authorized_for_read_only');
     return 0 if !$self->{'can_submit_commands'};
