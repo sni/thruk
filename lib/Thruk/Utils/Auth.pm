@@ -267,6 +267,20 @@ sub _permission_filter {
                 _warn($search) if $c->stash->{'has_error'};
                 die("invalid auth filter") if $c->stash->{'has_error'};
             }
+            if($p->{'svc_custom_var'}) {
+                my $search = {
+                    text_filter => [{
+                        'type'    => 'custom variable',
+                        'op'      => $p->{'svc_custom_op'} || '=',
+                        'value'   => $p->{'svc_custom_val'},
+                        'val_pre' => $p->{'svc_custom_var'},
+                    }],
+                };
+                my($hostfilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+                push @svc_filter, $hostfilter; # use the host filter here, because the service filter would match host and service variables and we don't want that here
+                _warn($search) if $c->stash->{'has_error'};
+                die("invalid auth filter") if $c->stash->{'has_error'};
+            }
         }
         for my $hg (@{$p->{'hostgroups'}}) {
             my $search = {
@@ -294,11 +308,30 @@ sub _permission_filter {
             _warn($search) if $c->stash->{'has_error'};
             die("invalid auth filter") if $c->stash->{'has_error'};
         }
+        if($p->{'hst_custom_var'}) {
+            my $search = {
+                text_filter => [{
+                    'type'    => 'custom variable',
+                    'op'      => $p->{'hst_custom_op'} || '=',
+                    'value'   => $p->{'hst_custom_val'},
+                    'val_pre' => $p->{'hst_custom_var'},
+                }],
+            };
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, undef, 1);
+            push @hst_filter, ($type eq 'hosts' ? $hostfilter : $servicefilter);
+            _warn($search) if $c->stash->{'has_error'};
+            die("invalid auth filter") if $c->stash->{'has_error'};
+        }
     }
 
     # remove duplicates
     @hst_filter = _filter_dups(\@hst_filter);
     @svc_filter = _filter_dups(\@svc_filter);
+
+    if(scalar @hst_filter == 0) {
+        # no implicit 'all' filter
+        return([]);
+    }
 
     if($type eq 'hosts') {
         return([Thruk::Utils::Status::improve_filter(\@hst_filter)]);

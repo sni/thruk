@@ -884,7 +884,7 @@ processes a single search box filter
 
 =cut
 sub single_search {
-    my( $c, $search, $strict ) = @_;
+    my( $c, $search, $strict, $custom_host_only ) = @_;
 
     my $errors = 0;
     my(@hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter);
@@ -1232,10 +1232,14 @@ sub single_search {
             if($op eq '!~~') { $cop = '-and' }
             if($op eq '='  && $value eq '') { $cop = '-and' }
             if($op eq '!=' && $value eq '') { $cop = '-or' }
-            push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
-                                                  custom_variables => { $op => $pre." ".$value },
-                                          ],
-                                 };
+            if($custom_host_only) {
+                push @servicefilter, { host_custom_variables => { $op => $pre." ".$value } };
+            } else {
+                push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
+                                                    custom_variables => { $op => $pre." ".$value },
+                                            ],
+                                    };
+            }
         }
         else {
             if($filter->{'type'} ne '') {
