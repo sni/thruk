@@ -376,7 +376,7 @@ sub _check_for_commands {
         return 1;
     }
 
-    # command commited?
+    # command committed?
     if( $cmd_mod == 2 and do_send_command($c) ) {
         Thruk::Utils::set_message( $c, 'success_message', 'Commands successfully submitted' );
         redirect_or_success( $c, -2 );

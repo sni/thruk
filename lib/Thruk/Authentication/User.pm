@@ -546,10 +546,10 @@ sub check_permissions {
  check_cmd_permissions('service', $servicename, $hostname)
  check_cmd_permissions('host_services', $hostname)
  check_cmd_permissions('all_services')
- check_cmd_permissions('hostgroup', $hostgroupname)
- check_cmd_permissions('servicegroup', $servicegroupname)
- check_cmd_permissions('contact', $contactname)
- check_cmd_permissions('contactgroup', $contactgroupname)
+ check_cmd_permissions('hostgroup', $hostgroup_name)
+ check_cmd_permissions('servicegroup', $servicegroup_name)
+ check_cmd_permissions('contact', $contact_name)
+ check_cmd_permissions('contactgroup', $contactgroup_name)
 
  for example:
  $c->check_cmd_permissions('service', $service, $host)
