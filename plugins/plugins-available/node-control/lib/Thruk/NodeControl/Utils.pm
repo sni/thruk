@@ -1522,14 +1522,20 @@ sub _convert_ansible_script_result {
     # output: demo@test.local | FAILED! => {       # script module
     if($data =~ s/\A.*?\s+\|\s+([^=]+)\s+=>\s(\{.*\})\s*\Z//sgmx) {
         my($state, $msg) = ($1, $2);
-        my $jsonreader = Cpanel::JSON::XS->new->utf8;
-        $jsonreader->relaxed();
         my $f;
         eval {
-            $f = $jsonreader->decode($msg);
+            $f = Cpanel::JSON::XS->new->utf8->relaxed->decode($msg);
         };
-        if($@) {
-            die("ansible failed to parse json: ".$@);
+        my $err = $@;
+        if($err) {
+            # try again without utf8
+            eval {
+                $f = Cpanel::JSON::XS->new->relaxed->decode($msg);
+            };
+            $err = $@;
+            if($err) {
+                die("ansible failed to parse json: ".$err);
+            }
         }
         return($f->{'rc'}, $f->{'stdout'}.($f->{'stderr'}//'')) if defined $f->{'stdout'};
         die($f->{'msg'}) if(defined $f->{'msg'} && $state eq 'FAILED!');
