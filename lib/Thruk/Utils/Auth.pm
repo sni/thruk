@@ -14,7 +14,10 @@ use warnings;
 use strict;
 use Carp;
 
+use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Utils ();
+use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 ##############################################
 =head1 METHODS
@@ -31,7 +34,7 @@ returns a filter which can be used for authorization
 
 =cut
 sub get_auth_filter {
-    my($c, $type, $strict) = @_;
+    my($c, $type, $strict, $cmd_permissions) = @_;
     $strict = 0 unless defined $strict;
 
     return if $type eq 'status';
@@ -57,7 +60,12 @@ sub get_auth_filter {
         if(!$strict && $c->check_user_roles('authorized_for_all_hosts')) {
             return();
         }
-        return('contacts' => { '>=' => $c->user->get('username') });
+        return(Thruk::Utils::combine_filter(
+            '-or', [
+                {'contacts' => { '>=' => $c->user->get('username') }},
+                @{_permission_filter($c, 'hosts', $cmd_permissions)},
+            ],
+        ));
     }
 
     # hostgroups authorization
@@ -71,12 +79,20 @@ sub get_auth_filter {
             return();
         }
         if($c->config->{'use_strict_host_authorization'}) {
-            return('contacts' => { '>=' => $c->user->get('username') });
+            return(Thruk::Utils::combine_filter(
+                '-or', [
+                    {'contacts' => { '>=' => $c->user->get('username') }},
+                    @{_permission_filter($c, 'services', $cmd_permissions)},
+                ],
+            ));
         } else {
-            return('-or' => [ 'contacts'      => { '>=' => $c->user->get('username') },
-                              'host_contacts' => { '>=' => $c->user->get('username') },
-                            ],
-                  );
+            return(Thruk::Utils::combine_filter(
+                '-or', [
+                    {'contacts' => { '>=' => $c->user->get('username') }},
+                    {'host_contacts' => { '>=' => $c->user->get('username') } },
+                    @{_permission_filter($c, 'services', $cmd_permissions)},
+                ],
+            ));
         }
     }
 
@@ -212,5 +228,107 @@ sub get_auth_filter {
     confess("cannot authorize query");
 }
 
+##############################################
+sub _permission_filter {
+    my($c, $type, $cmd_permissions) = @_;
+
+    die("unknown type") if($type ne 'hosts' && $type ne 'services');
+
+    my $permissions = $c->user->{'permissions'};
+
+    # filter matching permissions
+    my @matched;
+    for my $p (@{$permissions}) {
+        next if $type eq 'services' && !$p->{'with_services'};
+        if($type eq 'hosts') {
+            next if ($cmd_permissions && !$p->{'hst_commands'});
+        } else {
+            next if ($cmd_permissions && !$p->{'svc_commands'});
+        }
+
+        push @matched, $p;
+    }
+
+    return([]) unless scalar @matched > 0;
+
+    my(@hst_filter, @svc_filter);
+    for my $p (@matched) {
+        if($type eq 'services') {
+            for my $s (@{$p->{'services'}}) {
+                my $search = {
+                    text_filter => [{
+                        'type'  => 'service',
+                        'op'    => $p->{'services_op'} || '=',
+                        'value' => $s,
+                    }],
+                };
+                my(undef, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+                push @svc_filter, $servicefilter;
+                _warn($search) if $c->stash->{'has_error'};
+                die("invalid auth filter") if $c->stash->{'has_error'};
+            }
+        }
+        for my $hg (@{$p->{'hostgroups'}}) {
+            my $search = {
+                text_filter => [{
+                    'type'  => 'hostgroup',
+                    'op'    => $p->{'hostgroups_op'} || '=',
+                    'value' => $hg,
+                }],
+            };
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+            push @hst_filter, ($type eq 'hosts' ? $hostfilter : $servicefilter);
+            _warn($search) if $c->stash->{'has_error'};
+            die("invalid auth filter") if $c->stash->{'has_error'};
+        }
+        for my $h (@{$p->{'hosts'}}) {
+            my $search = {
+                text_filter => [{
+                    'type'  => 'host',
+                    'op'    => $p->{'hosts_op'} || '=',
+                    'value' => $h,
+                }],
+            };
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+            push @hst_filter, ($type eq 'hosts' ? $hostfilter : $servicefilter);
+            _warn($search) if $c->stash->{'has_error'};
+            die("invalid auth filter") if $c->stash->{'has_error'};
+        }
+    }
+
+    # remove duplicates
+    @hst_filter = _filter_dups(\@hst_filter);
+    @svc_filter = _filter_dups(\@svc_filter);
+
+    if($type eq 'hosts') {
+        return([Thruk::Utils::Status::improve_filter(\@hst_filter)]);
+    }
+
+    return([Thruk::Utils::Status::improve_filter([Thruk::Utils::combine_filter(
+        '-and', [
+            Thruk::Utils::combine_filter("-or", \@hst_filter),
+            Thruk::Utils::combine_filter("-or", \@svc_filter),
+        ],
+    )])]);
+}
+##############################################
+# remove duplicates from filter
+sub _filter_dups {
+    my($filter) = @_;
+
+    my %seen;
+    my @filtered;
+
+    for my $f (@{$filter}) {
+        my $key = join("\n", @{Monitoring::Livestatus::Class::Lite::filter_statement($f, "F:")});
+        next if $seen{$key}++;
+        $seen{$key} = 1;
+        push @filtered, $f;
+    }
+
+    return @filtered;
+}
+
+##############################################
 
 1;

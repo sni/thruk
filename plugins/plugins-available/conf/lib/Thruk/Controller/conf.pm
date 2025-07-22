@@ -138,6 +138,10 @@ sub index {
         return if Thruk::Action::AddDefaults::die_when_no_backends($c);
         _process_users_page($c);
     }
+    elsif($subcat eq 'teams') {
+        return if Thruk::Action::AddDefaults::die_when_no_backends($c);
+        _process_teams_page($c);
+    }
     elsif($subcat eq 'plugins') {
         _process_plugins_page($c);
     }
@@ -353,6 +357,32 @@ sub _process_json_page {
 
         my $json = [{ 'name' => $type.'s',
                       'data' => $attr,
+                   }];
+        return $c->render(json => $json);
+    }
+
+    # teams
+    if($type eq 'team') {
+        my @all_teams;
+        my @teams = glob($c->config->{'var_path'}."/teams/*.json");
+        for my $t (@teams) {
+            $t =~ s/^.*\///gmx;
+            $t =~ s/\.json$//gmx;
+            $t = Thruk::Utils::Encode::decode_any($t);
+            push @all_teams, $t;
+        }
+
+        my $json = [{ 'name' => $type.'s',
+                      'data' => \@all_teams,
+                   }];
+        return $c->render(json => $json);
+    }
+
+    # cgi roles
+    if($type eq 'cgi_role') {
+        my $json = [{ 'name'  => $type.'s',
+                      'alias' => 'cgi roles',
+                      'data'  => $Thruk::Constants::possible_roles,
                    }];
         return $c->render(json => $json);
     }
@@ -723,6 +753,124 @@ sub _process_users_page {
     $c->stash->{'template'} = 'conf_data_users.tt';
 
     return 1;
+}
+
+##########################################################
+# create the teams config page
+sub _process_teams_page {
+    my( $c ) = @_;
+    $c->stash->{'team'}      = { 'name' => '' };
+    $c->stash->{'show_team'} = 0;
+
+    my $teamname = $c->req->parameters->{'team'} // '';
+    if($teamname && Thruk::Base::check_for_nasty_filename($teamname)) {
+        die("this team name contains nasty characters and is not allowed");
+    }
+    my $teamfile = $c->config->{'var_path'}."/teams/".$teamname.'.json';
+
+    my $action = $c->req->parameters->{'action'} || 'list';
+    if($action eq 'edit') {
+        my $team = Thruk::Utils::IO::json_lock_retrieve($teamfile);
+        $c->stash->{'team'} = {
+            'name'        => $teamname,
+            'cgi_roles'   => $team->{'roles'}       // [],
+            'includes'    => $team->{'includes'}    // [],
+            'permissions' => $team->{'permissions'} // [],
+            'notes'       => $team->{'notes'}       // '',
+        };
+        $c->stash->{'team'}->{'cgi_roles'} = [map { my $n = $_; $n =~ s|^authorized_for_||gmx; "authorized_for_".$n; } @{$c->stash->{'team'}->{'cgi_roles'}} ];
+        $c->stash->{'show_team'} = 1;
+    }
+
+    if($action eq 'delete') {
+        unlink($teamfile);
+        Thruk::Utils::set_message( $c, 'success_message', 'Team successfully deleted.');
+
+        return $c->redirect_to('conf.cgi?sub=teams');
+    }
+
+    if($action eq 'store') {
+        my $old_name = $c->req->parameters->{'team'};
+        my $new_name = $c->req->parameters->{'new_name'};
+        if(!$new_name || Thruk::Base::check_for_nasty_filename($new_name)) {
+            die("this team name contains nasty characters and is not allowed");
+        }
+        my $new_file = $c->config->{'var_path'}."/teams/".$new_name.'.json';
+
+        if($old_name && $new_name ne $old_name) {
+            my $old_file = $c->config->{'var_path'}."/teams/".$old_name.'.json';
+            unlink($old_file) or die("cannot remove old team file: ".$!);
+        }
+
+        my $team = {};
+        $team->{'notes'}       = $c->req->parameters->{'notes'} if $c->req->parameters->{'notes'};
+        $team->{'roles'}       = Thruk::Base::comma_separated_list($c->req->parameters->{'cgi_roles'} // '');
+        $team->{'includes'}    = Thruk::Base::comma_separated_list($c->req->parameters->{'includes'}  // '');
+        $team->{'permissions'} = _parse_teams_permission($c->req->parameters);
+
+        Thruk::Utils::IO::json_lock_store($new_file, $team);
+
+        Thruk::Utils::set_message( $c, 'success_message', 'Team saved successfully.' );
+        return $c->redirect_to('conf.cgi?sub=teams&action=edit&team='.$new_name);
+    }
+
+    if($action eq 'new') {
+        $c->stash->{'team'} = {
+            'name'        => "",
+            'cgi_roles'   => [],
+            'includes'    => [],
+            'permissions' => [],
+            'notes'       => '',
+        };
+        $c->stash->{'show_team'} = 1;
+    }
+
+    $c->stash->{'subtitle'} = "Team Configuration";
+    $c->stash->{'template'} = 'conf_data_teams.tt';
+
+    return 1;
+}
+
+##########################################################
+sub _parse_teams_permission {
+    my($params) = @_;
+    my $permisssions = [];
+
+    my @attributes = qw/
+        hostgroups
+        hostgroups_op
+        hosts
+        hosts_op
+        with_services
+        services
+        services_op
+        hst_custom_op
+        hst_custom_val
+        hst_custom_var
+        svc_custom_op
+        svc_custom_val
+        svc_custom_var
+        hst_commands
+        svc_commands
+        allowed_commands
+    /;
+
+    for my $attr (@attributes) {
+        my $values = Thruk::Base::list($params->{$attr});
+        for(my $i = 0; $i < scalar @{$values}; $i++) {
+            if(scalar @{$permisssions} < $i) {
+                push @{$permisssions}, {};
+            }
+            my $value = $values->[$i];
+            if($attr eq 'hostgroups' || $attr eq 'hosts' || $attr eq 'services') {
+                $value = Thruk::Base::comma_separated_list($value);
+            }
+            $permisssions->[$i]->{$attr} = $value;
+        }
+
+    }
+
+    return $permisssions;
 }
 
 ##########################################################

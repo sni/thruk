@@ -713,8 +713,7 @@ combine filter by operator
 
 =cut
 sub combine_filter {
-    my $operator = shift;
-    my $filter   = shift;
+    my($operator, $filter) = @_;
 
     if(!defined $operator && $operator ne '-or' && $operator ne '-and') {
         confess("unknown operator: ".Dumper($operator));
@@ -726,10 +725,19 @@ sub combine_filter {
         confess("expected arrayref, got: ".Dumper(ref $filter));
     }
 
+    @{$filter} = grep defined, @{$filter};
+
     return if scalar @{$filter} == 0;
 
     if(scalar @{$filter} == 1) {
         return $filter->[0];
+    }
+
+    # [ 'description', { '=' => 'Https' } ]
+    if(scalar @{$filter} == 2) {
+        if(ref $filter->[0] eq '' && ref $filter->[1] eq 'HASH') {
+            return $filter;
+        }
     }
 
     return { $operator => $filter };

@@ -35,14 +35,18 @@ sub new {
 
     confess("no username") unless defined $username;
 
-    $self->{'username'}          = $username;
-    $self->{'roles'}             = [];
-    $self->{'groups'}            = [];
-    $self->{'alias'}             = undef;
-    $self->{'roles_from_groups'} = {};
-    $self->{'superuser'}         = $superuser ? 1 : 0;
-    $self->{'internal'}          = $internal  ? 1 : 0;
+    $self->{'username'}           = $username;
+    $self->{'roles'}              = [];
+    $self->{'teams'}              = [];
+    $self->{'groups'}             = [];
+    $self->{'alias'}              = undef;
+    $self->{'roles_from_groups'}  = {};
+    $self->{'roles_from_profile'} = {};
+    $self->{'roles_from_teams'}   = {};
+    $self->{'superuser'}          = $superuser ? 1 : 0;
+    $self->{'internal'}           = $internal  ? 1 : 0;
     $self->{'admin_role_from_system_and_conf'} = $c->config->{'admin_role_from_system_and_conf'} // 1;
+    $self->{'permissions'}        = [];
 
     # add roles from cgi_conf
     for my $role (@{$Thruk::Constants::possible_roles}) {
@@ -62,6 +66,27 @@ sub new {
         $self->{'roles_from_session'} = Thruk::Base::array2hash($sessiondata->{'roles'});
     }
 
+    # oauth groups are mapped to teams
+    if($sessiondata && $sessiondata->{'oauth_groups'}) {
+        push @{$self->{'teams'}}, @{$sessiondata->{'oauth_groups'}};
+    }
+
+    # ex.: user settings from var/users/<name>
+    $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
+
+    $self->{'roles_from_profile'} = {};
+    if($self->{settings}->{'roles'}) {
+        push @{$self->{'roles'}}, @{$self->{settings}->{'roles'}};
+        $self->{'roles_from_profile'} = Thruk::Base::array2hash($self->{settings}->{'roles'});
+    }
+
+    if($self->{settings}->{'teams'}) {
+        push @{$self->{'teams'}}, @{$self->{settings}->{'teams'}};
+    }
+
+    # expand teams recursively
+    $self->_expand_teams($c, $self->{'teams'});
+
     $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
 
     # Is this user internal or an admin user?
@@ -71,13 +96,12 @@ sub new {
         $self->{'can_submit_commands_src'} = "admin role";
     }
 
-    # ex.: user settings from var/users/<name>
-    $self->{settings} = $self->{'internal'} ? {} : Thruk::Utils::get_user_data($c, $username);
-
     if($self->{'internal'} && !$self->{'timestamp'}) {
         $self->{'timestamp'}        = time();
         $self->{'contact_src_peer'} = [];
     }
+
+    $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     return $self;
 }
@@ -148,7 +172,7 @@ sub set_dynamic_attributes {
         $self->grant('admin');
     }
 
-    $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
+    $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     if(!$skip_db_access && !$roles) {
         $c->cache->set('users', $username, $data);
@@ -284,19 +308,23 @@ sub _apply_user_data {
     push @{$self->{'roles'}}, @{$roles};
 
     # override can_submit_commands from cgi.cfg
-    if(grep /authorized_for_all_host_commands/mx, @{$self->{'roles'}}) {
+    if($self->check_user_roles('admin')) {
+        $can_submit_commands     = 1;
+        $can_submit_commands_src = "admin role";
+    }
+    elsif(grep /^authorized_for_all_host_commands$/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
         $can_submit_commands_src = "authorized_for_all_host_commands role";
     }
-    elsif(grep /authorized_for_all_service_commands/mx, @{$self->{'roles'}}) {
+    elsif(grep /^authorized_for_all_service_commands$/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
         $can_submit_commands_src = "authorized_for_all_service_commands role";
     }
-    elsif(grep /authorized_for_system_commands/mx, @{$self->{'roles'}}) {
+    elsif(grep /^authorized_for_system_commands$/mx, @{$self->{'roles'}}) {
         $can_submit_commands     = 1;
         $can_submit_commands_src = "authorized_for_system_commands role";
     }
-    elsif(grep /authorized_for_read_only/mx, @{$self->{'roles'}}) {
+    elsif(grep /^authorized_for_read_only$/mx, @{$self->{'roles'}}) {
         # read_only role already supplied via cgi.cfg, enforce
         $can_submit_commands = 0;
         $can_submit_commands_src = "authorized_for_read_only role";
@@ -304,11 +332,10 @@ sub _apply_user_data {
 
     _debug("can_submit_commands: $can_submit_commands");
     if($can_submit_commands != 1) {
-        if(!grep /authorized_for_read_only/mx, @{$self->{'roles'}}) {
+        if(!grep /^authorized_for_read_only$/mx, @{$self->{'roles'}}) {
             push @{$roles}, 'authorized_for_read_only';
         }
     }
-
 
     $data->{'roles'}                   = Thruk::Base::array_uniq($roles);
     $data->{'can_submit_commands'}     = $can_submit_commands;
@@ -391,7 +418,7 @@ sub check_user_roles {
         # - authorized_for_system_commands and
         # - authorized_for_configuration_information
         # gains the full admin role as well.
-        # change this behaviour with the 'admin_role_from_system_and_conf' setting.
+        # change this behavior with the 'admin_role_from_system_and_conf' setting.
         if($self->{'admin_role_from_system_and_conf'}
             && $self->check_user_roles('authorized_for_system_commands')
             && $self->check_user_roles('authorized_for_configuration_information')
@@ -399,6 +426,27 @@ sub check_user_roles {
             return(1);
         }
     }
+
+    if($role eq 'authorized_for_all_hosts') {
+        # this roles is implicitly granted if there are * permissions
+        return(1) if _has_star_permissions($self->{'permissions'});
+    }
+
+    if($role eq 'authorized_for_all_host_commands') {
+        # this roles is implicitly granted if there are * permissions with commands enabled
+        return(1) if _has_star_permissions($self->{'permissions'}, 1);
+    }
+
+    if($role eq 'authorized_for_all_services') {
+        # this roles is implicitly granted if there are * permissions
+        return(1) if _has_star_permissions($self->{'permissions'}, 0, 1);
+    }
+
+    if($role eq 'authorized_for_all_service_commands') {
+        # this roles is implicitly granted if there are * permissions with commands enabled
+        return(1) if _has_star_permissions($self->{'permissions'}, 1, 1);
+    }
+
     return(0);
 }
 
@@ -414,10 +462,12 @@ sub check_user_roles {
  for example:
  $c->check_permissions('service', $service, $host)
 
+returns true if users has view permissions for the given type and value.
+
 =cut
 
 sub check_permissions {
-    my($self, $c, $type, $value, $value2, $value3) = @_;
+    my($self, $c, $type, $value, $value2, $value3, $cmd_permissions) = @_;
 
     return 1 if $c->check_user_roles('authorized_for_admin');
 
@@ -427,21 +477,26 @@ sub check_permissions {
 
     my $count = 0;
     if($type eq 'host') {
-        my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), name => $value ]);
+        return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_host_commands' : 'authorized_for_all_hosts');
+        my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2, $cmd_permissions), name => $value ]);
         $count = 1 if defined $hosts && scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
-        my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), description => $value, host_name => $value2 ]);
+        return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_service_commands' : 'authorized_for_all_services');
+        my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3, $cmd_permissions), description => $value, host_name => $value2 ]);
         $count = 1 if defined $services && scalar @{$services} > 0;
     }
     elsif($type eq 'host_services') {
-        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value2), host_name => $value ]);
-        my $services2 = $c->db->get_service_names(filter => [                                                               host_name => $value ]);
+        return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_service_commands' : 'authorized_for_all_services');
+        # does the user have permissions for all services of the host?
+        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value2, $cmd_permissions), host_name => $value ]);
+        my $services2 = $c->db->get_service_names(filter => [                                                                                 host_name => $value ]);
         # authorization permitted when the amount of services is the same number as services with authorization
         $count = 1 if defined $services1 && defined $services2 && scalar @{$services1} == scalar @{$services2};
     }
     elsif($type eq 'hostgroup') {
-        my $hosts1 = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2), groups => { '>=' => $value } ]);
+        return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_host_commands' : 'authorized_for_all_hosts');
+        my $hosts1 = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2, $cmd_permissions), groups => { '>=' => $value } ]);
         my $hosts2 = $c->db->get_host_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of hosts is the same number as hosts with authorization
@@ -450,7 +505,8 @@ sub check_permissions {
         }
     }
     elsif($type eq 'servicegroup') {
-        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3), groups => { '>=' => $value } ]);
+        return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_service_commands' : 'authorized_for_all_services');
+        my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3, $cmd_permissions), groups => { '>=' => $value } ]);
         my $services2 = $c->db->get_service_names(filter => [ groups => { '>=' => $value } ]);
         $count = 0;
         # authorization permitted when the amount of services is the same number as services with authorization
@@ -498,6 +554,8 @@ sub check_permissions {
  for example:
  $c->check_cmd_permissions('service', $service, $host)
 
+returns true if users has command permissions for the given type and value.
+
 =cut
 
 sub check_cmd_permissions {
@@ -516,29 +574,29 @@ sub check_cmd_permissions {
     }
     elsif($type eq 'host') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
-        return 1 if $self->check_permissions($c, 'host', $value, 1);
+        return 1 if $self->check_permissions($c, 'host', $value, 1, undef, undef, 1);
     }
     elsif($type eq 'hostgroup') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
-        return 1 if $self->check_permissions($c, 'hostgroup', $value, 1);
+        return 1 if $self->check_permissions($c, 'hostgroup', $value, 1, undef, undef, 1);
     }
     elsif($type eq 'all_hosts') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
     }
     elsif($type eq 'service') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'service', $value, $value2, 1);
+        return 1 if $self->check_permissions($c, 'service', $value, $value2, 1, undef, 1);
     }
     elsif($type eq 'host_services') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'host_services', $value, 1);
+        return 1 if $self->check_permissions($c, 'host_services', $value, 1, undef, undef, 1);
     }
     elsif($type eq 'all_services') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
     }
     elsif($type eq 'servicegroup') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'servicegroup', $value, 1);
+        return 1 if $self->check_permissions($c, 'servicegroup', $value, 1, undef, undef, 1);
     }
     elsif($type eq 'contact') {
         return 1 if $self->check_permissions($c, 'contact', $value, 1);
@@ -609,9 +667,10 @@ grant role to user
 sub grant {
     my($self, $role) = @_;
     if($role eq 'admin') {
-        $self->{'roles'} = [@{$Thruk::Constants::possible_roles}];
+        push @{$self->{'roles'}}, @{$Thruk::Constants::possible_roles};
         # remove read only role
         $self->{'roles'} = [ grep({ $_ ne 'authorized_for_read_only' } @{$self->{'roles'}}) ];
+        $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
     } else {
         confess('role '.$role.' not implemented');
     }
@@ -658,5 +717,74 @@ sub js_data {
         readonly            => $self->{'can_submit_commands'} ? Cpanel::JSON::XS::false : Cpanel::JSON::XS::true,
     });
 }
+
+########################################
+# expand roles from teams definitions
+sub _expand_teams {
+    my($self, $c, $teams, $already_included) = @_;
+    $already_included = {} unless defined $already_included;
+
+    my $added = 0;
+    for my $t (@{$teams}) {
+        next if $already_included->{$t};
+        if(Thruk::Base::check_for_nasty_filename($t)) {
+            _warn("invalid team name: $t");
+            next;
+        }
+
+        my $role_data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}."/teams/".$t.".json");
+        if($role_data->{'includes'}) {
+            for my $i (@{$role_data->{'includes'}}) {
+                next if $already_included->{$i};
+                push @{$teams}, $i;
+                $already_included->{$i} = $i;
+                $added++;
+            }
+        }
+
+        if($role_data->{'roles'}) {
+            for my $i (@{$role_data->{'roles'}}) {
+                my $r = "$i";
+                $r =~ s/^authorized_for_//gmx;
+                $r = "authorized_for_".$r;
+                $self->{'roles_from_teams'}->{$r} = [] unless defined $self->{'roles_from_teams'}->{$r};
+                push @{$self->{'roles_from_teams'}->{$r}}, $t;
+                push @{$self->{'roles'}}, $r;
+            }
+        }
+        if($role_data->{'permissions'}) {
+            push @{$self->{'permissions'}}, @{$role_data->{'permissions'}};
+        }
+    }
+
+    if($added > 0) {
+        $self->_expand_teams($c, $teams, $already_included);
+    }
+
+    return;
+}
+
+########################################
+# returns true if permissions contain * permissions
+sub _has_star_permissions {
+    my($permissions, $with_commands, $with_services) = @_;
+
+    return 0 unless $permissions;
+
+    for my $p (@{$permissions}) {
+        next unless(grep(/^\*$/mx, @{$p->{'hosts'}}) || grep(/^\*$/mx, @{$p->{'hostgroups'}}));
+        if($with_services) {
+            next if $p->{'with_services'} ne '1';
+            next if ($with_commands && !$p->{'svc_commands'});
+        } else {
+            next if ($with_commands && !$p->{'hst_commands'});
+        }
+        return 1;
+    }
+    return 0;
+}
+
+
+########################################
 
 1;

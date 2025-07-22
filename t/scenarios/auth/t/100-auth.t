@@ -77,7 +77,7 @@ BEGIN {
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/user.cgi',
-        'like'   => ['>User<.*?>admin<', 'authorized_for_admin', 'from group: admins'],
+        'like'   => ['>User<.*?>admin<', 'authorized_for_admin', 'from contact group: admins'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/thruk/whoami',

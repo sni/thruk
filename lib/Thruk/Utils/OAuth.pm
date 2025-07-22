@@ -93,7 +93,7 @@ sub handle_oauth_login {
         } else {
             $ua->default_header(Authorization => "token ".$token->{"access_token"});
         }
-        my $login;
+        my($login, $teams);
         if ($auth->{'api_url'}) {
             _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
             $res = $ua->get($auth->{'api_url'});
@@ -102,7 +102,7 @@ sub handle_oauth_login {
             if(!$userinfo) {
                 return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
             }
-            $login = _extract_login($auth, $userinfo);
+            ($login, $teams) = _extract_login($auth, $userinfo);
             if(!defined $login) {
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
             }
@@ -129,17 +129,14 @@ sub handle_oauth_login {
                 _debug("oauth login step2: WARNING insecure JWT decode");
                 $id_token = decode_jwt(token => $token->{'id_token'}, ignore_signature => 1);
             }
-            $login = _extract_login($auth, $id_token);
+            ($login, $teams) = _extract_login($auth, $id_token);
             if(!defined $login) {
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { token => $token, id_token => $id_token }});
             }
         }
         _debug(sprintf("oauth login step2: got user id: %s", $login)) if Thruk::Base->debug;
         $login = Thruk::Authentication::User::transform_username($c->config, $login);
-        my $session = Thruk::Utils::CookieAuth::store_session($c->config, undef, {
-                                                                    address    => $c->req->address,
-                                                                    username   => $login,
-        });
+        my $session = store_oauth_session($c, $login, $teams);
         if($c->config->{'cookie_auth_login_hook'}) {
             Thruk::Utils::IO::cmd($c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
@@ -237,17 +234,26 @@ sub _get_json {
 sub _extract_login {
     my($auth, $userinfo) = @_;
 
+    my $teams;
     if(Thruk::Base->debug) {
         _debug("oauth login step2: got user details:");
         _debug($userinfo);
     }
 
-    if($auth->{'login_field'}) {
-        return $userinfo->{$auth->{'login_field'}};
+    if($auth->{'groups_field'}) {
+        if($userinfo->{$auth->{'groups_field'}}) {
+            $teams = $userinfo->{$auth->{'groups_field'}};
+        }
+    } elsif($userinfo->{'groups'}) {
+        $teams = $userinfo->{'groups'};
     }
 
-    return $userinfo->{'login'} if $userinfo->{'login'};
-    return $userinfo->{'email'} if $userinfo->{'email'};
+    if($auth->{'login_field'}) {
+        return($userinfo->{$auth->{'login_field'}}, $teams);
+    }
+
+    return($userinfo->{'login'}, $teams) if $userinfo->{'login'};
+    return($userinfo->{'email'}, $teams) if $userinfo->{'email'};
 
     return;
 }
@@ -260,6 +266,27 @@ sub _base64_url_encode {
     $data =~ tr|+/=|-_|d;
 
     return($data);
+}
+
+##########################################################
+
+=head2 store_oauth_session
+
+  store_oauth_session($c, $login, $teams)
+
+creates (oauth) session with given login and teams.
+
+=cut
+sub store_oauth_session {
+    my($c, $login, $teams) = @_;
+
+    my $session = Thruk::Utils::CookieAuth::store_session($c->config, undef, {
+        address      => $c->req->address,
+        username     => $login,
+        oauth_groups => $teams,
+    });
+
+    return $session;
 }
 
 ##########################################################

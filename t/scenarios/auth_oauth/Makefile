@@ -1,5 +1,7 @@
 include ../_common/Makefile.common
 
+export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
+
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
 	   if [ $$(docker compose logs | grep "failed=" | grep -v "failed=0" | wc -l) -gt 0 ]; then $(MAKE) wait_start_failed; exit 1; fi; \

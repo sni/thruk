@@ -4146,6 +4146,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "groups/roles as provided by the oauth server",
+     "name": "oauth_groups",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "extra session roles",
      "name": "roles",
      "type": "",

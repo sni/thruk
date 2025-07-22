@@ -1,0 +1,423 @@
+﻿[% USE date %]
+[% WRAPPER _conf_frame.tt %]
+
+<div class="flexcol mx-auto w-fit">
+  <form action="conf.cgi" method="GET" class="mt-5 w-full">
+    <input type="hidden" name="sub" value="teams">
+    <input type="hidden" name="action" value="edit">
+    <div class="card w-full min-w-[650px]">
+      <div class="head flexrow flex-nowrap justify-between">
+        <div class="w-40">
+          <a href="conf.cgi" class="button header-button rounded w-[70px]" title="Go back">
+            <i class="uil uil-angle-double-left"></i>Back
+          </a>
+        </div>
+        <h3>select team to edit</h3>
+        <div class="w-40"></div>
+      </div>
+      <div class="body">
+        <div class="flexrow flex-nowrap gap-1">
+          <span class="textTableHeader mt-1.5">Team</span>
+          <input type="text" name="team" value="[% team.name | html %]" onclick="ajax_search.init(this, 'team', {url:'conf.cgi?action=json', autosubmit:true})" class="w-full">
+          <input type="submit" name="send" value="show" style="width:80px">
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="flexrow flex-nowrap gap-5">
+    [% IF show_team %]
+      <form action="conf.cgi" method="POST" autocomplete="off" onsubmit="removeTemplateRows(this); setFormBtnSpinner(this)">
+        <input type="submit" name="send" value="save" style="display:none">
+        <input type="hidden" name="sub" value="teams">
+        <input type="hidden" name="action" value="store">
+        <input type="hidden" name="team" value="[% team.name | html %]">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+        <div class="card min-w-[650px] overflow-hidden">
+          <div class="head justify-between">
+            <h3>Editing: [% team.name | html %]</h3>
+            <button class="submit green w-32"><i class="uil uil-save"></i>save</button>
+          </div>
+          <table class="body mt-2 striped js-permissions-table">
+            <tbody>
+              <tr>
+                <th class="min-w-32">Name</th>
+                <td class="w-full">
+                  <div><input type="text" name="new_name" value="[% team.name | html %]" class="w-full" required></div>
+                </td>
+              </tr>
+              <tr>
+                <th class="align-top pt-1">CGI Roles</th>
+                <td>
+                  <div class="tags-input tags-sorted tags-col">
+                    <input
+                      type="text"
+                      name="cgi_roles"
+                      value="[% team.cgi_roles.join(', ') | html %]"
+                      placeholder="set global cgi roles"
+                      onfocus="this.click()"
+                      onclick="ajax_search.init(this, 'cgi_role', { url: 'conf.cgi?action=json&type=cgi_roles', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
+                    >
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>Include Teams</th>
+                <td>
+                  <div class="tags-input">
+                    <input
+                      type="text"
+                      name="includes"
+                      value="[% team.includes.join(', ') | html %]"
+                      placeholder="include additional teams"
+                      onfocus="this.click()"
+                      onclick="ajax_search.init(this, 'team', { url: 'conf.cgi?action=json&type=teams', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: [ filter_own_team, tags_input_filter_duplicates ] })"
+                    >
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th class="align-top pt-1">Notes</th>
+                <td>
+                  <textarea
+                    name="notes"
+                    class="w-full"
+                    rows="[% rows = team.notes.split('\n').size; IF rows > 3; rows = 3; END; IF rows <= 0; rows = 1; END; rows %]"
+                    placeholder="add notes or description"
+                    onkeyup="this.style.height = ''; this.style.height = (Math.min(this.scrollHeight+2, 54)) + 'px';"
+                  >[% team.notes | html %]</textarea>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2" class="border-b mt-2 pt-2"></td>
+              </tr>
+              <tr>
+                <th colspan="2" class="clickable" onclick="return overcard({ 'bodyEl': 'commands_help', 'caption': 'Permissions Help', 'width': 550, 'draggable': true, 'resizable': true });">
+                  Permissions
+                  <i class="fa-solid fa-circle-question"></i>
+                  <table id="commands_help" class="hidden body table-fixed mb-2">
+                    <tr>
+                      <th>Permissions</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        Permissions can be used to assign hosts and services to teams in addition to<br>
+                        using contact groups or cgi roles.<br>
+                        <b>Hostgroups</b> and <b>Hosts</b> can make use of <b>*</b> or regular expressions.<br>
+                        <b>Custom Variables</b> can be used to assign hosts based on a custom variable.<br>
+                        Depending on the <b>services</b> selection contacts may see services as well.<br>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th class="border-t">Commands</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        The hosts and services commands checkbox define whether the team is allowed to<br>
+                        submit commands for hosts and services.
+                      </td>
+                    </tr>
+                    <tr>
+                      <th class="border-t">Command Restrictions</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        Restrict commands by their command ids, for example: 17-34,50-65.<br>
+                        The syntax is as the same as in the global <b>command_enabled</b> setting.<br>
+                        If empty, all commands are allowed.<br>
+                        Read more in the <a href="https://thruk.org/documentation/configuration.html#_command_enabled" target="_blank"><i class="uil uil-external-link-alt text-sm"></i> online documentation</a>
+                      </td>
+                    </tr>
+                  </table>
+                </th>
+              </tr>
+              [% BLOCK permission_block %]
+                [%
+                  IF !p.exists("hostgroups");       p.hostgroups       = [];  END;
+                  IF !p.exists("hostgroups_op");    p.hostgroups_op    = "="; END;
+                  IF !p.exists("hosts");            p.hosts            = [];  END;
+                  IF !p.exists("hosts_op");         p.hosts_op         = "="; END;
+                  IF !p.exists("with_services");    p.with_services    = 0;   END;
+                  IF !p.exists("services");         p.services         = [];  END;
+                  IF !p.exists("services_op");      p.services_op      = "="; END;
+                  IF !p.exists("hst_custom_var");   p.hst_custom_var   = "";  END;
+                  IF !p.exists("hst_custom_val");   p.hst_custom_val   = "";  END;
+                  IF !p.exists("hst_custom_op");    p.hst_custom_op    = "="; END;
+                  IF !p.exists("svc_custom_var");   p.svc_custom_var   = "";  END;
+                  IF !p.exists("svc_custom_val");   p.svc_custom_val   = "";  END;
+                  IF !p.exists("svc_custom_op");    p.svc_custom_op    = "="; END;
+                  IF !p.exists("hst_commands");     p.hst_commands     = "0"; END;
+                  IF !p.exists("svc_commands");     p.svc_commands     = "0"; END;
+                  IF !p.exists("allowed_commands"); p.allowed_commands = "";  END;
+                %]
+                <tr class="js-teams-permissions [% IF hidden %]hidden template[% END %]">
+                  <td class="pb-2 w-full" colspan="2">
+                    <table>
+                      <tr>
+                        <th class="pl-3 min-w-[120px]">Hostgroups</th>
+                        <td colspan="2" class="w-full">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="hostgroups_op" class="w-12">
+                              <option value="="[% IF  p.hostgroups_op == '='  %] selected[% END %]>=</option>
+                              <option value="~"[% IF  p.hostgroups_op == '~'  %] selected[% END %]>~</option>
+                            </select>
+                            <input
+                              type="text"
+                              name="hostgroups"
+                              value="[% p.hostgroups.join(', ') | html %]"
+                              placeholder="permit hostgroups"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'hostgroup', { list: '\\s*,\\s*' } )"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <a href="" onclick="jQuery(this).parents('TR.js-teams-permissions').first().remove(); return false;">
+                            <i class="fa-solid fa-trash text-sm" title="delete permission entry"></i>
+                          </a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="pl-3">Hosts</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="hosts_op" class="w-12">
+                              <option value="="[% IF  p.hosts_op == '='  %] selected[% END %]>=</option>
+                              <option value="~"[% IF  p.hosts_op == '~'  %] selected[% END %]>~</option>
+                            </select>
+                            <input
+                              type="text"
+                              name="hosts"
+                              value="[% p.hosts.join(', ') | html %]"
+                              placeholder="permit hosts"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'hosts', { list: '\\s*,\\s*' } )"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th class="pl-3">Host Cust. Var.</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="hst_custom_op" class="w-12">
+                              <option value="="[% IF  p.hst_custom_op == '='  %] selected[% END %]>=</option>
+                              <option value="~"[% IF  p.hst_custom_op == '~'  %] selected[% END %]>~</option>
+                            </select>
+                            <input
+                              type="text"
+                              name="hst_custom_var"
+                              value="[% p.hst_custom_var | html %]"
+                              placeholder="custom"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'custom variable')"
+                              class="w-28"
+                            >
+                            <input
+                              type="text"
+                              name="hst_custom_val"
+                              placeholder="variable"
+                              value="[% p.hst_custom_val | html %]"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'custom value')"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+
+                      <tr>
+                        <th class="pl-3"></th>
+                        <td colspan="2">
+                          <select name="with_services" class="w-[164px] js-check-service-visibility" onchange="check_services_visibility(this)">
+                            <option value="1"[% IF  p.with_services == '1' %] selected[% END %]>including all services</option>
+                            <option value="2"[% IF  p.with_services == '2' %] selected[% END %]>with specific services</option>
+                            <option value="0"[% IF !p.with_services        %] selected[% END %]>without services</option>
+                          </select>
+                        </td>
+                        <td></td>
+                      </tr>
+
+                      <tr class="js-services-hide">
+                        <th class="pl-3">Services</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="services_op" class="w-12">
+                              <option value="="[% IF  p.services_op == '='  %] selected[% END %]>=</option>
+                              <option value="~"[% IF  p.services_op == '~'  %] selected[% END %]>~</option>
+                            </select>
+                            <input
+                              type="text"
+                              name="services"
+                              value="[% p.services.join(', ') | html %]"
+                              placeholder="restrict to certain services"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'services', { list: '\\s*,\\s*' } )"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr class="js-services-hide">
+                        <th class="pl-3">Service Cust. Var.</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="svc_custom_op" class="w-12">
+                              <option value="="[% IF  p.svc_custom_op == '='  %] selected[% END %]>=</option>
+                              <option value="~"[% IF  p.svc_custom_op == '~'  %] selected[% END %]>~</option>
+                            </select>
+                            <input
+                              type="text"
+                              name="svc_custom_var"
+                              value="[% p.svc_custom_var | html %]"
+                              placeholder="custom"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'custom variable')"
+                              class="w-28"
+                            >
+                            <input
+                              type="text"
+                              name="svc_custom_val"
+                              placeholder="variable"
+                              value="[% p.svc_custom_val | html %]"
+                              onfocus="this.click()"
+                              onclick="ajax_search.init(this, 'custom value')"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th class="pl-3">Commands</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <div class="flexrow flex-nowrap gap-1 items-center w-[164px]">
+                              <input type="checkbox" name="hst_commands" id="hst_commands" [% IF p.hst_commands %] checked[% END %]><label for="hst_commands" class="ml-0 mr-2">hosts</label>
+                              <input type="checkbox" name="svc_commands" id="svc_commands"[% IF p.svc_commands %] checked[% END %] class="js-services-disable"><label for="svc_commands" class="ml-0 js-services-disable">services</label>
+                            </div>
+                            <input
+                              type="text"
+                              name="allowed_commands"
+                              value="[% p.allowed_commands | html %]"
+                              placeholder="restrict commands, ex.: 17-34,50-65"
+                              class="w-auto flex-grow"
+                            >
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              [% END %]
+              [% FOREACH p = team.permissions %]
+                [% PROCESS permission_block p=p hidden=0 idx=loop.index %]
+              [% END %]
+              [% PROCESS permission_block p={ with_services=1,hst_commands=1, svc_commands=1 } hidden=1 idx=-1 %]
+              <tr>
+                <td colspan="2" class="border-b mt-0 pt-0"></td>
+              </tr>
+              <tr>
+                <td colspan=2 onclick="permission_add_row(); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable">
+                  <i class="uil uil-angle-down text-lg leading-3" title="add new permission entry"></i> add permissions
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </form>
+    [% ELSE %]
+        <div class="min-w-[650px]"></div>
+    [% END %]
+    <div class="card overflow-hidden w-full">
+      <div class="head">
+        <h3>Actions</h3>
+      </div>
+      <div class="actionbox">
+        <div class="flex flex-nowrap">
+          <a href="conf.cgi?sub=teams&amp;action=new"><i class="fa-solid fa-plus"></i>Create a new team</a>
+        </div>
+        [% IF show_team %]
+          <hr class="mt-0.5 pt-0.5">
+          <div class="hover-red-text">
+            <form action='conf.cgi' method='POST'>
+              <input type='hidden' name='sub' value='teams'>
+              <input type='hidden' name='action' value='delete'>
+              <input type='hidden' name='team' value="[% team.name | html %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+              <a href="conf.cgi?sub=teams&amp;name=[% team.name | uri %]" onClick="if(confirm('really delete this team?')) { jQuery(this).closest('FORM').submit(); }; return false;">
+                <i class="fa-solid fa-trash"></i>
+                Delete this team
+              </a>
+            </form>
+          </div>
+        [% END %]
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+<!--
+function filter_own_team(value) {
+  if(value === '[% team.name | html %]') {
+    return false;
+  }
+  return true;
+}
+
+function permission_add_row() {
+  var template = jQuery('.js-teams-permissions').last().clone();
+  jQuery(template).removeClass('hidden');
+  jQuery(template).removeClass('template');
+  var table = jQuery('.js-permissions-table');
+  var row = table[0].insertRow(table[0].rows.length - 3);
+  row.className = 'js-teams-permissions';
+
+  // move cells to new row
+  for(var i = 0; i < template[0].cells.length; i++) {
+    jQuery(row).append(template[0].cells[i]);
+  }
+}
+
+function removeTemplateRows(form) {
+  jQuery(form).find('.template').remove();
+}
+
+function check_services_visibility(select) {
+  var table = jQuery(select).closest('table');
+  jQuery(table).find('.js-services-disable').each(function() {
+    if(select.value == '0') {
+      jQuery(this).prop('disabled', true);
+    } else {
+      jQuery(this).prop('disabled', false);
+    }
+  });
+
+  jQuery(table).find('.js-services-hide').each(function() {
+    if(select.value == '0' || select.value == '1') {
+      jQuery(this).addClass('hidden');
+    } else {
+      jQuery(this).removeClass('hidden');
+    }
+  });
+}
+
+jQuery(document).ready(function() {
+  // update initial visibility
+  jQuery(".js-check-service-visibility").each(function(i, el) {
+    check_services_visibility(el);
+  });
+});
+
+-->
+</script>
+
+[% END %]

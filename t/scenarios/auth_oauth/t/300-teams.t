@@ -7,36 +7,28 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
-    plan tests => 58;
+    plan tests => 51;
 }
 
 ###############################################################################
-TestUtils::test_page(
-    'url'   => '/thruk/cgi-bin/login.cgi?logout',
-    'like'  => ['omdadmin sso'],
-    'code'  => 401,
-    'follow'  => 1,
-);
-
-###############################################################################
-TestUtils::test_page(
-    'url'   => '/thruk/cgi-bin/login.cgi',
-    'like'  => ['omdadmin sso'],
-    'code'  => 401,
-);
-
-###############################################################################
+# login as omdadmin
 TestUtils::test_page(
     'url'     => '/thruk/cgi-bin/login.cgi',
-    'post'    => { 'oauth' => 0, submit => 'login' },
-    'like'    => ['tac.cgi'],
+    'post'    => { 'oauth' => 1, submit => 'login' },
+    'like'    => ['tac.cgi', 'omdadmin'],
     'follow'  => 1,
 );
 
 ###############################################################################
 TestUtils::test_page(
-    'url'     => '/thruk/cgi-bin/tac.cgi',
-    'like'    => ['>User<.*?>clientö<'],
+    'url'   => '/thruk/cgi-bin/user.cgi',
+    'like'  => ['omdadmin', 'authorized_for_admin', 'group1', 'group2' ],
+);
+
+###############################################################################
+TestUtils::test_page(
+    'url'   => '/thruk/cgi-bin/conf.cgi?sub=teams&action=edit&team=group1',
+    'like'  => ['authorized_for_admin', 'Create a new team' ],
 );
 
 ###############################################################################
@@ -46,3 +38,5 @@ TestUtils::test_page(
     'code'  => 401,
     'follow'  => 1,
 );
+
+###############################################################################

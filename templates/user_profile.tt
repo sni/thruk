@@ -20,6 +20,24 @@
           </div>
         </td>
       </tr>
+      <tr class="hoverable">
+        <th class="align-top">Teams</th>
+        <td>
+          [%- IF profile_user.teams.size > 0 -%]
+            [%- has_admin = c.check_user_roles("admin") -%]
+            [%- FOREACH t = profile_user.teams.sort -%]
+              [%- IF has_admin -%]
+                <a class="link" href="conf.cgi?sub=teams&action=edit&team=[% t | uri %]">[% t | html %]</a>
+              [%- ELSE -%]
+                [%- t | html -%]
+              [%- END -%]
+              [%- IF !loop.last %], [% END -%]
+            [%- END -%]
+          [%- ELSE -%]
+            &lt;none&gt;
+          [% END %]
+        </td>
+      </tr>
       <tr>
         <th class="align-top">Effective Roles</th>
         <td>[% PROCESS _user_roles.tt %]</td>
@@ -69,7 +87,7 @@
                 <select name="timezone" class="w-full">
                   [% FOR tz = timezones %]
                     <option value="[% tz.text | html %]"[% IF user_tz == tz.text %] selected[% END %]>[% tz.text | html %][% IF tz.text == "Server Setting" %]&nbsp;&nbsp;&nbsp;&nbsp;([% c.config._server_timezone %])[% END %]</option>
-                  [% END %]
+                  [%- END %]
                 </select>
               </div>
               <div>

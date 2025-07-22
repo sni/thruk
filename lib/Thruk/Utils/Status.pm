@@ -436,8 +436,8 @@ sub do_filter {
     }
 
     unless($improved) {
-        $servicefilter = _improve_filter($servicefilter) if $servicefilter;
-        $hostfilter    = _improve_filter($hostfilter)    if $hostfilter;
+        $servicefilter = improve_filter($servicefilter) if $servicefilter;
+        $hostfilter    = improve_filter($hostfilter)    if $hostfilter;
     }
 
     # add global filter from totals links
@@ -682,8 +682,8 @@ sub do_search {
     my $hostgroupfilter     = Thruk::Utils::combine_filter( '-or', \@hostgroupfilter );
     my $servicegroupfilter  = Thruk::Utils::combine_filter( '-or', \@servicegroupfilter );
 
-    $servicefilter       = _improve_filter($servicefilter)       if $servicefilter;
-    $hostfilter          = _improve_filter($hostfilter)          if $hostfilter;
+    $servicefilter       = improve_filter($servicefilter)       if $servicefilter;
+    $hostfilter          = improve_filter($hostfilter)          if $hostfilter;
 
     # fill the host/service totals box
     if(!$c->stash->{'has_error'} && (!$c->stash->{'minimal'} || $c->stash->{'play_sounds'}) && ( $prefix eq 'dfl_' or $prefix eq 'ovr_' or $prefix eq 'grd_' or $prefix eq '')) {
@@ -1020,7 +1020,10 @@ sub single_search {
         elsif ( $filter->{'type'} eq 'host' ) {
 
             # check for wildcards
-            if( CORE::index( $value, '*' ) >= 0 and $op eq '=' ) {
+            if( $value eq '*' || $value eq '.*' ) {
+                push @hostfilter,          {      name => { '!=' => '' } };
+                push @servicefilter,       { host_name => { '!=' => '' } };
+            } elsif( CORE::index( $value, '*' ) >= 0 && $op eq '=' ) {
                 # convert wildcards into real regexp
                 my $searchhost = $value;
                 $searchhost = Thruk::Utils::convert_wildcards_to_regex($searchhost);
@@ -1029,8 +1032,8 @@ sub single_search {
             }
             else {
                 if($strict || $op eq  '=') {
-                    push @hostfilter,          { $joinop => [ name      => { $op => $value } ] };
-                    push @servicefilter,       { $joinop => [ host_name => { $op => $value } ] };
+                    push @hostfilter,          { name      => { $op => $value } };
+                    push @servicefilter,       { host_name => { $op => $value } };
                 } else {
                     push @hostfilter,          { $joinop => [ name      => { $op => $value }, alias      => { $op => $value }, address      => { $op => $value }, display_name      => { $op => $value } ] };
                     push @servicefilter,       { $joinop => [ host_name => { $op => $value }, host_alias => { $op => $value }, host_address => { $op => $value }, host_display_name => { $op => $value } ] };
@@ -1039,14 +1042,18 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'service' ) {
             if($strict || $op eq  '=') {
-                push @servicefilter,       { $joinop => [ description => { $op => $value } ] };
+                push @servicefilter,       { description => { $op => $value } };
             } else {
                 push @servicefilter,       { $joinop => [ description => { $op => $value }, display_name => { $op => $value } ] };
             }
             $c->stash->{'has_service_filter'} = 1;
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
-            if(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
+            if( $value eq '*' || $value eq '.*' ) {
+                push @hostfilter,          { name      => { '!=' => '' } };
+                push @servicefilter,       { host_name => { '!=' => '' } };
+            }
+            elsif(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'hostgroup');
                 push @hostfilter,          $hfilter;
                 push @servicefilter,       $sfilter;
@@ -3170,8 +3177,15 @@ sub _expand_duration_filter {
 }
 
 ##############################################
-# try to optimize and remove useless cruft and intendion
-sub _improve_filter {
+
+=head2 improve_filter
+
+  filter2text($filter)
+
+try to optimize and remove useless cruft and intendion
+
+=cut
+sub improve_filter {
     my($filter) = @_;
 
     # reduce useless intendion from hashes

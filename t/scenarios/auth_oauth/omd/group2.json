@@ -1,0 +1,11 @@
+{
+  "roles": ["authorized_for_system_commands", "authorized_for_blah"],
+  "permissions": [
+    {
+      "hosts": ["*"],
+      "with_services": "1",
+      "hst_commands": "1",
+      "svc_commands": "1"
+    }
+  ]
+}

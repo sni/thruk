@@ -2545,6 +2545,7 @@ lists thruk sessions.
 |fake                              |            |          | flag whether this is a fake session or not
 |file                              |            |          | file name the session data file
 |hashed_key                        |            |          | hashed session id
+|oauth_groups                      |            |          | groups/roles as provided by the oauth server
 |roles                             |            |          | extra session roles
 |username                          |            |          | username of this session
 |===========================================
@@ -2639,4 +2640,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

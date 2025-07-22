@@ -12,6 +12,7 @@ use Thruk::Controller::cmd ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::OAuth ();
 
 ################################################################################
 my $c = Thruk::Utils::CLI->new()->get_c();
@@ -32,6 +33,8 @@ my $service_description = $test_svc->{'description'};
 my $host_group          = $test_svc->{'host_groups'}->[0];
 my $service_group       = $test_svc->{'groups'}->[0];
 
+# create example session
+Thruk::Utils::OAuth::store_oauth_session($c, "docs-update", ["example-team"]);
 
 my $cmds = _update_cmds($c);
 _update_docs($c, "docs/documentation/rest.asciidoc", "lib/Thruk/Controller/Rest/V1/docs.pm");
