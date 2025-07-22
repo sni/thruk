@@ -574,29 +574,29 @@ sub check_cmd_permissions {
     }
     elsif($type eq 'host') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
-        return 1 if $self->check_permissions($c, 'host', $value, 1, undef, undef, 1);
+        return 1 if $self->check_permissions($c, 'host', $value, 1, undef, 1);
     }
     elsif($type eq 'hostgroup') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
-        return 1 if $self->check_permissions($c, 'hostgroup', $value, 1, undef, undef, 1);
+        return 1 if $self->check_permissions($c, 'hostgroup', $value, 1, undef, 1);
     }
     elsif($type eq 'all_hosts') {
         return 1 if $self->check_user_roles('authorized_for_all_host_commands');
     }
     elsif($type eq 'service') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'service', $value, $value2, 1, undef, 1);
+        return 1 if $self->check_permissions($c, 'service', $value, $value2, 1, 1);
     }
     elsif($type eq 'host_services') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'host_services', $value, 1, undef, undef, 1);
+        return 1 if $self->check_permissions($c, 'host_services', $value, 1, undef, 1);
     }
     elsif($type eq 'all_services') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
     }
     elsif($type eq 'servicegroup') {
         return 1 if $self->check_user_roles('authorized_for_all_service_commands');
-        return 1 if $self->check_permissions($c, 'servicegroup', $value, 1, undef, undef, 1);
+        return 1 if $self->check_permissions($c, 'servicegroup', $value, 1, undef, 1);
     }
     elsif($type eq 'contact') {
         return 1 if $self->check_permissions($c, 'contact', $value, 1);
@@ -775,9 +775,9 @@ sub _has_star_permissions {
         next unless(grep(/^\*$/mx, @{$p->{'hosts'}}) || grep(/^\*$/mx, @{$p->{'hostgroups'}}));
         if($with_services) {
             next if $p->{'with_services'} ne '1';
-            next if ($with_commands && !$p->{'svc_commands'});
+            next if ($with_commands && (!$p->{'svc_commands'} || $p->{'allowed_commands'}));
         } else {
-            next if ($with_commands && !$p->{'hst_commands'});
+            next if ($with_commands && (!$p->{'hst_commands'} || $p->{'allowed_commands'}));
         }
         return 1;
     }

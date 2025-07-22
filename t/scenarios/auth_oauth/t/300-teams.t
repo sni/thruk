@@ -7,7 +7,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
-    plan tests => 139;
+    plan tests => 152;
 }
 
 ###############################################################################
@@ -87,6 +87,12 @@ BEGIN {
         'url'    => '/thruk/cgi-bin/status.cgi?style=detail',
         'like'   => ['testuser', 'Https', 'Disk /' ],
         'unlike' => ['Zombie', 'Ping' ],
+    );
+
+    ###########################################################################
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/extinfo.cgi?type=1&host=localhost',
+        'like'   => ['localhost', 'Host Information', 'does not have permissions to execute commands' ],
     );
 
     ###########################################################################
