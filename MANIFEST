@@ -2711,6 +2711,7 @@ t/scenarios/auth_oauth/omd/Dockerfile
 t/scenarios/auth_oauth/omd/grafana.ini
 t/scenarios/auth_oauth/omd/group1.json
 t/scenarios/auth_oauth/omd/group2.json
+t/scenarios/auth_oauth/omd/group3.json
 t/scenarios/auth_oauth/omd/oauth2_server/config.yml
 t/scenarios/auth_oauth/omd/oauth2_server/oauth2_server.pl
 t/scenarios/auth_oauth/omd/playbook.yml

@@ -1,11 +1,9 @@
 {
-  "roles": ["authorized_for_broadcasts", "authorized_for_blah"],
   "permissions": [
     {
       "hosts": ["*"],
       "services": [ "Https", "Http", "Disk /" ],
-      "with_services": "1",
-      "hst_commands": "1",
+      "with_services": "2",
       "svc_commands": "1"
     }
   ]

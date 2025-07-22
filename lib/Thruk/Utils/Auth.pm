@@ -311,6 +311,7 @@ sub _permission_filter {
         ],
     )])]);
 }
+
 ##############################################
 # remove duplicates from filter
 sub _filter_dups {

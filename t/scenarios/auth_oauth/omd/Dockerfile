@@ -7,3 +7,4 @@ COPY grafana.ini /root/
 COPY thruk_local.conf /root/
 COPY group1.json /root/
 COPY group2.json /root/
+COPY group3.json /root/

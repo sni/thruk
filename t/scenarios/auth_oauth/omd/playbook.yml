@@ -64,15 +64,11 @@
       owner: demo
       group: demo
   - copy:
-      src: /root/group1.json
-      dest: /opt/omd/sites/demo/var/thruk/teams/group1.json
+      src: /root/{{item}}.json
+      dest: /opt/omd/sites/demo/var/thruk/teams/{{item}}.json
       owner: demo
       group: demo
-  - copy:
-      src: /root/group2.json
-      dest: /opt/omd/sites/demo/var/thruk/teams/group2.json
-      owner: demo
-      group: demo
+    with_items: ['group1', 'group2', 'group3']
   - name: "install Dancer2::Plugin::OAuth2::Server"
     shell: "sudo su - {{ site }} -c 'cpanm -n Dancer2::Plugin::OAuth2::Server'"
     environment:

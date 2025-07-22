@@ -20,3 +20,9 @@ plugins:
           openid: 2
           profile: "profile"
           email: "omdadmin@localhost"
+      omdadmin:
+        client_secret: secret
+        scopes:
+          openid: 3
+          profile: "profile"
+          email: "testuser@localhost"
