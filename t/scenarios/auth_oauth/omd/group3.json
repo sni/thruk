@@ -4,7 +4,8 @@
       "hosts": ["*"],
       "services": [ "Https", "Http", "Disk /" ],
       "with_services": "2",
-      "svc_commands": "1"
+      "svc_commands": "1",
+      "allowed_commands": "3,7"
     }
   ]
 }
