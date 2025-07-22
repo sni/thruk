@@ -13,14 +13,23 @@ breadcrumb: [ "configuration.html", "Configuration", "Commands" ]
         option.
       </p>
     </div>
+    <div class="paragraph">
+      <p>Note, these numbers are more or less the ones from the
+         <a href="https://github.com/naemon/naemon-core/blob/master/src/naemon/common.h#L74" target="_blank">naemon source</a>.
+         However, a few are missing and a few are used twice. This is because Thruk combines some commands which have options but
+         are different commands in naemon.
+      </p>
+    </div>
   </div>
 </div>
 
 <script>
-  jQuery(document).ready(function() {
-    // sort by number initially
-    jQuery("TABLE.table TH").first().click();
-  });
+    if(!window.doOnLoadList) { window.doOnLoadList = [] };
+    window.doOnLoadList.push(function() {
+        // sort by number initially
+        jQuery.bootstrapSortable(true, undefined, 'default');
+        jQuery("TABLE.table TH").first().click();
+    });
 </script>
 
 <table class="table table-striped table-bordered table-hover sortable" cellspacing="0" width="100%">
