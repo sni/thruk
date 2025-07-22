@@ -44,7 +44,7 @@ ok($c->user, "user object exists");
         'svc_custom_var' => '',
         'with_services' => '2'
     }];
-    my $expected_hst_filter = { 'name' => { '!=' => '' } };
+    my $expected_hst_filter = [{ 'name' => { '!=' => '' } }];
     $c->user->{'permissions'} = $permissions;
     my $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts');
     is_deeply($filter, $expected_hst_filter, "hosts filter is correct");
@@ -53,7 +53,7 @@ ok($c->user, "user object exists");
     $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts', 1);
     is_deeply($filter, [], "hosts cmd filter is correct");
 
-    my $expected_svc_filter = {
+    my $expected_svc_filter = [{
         '-and' => [
                     { 'host_name' => { '!=' => '' } },
                     { '-or' => [
@@ -63,7 +63,7 @@ ok($c->user, "user object exists");
                         ]
                     }
                 ]
-    };
+    }];
     $filter = Thruk::Utils::Auth::_permission_filter($c, 'services');
     is_deeply($filter, $expected_svc_filter, "hosts filter is correct");
 

@@ -321,7 +321,7 @@ for my $b (@{$broken}) {
         };
     my $json = Cpanel::JSON::XS->new->utf8->canonical;
     my $enc  = $json->encode($filter);
-    my $optimized = Thruk::Utils::Status::_improve_filter($filter);
+    my $optimized = Thruk::Utils::Status::improve_filter($filter);
     my $enc2 = $json->encode($optimized);
     ok($enc ne $enc2, "query can be optimized");
     is_deeply($optimized, $exp, "optimized query is correct");
