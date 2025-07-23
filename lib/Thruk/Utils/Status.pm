@@ -1021,8 +1021,8 @@ sub single_search {
 
             # check for wildcards
             if( $value eq '*' || $value eq '.*' ) {
-                push @hostfilter,          {      name => { '!=' => '' } };
-                push @servicefilter,       { host_name => { '!=' => '' } };
+                push @hostfilter,          {        name => { '!=' => '' } };
+                push @servicefilter,       { description => { '!=' => '' } }; # for some reason host_name != '' does not work
             } elsif( CORE::index( $value, '*' ) >= 0 && $op eq '=' ) {
                 # convert wildcards into real regexp
                 my $searchhost = $value;
