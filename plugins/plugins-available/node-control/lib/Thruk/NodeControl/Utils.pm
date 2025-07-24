@@ -698,7 +698,7 @@ sub _omd_update_step2 {
             return _set_job_errored($c, 'updating', $peer->{'key'}, $err);
         }
         if($rc ne '0') {
-            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %d)", $rc));
+            return _set_job_errored($c, 'updating', $peer->{'key'}, sprintf("update canceled by pre hook (rc: %s)", $rc));
         }
     }
 
