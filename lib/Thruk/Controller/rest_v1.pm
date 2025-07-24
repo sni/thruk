@@ -1087,6 +1087,19 @@ sub _apply_data_function {
         ## use critic
         return $val;
     }
+    if($name eq 'concat') {
+        for my $a (@{$args}) {
+            my $n = "$a";
+            if($n =~ m/^("|')/mx) {
+                $n = _trim_quotes($n);
+                $val .= $n;
+            } else {
+                $n = _trim_backticks($n);
+                $val .= $row->{$n}//'';
+            }
+        }
+        return($val);
+    }
 
     # just set the unit, do not change the value
     if($name eq 'unit') {
@@ -1146,7 +1159,7 @@ sub _extract_val {
 
 ##########################################################
 # returns columns required from calculations
-sub _get_calc_required_columns {
+sub _get_calc_concat_required_columns {
     my($c) = @_;
 
     my $extra = [];
@@ -1160,6 +1173,15 @@ sub _get_calc_required_columns {
                 next if $t eq '*';
                 next if $t eq '/';
                 push @{$extra}, $t;
+            }
+        }
+        if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] eq 'concat') {
+            my $arg = $col->{'func'}->[0]->[1];
+            for my $a (@{$arg}) {
+                my $n = "$a";
+                next if $n =~ m/^("|')/mx; # skip quoted strings
+                $n = _trim_backticks($n);
+                push @{$extra}, $n;
             }
         }
     }
@@ -1269,7 +1291,7 @@ sub _livestatus_options {
         }
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
-            push @{$columns}, @{_get_calc_required_columns($c)};
+            push @{$columns}, @{_get_calc_concat_required_columns($c)};
             $columns = Thruk::Base::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
@@ -3059,6 +3081,17 @@ sub _trim_quotes {
         return $val;
     }
     if($val =~ s/^"(.*)"$/$1/mx) {
+        return $val;
+    }
+    return $val;
+}
+
+##########################################################
+# remove backticks from string
+sub _trim_backticks {
+    my($val) = @_;
+    return unless defined $val;
+    if($val =~ s/^`(.*)`$/$1/mx) { # NO CRITIC BACKTICKS
         return $val;
     }
     return $val;
