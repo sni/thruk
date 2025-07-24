@@ -1050,8 +1050,8 @@ sub single_search {
         }
         elsif ( $filter->{'type'} eq 'hostgroup' ) {
             if( $value eq '*' || $value eq '.*' ) {
-                push @hostfilter,          { name      => { '!=' => '' } };
-                push @servicefilter,       { host_name => { '!=' => '' } };
+                push @hostfilter,          { name        => { '!=' => '' } };
+                push @servicefilter,       { description => { '!=' => '' } }; # for some reason host_name != '' does not work
             }
             elsif(($op eq '~~' or $op eq '!~~') && !$ENV{'THRUK_USE_LMD'}) {
                 my($hfilter, $sfilter) = get_groups_filter($c, $op, $value, 'hostgroup');

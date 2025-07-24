@@ -41,7 +41,7 @@ ok($c->user, "user object exists");
 
     my $expected_svc_filter = [{
         '-and' => [
-                    { 'host_name' => { '!=' => '' } },
+                    { 'description' => { '!=' => '' } },
                     { '-or' => [
                             { 'description' => { '=' => 'Https' } },
                             { 'description' => { '=' => 'Http' } },
