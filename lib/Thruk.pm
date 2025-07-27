@@ -265,7 +265,7 @@ sub _dispatcher {
     my($env) = @_;
 
     $Thruk::Globals::COUNT++;
-    &timing_breakpoint("_dispatcher: ".$env->{PATH_INFO}, "reset");
+    &timing_breakpoint("_dispatcher: ".($env->{PATH_INFO} || $env->{SCRIPT_NAME}), "reset");
     # connection keep alive breaks IE in development server
     if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
         delete $env->{'HTTP_CONNECTION'};

@@ -7,6 +7,7 @@ use Time::HiRes ();
 
 use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
+use Thruk::Utils::Encode ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
 
@@ -170,6 +171,10 @@ sub _rest_get_config_files {
 Thruk::Controller::rest_v1::register_rest_path_v1(['GET','DELETE','PATCH','POST'], qr%^/(host|hostgroup|servicegroup|timeperiod|contact|contactgroup|command|)s?/([^/]+)/config?$%mx, \&_rest_get_config, ["admin"]);
 sub _rest_get_config {
     my($c, undef, $type, $name, $name2) = @_;
+
+    $name  = Thruk::Utils::Encode::decode_any($name);
+    $name2 = Thruk::Utils::Encode::decode_any($name2);
+
     require Thruk::Utils::Conf;
     my $live = [];
     my $method = $c->req->method();

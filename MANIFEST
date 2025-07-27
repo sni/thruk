@@ -3149,7 +3149,9 @@ t/scenarios/utf8/t/000-init.t
 t/scenarios/utf8/t/300-controller_extinfo.t
 t/scenarios/utf8/t/300-controller_status.t
 t/scenarios/utf8/t/300-controller_tac.t
+t/scenarios/utf8/t/local/010-local.t
 t/scenarios/utf8/t/local/015-excel-export.t
+t/scenarios/utf8/t/local/017-utf8.t
 t/scenarios/utf8/thruk.conf
 t/scenarios/utf8/thruk_local.conf
 t/test_request
