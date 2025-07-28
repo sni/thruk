@@ -30,11 +30,11 @@
   [% last_section = "" %]
   [% FOREACH pd IN backends %]
   <tr>
-    <td>
+    <td class="table_search_hide_unless_first">
       [% section = backend_detail.$pd.section %]
-      <span [% IF last_section == section || section == "Default" || section == "" %]style="display: none;"[% END %]>
-      [% section | html %]/
-      </span>
+      [% IF section != "Default" && section != "" %]
+        <span [% IF last_section == section %]style="display: none;"[% END %]>[% section | html %]/</span>
+      [% END %]
       [% last_section = section %]
     </td>
     <td title="id: [% pd %]" data-id="[% pd %]">

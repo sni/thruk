@@ -3828,6 +3828,24 @@ function do_table_search_table_filter(id, table, value) {
 // update pager count and call callback
 function table_search_post(id) {
     updatePagerCount(id);
+
+    var lastVal;
+    jQuery('#'+id+' .table_search_hide_unless_first SPAN').css('display', 'none');
+    jQuery('#'+id+' .table_search_hide_unless_first').each(function(i, el) {
+        var tr   = jQuery(el).closest('TR');
+        if(jQuery(tr).hasClass('filter_hidden')) {
+            return;
+        }
+        var sub  = jQuery(el).find('SPAN');
+        if(sub) {
+            var val = sub.html();
+            if(val != lastVal) {
+                jQuery(sub).css('display', '');
+            }
+            lastVal = val;
+        }
+    });
+
     if(table_search_cb[id] != undefined) {
         try {
             table_search_cb[id]();
