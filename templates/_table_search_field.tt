@@ -16,6 +16,7 @@
     var filter = get_hash(2);
     if(filter != undefined) {
         jQuery('#table_search_input').val(filter);
+        init_deletable_inputs();
     }
 
     jQuery(document).ready(function() {
