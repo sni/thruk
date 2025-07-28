@@ -148,7 +148,7 @@
               [% IF hide_remaining_columns && col != "actions"; NEXT; END %]
               [% IF col == "section" %]
                 <td
-                  class="align-top js-node-row clickable table_search_hide_unless_first"
+                  class="align-top js-node-row clickable js-hide-unless-first"
                   data-section="s:[% s.section | html %]:"
                   onclick="setTableSearchFilter('s:[% s.section| html %]:')"
                   title="filter by section: [% s.section | html %]"

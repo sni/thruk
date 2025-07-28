@@ -3830,8 +3830,8 @@ function table_search_post(id) {
     updatePagerCount(id);
 
     var lastVal;
-    jQuery('#'+id+' .table_search_hide_unless_first SPAN').css('display', 'none');
-    jQuery('#'+id+' .table_search_hide_unless_first').each(function(i, el) {
+    jQuery('#'+id+' .js-hide-unless-first SPAN').css('display', 'none');
+    jQuery('#'+id+' .js-hide-unless-first').each(function(i, el) {
         var tr   = jQuery(el).closest('TR');
         if(jQuery(tr).hasClass('filter_hidden')) {
             return;
