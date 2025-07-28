@@ -79,7 +79,7 @@ function reports_view(typ) {
     else                     { jQuery('#view1').addClass('active') }
     set_hash(typ, 1);
 
-    updatePagerCount('reportsTable');
+    table_search_post('reportsTable');
 }
 
 /* collect total number of affected hosts and services */
