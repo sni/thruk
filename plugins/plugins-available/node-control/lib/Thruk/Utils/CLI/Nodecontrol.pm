@@ -115,12 +115,12 @@ sub cmd {
             my($pid, $ts) = Thruk::Utils::CLI::check_lock($lock_file, "nc_".$mode);
             return(sprintf("update for %s already running (duration: %s) with pid: %s\n", $mode, Thruk::Utils::Filter::duration(Time::HiRes::time() - $ts, 6), $pid), 0) if $pid;
         }
-        my($rc, $msg) = _action_facts($c, $mode, $opt, $commandoptions, $global_options);
+        my($rc, $msg) = _action_facts($c, $mode, $opt, $commandoptions, $config, $global_options);
         Thruk::Utils::CLI::check_lock_unlock($lock_file, "nc_".$mode) if $lock_file;
         return($rc, $msg);
     }
     elsif($mode eq 'cleanup') {
-        return(_action_cleanup($c, $opt, $commandoptions, $global_options));
+        return(_action_cleanup($c, $opt, $commandoptions, $config, $global_options));
     }
     elsif($mode eq 'install') {
         return(_action_install($c, $opt, $commandoptions, $config, $global_options));
@@ -183,10 +183,10 @@ sub _action_list {
 
 ##############################################
 sub _action_facts {
-    my($c, $mode, $opt, $commandoptions, $global_options) = @_;
+    my($c, $mode, $opt, $commandoptions, $config, $global_options) = @_;
 
     my $t1  = [gettimeofday()];
-    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
+    my $peers = _get_selected_peers($c, $commandoptions, $config, $global_options);
     _scale_peers($c, $opt->{'worker'}, $peers, sub {
         my($peer_key) = @_;
         my $peer = $c->db->get_peer_by_key($peer_key);
@@ -219,7 +219,7 @@ sub _action_install {
 
     my $version = $opt->{'version'} || $config->{'omd_default_version'};
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
+    my $peers = _get_selected_peers($c, $commandoptions, $config, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -257,7 +257,7 @@ sub _action_update {
 
     my $version = $opt->{'version'} || $config->{'omd_default_version'};
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
+    my $peers = _get_selected_peers($c, $commandoptions, $config, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -291,10 +291,10 @@ sub _action_update {
 
 ##############################################
 sub _action_cleanup {
-    my($c, $opt, $commandoptions, $global_options) = @_;
+    my($c, $opt, $commandoptions, $config, $global_options) = @_;
 
     my $errors = 0;
-    my $peers = _get_selected_peers($c, $commandoptions, $global_options);
+    my $peers = _get_selected_peers($c, $commandoptions, $config, $global_options);
     for my $peer_key (@{$peers}) {
         my $peer = $c->db->get_peer_by_key($peer_key);
         local $ENV{'THRUK_LOG_PREFIX'} = sprintf("[%s] ", $peer->{'name'});
@@ -328,7 +328,16 @@ sub _action_cleanup {
 
 ##############################################
 sub _get_selected_peers {
-    my($c, $commandoptions, $global_options) = @_;
+    my($c, $commandoptions, $config, $global_options) = @_;
+
+    # peer list can be extended from addons
+    my $peers = Thruk::NodeControl::Utils::get_peers($c);
+    my $servers = [];
+    for my $peer (@{$peers}) {
+        push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+    }
+    Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
+
     my $peers = [];
     my $backend = shift @{$commandoptions};
     if($backend && $backend ne 'all') {
