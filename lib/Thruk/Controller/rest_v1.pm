@@ -849,7 +849,7 @@ sub _apply_disaggregation {
     get_request_columns($c, $type)
 
     $type can be:
-        - RAW    - returns columsn as is, alias definitions untouched
+        - RAW    - returns columns as is, alias definitions untouched
         - NAMES  - returns column name
         - ALIAS  - returns column alias or the name if none specified
         - STRUCT - returns column as parsed structure
