@@ -147,7 +147,17 @@
             [% FOREACH col = columns %]
               [% IF hide_remaining_columns && col != "actions"; NEXT; END %]
               [% IF col == "section" %]
-                <td class="align-top js-node-row">[% IF s.section != "Default" && s.section != "" && s.section != last_section; s.section | html; END; last_section = s.section; %]</td>
+                <td
+                  class="align-top js-node-row clickable table_search_hide_unless_first"
+                  data-section="s:[% s.section | html %]:"
+                  onclick="setTableSearchFilter('s:[% s.section| html %]:')"
+                  title="filter by section: [% s.section | html %]"
+                >
+                  [% IF s.section != "Default" && s.section != "" %]
+                    <span [% IF s.section == last_section %]style="display: none;"[% END %]>[% s.section | html %]</span>
+                  [% END %]
+                  [% last_section = s.section %]
+                </td>
               [% ELSIF col == "backend" %]
                 <td class="align-top clickable pr-px" onclick="openModalWindowUrl('node_control.cgi?action=peer_status&modal=1&peer=[% s.peer_key | html %]');" title="[% s.peer_key | html %]">
                   <div class="flex min-w-max">
@@ -440,6 +450,9 @@
       }
       jQuery("SPAN.tabs").removeClass("active");
       jQuery("#view_"+typ).addClass("active");
+
+      // recalculate number of displayed items and sections
+      table_search_post("msTable");
 
       return true;
   }
