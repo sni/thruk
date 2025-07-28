@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 13;
+plan tests => 17;
 
 ###########################################################
 # test thruks script path
@@ -33,3 +33,13 @@ TestUtils::test_command({
         like => ['/"num_services_problems" : 2/'],
     });
 };
+
+###########################################################
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=host_name"',
+        like => ['/localhost/'],
+    });
+};
+
+###########################################################

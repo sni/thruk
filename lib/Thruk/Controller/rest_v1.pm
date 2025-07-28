@@ -1014,6 +1014,8 @@ sub _apply_columns {
         if($firstrow && $firstrow->{$col->{'column'}."_unit"}) {
             $col->{'unit'} = $firstrow->{$col->{'column'}."_unit"};
         }
+        $col->{'no_host_col'} = $col->{'column'};
+        $col->{'no_host_col'} =~ s/^host_//mx;
     }
 
     my $res = [];
@@ -1032,7 +1034,7 @@ sub _apply_columns {
 sub _get_transformed_row_value {
     my($row, $col) = @_;
 
-    my $val = $row->{$col->{'orig'}} // $row->{$col->{'column'}};
+    my $val = $row->{$col->{'orig'}} // $row->{$col->{'column'}} // $row->{$col->{'no_host_col'}};
     for my $f (@{$col->{'func'}}) {
         $val = _apply_data_function($col, $f, $val, $row);
     }
@@ -1338,6 +1340,9 @@ sub _livestatus_options {
                     if($col eq '*') {
                         $found = 0;
                         last;
+                    }
+                    if($type eq 'hosts') {
+                        $col =~ s/^host_//mx;
                     }
                     if($col eq 'peer_name' || $col eq 'peer_key' || $col eq 'peer_section') {
                         next;
