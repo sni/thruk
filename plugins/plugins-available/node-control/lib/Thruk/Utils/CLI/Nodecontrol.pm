@@ -141,7 +141,10 @@ sub _action_setversion {
         return("ERROR - no version specified\n", 1);
     }
     my $omd_available_versions = Thruk::NodeControl::Utils::get_available_omd_versions($c);
-    my @sel = grep { $_ =~ m/^$version/mx } @{$omd_available_versions};
+    if(@{$omd_available_versions} == 0) {
+        return("ERROR - no OMD versions available (yet) - please update facts first.\n", 1);
+    }
+    my @sel = grep { $_ =~ m/^\Q$version\E/mx } @{$omd_available_versions};
     if(scalar @sel == 0) {
         return("ERROR - no such version available\navailable versions:\n - ".join("\n - ", @{$omd_available_versions})."\n", 1);
     }

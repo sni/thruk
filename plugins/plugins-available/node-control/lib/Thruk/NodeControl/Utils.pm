@@ -1390,7 +1390,7 @@ sub get_available_omd_versions {
         push @{$servers}, &get_server($c, $peer, $config);
     }
 
-    my $available_omd_versions = [$config->{'omd_default_version'}];
+    my $available_omd_versions = $config->{'omd_default_version'} ? [$config->{'omd_default_version'}] : [];
     map { push @{$available_omd_versions}, @{$_->{omd_available_versions}}, @{$_->{omd_versions}} } @{$servers};
     $available_omd_versions = [reverse sort @{Thruk::Base::array_uniq($available_omd_versions)}];
     return $available_omd_versions;
