@@ -418,6 +418,7 @@ sub get_contactgroups_by_contact {
         $options->{wrapped_json} = 1;
     }
 
+    # must be fetched from contactgroups table since icinga 2 does not support groups in the contacts table
     $data = $self->_optimize(
                 $self->{'live'}
                     ->table('contactgroups')
