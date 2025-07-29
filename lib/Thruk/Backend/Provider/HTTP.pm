@@ -752,6 +752,22 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_contact_totals_stats
+
+  get_contact_totals_stats
+
+returns the contacts statistics
+
+=cut
+sub get_contact_totals_stats {
+    my($self, @options) = @_;
+    my $res = $self->_req('get_contact_totals_stats', \@options);
+    #my($typ, $size, $data) = @{$res};
+    return($res->[2], 'SUM');
+}
+
+##########################################################
+
 =head2 get_logs_start_end
 
   get_logs_start_end

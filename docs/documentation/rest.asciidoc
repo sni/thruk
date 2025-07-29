@@ -1033,6 +1033,17 @@ Update contact configuration partially.
 
 Deletes given contact from configuration.
 
+=== GET /contacts/totals
+
+hash of livestatus contacts totals statistics.
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|total                             |            |          | total number of contacts
+|===========================================
+
+
 === GET /downtimes
 
 lists livestatus downtimes.
@@ -2641,3 +2652,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

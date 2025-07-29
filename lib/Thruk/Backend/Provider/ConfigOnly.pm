@@ -442,6 +442,20 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_contact_totals_stats
+
+  get_contact_totals_stats
+
+returns the contacts statistics
+
+=cut
+
+sub get_contact_totals_stats {
+    return;
+}
+
+##########################################################
+
 =head2 get_host_stats
 
   get_host_stats

@@ -338,7 +338,7 @@ sub _get_selected_peers {
     }
     Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
 
-    my $peers = [];
+    $peers = [];
     my $backend = shift @{$commandoptions};
     if($backend && $backend ne 'all') {
         my $peer = $c->db->get_peer_by_key($backend);

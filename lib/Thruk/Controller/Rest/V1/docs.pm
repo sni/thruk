@@ -698,6 +698,18 @@ __DATA__
    ]
   }
  },
+ "/contacts/totals": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "total",
+     "type": "",
+     "unit": ""
+    }
+   ]
+  }
+ },
  "/hostgroups/<name>/availability": {
   "GET": {
    "columns": [

@@ -739,6 +739,16 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_contact_totals_stats
+
+=cut
+
+sub get_contact_totals_stats {
+    confess("not implemented");
+}
+
+##########################################################
+
 =head2 set_verbose
 
   set_verbose

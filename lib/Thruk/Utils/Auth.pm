@@ -122,6 +122,9 @@ sub get_auth_filter {
 
     # contacts authorization
     elsif($type eq 'contacts') {
+        if($c->check_user_roles('authorized_for_admin')) {
+            return();
+        }
         return('name' => $c->user->get('username'));
     }
 

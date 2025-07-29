@@ -8,7 +8,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 588;
+    plan tests => 596;
 }
 
 BEGIN {
@@ -69,6 +69,7 @@ my $list_pages = [
 ];
 
 my $hash_pages = [
+    '/contacts/totals',
     '/checks/stats',
     '/hosts/stats',
     '/hosts/totals',

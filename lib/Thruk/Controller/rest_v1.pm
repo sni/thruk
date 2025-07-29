@@ -2446,6 +2446,15 @@ sub _rest_get_livestatus_contacts {
 }
 
 ##########################################################
+# REST PATH: GET /contacts/totals
+# hash of livestatus contacts totals statistics.
+register_rest_path_v1('GET', qr%^/contacts?/totals$%mx, \&_rest_get_livestatus_contacts_totals);
+sub _rest_get_livestatus_contacts_totals {
+    my($c) = @_;
+    return($c->db->get_contact_totals_stats(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'contacts'), _livestatus_filter($c, 'contacts') ], %{_livestatus_options($c)}));
+}
+
+##########################################################
 # REST PATH: GET /contacts/<name>
 # lists contacts for given name.
 # alias for /contacts?name=<name>

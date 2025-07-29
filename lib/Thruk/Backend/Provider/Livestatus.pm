@@ -1759,6 +1759,40 @@ sub get_extra_perf_stats {
 
 ##########################################################
 
+=head2 get_contact_totals_stats
+
+  get_contact_totals_stats
+
+returns the contacts statistics
+
+=cut
+
+$Thruk::Backend::Provider::Livestatus::stats_columns->{'contact_totals_stats'} = [
+    'total'  => { -isa => { -and => [ 'name' => { '!=' => '' } ]}},
+];
+sub get_contact_totals_stats {
+    my($self, %options) = @_;
+
+    if($options{'data'}) {
+        return($options{'data'}->[0], 'SUM');
+    }
+
+    my $class = $self->_get_class('contacts', \%options);
+    if($class->apply_filter('contactstatstotals')) {
+        my $rows = $class->hashref_array();
+        unless(wantarray) {
+            confess("get_contact_totals_stats() should not be called in scalar context");
+        }
+        return($rows, 'GROUP_STATS') if defined $options{'columns'};
+        return(\%{$rows->[0]}, 'SUM');
+    }
+
+    $class->reset_filter()->stats($Thruk::Backend::Provider::Livestatus::stats_columns->{'contact_totals_stats'})->save_filter('contactstatstotals');
+    return($self->get_contact_totals_stats(%options));
+}
+
+##########################################################
+
 =head2 set_verbose
 
   set_verbose
