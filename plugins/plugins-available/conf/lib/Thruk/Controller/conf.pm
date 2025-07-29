@@ -3017,7 +3017,7 @@ sub _write_backends_to_thruk_local {
             $backend->{'groups'}     = $peer->{'groups'}     if defined $peer->{'groups'};
             $backend->{'configtool'} = $peer->{'configtool'} if defined $peer->{'configtool'};
             $backend->{'logcache_fetchlogs_command'} = $peer->{'peer_config'}->{'logcache_fetchlogs_command'} if defined $peer->{'peer_config'}->{'logcache_fetchlogs_command'};
-            $backend->{'authoritive'} = $peer->{'peer_config'}->{'authoritive'};
+            $backend->{'authoritative'} = $peer->{'peer_config'}->{'authoritative'};
             $savefile = $peer->{'peer_config'}->{'_FILE'} // $file;
         }
         $has_new = 1 if $x == 1;

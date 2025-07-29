@@ -497,8 +497,8 @@ sub _get_contacts {
     my($c) = @_;
     $c->stats->profile(begin => "_get_contacts");
 
-    my $auth_backends = $c->db->authoritive_peer_keys();
-    my $backends      = Thruk::Action::AddDefaults::has_backends_set($c) ? undef : $c->db->authoritive_peer_keys();
+    my $auth_backends = $c->db->authoritative_peer_keys();
+    my $backends      = Thruk::Action::AddDefaults::has_backends_set($c) ? undef : $c->db->authoritative_peer_keys();
     my $num_backends  = scalar @{$c->db->get_peers()};
     my($selected_backends) = $c->db->select_backends('get_contacts', []);
     if($num_backends > 1 && scalar @{$selected_backends} == $num_backends) {

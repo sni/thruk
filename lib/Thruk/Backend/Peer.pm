@@ -220,7 +220,7 @@ sub _initialise_peer {
     $self->{'configtool'}    = $peer_config->{'configtool'};
     $self->{'last_error'}    = undef;
     $self->{'logcache'}      = undef;
-    $self->{'authoritive'}   = $peer_config->{'authoritive'};
+    $self->{'authoritative'} = ($peer_config->{'authoritative'} // $peer_config->{'authoritive'});
     $self->{'verify'}        = $peer_config->{'options'}->{'verify'} // 1;
     $self->{'tags'}          = Thruk::Base::array2hash(Thruk::Base::comma_separated_list($peer_config->{'tags'}));
     $self->{'tags'}->{'live'} = 'live' unless scalar keys %{$self->{'tags'}} > 0;

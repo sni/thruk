@@ -164,7 +164,7 @@ sub user_page {
         if($c->stash->{'profile_user'} && $c->stash->{'profile_user'}->{'timestamp'} && time() - $c->stash->{'profile_user'}->{'timestamp'} < 5) {
             Thruk::Utils::set_message( $c, 'success_message', 'Auth cache cleared successfully.' );
         } else {
-            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to clear auth cache. Authoritive backends down?' );
+            Thruk::Utils::set_message( $c, 'fail_message', 'Failed to clear auth cache. Authoritative backends down?' );
         }
         return $c->redirect_to('user.cgi');
     }
