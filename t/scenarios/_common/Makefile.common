@@ -152,7 +152,7 @@ pre_prepare:
 prepare: base_images
 	$(MAKE) pre_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	docker compose build
+	timeout -v 30m docker compose build
 	docker compose up --remove-orphans -d
 	docker ps
 	@docker compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
