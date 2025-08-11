@@ -29,7 +29,7 @@
 
   [% last_section = "" %]
   [% FOREACH pd IN backends %]
-  <tr>
+  <tr [% IF backend_detail.$pd.disabled == 2 %]class="js-backend-disabled"[% END %]>
     <td class="js-hide-unless-first">
       [% section = backend_detail.$pd.section %]
       [% IF section != "Default" && section != "" %]
@@ -65,7 +65,7 @@
       [% END %]
     </td>
     [% IF down == 1 %]
-    <td colspan="8"  class="textALERT text-left whitespace-pre truncate overflow-hidden" style="max-width: 40vw;">
+    <td colspan="8" class="textALERT text-left whitespace-pre truncate overflow-hidden" style="max-width: 40vw;">
       [%- IF backend_detail.$pd.last_error != "OK" -%]
         [%- escape_html(backend_detail.$pd.last_error) -%]
       [%- END -%]
@@ -176,3 +176,10 @@
   </tr>
   [% END %]
 </table>
+<script>
+    jQuery(document).ready(function(){
+        if(get_hash(3) == '1'){
+            jQuery("#hide-disabled-backends").attr('checked', true).trigger('change');
+        }
+    });
+</script>

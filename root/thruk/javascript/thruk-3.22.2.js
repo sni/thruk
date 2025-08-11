@@ -4375,10 +4375,8 @@ function get_host() {
     return(host);
 }
 
-/* set hash of url */
+/* set hash of url - nr 2 is used for filter */
 function set_hash(value, nr) {
-    if(value == undefined)   { value = ""; }
-    if(value == "undefined") { value = ""; }
     var current = get_hash();
     if(nr != undefined) {
         if(current == undefined) {
@@ -4388,6 +4386,8 @@ function set_hash(value, nr) {
         tmp[nr-1] = value.replace(/\|/g, '%7C');
         value     = tmp.join('|');
     }
+    if(value == undefined)   { value = ""; }
+    if(value == "undefined") { value = ""; }
     // make emtpy values nicer, trim trailing pipes
     value = value.replace(/\|$/, '');
 

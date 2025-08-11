@@ -36,6 +36,9 @@
       <h3>Process Information</h3>
       <div class="flex gap-x-2 items-center">
         [% IF backends.size > 1 %]
+          [% IF list_mode == "list" %]
+          <div class="whitespace-nowrap ml-3"><input type="checkbox" id="hide-disabled-backends" onchange="jQuery('TR.js-backend-disabled').toggleClass('hidden'); set_hash(this.checked ? '1':'0', 3);" name="hide-disabled-backends"><label class="clickable ml-1 whitespace-nowrap" for="hide-disabled-backends">Hide Disabled Backends</label></div>
+          [% END %]
           [% PROCESS _table_search_field.tt ids=["procInfoTable"] %]
         [% END %]
         [% IF list_mode == "list" %]

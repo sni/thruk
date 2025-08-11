@@ -205,7 +205,9 @@
           [% pi_detail.$pd.data_source_version.replace('\(', '<br>(') %]
         [% ELSE %]
           [% IF backend_detail.$pd.last_error != "OK" %]
+            <div class="textALERT">
             [% escape_html(backend_detail.$pd.last_error) %]
+            </div>
           [% END %]
         [% END %]
       </div>
