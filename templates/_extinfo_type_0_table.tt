@@ -179,7 +179,7 @@
 <script>
     jQuery(document).ready(function(){
         if(get_hash(3) == '1'){
-            jQuery("#hide-disabled-backends").attr('checked', true).trigger('change');
+            jQuery("#hide-disabled-backends").prop('checked', true).trigger('change');
         }
     });
 </script>
