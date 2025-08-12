@@ -30,6 +30,7 @@ while(<$ph>) {
        |restricted
        |Root
        |test
+       |woshsh
     )\.pm$/mx;
 
     fail(sprintf("file %s is missing the ssi_include()", $file));
