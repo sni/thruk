@@ -2466,6 +2466,7 @@ t/110-thruk_authentication_user.t
 t/111-thruk_utils.t
 t/112-thruk_utils_filter.t
 t/113-thruk_utils_auth.t
+t/120-ssi-includes.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t

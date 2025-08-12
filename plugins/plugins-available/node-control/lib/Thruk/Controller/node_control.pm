@@ -45,6 +45,9 @@ sub index {
     $c->stash->{has_omd}               = $ENV{'OMD_SITE'} ? 1 : 0;
     $c->stash->{'has_jquery_ui'}       = 1;
 
+    $c->stash->{page}                  = 'node_control';
+    Thruk::Utils::ssi_include($c);
+
     my $config               = Thruk::NodeControl::Utils::config($c);
     my $parallel_actions     = $config->{'parallel_tasks'} // 3;
     $c->stash->{ms_parallel} = $parallel_actions;

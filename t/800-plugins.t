@@ -48,6 +48,7 @@ my $extra_tests = [
   't/092-todo.t',
   't/094-plugin-root-path.t',
   't/099-Perl-Critic.t',
+  't/120-ssi-includes.t',
   't/900-javascript_syntax.t',
   glob('t/data/800-plugins/*.t'),
 ];

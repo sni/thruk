@@ -191,6 +191,8 @@ sub index {
     $c->stash->{template}         = 'showlog.tt';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     return 1;
 }
 

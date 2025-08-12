@@ -33,6 +33,8 @@ sub index {
     $c->stash->{page}             = 'config';
     $c->stash->{'no_auto_reload'} = 1;
 
+    Thruk::Utils::ssi_include($c);
+
     return $c->detach('/error/index/8') unless $c->check_user_roles( "authorized_for_configuration_information" );
 
     my $type = $c->req->parameters->{'type'} || "hosts";

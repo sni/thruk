@@ -34,10 +34,11 @@ sub index {
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
 
     $c->stash->{title}                 = 'Top Statistics';
-    $c->stash->{page}                  = 'status';
+    $c->stash->{page}                  = 'omd';
     $c->stash->{hide_backends_chooser} = 1;
     $c->stash->{no_auto_reload}        = 1;
     $c->stash->{plugin}                = $pluginname;
+    Thruk::Utils::ssi_include($c);
 
     our $hosts_list = undef;
 
