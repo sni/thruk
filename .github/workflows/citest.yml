@@ -19,7 +19,7 @@ jobs:
   citest:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: perl -V
         run: perl -V
       - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
