@@ -23,6 +23,7 @@ while(<$ph>) {
        \/
        |error
        |panorama
+       |pansnaps
        |proxy
        |remote
        |rest_v1
