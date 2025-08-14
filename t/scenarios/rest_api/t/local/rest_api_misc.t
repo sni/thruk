@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 94;
+plan tests => 99;
 
 ###########################################################
 # test thruks script path
@@ -115,7 +115,7 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
 
 ###########################################################
 {
-    # make sure / columns do not interfer with calculations
+    # make sure / columns do not interfere with calculations
     TestUtils::test_command({
         cmd     => '/usr/bin/env thruk r \'/services?columns=name,/\'',
         like => ['/"\/"\s*:\s*\d+,/'],
@@ -131,6 +131,16 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd     => '/usr/bin/env thruk r \'/services?columns=name,/,latency/5\'',
         like => ['/"\/"\s*:\s*\d+,/', '/"latency\/5"/'],
+    });
+}
+
+###########################################################
+{
+    # uniq()
+    TestUtils::test_command({
+        cmd     => '/usr/bin/env thruk r \'/thruk/sessions?columns=uniq(),address,username\'',
+        like    => ['/"username" :/'],
+        unlike  => ['/count/'],
     });
 }
 

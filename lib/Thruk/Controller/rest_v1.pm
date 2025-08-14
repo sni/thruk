@@ -37,7 +37,7 @@ our $VERSION = 1;
 our $rest_paths = [];
 
 my $reserved_query_parameters  = [qw/limit offset sort columns headers backend backends q CSRFtoken/];
-my $aggregation_function_names = [qw/count sum avg min max/];
+my $aggregation_function_names = [qw/count sum avg min max uniq/];
 my $disaggregation_function_names  = [qw/as_rows to_rows/];
 my $aggregation_functions      = Thruk::Base::array2hash($aggregation_function_names);
 my $disaggregation_functions   = Thruk::Base::array2hash($disaggregation_function_names);
@@ -990,6 +990,7 @@ sub column_required {
 
     return;
 }
+
 ##########################################################
 sub _apply_columns {
     my($c, $data) = @_;
@@ -1023,6 +1024,7 @@ sub _apply_columns {
         my $row = {};
         for my $col (@{$columns}) {
             $row->{$col->{'alias'}} = _get_transformed_row_value($d, $col);
+            delete $row->{'_uniq_placeholder'};
         }
         push @{$res}, $row;
     }
@@ -3034,6 +3036,7 @@ sub _split_columns {
     for (@{$columns}) {
         $_ =~ s/^\s+//gmx;
         $_ =~ s/\s+$//gmx;
+        $_ =~ s/uniq\(\)/count(*):_uniq_placeholder/gmx; # uniq is just like count(*) just without having the number in the output
     }
     return($columns);
 }

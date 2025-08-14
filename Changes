@@ -7,7 +7,8 @@ next:
           - Agents:
             - add config change preview
           - Rest:
-            - add concat aggregation function
+            - add concat() aggregation function
+            - add uniq() aggregation function
             - add /contacts/totals endpoint
 
 3.22.2   Wed May 28 17:14:48 CEST 2025

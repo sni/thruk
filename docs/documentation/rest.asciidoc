@@ -436,13 +436,14 @@ ex.: return first 3 characters from upper case host name.
 
 Aggregation functions can be used to get statistical information.
 
-Available aggregaton functions are:
+Available aggregation functions are:
 
   * `count`: total number of matches
   * `avg`: calculated average for numerical columns
   * `sum`: calculated sum for numerical columns
   * `min`: calculated minimum value for numerical columns
   * `max`: calculated maximum value for numerical columns
+  * `uniq`: return uniq rows only once (uniqueness is calculated over all columns)
 
 ex.: return average latency over all hosts
 
@@ -456,6 +457,12 @@ ex.: list average execution time over all services grouped by state.
 
 ------
   %> thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
+------
+
+ex.: list unique custom variable values from all services
+
+------
+  %> thruk r '/services?columns=uniq(),_DEVICE_ID&sort=_DEVICE_ID'
 ------
 
 Rename columns by appending `:name`
@@ -2652,4 +2659,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-
