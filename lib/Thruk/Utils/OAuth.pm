@@ -242,10 +242,10 @@ sub _extract_login {
 
     if($auth->{'groups_field'}) {
         if($userinfo->{$auth->{'groups_field'}}) {
-            $teams = $userinfo->{$auth->{'groups_field'}};
+            $teams = Thruk::Base::list($userinfo->{$auth->{'groups_field'}});
         }
     } elsif($userinfo->{'groups'}) {
-        $teams = $userinfo->{'groups'};
+        $teams = Thruk::Base::list($userinfo->{'groups'});
     }
 
     if($auth->{'login_field'}) {
