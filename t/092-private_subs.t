@@ -39,6 +39,7 @@ sub check_private_subs {
         $test =~ s/\#.*//gmx;
         $test =~ s/Devel::Cycle::_//gmx;
         next if $test =~ m/::_skip_backends/mx;
+        next if $test =~ m/Thruk::Utils::Log::/mx;
         if($test =~ m/::_/mx) {
             fail("private sub used in ".$file.":$nr ".$line);
         }

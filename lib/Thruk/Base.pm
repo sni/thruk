@@ -15,7 +15,7 @@ use strict;
 use Carp qw/confess/;
 use Exporter 'import';
 
-use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Log (); # Log also imports base, so we cannot use imports here
 
 our @EXPORT_OK = qw(mode verbose quiet debug trace config);
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
@@ -410,7 +410,7 @@ sub expand_numeric_list {
             } elsif($block =~ m/^(\d+)$/gmx) {
                     $list->{$1} = 1;
             } else {
-                _error("'$block' is not a valid number or range") if defined $c;
+                Thruk::Utils::Log::_error("'$block' is not a valid number or range") if defined $c;
             }
         }
     }
