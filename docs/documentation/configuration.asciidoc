@@ -457,8 +457,9 @@ ex.:
 
   max_process_memory=1000
 
+=== cli_graph_timeout
 
-
+Timeout after which `thruk -a graph` fails. Defaults to 30.
 
 
 == Authorization Settings
