@@ -1638,6 +1638,7 @@ sub get_graph_url {
     theme          => light/dark,
     font_color     => #12345,
     bg_color       => #12345,
+    timeout        => 30,
   })
 
 return raw pnp/grafana image if possible.
@@ -1652,6 +1653,7 @@ sub get_perf_image {
     $options->{'service'}     = ''     unless defined $options->{'service'};
     $options->{'show_title'}  = 1      unless defined $options->{'show_title'};
     $options->{'show_legend'} = 1      unless defined $options->{'show_legend'};
+    $options->{'timeout'}     = 30     unless defined $options->{'timeout'};
     if(defined $options->{'end'}) {
         $options->{'end'} = _parse_date($options->{'end'});
     } else {
@@ -1792,7 +1794,7 @@ sub get_perf_image {
     if($grafanaurl) {
         $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
     }
-    my($rc, $out) = Thruk::Utils::IO::cmd($cmd, { timeout => 30 });
+    my($rc, $out) = Thruk::Utils::IO::cmd($cmd, { timeout => $options->{'timeout'} });
     unlink($c->stash->{'fake_session_file'});
     if(-e $filename) {
         my $imgdata  = Thruk::Utils::IO::read($filename);

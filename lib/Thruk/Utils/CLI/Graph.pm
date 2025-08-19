@@ -56,6 +56,10 @@ The graph command exports pnp/grafana graphs
 
     Write output to file, default is printing to stdout.
 
+=item B<timeout>
+
+    Fail after timeout seconds
+
 =back
 
 =cut
@@ -99,6 +103,7 @@ sub cmd {
          "width=i"          => \$opt->{'width'},
          "height=i"         => \$opt->{'height'},
          "source=i"         => \$opt->{'source'},
+         "timeout=i"         =>\$opt->{'timeout'},
          "o|output=s"       => \$opt->{'output'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
@@ -107,6 +112,7 @@ sub cmd {
 
     my $start  = ($opt->{'start'} || $now-86400);
     my $end    = ($opt->{'end'}   || $now);
+    my $timeout= ($opt->{'timeout'} || Thruk::Base->config->{'cli_graph_timeout'} || 30);
 
     $start = Thruk::Utils::parse_date($c, $start);
     $end   = Thruk::Utils::parse_date($c, $end);
@@ -143,6 +149,7 @@ sub cmd {
             height  => $height,
             source  => $opt->{'source'},
             follow  => 1,
+            timeout => $timeout,
     });
     if(!$img) {
         _warn($c->stash->{'last_graph_output'}) if $c->stash->{'last_graph_output'};
