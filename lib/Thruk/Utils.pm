@@ -521,7 +521,7 @@ sub set_message {
     my($escaped_message, $escaped_details);
     if($escape) {
         $escaped_message = Thruk::Utils::Filter::escape_html($message);
-        $escaped_details = Thruk::Utils::Filter::escape_html($details);
+        $escaped_details = Thruk::Utils::Filter::escape_html($details) if defined $details;
     }
 
     # cookie does not get escaped, it will be escaped upon read
