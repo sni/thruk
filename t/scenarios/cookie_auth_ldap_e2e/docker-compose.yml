@@ -9,3 +9,4 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro

@@ -2929,14 +2929,7 @@ t/scenarios/cookie_auth_ldap_e2e/docker-compose.yml
 t/scenarios/cookie_auth_ldap_e2e/Makefile
 t/scenarios/cookie_auth_ldap_e2e/omd/auth_ldap.conf
 t/scenarios/cookie_auth_ldap_e2e/omd/Dockerfile
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_anonymous_bind.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_BASE.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_DIT.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_GLOBAL_olcIdleTimeout.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_Manager_olcRootPW.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/cn=config_olcRootPW.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/group.ldif
-t/scenarios/cookie_auth_ldap_e2e/omd/ldif/user.ldif
+t/scenarios/cookie_auth_ldap_e2e/omd/ldap_server.pl
 t/scenarios/cookie_auth_ldap_e2e/omd/playbook.yml
 t/scenarios/cookie_auth_ldap_e2e/omd/test.cfg
 t/scenarios/cookie_auth_ldap_e2e/omd/test.sh
