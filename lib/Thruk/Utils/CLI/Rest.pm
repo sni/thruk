@@ -309,6 +309,7 @@ sub _apply_threshold {
             _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold_name=key:value\n");
             return;
         }
+        _debug("checking threshold %s - src: %s | threshold: %s | current value: %s", $threshold_name, $attr, $threshold, $value);
         $value = 0 unless defined $value;
         if($threshold !~ m/^[\-\d\.]+$/mx) {
             eval {
