@@ -371,15 +371,13 @@ sub _create_output {
         # output template supplied?
         if($r->{'output'}) {
             if($totals->{'output'}) {
-                _set_rc(3, "multiple -o/--output parameter are not supported.");
-                return;
+                return("multiple -o/--output parameter are not supported.", 3);
             }
             $totals->{'output'} = $r->{'output'};
         }
         if($r->{'template'}) {
             if($totals->{'template'}) {
-                _set_rc(3, "multiple --template parameter are not supported.");
-                return;
+                return("multiple --template parameter are not supported.", 3);
             }
             $totals->{'template'} = $r->{'template'};
         }
@@ -392,8 +390,7 @@ sub _create_output {
         return($r->{'output'}, 3) if $r->{'rc'} == 3;
     }
     if($totals->{'template'} && $totals->{'output'}) {
-        _set_rc(3, "do not mix -o/--output with --template. Use only one of them.");
-        return;
+        return("do not mix -o/--output with --template. Use only one of them.", 3);
     }
 
     # if there is no format, simply concatenate the output
@@ -424,8 +421,7 @@ sub _create_output {
 
     if($totals && $totals->{'template'}) {
         if(!-e $totals->{'template'}) {
-            _set_rc(3, $totals->{'template'}.": ".$!);
-            return;
+            return($totals->{'template'}.": ".$!, 3);
         }
         my $tpl = Cwd::abs_path($totals->{'template'});
         $macros->{"macros"} = $macros;
