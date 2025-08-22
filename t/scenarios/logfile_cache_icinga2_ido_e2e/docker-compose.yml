@@ -8,14 +8,14 @@ services:
         - "127.0.0.3:60306:3306"
     volumes:
         - ../../../:/thruk:ro
-  mysqldb:
-     image: mysql:5
+  mariadb:
+     image: mariadb:12
      restart: always
      environment:
-        MYSQL_ROOT_PASSWORD: thruk
-        MYSQL_DATABASE: thruk
-        MYSQL_USER: thruk
-        MYSQL_PASSWORD: thruk
+        MARIADB_ROOT_PASSWORD: thruk
+        MARIADB_DATABASE: thruk
+        MARIADB_USER: thruk
+        MARIADB_PASSWORD: thruk
      ports:
         - "127.0.0.3:63306:3306"
   postgresdb:
