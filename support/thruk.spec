@@ -19,15 +19,17 @@ URL:           http://thruk.org
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
-BuildRequires: autoconf, automake, perl, patch, npm
 Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
-BuildRequires: libthruk >= 2.44.2
+BuildRequires: make, patch, npm
+BuildRequires: perl
+BuildRequires: perl-devel
+BuildRequires: perl(Module::Install)
+BuildRequires: libthruk >= 3.24
+
 Requires:      thruk-base = %{version}-%{release}
 Requires:      thruk-plugin-reporting = %{version}-%{release}
-%if 0%{?suse_version} < 1315
-Requires(pre): shadow-utils
-%endif
+
 %if 0%{?systemd_requires}
 %systemd_requires
 %endif
@@ -46,36 +48,27 @@ large installations.
 %global debug_package %{nil}
 
 %package base
-Summary:     Thruk Gui Base Files
-Group:       Applications/System
-Requires:    libthruk >= 2.44.2
+Summary:         Thruk Gui Base Files
+Group:           Applications/System
+AutoReqProv:     no
+Requires:        perl logrotate curl
+Requires:        libthruk >= 3.24
 Requires(preun): libthruk
-Requires(post): libthruk
-Requires:    perl logrotate gd wget
-AutoReqProv: no
+Requires(post):  libthruk
+
 
 #sles and opensuse
 %if %{defined suse_version}
 %if 0%{?suse_version} >= 1315
 BuildRequires: apache2
-Requires:    apache2 apache2-mod_fcgid cronie
+Requires:      apache2 apache2-mod_fcgid cronie
 %endif
-%if 0%{?suse_version} < 1315
-BuildRequires: apache2
-Requires:    apache2 apache2-mod_fcgid cron
-%endif
-%else
-BuildRequires: perl(Module::Install)
 %endif
 
 # >=rhel7 and fedora
 %if 0%{?el7}%{?el8}%{?el9}%{?fedora}
 BuildRequires: httpd
-BuildRequires: perl-Digest-SHA
-BuildRequires: perl-devel
-BuildRequires: perl(ExtUtils::Install)
-Requires: httpd mod_fcgid cronie
-Requires: perl-LWP-Protocol-https
+Requires:      httpd mod_fcgid cronie
 %endif
 
 %description base
@@ -86,11 +79,6 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
-%if %{defined suse_version}
-Requires:    xorg-x11-fonts
-%else
-Requires:    urw-fonts
-%endif
 AutoReqProv: no
 
 %description plugin-reporting

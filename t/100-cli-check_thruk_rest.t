@@ -8,6 +8,8 @@ BEGIN {
     import TestUtils;
 }
 
+eval "use Test::Cmd";
+plan skip_all => 'Test::Cmd required' if $@;
 plan tests => 37;
 
 TestUtils::test_command({

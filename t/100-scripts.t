@@ -1,6 +1,10 @@
 use warnings;
 use strict;
-use Test::More tests => 15;
+use Test::More;
+
+eval "use Test::Cmd";
+plan skip_all => 'Test::Cmd required' if $@;
+plan tests => 15;
 
 BEGIN {
     use lib('t');
