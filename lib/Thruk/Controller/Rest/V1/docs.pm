@@ -702,7 +702,7 @@ __DATA__
   "GET": {
    "columns": [
     {
-     "description": "",
+     "description": "total number of contacts",
      "name": "total",
      "type": "",
      "unit": ""

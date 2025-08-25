@@ -510,6 +510,7 @@ sub _fetch_keys {
 
     return if $proto ne 'GET';
     return if $doc =~ m/alias|https?:/mxi;
+    return if $url eq '/thruk/jobs/<id>/output';
     return if $url eq '/thruk/reports/<nr>/report';
     return if $url eq '/thruk/cluster/heartbeat';
     return if $url eq '/thruk/config';

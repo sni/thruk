@@ -94,7 +94,7 @@ sub cmd {
             nofork       => "don't fork"
             background   => "return $jobid if set, or redirect otherwise"
             clean        => "remove job after displaying it if true"
-            render       => "set to a true value to render page immediatly"
+            render       => "set to a true value to render page immediately"
             show_output  => show console with output
             log_archive  => store stdout/stderr with this filename
         }
@@ -164,6 +164,8 @@ sub perl {
             # invert rc to match exit code style
             Thruk::Utils::IO::write($dir."/rc", ($rc ? 0 : 1));
             Thruk::Utils::IO::write($dir."/perl_res", (defined $rc && ref $rc eq '') ? Thruk::Utils::Encode::encode_utf8($rc) : "", undef, 1);
+
+            $c->stash->{'res_ctype'} = $c->res->content_type();
 
             wrap_prefix_output_stop();
             close(*STDOUT);
@@ -706,10 +708,11 @@ wait for this job to finish
 sub wait_for_job {
     my($c, $job, $timeout) = @_;
     $timeout = 3 unless $timeout;
+    my $wait_until = time() + $timeout;
 
     my($is_running, $time) = get_status($c, $job);
     $c->stats->profile(begin => "job_page waiting for job: ".$job);
-    while($is_running and $time < $timeout) {
+    while($is_running && time() < $wait_until) {
         Time::HiRes::sleep(0.1) if $time <  1;
         Time::HiRes::sleep(0.3) if $time >= 1;
         ($is_running, $time) = get_status($c, $job);

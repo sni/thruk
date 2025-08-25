@@ -36,7 +36,7 @@ Thruk Controller
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters  = [qw/limit offset sort columns headers backend backends q CSRFtoken/];
+my $reserved_query_parameters  = [qw/limit offset sort columns headers backend backends q CSRFtoken background/];
 my $aggregation_function_names = [qw/count sum avg min max uniq/];
 my $disaggregation_function_names  = [qw/as_rows to_rows/];
 my $aggregation_functions      = Thruk::Base::array2hash($aggregation_function_names);
@@ -177,6 +177,35 @@ sub index {
         return;
     }
 
+    # background request?
+    if($c->req->parameters->{"background"}) {
+        $c->config->{'no_external_job_forks'} = 0;
+        delete $c->req->parameters->{"background"};
+        my $job = Thruk::Utils::External::perl($c, {
+                    expr       => 'Thruk::Controller::rest_v1::_process_rest_request($c, "'.$path_info.'", "'.$format.'")',
+                    message    => 'rest api request rendered in background, please stand by...',
+                    clean      => 1,
+                    render     => 1,
+                    background => 1,
+        });
+        if($job) {
+            # fall back to json format, format was meant for the actual data
+            return(_format_output($c, 'json', {
+                'success'    => Cpanel::JSON::XS::true,
+                'job_id'     => $job,
+                'message'    => 'request started in background with job id: '.$job,
+                'result_url' => '/thruk/jobs/'.$job.'/output',
+            }));
+        }
+        die("failed to start background job");
+    }
+
+    return(_process_rest_request($c, $path_info, $format));
+}
+
+##########################################################
+sub _process_rest_request {
+    my($c, $path_info, $format) = @_;
     my $data = process_rest_request($c, $path_info);
     return(_format_output($c, $format, $data));
 }
@@ -186,6 +215,8 @@ sub _format_output {
     my($c, $format, $data) = @_;
 
     return $data if $c->{'rendered'};
+
+    return $c->render('text' => $data) if $c->stash->{'rest_text'};
 
     if($format eq 'csv') {
         return(_format_csv_output($c, $data));
@@ -287,6 +318,11 @@ sub process_rest_request {
     if(ref $data eq 'ARRAY') {
         return($data);
     }
+
+    if($c->stash->{'rest_text'} && !ref $data) {
+        return($data);
+    }
+
     return({ 'message' => 'error during request', 'description' => "returned data is of type '".(ref $data || 'text')."'", 'code' => 500 });
 }
 
@@ -1896,12 +1932,16 @@ sub _rest_get_thruk_jobs {
     my($c, undef, $job) = @_;
     require Thruk::Utils::External;
 
+    my $is_admin = $c->check_user_roles('admin') ? 1 : 0;
     my $data = [];
     for my $dir (glob($c->config->{'var_path'}."/jobs/*/.")) {
         if($dir =~ m%/([^/]+)/\.$%mx) {
             my $id = $1;
             next if $job && $job ne $id;
-            push @{$data}, Thruk::Utils::External::read_job($c, $id);
+            my $job_data = Thruk::Utils::External::read_job($c, $id);
+            if($is_admin || !defined $job_data->{'user'} || $job_data->{'user'} eq $c->stash->{'remote_user'}) {
+                push @{$data}, $job_data;
+            }
         }
     }
     if($job) {
@@ -1920,16 +1960,54 @@ sub _rest_get_thruk_jobs {
 register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)$%mx, \&_rest_get_thruk_jobs);
 
 ##########################################################
+# REST PATH: GET /thruk/jobs/<id>/output
+# get thruk job output for given id.
+#
+# Will return the plain result of a finished job as initially requested. In case
+# jobs takes longer than 30 seconds, this will return 302 redirects to itself
+# until the job succeeds. So if you follow those redirect, you will get the
+# final result as soon as its calculated.
+register_rest_path_v1('GET', qr%^/thruk/jobs?/([^/]+)/output$%mx, \&_rest_get_thruk_job_output);
+sub _rest_get_thruk_job_output {
+    my($c, undef, $job) = @_;
+    require Thruk::Utils::External;
+
+    my $is_admin = $c->check_user_roles('admin') ? 1 : 0;
+    my $job_data = Thruk::Utils::External::read_job($c, $job);
+    if($is_admin || !defined $job_data->{'user'} || $job_data->{'user'} eq $c->stash->{'remote_user'}) {
+    } else {
+        return({ 'message' => 'no such job', code => 404 });
+    }
+
+    if($job_data->{'is_running'}) {
+        # in cli mode we just wait for the job to finish
+        if(Thruk::Base::mode_cli()) {
+            Thruk::Utils::External::wait_for_job($c, $job, 300);
+        } else {
+            # in http(s) mode send a redirect to ourself after 30sec
+            my $still_running = Thruk::Utils::External::wait_for_job($c, $job, 30);
+            if($still_running) {
+                return $c->redirect_to($c->stash->{'url_prefix'}."r/thruk/jobs/".$job."/output");
+            }
+        }
+        $job_data = Thruk::Utils::External::read_job($c, $job);
+    }
+
+    my(undef,undef,undef,undef,$stash) = Thruk::Utils::External::get_result($c, $job, 1);
+
+    $c->stash->{'rest_text'} = 1;
+    $c->res->headers->content_type($stash->{'res_ctype'}."; charset=utf-8") if defined $stash->{'res_ctype'};
+    return($job_data->{'perl_res'});
+}
+
+##########################################################
 # REST PATH: GET /thruk/sessions
 # lists thruk sessions.
 register_rest_path_v1('GET', qr%^/thruk/sessions?$%mx, \&_rest_get_thruk_sessions);
 sub _rest_get_thruk_sessions {
     my($c, undef, $id) = @_;
     $c->stats->profile(begin => "_rest_get_thruk_sessions");
-    my $is_admin = 0;
-    if($c->check_user_roles('admin')) {
-        $is_admin = 1;
-    }
+    my $is_admin = $c->check_user_roles('admin') ? 1 : 0;
 
     my $data         = [];
     my $total_number = 0;

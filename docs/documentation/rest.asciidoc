@@ -647,6 +647,36 @@ is in short:
 | DELETE  | remove existing ressource, ex.: `DELETE /thruk/reports/1` to remove the report entirely.
 |===========================================
 
+== Long Running Requests
+
+Some REST requests may take longer than the usual timeout of 40seconds. In this case you can start a background rest
+request. Then in a separate request, the result of the initial REST request can be retrieved as soon as it is ready.
+
+------
+  %> curl -k -d "" 'https://username:password@localhost/thruk/r/config/check?background=1'
+------
+
+This returns something like:
+
+------
+  {
+    "job_id" : "737aa",
+    "message" : "request started in background with job id: 737aa",
+    "result_url" : "/thruk/jobs/737aa/output",
+    "success" : true
+  }
+------
+
+Then you can make use of the follow feature of curl to retrieve the result once
+it is ready.
+
+------
+  %> curl -k -L https://omdadmin:omd@localhost/demo/thruk/r/thruk/jobs/1263d/output
+------
+
+If the result takes more than 30 seconds to compute, it will return a 302 redirect
+every 30 seconds until it is completed.
+
 == Object configuration notes
 
 To create brand new object configurations (e.g hosts), you MUST use POST /config/objects as documented further down.
@@ -2303,6 +2333,15 @@ lists thruk jobs.
 get thruk job status for given id.
 alias for /thruk/jobs?id=<id>
 
+=== GET /thruk/jobs/<id>/output
+
+get thruk job output for given id.
+
+Will return the plain result of a finished job as initially requested. In case
+jobs takes longer than 30 seconds, this will return 302 redirects to itself
+until the job succeeds. So if you follow those redirect, you will get the
+final result as soon as its calculated.
+
 === GET /thruk/logcache/stats
 
 lists logcache statistics
@@ -2659,3 +2698,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
