@@ -23,7 +23,6 @@ Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
 BuildRequires: make, patch, npm
 BuildRequires: perl
-BuildRequires: perl-devel
 BuildRequires: perl(Module::Install)
 BuildRequires: libthruk >= 3.24
 
@@ -32,6 +31,16 @@ Requires:      thruk-plugin-reporting = %{version}-%{release}
 
 %if 0%{?systemd_requires}
 %systemd_requires
+%endif
+
+# rhel / rocky / alma / fedora
+%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux} || 0%{?fedora}
+BuildRequires: perl-devel
+%endif
+
+# rhel / rocky / alma
+%if 0%{?rhel} || 0%{?rocky} || 0%{?almalinux}
+BuildRequires: epel-release
 %endif
 
 %description
