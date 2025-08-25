@@ -14,9 +14,15 @@ if [ -n "$CONFLICTS" -a "$CONFLICTS" != "0" ]; then
     exit 1
 fi
 
+# check if tmux is available on this host
+HAS_TMUX=0
+if command -v tmux >/dev/null 2>&1; then
+    HAS_TMUX=1
+fi
+
 echo "*** updating site $(id -un) from $(omd version -b) to version $OMD_UPDATE..."
 echo "*** Site will be stopped during the update, so no progress can be displayed."
-echo "*** this may take a couple of minutes..."; sleep 3 # wait 3 seconds, so this message can be transfered back via http
+echo "*** this may take a couple of minutes..."; sleep 3 # wait 3 seconds, so this message can be transferred back via http
 
 SITE_STARTED=0
 omd status -b > /dev/null 2>&1
@@ -32,7 +38,7 @@ fi
 
 CMD="omd -f -V $OMD_UPDATE update --conflict=ask"
 # start update in tmux
-if command -v tmux >/dev/null 2>&1; then
+if [ "$HAS_TMUX" = "1" ]; then
     session="omd_update"
     tmux -f /dev/null new-session -d -s $session -x 120 -y 25
     window=0
@@ -42,13 +48,13 @@ if command -v tmux >/dev/null 2>&1; then
 
     # now wait till the omd update is finished and tail the output till then
     # end tmux on success
-    bashpid=$(tmux -f /dev/null list-panes -a -F "#{pane_pid} #{session_name}" | grep $session | awk '{ print $1 }')
-    omdpid=$(ps -efl | grep $bashpid | grep omd | awk '{ print $4 }')
+    PID_BASH=$(tmux -f /dev/null list-panes -a -F "#{pane_pid} #{session_name}" | grep $session | awk '{ print $1 }')
+    PID_OMD=$(ps -efl | grep $PID_BASH | grep omd | awk '{ print $4 }')
     X=0
-    if [ "$omdpid" = "" ]; then
+    if [ "$PID_OMD" = "" ]; then
         while [ $X -lt 10 ]; do
-            omdpid=$(ps -efl | grep $bashpid | grep omd | awk '{ print $4 }')
-            [ "$omdpid" != "" ] && break;
+            PID_OMD=$(ps -efl | grep $PID_BASH | grep omd | awk '{ print $4 }')
+            [ "$PID_OMD" != "" ] && break;
             if [ $(tmux -f /dev/null capture-pane -p -t $session:$window 2>/dev/null | grep -c "Finished update") -gt 0 ]; then
                 break
             fi
@@ -57,9 +63,9 @@ if command -v tmux >/dev/null 2>&1; then
         done
     fi
 
-    if [ "$omdpid" != "" ]; then
+    if [ "$PID_OMD" != "" ]; then
         X=0
-        while kill -0 $omdpid >/dev/null 2>&1; do
+        while kill -0 $PID_OMD >/dev/null 2>&1; do
             sleep 1
             X=$((X+1))
             if [ $X -gt 120 ]; then
@@ -83,7 +89,7 @@ fi
 
 if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
     # exit tmux again
-    if command -v tmux >/dev/null 2>&1; then
+    if [ "$HAS_TMUX" = "1" ]; then
         tmux -f /dev/null send-keys -t $session:$window "exit" C-m
     fi
 
@@ -104,7 +110,7 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
     exit 0
 fi
 
-if command -v tmux >/dev/null 2>&1; then
+if [ "$HAS_TMUX" = "1" ]; then
     echo "*** [ERROR] update failed, ssh into $HOSTNAME and"
     echo "*** [ERROR] run 'tmux attach -t $session:$window' to manually investigate"
 else
