@@ -113,7 +113,12 @@ if [ -n "$MISSING" ]; then
     elif test -x /usr/bin/dnf; then
         yum -y install alsa-lib atk at-spi2-atk cups-libs libdrm libXcomposite libXdamage libxkbcommon libXrandr mesa-libgbm nss
     elif test -x /usr/bin/apt-get; then
-        apt-get install -y libasound2 libatk1.0-0 libatk-bridge2.0-0 libgbm1 libnspr4 libnss3 libxcomposite1 libxdamage1 libxkbcommon0 libxrandr2
+        apt-get install -y libatk1.0-0 libatk-bridge2.0-0 libgbm1 libnspr4 libnss3 libxcomposite1 libxdamage1 libxkbcommon0 libxrandr2
+        if apt-cache show libasound2t64 >/dev/null 2>&1; then
+            apt-get install -y libasound2t64
+        else
+            apt-get install -y libasound2
+        fi
     fi
 
     MISSING=$(ldd $DEST/chromium/chrome/*/chrome-*/chrome | grep "=> not found")
