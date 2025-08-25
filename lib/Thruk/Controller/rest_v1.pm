@@ -550,6 +550,7 @@ sub _post_processing {
     }
 
     return($data) if _is_failed($data);
+
     if(ref $data eq 'HASH') {
         # Columns
         $data = shift @{_apply_columns($c, [$data])};
@@ -1259,7 +1260,7 @@ sub _apply_sort {
 sub _livestatus_options {
     my($c, $type) = @_;
     my $options = {};
-    if($c->req->parameters->{'limit'} && !$c->stash->{'filter_fixed_up'}) {
+    if($c->req->parameters->{'limit'} && !$c->stash->{'filter_fixed_up'} && !_has_aggregation_functions($c)) {
         $options->{'options'}->{'limit'} = $c->req->parameters->{'limit'};
         if($c->req->parameters->{'offset'}) {
             $options->{'options'}->{'limit'} += $c->req->parameters->{'offset'};
@@ -3248,6 +3249,28 @@ sub _host_service_filter {
     }
 
     return($filter);
+}
+
+##########################################################
+sub _has_aggregation_functions {
+    my($c) = @_;
+
+    my $columns = get_request_columns($c, STRUCT);
+    return 0 unless defined $columns;
+
+    my $num_cols = scalar @{$columns};
+    for(my $x = 0; $x < $num_cols; $x++) {
+        my $col = $columns->[$x];
+        # check for aggregation function which must be the outer most one
+        if(scalar @{$col->{'func'}} > 0) {
+            my $lst = scalar @{$col->{'func'}} -1;
+            if($aggregation_functions->{$col->{'func'}->[$lst]->[0]}) {
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 ##########################################################
