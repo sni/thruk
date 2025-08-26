@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 76;
+    plan tests => 84;
 
     use lib('t');
     require TestUtils;
@@ -61,6 +61,12 @@ TestUtils::test_page(
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk nc list',
     like   => ['/tier2c/', '/Rocky/', '/Ubuntu/', '/demo/', '/OK/'],
+});
+
+TestUtils::test_command({
+    cmd    => '/usr/bin/env thruk nc list tier2c',
+    like   => ['/tier2c/', '/Rocky/', '/demo/', '/OK/'],
+    unlike => ['/tier3b/'],
 });
 
 TestUtils::test_command({

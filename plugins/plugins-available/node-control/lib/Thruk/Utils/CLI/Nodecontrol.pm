@@ -24,7 +24,7 @@ The nodecontrol command can start node control commands.
 
     available commands are:
 
-    - -l|list                                        list available backends.
+    - -l|list <backendid|all>                        list available backends.
     - facts   <backendid|all>  [-w|--worker=<nr>]    update facts for given backend.
     - runtime <backendid|all>  [-w|--worker=<nr>]    update runtime data for given backend.
     - setversion <version>                           set new default omd version
@@ -94,15 +94,19 @@ sub cmd {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
 
-    my $mode = shift @{$commandoptions};
-    $mode = 'list' if $opt->{'mode_list'};
+    my $mode;
+    if($opt->{'mode_list'}) {
+        $mode = 'list';
+    } else {
+        $mode = shift @{$commandoptions};
+    }
     Thruk::Base->config->{'no_external_job_forks'} = 0; # must be enabled, would break job control
 
     if($mode eq 'setversion') {
         return(_action_setversion($c, $commandoptions));
     }
     elsif($mode eq 'list') {
-        return(_action_list($c, $config));
+        return(_action_list($c, $opt, $commandoptions, $config, $global_options));
     }
     elsif($mode eq 'facts' || $mode eq 'runtime') {
         # this function must be run on one cluster node only
@@ -157,12 +161,25 @@ sub _action_setversion {
 
 ##############################################
 sub _action_list {
-    my($c, $config) = @_;
+    my($c, $opt, $commandoptions, $config, $global_options) = @_;
     my @data;
+
     for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
         my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
         my $v = $s->{'omd_version'};
         $v =~ s/-labs-edition//gmx;
+        if(defined $opt->{'version'} && $v ne $opt->{'version'}) { next; }
+        my $found = 1;
+        if(defined $commandoptions && scalar @{$commandoptions} > 0)  {
+            $found = 0;
+            for my $pat (@{$commandoptions}) {
+                if(lc($pat) eq 'ALL' || $peer->{'name'} =~ m/$pat/mx || $peer->{'key'} =~ m/$pat/mx || $peer->{'section'} =~ m/$pat/mx) {
+                    $found = 1;
+                    last;
+                }
+            }
+        }
+        next unless $found;
         push @data, {
             Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
             Name    => $peer->{'name'},
