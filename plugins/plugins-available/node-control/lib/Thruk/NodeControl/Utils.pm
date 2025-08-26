@@ -1675,6 +1675,7 @@ sub clean_old_json_files {
     my($c, $peers) = @_;
 
     $c->stats->profile(begin => "clean_old_json_files");
+    my $delete_threshold_date = time() - (7*86400);
 
     my $keys = {};
     for my $peer (@{$peers}) {
@@ -1685,7 +1686,13 @@ sub clean_old_json_files {
         $f = Thruk::Base::basename($f);
         $f =~ s/\.json$//gmx;
         next if $f eq '_conf';
-        unlink($c->config->{'var_path'}.'/node_control/'.$f.'.json') unless $keys->{$f};
+        if(!$keys->{$f}) {
+            my $file = $c->config->{'var_path'}.'/node_control/'.$f.'.json';
+            my @stat = stat($file);
+            if($stat[9] < $delete_threshold_date) {
+                unlink($file);
+            }
+        }
     }
 
     $c->stats->profile(end => "clean_old_json_files");
