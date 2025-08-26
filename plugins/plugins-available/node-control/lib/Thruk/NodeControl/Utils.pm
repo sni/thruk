@@ -496,7 +496,7 @@ sub _ansible_available_packages {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
     my @pkgs = ($pkgs =~ m/^(omd\-\S+?)(?:\s|\.x86_64|\.aarch64)/gmx);
-    @pkgs = grep(!/^(omd-labs-edition|omd-daily|.*-addons-|.*-meta\.)/mx, @pkgs); # remove meta packages
+    @pkgs = grep(!/^(omd-labs-edition|omd-daily|omd-stream|.*-addons-|.*-meta\.)/mx, @pkgs); # remove meta packages
     @pkgs = reverse sort @pkgs;
     @pkgs = map { my $pkg = $_; $pkg =~ s/^omd\-//gmx; $pkg; } @pkgs;
 
