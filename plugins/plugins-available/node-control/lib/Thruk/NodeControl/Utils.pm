@@ -485,16 +485,23 @@ sub _ansible_available_packages {
         die("no package manager");
     }
 
-    my $pkgs;
+    my $cmd;
     if($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'yum') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'yum search omd- 2>/dev/null');
+        $cmd = 'yum search omd- 2>/dev/null';
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'dnf') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'dnf search omd- 2>/dev/null');
+        $cmd = 'dnf search omd- 2>/dev/null';
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'apt') {
-        (undef, $pkgs) = _remote_cmd($c, $peer, 'apt-cache search omd- 2>/dev/null');
+        $cmd = 'apt-cache search omd- 2>/dev/null';
     } else {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
+
+    my($rc, $pkgs) = _remote_cmd_background_wait($c, $peer, $cmd, undef, undef, 180, "updating available packages");
+    if($rc != 0) {
+        _debug("fetching available packages failed: %s", ($pkgs || 'unknown error'));
+        return({});
+    }
+
     my @pkgs = ($pkgs =~ m/^(omd\-\S+?)(?:\s|\.x86_64|\.aarch64)/gmx);
     @pkgs = grep(!/^(omd-labs-edition|omd-daily|omd-stream|.*-addons-|.*-meta\.)/mx, @pkgs); # remove meta packages
     @pkgs = reverse sort @pkgs;
@@ -514,7 +521,7 @@ sub _ansible_available_os_updates {
     my $updates  = [];
     my $security = [];
     if($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'apt') {
-        my($rc, $out) = _remote_cmd($c, $peer, 'apt-get -y --dry-run upgrade');
+        my($rc, $out) = _remote_cmd_background_wait($c, $peer, 'apt-get -y --dry-run upgrade', undef, undef, 180, "dry run upgrade");
         if($rc == 0) {
             my @updates = $out =~ m/^Inst\s+(\S+)\s+(.*)$/gmx;
             while(scalar @updates > 0) {
@@ -530,18 +537,18 @@ sub _ansible_available_os_updates {
     }
 
     if($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'dnf') {
-        my($rc, $out) = _remote_cmd($c, $peer, 'dnf check-update 2>/dev/null');
+        my($rc, $out) = _remote_cmd_background_wait($c, $peer, 'dnf check-update 2>/dev/null', undef, undef, 180, "dnf check-update");
         $updates = _parse_yum_check_update($out);
 
-        ($rc, $out) = _remote_cmd($c, $peer, 'dnf check-update --security 2>/dev/null');
+        ($rc, $out) = _remote_cmd_background_wait($c, $peer, 'dnf check-update --security 2>/dev/null', undef, undef, 180, "dnf check security update");
         $security = _parse_yum_check_update($out);
     }
 
     if($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'yum') {
-        my($rc, $out) = _remote_cmd($c, $peer, 'yum check-update 2>/dev/null');
+        my($rc, $out) = _remote_cmd_background_wait($c, $peer, 'yum check-update 2>/dev/null', undef, undef, 180, "yum check-update");
         $updates = _parse_yum_check_update($out);
 
-        ($rc, $out) = _remote_cmd($c, $peer, 'yum check-update --security 2>/dev/null');
+        ($rc, $out) = _remote_cmd_background_wait($c, $peer, 'yum check-update --security 2>/dev/null', undef, undef, 180, "yum check security update");
         $security = _parse_yum_check_update($out);
     }
 
@@ -1036,6 +1043,33 @@ sub _remote_cmd {
 
     my $fullcmd = "ansible all -i "._sitename($peer, $server)."\@$host_name, -m shell -a \"".$cmd."\"";
     return(_ansible_cmd($c, $peer, $fullcmd, $background_options, $err));
+}
+
+##########################################################
+# run command on remote machine in background but wait for completion
+sub _remote_cmd_background_wait {
+    my($c, $peer, $cmd, $background_options, $env, $max_wait, $msg) = @_;
+    $background_options = {} unless defined $background_options;
+    $max_wait           = 1800 unless $max_wait;
+
+    $background_options->{'message'} = $msg;
+
+    my($rc, $job);
+    eval {
+        ($rc, $job) = _remote_cmd($c, $peer, $cmd, $background_options, $env);
+    };
+    my $err = $@;
+    if($err) {
+        return(1, "remote job failed to start: ".$err);
+    }
+
+    # wait for $max_wait seconds
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 2, $max_wait, 1);
+    if(!$jobdata) {
+        return(1, "remote job ".$job." failed for unknown reason");
+    }
+
+    return($jobdata->{'rc'}, $jobdata->{'stdout'});
 }
 
 ##########################################################
