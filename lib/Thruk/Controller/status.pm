@@ -63,6 +63,8 @@ sub index {
     }
 
     if($c->req->parameters->{'serveraction'}) {
+        return if Thruk::Utils::External::render_page_in_background($c);
+
         my($rc, $msg) = Thruk::Utils::Status::serveraction($c);
         my $json = { 'rc' => $rc, 'msg' => $msg };
         return $c->render(json => $json);

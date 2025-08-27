@@ -613,10 +613,10 @@ $c->redirect_to(<url>)
 
 =cut
 sub redirect_to {
-    my($c, $url) = @_;
+    my($c, $url, $force) = @_;
 
     # do not redirect json post requests, for ex.: from send_form_in_background_and_reload()
-    if($c->req->method eq 'POST' && want_json_response($c)) {
+    if(!$force && $c->req->method eq 'POST' && want_json_response($c)) {
         my $data = { 'ok' => 1 };
         $data->{'message'} = $c->stash->{'thruk_message_raw'} if $c->stash->{'thruk_message_raw'};
         $data->{'ok'} = 0 if defined $c->stash->{'thruk_message_style'} && $c->stash->{'thruk_message_style'} eq 'fail_message';

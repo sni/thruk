@@ -701,6 +701,9 @@ sub _task_textsave {
 ##########################################################
 sub _task_serveraction {
     my($c) = @_;
+
+    return if Thruk::Utils::External::render_page_in_background($c);
+
     my($rc, $msg);
     # if there is a dashboard in our parameters, make sure we have proper permissions
     if($c->req->parameters->{'dashboard'} && Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $c->req->parameters->{'dashboard'}) == ACCESS_NONE) {

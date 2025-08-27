@@ -6512,7 +6512,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
     // server action urls
     if(href.match(/^server:\/\//)) {
         if(server_action_url == undefined) {
-            server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1';
+            server_action_url = url_prefix + 'cgi-bin/status.cgi?serveraction=1&json=1';
         }
         var data = {
             host:      host,
@@ -6540,7 +6540,7 @@ function check_server_action(id, link, backend, host, service, server_action_url
                     url: server_action_url,
                     data: data,
                     type: 'POST',
-                    success: function(data) {
+                    success: function(data, textStatus, jqXHR) {
                         thruk_message(data.rc, data.msg, config.close_timeout);
                         if(id) { remove_close_element(id); jQuery('#'+id).remove(); }
                         reset_action_menu_icons();

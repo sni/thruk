@@ -976,6 +976,9 @@ sub do_parent_stuff {
         if(defined $conf->{'initwait'}) {
             $append = '&initwait='.$conf->{'initwait'};
         }
+        if($c->want_json_response()) {
+            return $c->redirect_to($c->stash->{'url_prefix'}."r/thruk/job/".$id."/output", 1);
+        }
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/job.cgi?job=".$id.$append);
     }
     return $id;

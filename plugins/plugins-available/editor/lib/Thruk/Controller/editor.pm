@@ -118,6 +118,7 @@ sub index {
     }
     elsif($c->req->parameters->{'serveraction'}) {
         return unless Thruk::Utils::check_csrf($c);
+        return if Thruk::Utils::External::render_page_in_background($c);
         my $req_file = $c->req->parameters->{'file'};
         my($file, undef, undef) = _get_file($edits, $req_file);
         my($rc, $msg) = (1, "no such file or directory");

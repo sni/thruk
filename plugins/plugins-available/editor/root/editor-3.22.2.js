@@ -416,7 +416,7 @@ function _load_action_menu(path, action_menu) {
                         }
                     }
                 }
-                check_server_action(undefined, link, undefined, undefined, undefined, url_prefix + 'cgi-bin/editor.cgi?serveraction=1', extra_data, callback);
+                check_server_action(undefined, link, undefined, undefined, undefined, url_prefix + 'cgi-bin/editor.cgi?serveraction=1&json=1', extra_data, callback);
                 return(true);
             });
         },

@@ -2259,6 +2259,7 @@ sub serveraction {
     if(!defined $c->config->{'action_menu_actions'}->{$action}) {
         return(1, 'custom action '.$action.' is not defined');
     }
+
     # tokenize cmd
     my @cmdline = split(/"?((?<!")\S+(?<!")|[^"]+)"?\s*/mx, $c->config->{'action_menu_actions'}->{$action});
     @cmdline = grep{$_ ne ''}@cmdline;
