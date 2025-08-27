@@ -14,7 +14,7 @@
     content: |
       [
         "-",
-        {"icon":"/demo/thruk/themes/{{"{{theme}}"}}/images/package_go.png",
+        {"icon":"uil-file-check-alt",
         "label":"Syntax Check",
         "action":"server://perlsyntax/$TMPFILENAME$"
         },
@@ -27,7 +27,7 @@
     content: |
       [
         "-",
-        {"icon":"/demo/thruk/themes/{{"{{theme}}"}}/images/package_go.png",
+        {"icon":"uil-file-check-alt",
         "label":"Syntax Check",
         "action":"server://jsonsyntax/$TMPFILENAME$"
         },
