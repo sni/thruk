@@ -50,8 +50,19 @@ When somebody clicks on that link, Thruk will start the `sample.sh` script like:
 First it uses the complete commandline from the `thruk_local.conf` and replaces
 all available macros. Then it adds the arguments from the link configuration.
 
+== Macros
+
+For server side scripts most macros can be used.
 See link:macros.html[Macros] for a list of all available macros.
 
+Inside the actual menu definition you can only use the following macros:
+
+- `$HOSTNAME$`
+- `$SERVICEDESC$`
+- `{{ theme }}`
+- `{{ remote_user }}`
+- `{{ site }}`
+- `{{ prefix }}`
 
 === Scripts
 The scripts can do whatever they want. However you should consider a few things:
