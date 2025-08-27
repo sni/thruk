@@ -4307,6 +4307,7 @@ var thruk_message_fade_timer;
 function thruk_message(rc, message, close_timeout) {
     jQuery('#thruk_message').remove();
     window.clearInterval(thruk_message_fade_timer);
+    message = message.trim()
     var lines = message.split("\n");
     message = lines.shift();
     var cls = 'fail_message';
