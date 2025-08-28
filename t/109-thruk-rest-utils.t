@@ -12,12 +12,12 @@ BEGIN {
 use_ok 'Thruk::Utils::CLI::Rest';
 
 ################################################################################
-my $test_result = [{data => {
+my $test_result = [{json => {
         "text1"  => "text1",
         "int1"   => 5,
         "float1" => 3.7,
         "total"  => 1,
-    }}, {data =>  {
+    }}, {json =>  {
         "text2"  => "text2",
         "int2"   => 2,
         "float2" => 1.7,
