@@ -84,7 +84,7 @@ sub _fetch_results {
 
         # replace variables in the url, ex.: from previous queries
         unshift(@{$opts}, {}); # add empty totals up front to not mix up order
-        $url =~ s/\{([^\}]+)\}/&_replace_output($1, $opts, {})/gemx;
+        $url =~ s/\{([^\}]+)\}/&_replace_output($1, $opts, {}, 1)/gemx;
         shift @{$opts};
 
         # Support local files and remote urls as well.
@@ -294,6 +294,7 @@ sub _set_postdata {
 sub _apply_threshold {
     my($threshold_name, $data, $totals) = @_;
     return unless scalar @{$data->{$threshold_name}} > 0;
+    $data->{'json'} = decode_json($data->{'result'}) unless $data->{'json'};
 
     for my $t (@{$data->{$threshold_name}}) {
         my($attr, $threshold);
@@ -597,7 +598,7 @@ sub _calculate_data_totals {
 
 ##############################################
 sub _replace_output {
-    my($var, $result, $macros) = @_;
+    my($var, $result, $macros, $keep_if_missing) = @_;
     my($format, $strftime);
     if($var =~ m/^(.*)%strftime:(.*)$/gmx) {
         $strftime = $2; # overwriting $var first breaks on <= perl 5.16
@@ -634,6 +635,7 @@ sub _replace_output {
                 $ok = 1;
             }
             if(!$ok) {
+                return('{'.$var.'}') if $keep_if_missing;
                 $error = "error:$v does not exist";
             }
         }
