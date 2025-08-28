@@ -236,6 +236,10 @@ Lists can be enumerated like this {hits::0}
 Using --template=<file> will use a template toolkit template to create the output text.
 Find the documentation for the template syntax here: https://template-toolkit.org/docs/manual/
 
+Instead of a file, you can base64 encode the template and supply --template=data:<BASE64...> as well.
+Use 'base64 -w 0 file.tt' to decode your input file. This makes things more portable, but beware
+of the maximum command line length.
+
 The exit code is parsed from the template output. Either make the output start with a
 naemon/nagios exit code like this: OK - ... or CRITICAL - ... or print the text:
 {EXITCODE:OK} or {EXITCODE:3} anywhere in the output.

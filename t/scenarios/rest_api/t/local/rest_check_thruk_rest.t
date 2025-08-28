@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 34;
+plan tests => 38;
 
 ###########################################################
 # test thruks script path
@@ -54,9 +54,14 @@ TestUtils::test_command({
         like    => ["/login required/"],
         exit    => 3,
     });
-
+    # cross reference variables in urls
     TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest -o '{2:0.name}' '/hosts/?name=localhost&columns=address&limit=1' '/hosts/?address={1:0.address}&columns=name'",
         like    => ["/^localhost\$/"],
+    });
+    # inline base64 template
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest /services/localhost/Users --template='data:WyUgSUYgUkFXLjAuc3RhdGUgPT0gMCAlXQpPSyAtIFslIFJBVy4wLmRlc2NyaXB0aW9uICVdClslIEVMU0UgJV0KQ1JJVElDQUwgLSBbJSBSQVcuMC5kZXNjcmlwdGlvbiAlXQpbJSBFTkQgJV0K'",
+        like    => ["/^OK - Users\$/"],
     });
 };

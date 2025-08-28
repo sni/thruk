@@ -430,12 +430,19 @@ sub _create_output {
     _debug($macros);
 
     if($totals && $totals->{'template'}) {
-        if(!-e $totals->{'template'}) {
+        my $tpl;
+        # base64 encoded template?
+        if($totals->{'template'} =~ m/^data:(.*)$/mx) {
+            require MIME::Base64;
+            my $b64 = MIME::Base64::decode_base64($1);
+            $tpl = \$b64;
+        }
+        elsif(!-e $totals->{'template'}) {
             return($totals->{'template'}.": ".$!, 3);
         }
-        my $tpl = Cwd::abs_path($totals->{'template'});
+        $tpl = Cwd::abs_path($totals->{'template'}) unless $tpl;
         $macros->{"macros"} = $macros;
-        _debug("using template: ".$tpl);
+        _debug("using template: %s", ref $tpl ? "<base64 inline>\n".${$tpl} : $tpl);
         my $settings = Thruk::Config::get_toolkit_config();
         $settings->{'RELATIVE'}    = 1;
         $settings->{'ABSOLUTE'}    = 1;
