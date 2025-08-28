@@ -6,10 +6,10 @@ Build-Depends: debhelper (>= 7),
   libthruk (>=3.24),
   lsb-release,
   apache2,
+  npm,
   perl,
   libmodule-install-perl,
-  libtest-cmd-perl,
-  npm
+  libtest-cmd-perl
 Standards-Version: 3.7.3
 Homepage: http://www.thruk.org
 Bugs: https://github.com/sni/thruk/issues
@@ -17,7 +17,7 @@ Vcs-Git: git://github.com/sni/thruk.git
 
 Package: thruk
 Architecture: any
-Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends}, thruk-base (= ${source:Version})
+Depends: ${extra:Depends}, thruk-base (= ${source:Version})
 Recommends: thruk-plugin-reporting (= ${source:Version})
 Description: Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
  Thruk is a multibackend monitoring webinterface which currently
@@ -28,7 +28,7 @@ Description: Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
 
 Package: thruk-base
 Architecture: any
-Depends: ${shlibs:Depends}, ${perl:Depends}, ${extra:Depends},
+Depends: ${perl:Depends}, ${extra:Depends},
          libthruk (>=3.24),
          apache2 | nginx-light | nginx-full | nginx-extras | nginx-core | nginx,
          libapache2-mod-fcgid | nginx-light | nginx-full | nginx-extras | nginx-core | nginx,
@@ -47,7 +47,8 @@ Description: Monitoring Webinterface for Nagios/Icinga and Shinken
 
 Package: thruk-plugin-reporting
 Architecture: any
-Depends: ${misc:Depends}, ${perl:Depends}, ${shlibs:Depends},
-         thruk-base (= ${source:Version}), fonts-liberation
+Depends: ${misc:Depends},
+         thruk-base (= ${source:Version}),
+         fonts-liberation
 Description: This package contains the reporting addon for thruk useful for sla
  and event reporting.

@@ -12,10 +12,10 @@ Build-Depends: debhelper (>= 7),
   libthruk (>=3.24),
   lsb-release,
   apache2,
+  npm,
   perl,
   libmodule-install-perl,
   libtest-cmd-perl,
-  npm
 Files:
    00000000000000000000000000000000 0000 thruk_1.0.0.orig.tar.gz
    00000000000000000000000000000000 0000 thruk_1.0.0-1.diff.tar.gz
