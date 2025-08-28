@@ -3648,6 +3648,27 @@ sub command_disabled {
 
 ##############################################
 
+=head2 command_disabled_all
+
+    command_disabled_all($c, $numbers)
+
+returns true if all commands are disabled for current user
+
+=cut
+sub command_disabled_all {
+    my($c, $numbers) = @_;
+
+    die("numbers missing") unless($numbers && scalar @{$numbers} > 0);
+
+    for my $nr (@{$numbers}) {
+        return 0 if !command_disabled($c, $nr);
+    }
+
+    return 1;
+}
+
+##############################################
+
 =head2 code2name
 
     code2name($coderef)

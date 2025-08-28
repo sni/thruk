@@ -886,6 +886,7 @@ sub get_toolkit_config {
                     'dump'                          => \&Thruk::Utils::Filter::dump,
                     'get_broadcasts'                => \&Thruk::Utils::Broadcast::get_broadcasts,
                     'command_disabled'              => \&Thruk::Utils::command_disabled,
+                    'command_disabled_all'          => \&Thruk::Utils::command_disabled_all,
                     'proxifiy_url'                  => \&Thruk::Utils::proxifiy_url,
                     'get_remote_thruk_url_path'     => \&Thruk::Utils::get_remote_thruk_url_path,
                     'basename'                      => \&Thruk::Base::basename,
