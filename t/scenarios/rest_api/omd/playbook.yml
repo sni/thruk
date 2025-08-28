@@ -12,92 +12,75 @@
         APACHE_MODE=own
         PNP4NAGIOS=off
         LIVESTATUS_TCP=on
+
+  - name: copy demo files
+    copy:
+      src:  "/root/{{ item.src }}"
+      dest: "/omd/sites/demo/{{ item.dst }}"
+      owner: demo
+      group: demo
+    loop:
+      - { src: 'test.cfg',         dst: 'etc/naemon/conf.d/' }
+      - { src: 'testuser.cfg',     dst: 'etc/naemon/conf.d/' }
+      - { src: '1.rpt',            dst: 'var/thruk/reports/' }
+      - { src: '1.tab',            dst: 'etc/thruk/panorama/' }
+      - { src: '1.tsk',            dst: 'var/thruk/downtimes/' }
+      - { src: '1.tbp',            dst: 'etc/thruk/bp/' }
+      - { src: 'thruk_local.conf', dst: 'etc/thruk/' }
+
   - name: copy naemon example.cfg
     copy:
       src: /omd/sites/demo/share/doc/naemon/example.cfg
       dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
+
   - name: Increase default load limit
     replace:
       path: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       regexp: '(check_local_load\!5,5,5\!10,10,10)'
       replace: 'check_local_load!99,99,99!99,99,99'
+
   - name: Increase default disk threshold
     replace:
       path: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       regexp: '(check_local_disk!80%!90%\!)'
       replace: 'check_local_disk!2%!1%!'
-  - name: copy naemon test.cfg
-    copy:
-      src: /root/test.cfg
-      dest: /omd/sites/demo/etc/naemon/conf.d/test.cfg
-      owner: demo
-      group: demo
-  - name: copy naemon testuser.cfg
-    copy:
-      src: /root/testuser.cfg
-      dest: /omd/sites/demo/etc/naemon/conf.d/testuser.cfg
-      owner: demo
-      group: demo
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_admin='
-      line: 'authorized_contactgroup_for_admin=testgroup'
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_configuration_information='
-      line: 'authorized_contactgroup_for_configuration_information=testgroup2'
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_all_services='
-      line: 'authorized_contactgroup_for_all_services=testgroup2'
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_all_hosts='
-      line: 'authorized_contactgroup_for_all_hosts=testgroup2'
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_all_service_commands='
-      line: 'authorized_contactgroup_for_all_service_commands=testgroup2'
-  - lineinfile:
-      path: /omd/sites/demo/etc/thruk/cgi.cfg
-      regexp: '^authorized_contactgroup_for_all_host_commands='
-      line: 'authorized_contactgroup_for_all_host_commands=testgroup2'
-  - lineinfile:
+
+  - name: add contacts to htpasswd
+    lineinfile:
       path: /omd/sites/demo/etc/htpasswd
-      regexp: '^testuser:'
-      line: 'testuser:$apr1$rYJHrFjl$CXBAGzkW1.dklpbNZ2rKu/'
-  - lineinfile:
-      path: /omd/sites/demo/etc/htpasswd
-      regexp: '^testuser2:'
-      line: 'testuser2:$apr1$XCZk.pKm$sN8YtngAPWNvNU1DLJci9/'
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    loop:
+      - { regexp: '^testuser:',       line: 'testuser:$apr1$rYJHrFjl$CXBAGzkW1.dklpbNZ2rKu/' }
+      - { regexp: '^testuser2:',      line: 'testuser2:$apr1$XCZk.pKm$sN8YtngAPWNvNU1DLJci9/' }
+      - { regexp: '^downtimes_only:', line: 'downtimes_only:$apr1$gQihE42A$kFDhXqUA/jyCLxd0XLWU9/' }
+
+  - name: add contacts to cgi.cfg
+    lineinfile:
+      path: /omd/sites/demo/etc/thruk/cgi.cfg
+      regexp: "{{ item.regexp }}"
+      line: "{{ item.line }}"
+    loop:
+      - { regexp: '^authorized_contactgroup_for_admin=',                      line: 'authorized_contactgroup_for_admin=testgroup' }
+      - { regexp: '^authorized_contactgroup_for_configuration_information=',  line: 'authorized_contactgroup_for_configuration_information=testgroup2' }
+      - { regexp: '^authorized_contactgroup_for_all_services=',               line: 'authorized_contactgroup_for_all_services=testgroup2' }
+      - { regexp: '^authorized_contactgroup_for_all_hosts=',                  line: 'authorized_contactgroup_for_all_hosts=testgroup2' }
+      - { regexp: '^authorized_contactgroup_for_all_service_commands=',       line: 'authorized_contactgroup_for_all_service_commands=testgroup2' }
+      - { regexp: '^authorized_contactgroup_for_all_host_commands=',          line: 'authorized_contactgroup_for_all_host_commands=testgroup2' }
+      - { regexp: '^authorized_for_all_services=',                            line: 'authorized_for_all_services=downtimes_only' }
+      - { regexp: '^authorized_for_all_hosts=',                               line: 'authorized_for_all_hosts=downtimes_only' }
+      - { regexp: '^authorized_for_all_service_commands=',                    line: 'authorized_for_all_service_commands=downtimes_only' }
+      - { regexp: '^authorized_for_all_host_commands=',                       line: 'authorized_for_all_host_commands=downtimes_only' }
+
   - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+
   - file:
       path: /omd/sites/demo/var/thruk/secret.key
       mode: 0600
       owner: demo
       group: demo
-  - copy:
-      src: /root/1.rpt
-      dest: /omd/sites/demo/var/thruk/reports/
-      owner: demo
-      group: demo
-  - copy:
-      src: /root/1.tab
-      dest: /omd/sites/demo/etc/thruk/panorama/
-      owner: demo
-      group: demo
-  - copy:
-      src: /root/1.tsk
-      dest: /omd/sites/demo/var/thruk/downtimes/
-      owner: demo
-      group: demo
-  - name: add example business process
-    copy:
-      src: /root/1.tbp
-      dest: /omd/sites/demo/etc/thruk/bp/1.tbp
-      owner: demo
-      group: demo
+
   - name: "thruk cron install "
     shell: sudo su - demo -c "thruk cron install"

@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 40;
+plan tests => 51;
 
 ###########################################################
 # test thruks script path
@@ -72,6 +72,23 @@ TestUtils::test_command({
         my $duration = $t2 - $t1;
         ok($duration == 60, "downtime duration should be 60s but is ".$duration."s");
     }
+}
+
+###########################################################
+# user specific command restrictions
+{
+    # downtimes are allowed
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env curl -s -u downtimes_only:test -d "comment_data=test" --data-urlencode "end_time=+1m" http://localhost:5000/demo/thruk/r/hosts/localhost/cmd/schedule_host_downtime',
+        like   => ['/COMMAND/', '/Command successfully submitted/', '/SCHEDULE_HOST_DOWNTIME/'],
+    });
+
+    # comments are not
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env curl -s -u downtimes_only:test -d "comment_data=test" --data-urlencode "end_time=+1m" http://localhost:5000/demo/thruk/r/services/localhost/Https/cmd/add_svc_comment',
+        like   => ['/User is not allowed to send this command/', '/ADD_SVC_COMMENT/'],
+        code   => 400,
+    });
 }
 
 ###########################################################
