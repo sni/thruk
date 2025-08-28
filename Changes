@@ -11,6 +11,7 @@ next:
             - add uniq() aggregation function
             - add /contacts/totals endpoint
             - add support for long running background requests
+            - apply user specific settings on the rest api as well
 
 3.22.2   Wed May 28 17:14:48 CEST 2025
           - add "for all services" option for status quick commands

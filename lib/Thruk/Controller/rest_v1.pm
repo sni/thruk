@@ -79,6 +79,8 @@ sub index {
     $path_info =~ s#^.+/$##gmx;
     $path_info = '/' if $path_info eq '';
 
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_USER_ONLY);
+
     # handle PUT requests like POST.
     if($c->req->method() eq 'PUT') {
         $c->req->env->{'REQUEST_METHOD'} = "POST";

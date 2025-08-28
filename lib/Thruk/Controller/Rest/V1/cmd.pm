@@ -177,7 +177,7 @@ sub _rest_get_external_command {
         push @cmd_args, $val;
     }
 
-    # add missing value for reseting modified attributes
+    # add missing value for resetting modified attributes
     if($cmd->{'name'} eq 'change_host_modattr' || $cmd->{'name'} eq 'change_svc_modattr') {
         push @cmd_args, 0;
     }
@@ -193,6 +193,9 @@ sub _rest_get_external_command {
         }
     }
 
+    if(Thruk::Utils::command_disabled($c, $cmd->{'nr'})) {
+        return({ 'message' => 'User is not allowed to send this command', code => 400 });
+    }
     my $cmd_line = "COMMAND [".time()."] ".($cmd->{'cmdname'} // uc($cmd->{'name'}));
     if(scalar @cmd_args > 0) {
         $cmd_line .= ';' unless $cmd->{'cmdname'}; # only add leading ; for normal commands

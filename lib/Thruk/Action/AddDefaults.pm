@@ -431,6 +431,7 @@ sub add_defaults {
             add_defaults($c, $flags, 1);
         }
     }
+    return if $flags_hash->{ADD_USER_ONLY};
 
     $c->stash->{'defaults_added'} = 1;
 

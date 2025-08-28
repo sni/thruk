@@ -78,6 +78,7 @@ our %add_defaults = (
     ADD_DEFAULTS        => 0,
     ADD_SAFE_DEFAULTS   => 1,
     ADD_CACHED_DEFAULTS => 2,
+    ADD_USER_ONLY       => 3,
 );
 
 push @EXPORT_OK, keys(%add_defaults);
