@@ -138,8 +138,8 @@
                 <td>Services</td>
                 <td>
                   <select name="hostserviceoptions" class="w-full">
-                    <option value='0'[% IF c.config.cmd_defaults.hostserviceoptions == 0 %] selected[% END %]> Do nothing with services</option>
-                    <option value='1'[% IF c.config.cmd_defaults.hostserviceoptions == 1 %] selected[% END %]> Schedule downtime for all services</option>
+                    <option value='0'[% IF c.config.cmd_defaults.hostserviceoptions == 0 %] selected[% END %]>Do nothing with services</option>
+                    <option value='1'[% IF c.config.cmd_defaults.hostserviceoptions == 1 %] selected[% END %]>Schedule downtime for all services</option>
                   </select>
                 </td>
               </tr>

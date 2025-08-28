@@ -145,9 +145,9 @@
   <th class="w-1/4">Child Hosts</th>
   <td>
     <select name='childoptions' class="w-full">
-      <option value='0'>Do nothing with child hosts </option>
-      <option value='1'>Schedule triggered downtime for all child hosts </option>
-      <option value='2'>Schedule non-triggered downtime for all child hosts </option>
+      <option value="0"[% IF c.config.cmd_defaults.childoptions == 0 %] selected[% END %]>Do nothing with child hosts</option>
+      <option value="1"[% IF c.config.cmd_defaults.childoptions == 1 %] selected[% END %]>Schedule triggered downtime for all child hosts</option>
+      <option value="2"[% IF c.config.cmd_defaults.childoptions == 2 %] selected[% END %]>Schedule non-triggered downtime for all child hosts</option>
     </select>
   </td>
 </tr>
@@ -159,7 +159,7 @@
   <td>
     <select name='hostserviceoptions' class="w-full">
       <option value='0'>Do nothing with services</option>
-      <option value='1'[% IF c.request.parameters.hostserviceoptions == 1 %] selected[% END %]>Schedule downtime for all services as well</option>
+      <option value='1'[% IF c.request.parameters.hostserviceoptions == 1 || c.config.cmd_defaults.hostserviceoptions == 1 %] selected[% END %]>Schedule downtime for all services as well</option>
     </select>
   </td>
 </tr>
