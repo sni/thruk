@@ -82,6 +82,11 @@ sub _fetch_results {
     for my $opt (@{$opts}) {
         my $url = $opt->{'url'};
 
+        # replace variables in the url, ex.: from previous queries
+        unshift(@{$opts}, {}); # add empty totals up front to not mix up order
+        $url =~ s/\{([^\}]+)\}/&_replace_output($1, $opts, {})/gemx;
+        shift @{$opts};
+
         # Support local files and remote urls as well.
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
@@ -123,7 +128,7 @@ sub _fetch_results {
             }
 
             # plus symbols from the command line are probably meant as plus
-            # is a space is meant, simply use a space or %20
+            # if a space is meant, simply use a space or %20
             $url =~ s/\+/%2B/gmx;
         }
 
@@ -140,6 +145,12 @@ sub _fetch_results {
         $opt->{'content_type'} = $sub_c->res->content_type;
         $opt->{'result'}       = $sub_c->res->body;
         $opt->{'rc'}           = ($sub_c->res->code == 200 ? 0 : 3);
+        if(!$opt->{'json'}) {
+            eval {
+                my $json = decode_json($opt->{'result'});
+                $opt->{'json'} = $json;
+            };
+        }
         _debug2("json data:");
         _debug2($opt->{'result'});
     }
@@ -283,7 +294,6 @@ sub _set_postdata {
 sub _apply_threshold {
     my($threshold_name, $data, $totals) = @_;
     return unless scalar @{$data->{$threshold_name}} > 0;
-    $data->{'data'} = decode_json($data->{'result'}) unless $data->{'data'};
 
     for my $t (@{$data->{$threshold_name}}) {
         my($attr, $threshold);
@@ -304,7 +314,7 @@ sub _apply_threshold {
         }
         $attr =~ s/\./::/gmx;
 
-        my($value, $ok) = _get_value($data->{'data'}, $attr);
+        my($value, $ok) = _get_value($data->{'json'}, $attr);
         if(!$ok) {
             _set_rc($data, 3, "unknown variable $attr in thresholds, syntax is --$threshold_name=key:value\n");
             return;
@@ -361,10 +371,10 @@ sub _create_output {
         return($r->{'result'}, $r->{'rc'}) if $r->{'rc'} > 0;
 
         if($r->{rename} && scalar @{$r->{rename}} > 0) {
-            $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
+            $r->{'json'} = decode_json($r->{'result'}) unless $r->{'json'};
             for my $d (@{$r->{rename}}) {
                 my($old,$new) = split(/:/mx,$d, 2);
-                $r->{'data'}->{$new} = delete $r->{'data'}->{$old};
+                $r->{'json'}->{$new} = delete $r->{'json'}->{$old};
             }
         }
 
@@ -407,10 +417,10 @@ sub _create_output {
         STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
     };
 
-    $macros->{RAW} = $result->[0]->{'result'} // $result->[0]->{'data'} // '';
+    $macros->{RAW} = $result->[0]->{'result'} // $result->[0]->{'json'} // '';
     my $x = 0;
     for my $r (@{$result}) {
-        $macros->{'RAW'.$x} = $r->{'result'} // $r->{'data'} // '';
+        $macros->{'RAW'.$x} = $r->{'result'} // $r->{'json'} // '';
         $x++;
     }
     $macros->{RC}       = $rc;
@@ -454,7 +464,7 @@ sub _create_output {
         $output =~ s/\\n/\n/gmx; # support adding newlines
 
         chomp($output);
-        $output .= $macros->{PERFDATA};
+        $output .= $macros->{PERFDATA} if $macros->{PERFDATA} ne '|';
     }
     $output .= "\n";
     return($output, $rc);
@@ -465,9 +475,9 @@ sub _append_performance_data {
     my($opt, $result) = @_;
     my @perf_data;
     my $totals = $result->[0];
-    if(ref $totals->{'data'} eq 'HASH') {
-        for my $key (sort keys %{$totals->{'data'}}) {
-            my $perfdata = _append_performance_data_string($key, $totals->{'data'}->{$key}, $totals);
+    if(ref $totals->{'json'} eq 'HASH') {
+        for my $key (sort keys %{$totals->{'json'}}) {
+            my $perfdata = _append_performance_data_string($key, $totals->{'json'}->{$key}, $totals);
             push @perf_data, @{$perfdata} if $perfdata;
         }
     }
@@ -550,24 +560,24 @@ sub _perffilter {
 ##############################################
 sub _calculate_data_totals {
     my($result, $totals) = @_;
-    $totals->{data} = {};
+    $totals->{json} = {};
     my $perfunits   = [];
     my $perffilter  = [];
     for my $r (@{$result}) {
-        $r->{'data'} = decode_json($r->{'result'}) unless $r->{'data'};
-        next unless ref $r->{'data'} eq 'HASH';
-        for my $key (sort keys %{$r->{'data'}}) {
-            if(!defined $totals->{'data'}->{$key}) {
-                $totals->{'data'}->{$key} = $r->{'data'}->{$key};
+        $r->{'json'} = decode_json($r->{'result'}) unless $r->{'json'};
+        next unless ref $r->{'json'} eq 'HASH';
+        for my $key (sort keys %{$r->{'json'}}) {
+            if(!defined $totals->{'json'}->{$key}) {
+                $totals->{'json'}->{$key} = $r->{'json'}->{$key};
             } else {
-                $totals->{'data'}->{$key} += $r->{'data'}->{$key};
+                $totals->{'json'}->{$key} += $r->{'json'}->{$key};
             }
         }
         push @{$perfunits}, @{$r->{'perfunit'}}    if $r->{'perfunit'};
         push @{$perffilter}, @{$r->{'perffilter'}} if $r->{'perffilter'};
     }
     if(scalar @{$result} == 1) {
-        $totals->{'data'} = $result->[0]->{'data'};
+        $totals->{'json'} = $result->[0]->{'json'};
     }
     $totals->{perfunits} = {};
     for my $p (@{$perfunits}) {
@@ -607,11 +617,11 @@ sub _replace_output {
             $v  = $2;
         }
         my $val;
-        if($nr == 0 && $v =~ m/^\d\.?\d*$/mx && !defined $result->[$nr]->{'data'}->{$v}) {
+        if($nr == 0 && $v =~ m/^\d\.?\d*$/mx && !defined $result->[$nr]->{'json'}->{$v}) {
             $val = $v;
         } else {
             my($ok);
-            ($val, $ok) = _get_value($result->[$nr]->{'data'}, $v);
+            ($val, $ok) = _get_value($result->[$nr]->{'json'}, $v);
             if(!$ok && defined $macros->{$v}) {
                 $val = $macros->{$v};
                 $ok = 1;

@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 30;
+plan tests => 34;
 
 ###########################################################
 # test thruks script path
@@ -53,5 +53,10 @@ TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest -k https://localhost/demo/thruk/r/",
         like    => ["/login required/"],
         exit    => 3,
+    });
+
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest -o '{2:0.name}' '/hosts/?name=localhost&columns=address&limit=1' '/hosts/?address={1:0.address}&columns=name'",
+        like    => ["/^localhost\$/"],
     });
 };

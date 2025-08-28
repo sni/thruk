@@ -3,7 +3,6 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - teams: add role based permissions based on oauth group memberships
           - config: add support for reseting list values
-          - check_thruk_rest: add template option to set output from template toolkit file
           - Agents:
             - add config change preview
           - Rest:
@@ -12,6 +11,9 @@ next:
             - add /contacts/totals endpoint
             - add support for long running background requests
             - apply user specific settings on the rest api as well
+          - check_thruk_rest:
+            - add template option to set output from template toolkit file
+            - support variables urls when using multiple queries
 
 3.22.2   Wed May 28 17:14:48 CEST 2025
           - add "for all services" option for status quick commands
