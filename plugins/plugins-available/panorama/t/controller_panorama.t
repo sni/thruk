@@ -8,7 +8,6 @@ use Thruk::Config 'noautoload';
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 570;
 }
 
 BEGIN {
@@ -17,11 +16,7 @@ BEGIN {
     import TestUtils;
 }
 
-SKIP: {
-    skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-
-    use_ok 'Thruk::Controller::panorama';
-};
+use_ok 'Thruk::Controller::panorama';
 
 #################################################
 # get test data
@@ -186,6 +181,9 @@ isnt($res->{'data'}->{'pantab_12_panlet_22'}->{'{\\"d\\":\\"31d\\",\\"incl_hst\\
 # make sure all tasks are covered with tests
 is(scalar keys %{$subs}, 0, 'all tasks tested') or diag("untested tasks:\n".join(",\n", keys %{$subs})."\n");
 ok(!-e $etc_path.'/panorama/'.$test_dashboard_nr.'.tab', 'dashboard file removed: '.$etc_path.'/panorama/'.$test_dashboard_nr.'.tab');
+
+done_testing();
+
 
 #################################################
 sub _test_json_page {
