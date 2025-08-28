@@ -133,13 +133,6 @@
 </tr>
 [% END %]
 
-[% BLOCK cmd_form_persistent %]
-<tr>
-  <th class="w-1/4 clickable" onclick="jQuery('[name=persistent]').click()">Persistent</th>
-  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_comments || force_persistent_comments %] checked[% END %][% IF force_persistent_comments %] disabled[% END %]></td>
-</tr>
-[% END %]
-
 [% BLOCK cmd_form_childoptions %]
 <tr>
   <th class="w-1/4">Child Hosts</th>
