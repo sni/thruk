@@ -59,7 +59,7 @@ function init_page() {
 
     init_deletable_inputs();
 
-    var urlArgs  = toQueryParams();
+    var urlArgs = toQueryParams();
     if(sort_options && sort_options.type != null && urlArgs.sorttype == null) {
         urlArgs.sorttype   = sort_options.type;
         urlArgs.sortoption = sort_options.option;
@@ -158,9 +158,8 @@ function init_page() {
     /* toggle passwords */
     jQuery("I.js-toggle-password").off("click").on("click", togglePasswordVisibility).addClass("clickable");
 
-    var params = toQueryParams();
-    if(params["scrollTo"]) {
-        applyScroll(params["scrollTo"]);
+    if(urlArgs.scrollTo) {
+        applyScroll(urlArgs.scrollTo);
     }
 
     cleanUnderscoreUrl();
@@ -1788,7 +1787,12 @@ function toQueryParams(str) {
             raw = raw.replace(/%0D%0A/g, "\n");
             raw = raw.replace(/%0A/g, "\n");
             raw = raw.replace(/%C2%A0/g, " ");
-            val = decodeURIComponent(raw);
+            try {
+                val = decodeURIComponent(raw);
+            } catch(err) {
+                console.log(err)
+                val = raw;
+            }
         }
         if(vars[p[0]] != undefined) {
             if(is_array(vars[p[0]])) {
