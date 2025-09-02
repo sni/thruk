@@ -8,7 +8,9 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 38;
+plan tests => 47;
+
+use_ok("MIME::Base64");
 
 ###########################################################
 # test thruks script path
@@ -65,3 +67,31 @@ TestUtils::test_command({
         like    => ["/^OK - Users\$/"],
     });
 };
+
+###########################################################
+# using raw values from template
+{
+    my $template = "
+[% RAW1.0.host_name %]-[% RAW1.0.description %]
+";
+    my $tpl64 = MIME::Base64::encode_base64($template, '');
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest /services/localhost/Users --template='data:$tpl64'",
+        like    => ["/^localhost-Users\$/"],
+    });
+};
+
+###########################################################
+# using dump in template
+{
+    my $template = "
+[% dump(RAW1.0) %]
+";
+    my $tpl64 = MIME::Base64::encode_base64($template, '');
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest /services/localhost/Users --template='data:$tpl64'",
+        like => ["/'localhost'/"],
+    });
+};
+
+###########################################################

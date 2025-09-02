@@ -418,10 +418,10 @@ sub _create_output {
         STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
     };
 
-    $macros->{RAW} = $result->[0]->{'result'} // $result->[0]->{'json'} // '';
+    $macros->{RAW} = $result->[0]->{'json'} // $result->[0]->{'result'} // '';
     my $x = 0;
     for my $r (@{$result}) {
-        $macros->{'RAW'.$x} = $r->{'result'} // $r->{'json'} // '';
+        $macros->{'RAW'.$x} = $r->{'json'} // $r->{'result'} // '';
         $x++;
     }
     $macros->{RC}       = $rc;
