@@ -222,7 +222,7 @@ sub _action_facts {
             my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
             _cronerror(_strip_line($err, 1)); # don't fill the log with errors from cronjobs
         } else {
-            _info("%s updated %s sucessfully: OK\n", $peer->{'name'}, $mode);
+            _info("%s updated %s successfully: OK\n", $peer->{'name'}, $mode);
         }
     });
     $c->stats->profile(end => "_cmd_nc()");
@@ -262,7 +262,7 @@ sub _action_install {
         }
         _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
         _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
-        _info("%s install sucessfully: OK\n", $peer->{'name'});
+        _info("%s install successfully: OK\n", $peer->{'name'});
     }
     $c->stats->profile(end => "_cmd_nc()");
     return("", $errors > 0 ? 1 : 0);
@@ -300,7 +300,7 @@ sub _action_update {
         }
         _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
         _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
-        _info("%s update sucessfully: OK\n", $peer->{'name'});
+        _info("%s update successfully: OK\n", $peer->{'name'});
     }
     $c->stats->profile(end => "_cmd_nc()");
     return("", $errors > 0 ? 1 : 0);
@@ -337,7 +337,7 @@ sub _action_cleanup {
         }
         _info("%s\n", $jobdata->{'stdout'}) if $jobdata->{'stdout'};
         _info("%s\n", $jobdata->{'stderr'}) if $jobdata->{'stderr'};
-        _info("%s cleanup sucessfully: OK\n", $peer->{'name'});
+        _info("%s cleanup successfully: OK\n", $peer->{'name'});
     }
     $c->stats->profile(end => "_cmd_nc()");
     return("", $errors > 0 ? 1 : 0);

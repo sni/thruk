@@ -83,5 +83,5 @@ $page = TestUtils::test_page(
     'url'          => "/thruk/r/thruk/bp/".$data->[0]->{'id'},
     'method'       => "DELETE",
     'content_type' => 'application/json; charset=utf-8',
-    'like'         => ['business process sucessfully removed'],
+    'like'         => ['business process successfully removed'],
 );

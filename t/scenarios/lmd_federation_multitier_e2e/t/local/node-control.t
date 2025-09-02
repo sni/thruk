@@ -36,7 +36,7 @@ ok($target eq '../thruk/plugins-enabled/node-control/cron', 'cron points to corr
 for my $peer ('tier1a', 'tier2c', 'tier2e') {
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk nc facts '.$peer,
-        errlike   => ['/'.$peer.' updated facts sucessfully: OK/'],
+        errlike   => ['/'.$peer.' updated facts successfully: OK/'],
     });
 }
 
@@ -76,28 +76,28 @@ TestUtils::test_command({
 
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc cleanup tier2a',
-    errlike => ['/tier2a cleanup sucessfully/'],
+    errlike => ['/tier2a cleanup successfully/'],
 });
 
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc install tier2c',
-    errlike => ['/already installed/', '/tier2c install sucessfully/'],
+    errlike => ['/already installed/', '/tier2c install successfully/'],
 });
 
 # run update to test version
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc update tier2c',
-    errlike => ['/updating demo on tier2c/', '/tier2c update sucessfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
+    errlike => ['/updating demo on tier2c/', '/tier2c update successfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
 });
 
 # and back...
 my $omd_version = `omd version -b`; chomp($omd_version);
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc update tier2c --version='.$omd_version,
-    errlike => ['/updating demo on tier2c/', '/tier2c update sucessfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
+    errlike => ['/updating demo on tier2c/', '/tier2c update successfully/', '/OMD_SITE=demo/', '/OMD_UPDATE=/'],
 });
 
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc runtime tier3a',
-    errlike => ['/tier3a updated runtime sucessfully: OK/'],
+    errlike => ['/tier3a updated runtime successfully: OK/'],
 });

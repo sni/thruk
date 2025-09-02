@@ -79,7 +79,7 @@ sub _rest_get_thruk_bp_new {
     if(!$bps->[0]) {
         return({ 'message' => 'creating business process failed', code => 500 });
     }
-    return({ 'message' => 'business process sucessfully created', data => $bps->[0]->TO_JSON() });
+    return({ 'message' => 'business process successfully created', data => $bps->[0]->TO_JSON() });
 }
 
 ##########################################################
@@ -126,7 +126,7 @@ sub _rest_get_thruk_bp_by_id_crud {
     if($rc != 0) {
         return({ 'message' => 'reload command failed', code => 500 });
     }
-    return({ 'message' => 'business process sucessfully '.$action });
+    return({ 'message' => 'business process successfully '.$action });
 }
 
 ##########################################################
@@ -144,7 +144,7 @@ sub _rest_get_thruk_bp_by_id_refresh {
     my $bp = $bps->[0];
     $bp->update_status($c);
 
-    return({ 'message' => 'business process refreshed sucessfully' });
+    return({ 'message' => 'business process refreshed successfully' });
 }
 
 ##########################################################

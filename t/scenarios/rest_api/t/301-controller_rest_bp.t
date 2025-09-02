@@ -30,7 +30,7 @@ test_page({
 test_page({
     url     => 'PATCH /thruk/bp/1',
     post    => {"state_type" => "hard", "nodes" => [{"function" => "best()"}] },
-    like    => ['business process sucessfully updated'],
+    like    => ['business process successfully updated'],
 });
 test_page({
     url     => 'GET /thruk/bp/1',
@@ -42,7 +42,7 @@ test_page({
 test_page({
     url     => 'POST /thruk/bp/1',
     post    => \$original_bp,
-    like    => ['business process sucessfully updated'],
+    like    => ['business process successfully updated'],
 });
 test_page({
     url     => 'GET /thruk/bp/1',
@@ -53,7 +53,7 @@ test_page({
 # update status
 test_page({
     url     => 'POST /thruk/bp/1/refresh',
-    like    => ['business process refreshed sucessfully'],
+    like    => ['business process refreshed successfully'],
 });
 
 ################################################################################

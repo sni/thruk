@@ -35,7 +35,7 @@ TestUtils::test_command({
 for my $x (0..9) {
     TestUtils::test_command({
         cmd  => $BIN.' r -d @t/xt/business_process/data/9999.tbp -D id='.($bpid+$x).' -D name=Test_'.($bpid+$x).' -m POST /thruk/bp',
-        like => ['/business process sucessfully created/'],
+        like => ['/business process successfully created/'],
     });
 }
 TestUtils::test_command({
@@ -51,7 +51,7 @@ TestUtils::test_command({
 for my $x (0..9) {
     TestUtils::test_command({
         cmd  => $BIN.' r -m DELETE /thruk/bp/'.($bpid+$x),
-        like => ['/business process sucessfully removed/'],
+        like => ['/business process successfully removed/'],
     });
 }
 

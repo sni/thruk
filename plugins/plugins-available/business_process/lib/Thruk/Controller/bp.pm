@@ -191,7 +191,7 @@ sub index {
             }
 
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => "business process updated sucessfully\n".$msg }) unless $rc != 0;
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => "business process updated successfully\n".$msg }) unless $rc != 0;
             $bp->commit_cleanup();
             my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $id }); # load new process, otherwise we would update in edit mode
             $bps->[0]->update_status($c);
@@ -218,7 +218,7 @@ sub index {
                 Thruk::Utils::set_message( $c, { style => 'fail_message', msg => "reload command failed\n".$msg });
             }
             Thruk::BP::Utils::update_cron_file($c); # check cronjob
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully removed' }) unless $rc != 0;
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process successfully removed' }) unless $rc != 0;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         elsif($action eq 'clone') {
@@ -228,7 +228,7 @@ sub index {
             $bp->get_node('node1')->{'label'} = $label;
             $bp->set_file($c, $new_file);
             $bp->save($c);
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully cloned' });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process successfully cloned' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
         }
         elsif($action eq 'rename_node' and $nodeid) {
@@ -385,7 +385,7 @@ sub index {
         $bp->set_label($c, $label);
         $bp->save();
         die("internal error") unless $bp;
-        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process sucessfully created' });
+        Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process successfully created' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
     }
 

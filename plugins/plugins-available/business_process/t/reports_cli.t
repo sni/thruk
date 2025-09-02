@@ -32,7 +32,7 @@ my $test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=new&bp_labe
 $test->{'content'} =~ m|\&amp;bp=(\d+)\&amp;|mx;
 my $bpid = $1;
 ok($bpid, "got bp id: ".$bpid) || die("got no bp id, cannot test");
-TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'commit', 'bp' => $bpid }, follow => 1, like => 'business process updated sucessfully');
+TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'commit', 'bp' => $bpid }, follow => 1, like => 'business process updated successfully');
 
 my $test_pdf_reports = [{
         'name'                   => 'New Test Business Process Report',
@@ -121,6 +121,6 @@ for my $report (@{$test_pdf_reports}) {
 }
 
 # remove bp
-TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1, like => 'business process sucessfully removed');
+TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1, like => 'business process successfully removed');
 
 done_testing();

@@ -73,7 +73,7 @@ sub index {
             Thruk::NodeControl::Utils::save_config($c, {
                 'omd_default_version'   => $c->req->parameters->{'omd_default_version'},
             });
-            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'settings saved sucessfully' });
+            Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'settings saved successfully' });
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/node_control.cgi");
         }
 
