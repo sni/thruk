@@ -1,4 +1,4 @@
-﻿<tr[% IF nr == 0 %] style="display: none;"[% END%] id="perm_row_[% nr %]">
+﻿<tr[% IF nr == 0 %] style="display: none;"[% END %] id="perm_row_[% nr %]">
   <td>
     <select id="p_[% nr %]_ts" name="p_[% nr %]_ts">
       <option[% IF p.type == "user"  %] selected[% END %] value="contact">user</option>

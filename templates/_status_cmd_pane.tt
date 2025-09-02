@@ -17,37 +17,37 @@
             <input type='hidden' id="opt_persistent" name='persistent' value="comments">
             <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full" onclick="toggleElement('command_select', null, true); jQuery(this).blur(); return false;">
               [% IF c.config.cmd_quick_status.reschedule && !command_disabled_all(c, [7, 17, 96]) %]
-                <option hidden value="1" [% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END%]>Reschedule next check</option>
+                <option hidden value="1" [% IF c.config.cmd_quick_status.default == "reschedule next check" %] selected[% END %]>Reschedule next check</option>
               [% END %]
               [% IF c.config.cmd_quick_status.downtime && !command_disabled_all(c, [55, 56, 78, 79, 85, 86, 122]) %]
-                <option hidden value="2" [% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END%]>Add downtime</option>
-                <option hidden value="5" [% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END%]>Remove downtimes</option>
+                <option hidden value="2" [% IF c.config.cmd_quick_status.default == "add downtime" %] selected[% END %]>Add downtime</option>
+                <option hidden value="5" [% IF c.config.cmd_quick_status.default == "remove downtimes" %] selected[% END %]>Remove downtimes</option>
               [% END %]
               [% IF c.config.cmd_quick_status.comment && !command_disabled_all(c, [1, 2, 3, 4]) %]
-                <option hidden value="3" [% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END%]>Add comment</option>
-                <option hidden value="6" [% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END%]>Remove comments</option>
+                <option hidden value="3" [% IF c.config.cmd_quick_status.default == "add comment" %] selected[% END %]>Add comment</option>
+                <option hidden value="6" [% IF c.config.cmd_quick_status.default == "remove comments" %] selected[% END %]>Remove comments</option>
               [% END %]
               [% IF c.config.cmd_quick_status.acknowledgement && !command_disabled_all(c, [33, 34, 51, 52]) %]
-                <option hidden value="4" [% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END%]>Add acknowledgement</option>
-                <option hidden value="7" [% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END%]>Remove acknowledgement</option>
+                <option hidden value="4" [% IF c.config.cmd_quick_status.default == "add acknowledgement" %] selected[% END %]>Add acknowledgement</option>
+                <option hidden value="7" [% IF c.config.cmd_quick_status.default == "remove acknowledgement" %] selected[% END %]>Remove acknowledgement</option>
               [% END %]
               [% IF c.config.cmd_quick_status.active_checks && !command_disabled_all(c, [5, 6, 15, 16, 47, 48]) %]
-                <option hidden value="8" [% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END%]>Enable active checks</option>
-                <option hidden value="9" [% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END%]>Disable active checks</option>
+                <option hidden value="8" [% IF c.config.cmd_quick_status.default == "enable active checks" %] selected[% END %]>Enable active checks</option>
+                <option hidden value="9" [% IF c.config.cmd_quick_status.default == "disable active checks" %] selected[% END %]>Disable active checks</option>
               [% END %]
               [% IF c.config.cmd_quick_status.notifications && !command_disabled_all(c, [22, 23, 28, 29]) %]
-                <option hidden value="10" [% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END%]>Enable notifications</option>
-                <option hidden value="11" [% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END%]>Disable notifications</option>
+                <option hidden value="10" [% IF c.config.cmd_quick_status.default == "enable notifications" %] selected[% END %]>Enable notifications</option>
+                <option hidden value="11" [% IF c.config.cmd_quick_status.default == "disable notifications" %] selected[% END %]>Disable notifications</option>
               [% END %]
               [% IF c.config.cmd_quick_status.eventhandler && !command_disabled_all(c, [43, 44, 45, 46]) %]
-                <option hidden value="15" [% IF c.config.cmd_quick_status.default == "enable eventhandler" %] selected[% END%]>Enable eventhandler</option>
-                <option hidden value="16" [% IF c.config.cmd_quick_status.default == "disable eventhandler" %] selected[% END%]>Disable eventhandler</option>
+                <option hidden value="15" [% IF c.config.cmd_quick_status.default == "enable eventhandler" %] selected[% END %]>Enable eventhandler</option>
+                <option hidden value="16" [% IF c.config.cmd_quick_status.default == "disable eventhandler" %] selected[% END %]>Disable eventhandler</option>
               [% END %]
               [% IF c.config.cmd_quick_status.submit_result && !command_disabled_all(c, [30, 87]) %]
-                <option hidden value="12" [% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END%]>Submit passive check result</option>
+                <option hidden value="12" [% IF c.config.cmd_quick_status.default == "submit passive check result" %] selected[% END %]>Submit passive check result</option>
               [% END %]
               [% IF c.config.cmd_quick_status.reset_attributes && !command_disabled_all(c, [154, 155])  %]
-                <option hidden value="14" [% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END%]>Reset modified attributes</option>
+                <option hidden value="14" [% IF c.config.cmd_quick_status.default == "reset modified attributes" %] selected[% END %]>Reset modified attributes</option>
               [% END %]
             </select>
             <div class="card shadow-float absolute w-[376px] rounded-t-none overflow-hidden" style="display: none;" id="command_select">
@@ -175,14 +175,14 @@
               <tr><td class="pt-0 clickable" onclick="toggleCheckBox('opt1')">Force check</td><td class="pt-0"><input type='checkbox' id="opt1" name='force_check'[% IF c.config.cmd_defaults.force_check %] checked[% END %]></td></tr>
               <tr><td class="pt-0">Spread checks</td><td>
                 <select name="spread">
-                  <option value="0"[% IF c.config.cmd_defaults.reschedule_spread == 0 %] selected[% END%]>no</option>
-                  <option value="10"[% IF c.config.cmd_defaults.reschedule_spread == 10 %] selected[% END%]>10 seconds</option>
-                  <option value="30"[% IF c.config.cmd_defaults.reschedule_spread == 30 %] selected[% END%]>30 seconds</option>
-                  <option value="60"[% IF c.config.cmd_defaults.reschedule_spread == 60 %] selected[% END%]> 1 minute</option>
-                  <option value="300"[% IF c.config.cmd_defaults.reschedule_spread == 300 %] selected[% END%]> 5 minutes</option>
-                  <option value="900"[% IF c.config.cmd_defaults.reschedule_spread == 900 %] selected[% END%]> 15 minutes</option>
-                  <option value="1800"[% IF c.config.cmd_defaults.reschedule_spread == 1800 %] selected[% END%]> 30 minutes</option>
-                  <option value="3600"[% IF c.config.cmd_defaults.reschedule_spread == 3600 %] selected[% END%]> 1 hour</option>
+                  <option value="0"[% IF c.config.cmd_defaults.reschedule_spread == 0 %] selected[% END %]>no</option>
+                  <option value="10"[% IF c.config.cmd_defaults.reschedule_spread == 10 %] selected[% END %]>10 seconds</option>
+                  <option value="30"[% IF c.config.cmd_defaults.reschedule_spread == 30 %] selected[% END %]>30 seconds</option>
+                  <option value="60"[% IF c.config.cmd_defaults.reschedule_spread == 60 %] selected[% END %]> 1 minute</option>
+                  <option value="300"[% IF c.config.cmd_defaults.reschedule_spread == 300 %] selected[% END %]> 5 minutes</option>
+                  <option value="900"[% IF c.config.cmd_defaults.reschedule_spread == 900 %] selected[% END %]> 15 minutes</option>
+                  <option value="1800"[% IF c.config.cmd_defaults.reschedule_spread == 1800 %] selected[% END %]> 30 minutes</option>
+                  <option value="3600"[% IF c.config.cmd_defaults.reschedule_spread == 3600 %] selected[% END %]> 1 hour</option>
                 </select>
               </td></tr>
             </table>

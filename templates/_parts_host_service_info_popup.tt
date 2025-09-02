@@ -18,7 +18,7 @@
   [% IF obj.state != 0 %]
     <tr>
       <th>Current Attempt</th>
-      <td><span>[% obj.current_attempt %]/[% obj.max_check_attempts %]</span><span class="ml-2">([% IF obj.state_type == 1 %]HARD[% ELSE %]SOFT[% END%] state)</span></td>
+      <td><span>[% obj.current_attempt %]/[% obj.max_check_attempts %]</span><span class="ml-2">([% IF obj.state_type == 1 %]HARD[% ELSE %]SOFT[% END %] state)</span></td>
     </tr>
     <tr>
       <th>Last Check Time</th>
