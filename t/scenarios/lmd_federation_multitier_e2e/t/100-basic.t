@@ -3,10 +3,11 @@ use strict;
 use Cpanel::JSON::XS;
 use HTML::Entities;
 use Test::More;
+use URI::Escape qw/uri_escape/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 294;
+    plan tests => 313;
 }
 
 
@@ -61,20 +62,56 @@ for my $hst (sort keys %{$ids}) {
 }
 
 ###############################################################################
-# send muliple commands to sub peers
+# send multiple commands to sub peers
 TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/cmd.cgi',
     'post'   => {
         'referer'           => 'status.cgi',
         'selected_services' => 'tier3b;Load;e984d;e984d,tier3b;Ping;e984d',
         'selected_hosts'    => '',
-        'quick_command'     => '1',
+        'quick_command'     => '1', # reschedule
         'start_time'        => time(),
     },
     'like'   => [ 'Commands successfully submitted' ],
     'follow' => 1,
 );
 
+###############################################################################
+{
+    # create a downtime
+    my $rand    = rand();
+    my $comment = 'test downtime '.$rand;
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/cmd.cgi',
+        'post'   => {
+            'referer'            => 'status.cgi',
+            'selected_services'  => 'tier2a;Ping;c21da',
+            'selected_hosts'     => '',
+            'quick_command'      => '2', # add downtime
+            'start_time'         => time(),
+            'end_time'           => time()+60,
+            'com_data'           => $comment,
+            'childoptions'       => 0,
+            'fixed'              => 1,
+            'hostserviceoptions' => 0,
+        },
+        'like'   => [ 'Commands successfully submitted' ],
+        'follow' => 1,
+    );
+
+    # delete command should only go to a single backend
+    local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = undef;
+    my $test = {
+        cmd     => './script/thruk "cmd.cgi?quick_command=5&active_downtimes=1&selected_services='.uri_escape("tier2a;Ping;c21da").'" -v',
+        errlike => ['/Your command request was successfully submitted to the backend/', '/\[tier2a\]\s+/', '/cmd: COMMAND \[\d+\]\ DEL_SVC_DOWNTIME;\d+\s+\(tier2a;Ping\)/' ],
+        like    => ['/^\s*$/'],
+        exit    => 0,
+    };
+    TestUtils::test_command($test);
+    my @matches = $test->{'stderr'} =~ m/^(.*cmd:\s+COMMAND.*)$/gmx;
+    require Data::Dumper;
+    is(scalar @matches, 1, "one command sent") or diag(Data::Dumper::Dumper(\@matches));
+};
 
 ###############################################################################
 TestUtils::test_command({

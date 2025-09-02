@@ -215,6 +215,7 @@ sub index {
             $c->stash->{'lasthost'}      = $host;
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
+            $c->req->parameters->{'backend'} = join(",", @backends);
             $c->db->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
@@ -261,6 +262,7 @@ sub index {
             $c->req->parameters->{'cmd_typ'} = $cmd_typ;
             $c->req->parameters->{'host'}    = $host;
             $c->req->parameters->{'service'} = $service;
+            $c->req->parameters->{'backend'} = join(",", @backends);
             $c->db->enable_backends(\@backends, 1);
             if( $quick_command == 5 ) {
                 if($c->req->parameters->{'active_downtimes'}) {
@@ -382,7 +384,7 @@ sub _check_for_commands {
         redirect_or_success( $c, -2 );
     }
     else {
-        # no command submited, view commands page (can be nonnumerical)
+        # no command submitted, view commands page (can be nonnumerical)
         if( $cmd_typ eq "55" or $cmd_typ eq "56" or $cmd_typ eq "86" ) {
             $c->stash->{'hostdowntimes'}    = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => undef ]);
             $c->stash->{'servicedowntimes'} = $c->db->get_downtimes(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), service_description => { '!=' => undef } ]);

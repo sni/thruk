@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - teams: add role based permissions based on oauth group memberships
           - config: add support for reseting list values
+          - fix sending remove downtime commands to all backends
           - Agents:
             - add config change preview
           - Rest:
