@@ -32,7 +32,7 @@
       <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
       <input type="hidden" name="referer" value="[% short_uri(c, {referer => 'undef'}) %]">
       <input type="hidden" name="selected_ids" id="selected_ids" value="">
-      <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full mt-2">
+      <select name="quick_command" id="quick_command" class="w-full mt-2">
         [% IF c.config.cmd_quick_status.downtime && cmd_type == "recurring" %]
         <option value="fix">auto cleanup recurring downtimes</option>
         <option value="remove">remove recurring downtimes</option>
