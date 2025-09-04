@@ -145,10 +145,10 @@ sub perl {
             $c->stats->profile(begin => 'External::perl eval');
             ## no critic
             my $rc = eval($conf->{'expr'});
+            $err = $@;
             ## use critic
             $c->stats->profile(end => 'External::perl eval');
 
-            $err = $@;
             if($err) {
                 undef $rc;
                 if($c->stash->{'last_redirect_to'} && $c->{'detached'}) {
