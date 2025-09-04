@@ -1,0 +1,9 @@
+﻿[%# contains custom user quick commands #%]
+
+[%# the init block may adjust the list of 'quick_commands' #%]
+[% IF block == "init" %]
+[% END %]
+
+[%# the form block can add required form blocks #%]
+[% IF block == "form" %]
+[% END %]

@@ -2295,9 +2295,15 @@ sub serveraction {
     }
     _debug('parsed cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
 
+    my $env = {};
+    for my $key (sort keys %{$c->req->parameters}) {
+        next if $key eq 'CSRFtoken';
+        $env->{'POST_'.uc($key)} = ref $c->req->parameters->{$key} ? Thruk::Utils::dump_params($c->req->parameters->{$key}, 0, 1) : $c->req->parameters->{$key};
+    }
+
     my($rc, $output);
     eval {
-        ($rc, $output) = Thruk::Utils::IO::cmd([$cmd, @cmdline, @args]);
+        ($rc, $output) = Thruk::Utils::IO::cmd([$cmd, @cmdline, @args], { env => $env });
     };
     if($@) {
         return('1', $@);

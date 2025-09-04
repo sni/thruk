@@ -7,6 +7,7 @@ use Data::Dumper;
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 use Thruk::Views::ToolkitRenderer ();
 
 =head1 NAME
@@ -109,7 +110,23 @@ sub index {
         $c->stash->{'cmd_typ'} = 'c'.$quick_command;
         _check_for_commands($c);
     }
-    elsif( defined $quick_command and $quick_command or $c->stash->{'cmd_typ'} =~ m/^c(\d+)$/mx ) {
+    elsif( $quick_command && $quick_command =~ m%^server://%mx ) {
+        my $referer = $c->req->parameters->{'referer'} || '';
+
+        return if Thruk::Utils::External::render_page_in_background($c);
+
+        $c->req->parameters->{'link'} = $quick_command;
+        my($rc, $msg) = Thruk::Utils::Status::serveraction($c, {
+            '$SELECTED_HOSTS$'    => $c->req->parameters->{'selected_services'},
+            '$SELECTED_SERVICES$' => $c->req->parameters->{'selected_hosts'},
+        });
+        if($c->req->parameters->{'json'} || $c->want_json_response()) {
+            return $c->render(json => { 'rc' => $rc, 'msg' => $msg });
+        }
+        Thruk::Utils::set_message( $c,  ($rc == 0 ? 'success_message' : 'fail_message'), $msg );
+        return $c->redirect_to_detached($referer // $c->stash->{'url_prefix'}."cgi-bin/status.cgi?", 1);
+    }
+    elsif( defined $quick_command && $quick_command || $c->stash->{'cmd_typ'} =~ m/^c(\d+)$/mx ) {
         if(defined $1) {
             $quick_command = $1;
             my $backends = $c->req->parameters->{'backend'};
@@ -133,9 +150,9 @@ sub index {
         $c->req->parameters->{'selected_hosts'}    = '' unless defined $c->req->parameters->{'selected_hosts'};
         $c->req->parameters->{'selected_services'} = '' unless defined $c->req->parameters->{'selected_services'};
         $c->req->parameters->{'selected_ids'}      = '' unless defined $c->req->parameters->{'selected_ids'};
-        my @hostdata    = split /,/mx, $c->req->parameters->{'selected_hosts'};
-        my @servicedata = split /,/mx, $c->req->parameters->{'selected_services'};
-        my @idsdata     = split /,/mx, $c->req->parameters->{'selected_ids'};
+        my @hostdata    = split /~~/mx, $c->req->parameters->{'selected_hosts'};
+        my @servicedata = split /~~/mx, $c->req->parameters->{'selected_services'};
+        my @idsdata     = split /~~/mx, $c->req->parameters->{'selected_ids'};
         $c->{'spread_startdates'} = generate_spread_startdates( $c, scalar @hostdata + scalar @servicedata, $c->req->parameters->{'start_time'}, $c->req->parameters->{'spread'} );
 
         # persistent can be set in two ways
@@ -244,7 +261,7 @@ sub index {
         }
 
         # service quick commands
-        for my $servicedata ( split(/,/mx, $c->req->parameters->{'selected_services'}) ) {
+        for my $servicedata ( @servicedata ) {
             if( defined $service_quick_commands->{$quick_command} ) {
                 $cmd_typ = $service_quick_commands->{$quick_command};
             }

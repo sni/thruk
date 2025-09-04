@@ -502,21 +502,22 @@ set a message in an cookie for later display
 sub set_message {
     my $c   = shift;
     my $dat = shift;
-    my($style, $message, $details, $code, $escape);
 
-    if(ref $dat eq 'HASH') {
-        $style   = $dat->{'style'};
-        $message = $dat->{'msg'};
-        $details = $dat->{'details'};
-        $code    = $dat->{'code'};
-        $escape  = $dat->{'escape'};
-    } else {
-        $style   = $dat;
-        $message = shift;
-        $details = shift;
-        $code    = shift;
-        $escape  = shift;
+    if(ref $dat ne 'HASH') {
+        my $style = $dat;
+        $dat = {};
+        $dat->{'style'}   = $style;
+        $dat->{'msg'}     = shift;
+        $dat->{'details'} = shift;
+        $dat->{'code'}    = shift;
+        $dat->{'escape'}  = shift;
     }
+    my $style   = $dat->{'style'};
+    my $message = $dat->{'msg'};
+    my $details = $dat->{'details'};
+    my $code    = $dat->{'code'};
+    my $escape  = $dat->{'escape'};
+
     $escape = $escape // 1;
     my($escaped_message, $escaped_details);
     if($escape) {
@@ -532,6 +533,7 @@ sub set_message {
     $c->stash->{'thruk_message_style'}       = $style;
     $c->stash->{'thruk_message_raw'}         = $message;
     $c->stash->{'thruk_message_details_raw'} = $details;
+    $c->stash->{'thruk_message_data'}        = $dat;
     $c->res->code($code) if defined $code;
 
     _debug(sprintf("set_message: %s - %s", $style, $message));

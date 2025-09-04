@@ -1203,6 +1203,11 @@ sub _finished_job_page {
         # set request parameters
         $c->req->parameters($stash->{original_param}) if $stash->{original_param};
 
+        # message?
+        if($stash->{'thruk_message_data'}) {
+            Thruk::Utils::set_message( $c, $stash->{'thruk_message_data'});
+        }
+
         if(defined $forward) {
             $forward =~ s/^(http|https):\/\/.*?\//\//gmx;
             remove_job_dir($stash->{job_dir}) if $cleanup;

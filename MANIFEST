@@ -3423,6 +3423,7 @@ templates/user_api_keys.tt
 templates/user_ext_host_info.tt
 templates/user_ext_service_info.tt
 templates/user_profile.tt
+templates/user_quick_commands.tt
 templates/void.tt
 templates/waiting_for_job.tt
 THANKS

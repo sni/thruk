@@ -5,7 +5,7 @@
     <button class="iconOnly medium absolute right-2 top-2" onClick="selectAllHosts(false,'dfl_');selectAllServices(false,'dfl_');selectAllHosts(false,'svc_');selectAllServices(false,'svc_');selectAllHosts(false,'hst_');return false;"><i class="uil uil-times"></i></button>
   </div>
   <div class="body">
-    <form action="cmd.cgi" method="POST" id="quick_cmd_form" onsubmit="setFormBtnSpinner(this)">
+    <form action="cmd.cgi" method="POST" id="quick_cmd_form" onsubmit="return collectFormData('quick_cmd_form')">
       <input type="hidden" name="referer" value="[% short_uri(c) %]" id="form_cmd_referer">
       <input type="hidden" name="selected_services" id="selected_services" value="">
       <input type="hidden" name="selected_hosts"    id="selected_hosts"    value="">
@@ -36,6 +36,7 @@
     { val => "14", icon => "fa-solid fa-broom",                label => "Reset modified attributes",   hide => !c.config.cmd_quick_status.reset_attributes, cmd_chk => [154, 155],                    cls => "hover-red-text" },
   ];
 %]
+[% PROCESS user_quick_commands.tt block="init" %]
       <table class="cellspacing">
         <tr>
           <th class="w-24">Command</th>
@@ -46,6 +47,7 @@
                 [% IF qc == "-"; NEXT; END %]
                 [% IF !qc.defined("cls");  qc.cls  = ""; END %]
                 [% IF !qc.defined("form"); qc.form = []; END %]
+                [% IF !qc.defined("cmd_chk") || qc.cmd_chk.list.size == 0; qc.cmd_chk = [ -1 ]; END %]
                 [% IF !qc.hide && !command_disabled_all(c, qc.cmd_chk) %]
                   <option
                     hidden
@@ -73,7 +75,7 @@
         </tr>
         <tr id="row_comment" class="js-quick-command-form-options">
           <th>Comment</th>
-          <td><input type="text" value="" name="com_data" id="com_data" class="w-full"></td>
+          <td><input type="text" value="" name="com_data" id="com_data" class="w-full" required></td>
         </tr>
         [% IF c.stash.require_comments_for_disable_cmds %]
         <tr id="row_comment_disable_cmd" class="js-quick-command-form-options">
@@ -212,7 +214,7 @@
               </tr>
               <tr>
                 <td>Check output</td>
-                <td><input type="text" value="" name="plugin_output" id="plugin_output" class="w-full"></td>
+                <td><input type="text" value="" name="plugin_output" id="plugin_output" class="w-full" required></td>
               </tr>
               <tr>
                 <td>Performance data</td>
@@ -229,6 +231,7 @@
             </table>
           </td>
         </tr>
+        [% PROCESS user_quick_commands.tt block="form" %]
         <tr>
           <td></td>
           <td><button id="multi_cmd_submit_button" onClick="return collectFormData('quick_cmd_form')" class="w-full submit"></button></td>

@@ -7623,29 +7623,28 @@ function collectFormData(form_id) {
     }
 
     // set activity icon
-    check_quick_command();
+    check_quick_command_reschedule_icons();
 
     // check form values
-    var sel = document.getElementById('quick_command');
-    var value = sel.value;
-    if(value == 2 || value == 3 || value == 4) { /* add downtime / comment / acknowledge */
-        if(document.getElementById('com_data').value == '') {
-            alert('please enter a comment');
+    jQuery("#"+form_id+" input[required]:visible").each(function(i, el) {
+        var val = jQuery(el).val();
+        if(val == '') {
+            if(el.id == "com_data") {
+                alert('please enter a comment');
+            } else if(el.id == "plugin_output") {
+                alert('please enter a check result');
+            } else {
+                alert("please enter all required values");
+            }
             return(false);
         }
-    }
+    });
 
-    if(value == 12) { /* submit passive result */
-        if(document.getElementById('plugin_output').value == '') {
-            alert('please enter a check result');
-            return(false);
-        }
-    }
-
+    var combine_str = "~~";
     var ids_form = document.getElementById('selected_ids');
     if(ids_form) {
         // comments / downtime commands
-        ids_form.value = keys(selectedHosts).join(',');
+        ids_form.value = keys(selectedHosts).join(combine_str);
     }
     else {
         // regular services commands
@@ -7658,7 +7657,7 @@ function collectFormData(form_id) {
             services.push(obj_hash[row_id]);
         });
         var service_form = document.getElementById('selected_services');
-        service_form.value = services.join(',');
+        service_form.value = services.join(combine_str);
 
         var hosts = new Array();
         jQuery.each(selectedHosts, function(row_id, blah) {
@@ -7669,7 +7668,7 @@ function collectFormData(form_id) {
             hosts.push(obj_hash[row_id]);
         });
         var host_form = document.getElementById('selected_hosts');
-        host_form.value = hosts.join(',');
+        host_form.value = hosts.join(combine_str);
     }
 
     // save scroll position to referer
@@ -7741,7 +7740,7 @@ function submitFormIfChanged(el) {
 }
 
 /* verify submited command */
-function check_quick_command() {
+function check_quick_command_reschedule_icons() {
     var sel   = document.getElementById('quick_command');
     var value = sel.value;
     var img;
