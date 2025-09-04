@@ -38,6 +38,7 @@ The nodecontrol command can start node control commands.
 
 use warnings;
 use strict;
+use Carp;
 use Getopt::Long ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
@@ -116,7 +117,7 @@ sub cmd {
         my $lock_file;
         if($ENV{'THRUK_CRON'}) {
             $lock_file = $c->config->{'tmp_path'}.'/node_control_lock.json';
-            my($pid, $ts) = Thruk::Utils::CLI::check_lock($lock_file, "nc_".$mode);
+            my($pid, $ts) = Thruk::Utils::CLI::check_lock($lock_file, "nc_".$mode, undef, 3600);
             return(sprintf("update for %s already running (duration: %s) with pid: %s\n", $mode, Thruk::Utils::Filter::duration(Time::HiRes::time() - $ts, 6), $pid), 0) if $pid;
         }
         my($rc, $msg) = _action_facts($c, $mode, $opt, $commandoptions, $config, $global_options);
@@ -209,17 +210,26 @@ sub _action_facts {
         my $peer = $c->db->get_peer_by_key($peer_key);
         my $facts;
         _debug("%s start fetching %s data...\n", $peer->{'name'}, $mode);
-        if($mode eq 'facts') {
-            $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
-        }
-        if($mode eq 'runtime') {
-            $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
-            if(!$facts->{'ansible_facts'}) {
+        eval {
+            alarm(300);
+            local $SIG{'ALRM'} = sub { confess(sprintf("timeout while updating %s on %s", $mode, $peer->{'name'})); };
+
+            if($mode eq 'facts') {
                 $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
             }
-        }
+            if($mode eq 'runtime') {
+                $facts = Thruk::NodeControl::Utils::update_runtime_data($c, $peer);
+                if(!$facts->{'ansible_facts'}) {
+                    $facts = Thruk::NodeControl::Utils::ansible_get_facts($c, $peer, 1);
+                }
+            }
+        };
+        my $err = $@;
+        alarm(0);
+        _warn($err) if($err);
+
         if(!$facts || $facts->{'last_error'}) {
-            my $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($facts->{'last_error'}//'unknown error'));
+            $err = sprintf("%s updating %s failed: %s\n", $peer->{'name'}, $mode, ($err||$facts->{'last_error'}//'unknown error'));
             _cronerror(_strip_line($err, 1)); # don't fill the log with errors from cronjobs
         } else {
             _info("%s updated %s successfully: OK\n", $peer->{'name'}, $mode);

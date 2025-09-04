@@ -1528,24 +1528,36 @@ sub pid_exists {
 
 =head2 check_lock
 
-    check_lock($file, [$key], [$pid])
+    check_lock($file, [$key], [$pid], [$max_time = -1], [$signal = -9])
 
 check lock file, returns:
 
     - (undef, undef) if lock was set successfully
     - ($pid, $starttime) if a valid lock exists already
 
+if $max_time is given, the old process will be killed by $signal when threshold is reached.
+
 =cut
 sub check_lock {
-    my($file, $key, $pid) = @_;
+    my($file, $key, $pid, $max_time, $signal) = @_;
 
-    $pid = $$ unless $pid;
-    $key = 'lock' unless $key;
+    $pid      = $$ unless $pid;
+    $max_time = -1 unless $max_time;
+    $signal   = -9 unless $signal;
+    $key      = 'lock' unless $key;
     _debug("checking lock '%s' file: %s", $key, $file);
 
     my $prev = Thruk::Utils::IO::json_lock_retrieve($file);
     if($prev && $prev->{$key} && $prev->{$key}->{'pid'} && pid_exists($prev->{$key}->{'pid'}, 'thruk')) {
-        return($prev->{$key}->{'pid'}, $prev->{$key}->{'start_time'});
+        my $duration = time() - $prev->{$key}->{'start_time'};
+        if(!$max_time || $max_time <= 0 || $duration <= $max_time) {
+            return($prev->{$key}->{'pid'}, $prev->{$key}->{'start_time'});
+        }
+
+        _warn("lock '%s' file: %s runs for too long, killing pid %d with %d", $key, $file, $prev->{$key}->{'pid'}, $signal);
+        CORE::kill($signal, $prev->{$key}->{'pid'});
+
+        # continue normally and write the new pid file
     }
 
     my $data = Thruk::Utils::IO::json_lock_patch($file, { $key => { pid => $pid, start_time => Time::HiRes::time() } }, {allow_empty => 1});

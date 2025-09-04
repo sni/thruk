@@ -311,9 +311,13 @@ sub ansible_get_facts {
     my $file = $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'.json';
     my $f;
     eval {
+        alarm(240);
+        local $SIG{'ALRM'} = sub { confess("timeout while updating facts on ".$peer->{'name'}); };
+
         $f = _ansible_get_facts($c, $peer, $refresh);
     };
     my $err = $@;
+    alarm(0);
     if($err) {
         $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
     }
@@ -340,9 +344,13 @@ sub update_runtime_data {
     Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => $$ }, { pretty => 1, allow_empty => 1 });
     my $runtime = {};
     eval {
+        alarm(240);
+        local $SIG{'ALRM'} = sub { confess("timeout while updating runtime on ".$peer->{'name'}); };
+
         $runtime = _runtime_data($c, $peer, $skip_cpu);
     };
     my $err = $@;
+    alarm(0);
     if($err) {
         $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
     } else {
