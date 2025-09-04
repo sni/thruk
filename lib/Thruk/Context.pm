@@ -1110,7 +1110,7 @@ add profile to stash
 sub add_profile {
     my($c, $options) = @_;
     if(ref $options eq 'HASH') {
-        confes("no name in profile") unless $options->{'name'};
+        confess("no name in profile") unless $options->{'name'};
         return if $options->{'name'} eq 'TT get_variable.tt';
         $options->{'time'} = Time::HiRes::time() unless $options->{'time'};
         push @{$c->stash->{'page_profiles'}}, $options;
