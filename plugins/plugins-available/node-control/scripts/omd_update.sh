@@ -22,13 +22,24 @@ fi
 
 echo "*** updating site $(id -un) from $(omd version -b) to version $OMD_UPDATE..."
 echo "*** Site will be stopped during the update, so no progress can be displayed."
-echo "*** this may take a couple of minutes..."; sleep 3 # wait 3 seconds, so this message can be transferred back via http
+echo "*** this may take a couple of minutes...";
 
 SITE_STARTED=0
+THRUK_MAINT=0
 omd status -b > /dev/null 2>&1
 if [ $? -ne 1 ]; then
+    # set thruk cluster in maintenance mode
+    if thruk cluster status >/dev/null 2>&1; then
+        thruk cluster maint
+        THRUK_MAINT=1
+        echo "*** thruk cluster maintenance mode activated";
+    fi
+
+    sleep 3 # wait 3 seconds, so the messages above can be transferred back via http
+
     SITE_STARTED=1
     omd stop
+
     # make sure it is stopped
     omd status -b > /dev/null 2>&1
     if [ $? -ne 1 ]; then
@@ -76,6 +87,10 @@ if [ "$HAS_TMUX" = "1" ]; then
 
                 # at least try to start apache again
                 omd start apache
+                if [ "$THRUK_MAINT" = "1" ]; then
+                    thruk cluster unmaint
+                    echo "*** thruk cluster maintenance mode deactivated";
+                fi
 
                 exit 1
             fi
@@ -96,6 +111,10 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
     if [ $SITE_STARTED = 1 ]; then
         echo "%> omd start"
         omd start
+        if [ "$THRUK_MAINT" = "1" ]; then
+            thruk cluster unmaint
+            echo "*** thruk cluster maintenance mode deactivated";
+        fi
     else
         echo "SITE was not started before the update, won't start it again"
     fi
@@ -119,5 +138,9 @@ fi
 
 # at least try to start apache again
 omd start apache
+if [ "$THRUK_MAINT" = "1" ]; then
+    thruk cluster unmaint
+    echo "*** thruk cluster maintenance mode deactivated";
+fi
 
 exit 1
