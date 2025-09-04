@@ -1075,7 +1075,7 @@ sub _apply_columns {
 sub _get_transformed_row_value {
     my($row, $col) = @_;
 
-    my $val = $row->{$col->{'orig'}} // $row->{$col->{'column'}} // $row->{$col->{'no_host_col'}};
+    my $val = $row->{$col->{'orig'}//''} // $row->{$col->{'column'}//''} // $row->{$col->{'no_host_col'}//''};
     for my $f (@{$col->{'func'}}) {
         $val = _apply_data_function($col, $f, $val, $row);
     }
