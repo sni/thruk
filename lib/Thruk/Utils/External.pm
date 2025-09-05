@@ -1162,6 +1162,7 @@ show page for finished jobs
 sub _finished_job_page {
     my($c, $stash, $forward, $out) = @_;
     if(defined $stash and keys %{$stash} > 0) {
+        $forward = $forward // $stash->{'last_redirect_to'};
         my $cleanup = $stash->{'job_conf'}->{'clean'} ? 1 : 0;
            $cleanup = 0 if $ENV{'TEST_AUTHOR'};
         $c->res->headers->header( @{$stash->{'res_header'}} ) if defined $stash->{'res_header'};
@@ -1220,6 +1221,11 @@ sub _finished_job_page {
         }
 
         remove_job_dir($stash->{job_dir}) if $cleanup;
+
+        # make sure we always have a template set
+        $c->stash->{template} = $c->stash->{template} // 'passthrough.tt';
+        $c->stash->{text}     = $c->stash->{text}     // sprintf("job %s done", $stash->{'job_id'});
+
         return;
     }
 
