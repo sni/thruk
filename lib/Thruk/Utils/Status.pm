@@ -14,6 +14,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Cpanel::JSON::XS ();
+use Encode qw(encode_utf8);
 use URI::Escape qw/uri_unescape/;
 
 use Thruk::Utils ();
@@ -2295,10 +2296,13 @@ sub serveraction {
     }
     _debug('parsed cmd line: '.$cmd.' "'.(join('" "', @cmdline)).'"');
 
-    my $env = {};
+    my $env     = {};
+    my $encoder = Cpanel::JSON::XS->new->utf8->canonical;
     for my $key (sort keys %{$c->req->parameters}) {
         next if $key eq 'CSRFtoken';
-        $env->{'POST_'.uc($key)} = ref $c->req->parameters->{$key} ? Thruk::Utils::dump_params($c->req->parameters->{$key}, 0, 1) : $c->req->parameters->{$key};
+
+        my $dat = ref $c->req->parameters->{$key} ? $encoder->encode($c->req->parameters->{$key}) : encode_utf8($c->req->parameters->{$key});
+        $env->{'POST_'.uc($key)} = $dat;
     }
 
     my($rc, $output);

@@ -526,9 +526,11 @@ sub set_message {
     }
 
     my $cookie_data = $style.'~~'.$message;
+    utf8::encode($cookie_data);
     if(length($cookie_data) > $c->config->{'cookie_max_length'}) {
         $cookie_data = substr($cookie_data, 0, $c->config->{'cookie_max_length'}-3)."...";
     }
+
     # cookie does not get escaped, it will be escaped upon read
     $c->cookie('thruk_message', $cookie_data, { httponly => 0 });
     # use escaped data if possible, but store original data as well
