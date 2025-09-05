@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2121;
+    plan tests => 2122;
 }
 
 BEGIN {
@@ -14,7 +14,10 @@ BEGIN {
     import TestUtils;
 }
 
-BEGIN { use_ok 'Thruk::Controller::cmd' }
+BEGIN {
+    use_ok 'Thruk::Controller::cmd';
+    use_ok('Thruk::Constants', ':peer_states');
+};
 
 TestUtils::set_test_user_token();
 my $c              = TestUtils::get_c();
@@ -25,6 +28,7 @@ my $post           = { test_only => 1, cmd_mod => 2, host => $host, 'service' =>
 
 # test quick commands
 my $backends = $c->db->get_peers();
+@{$backends} = grep { !defined $_->{disabled} || $_->{disabled} != HIDDEN_LMD_PARENT } @{$backends}; # remove lmd parents, for this test
 SKIP: {
     my $num = 21;
     skip "test is useless with only a single backend",                $num if (scalar @{$backends} <= 1);
@@ -36,7 +40,7 @@ SKIP: {
         'post'     => {
               'quick_command'       => '1',
               'selected_hosts'      => '',
-              'selected_services'   => "host1;svc1;".$backends->[0]->{'key'}.',host1;svc1;'.$backends->[1]->{'key'},
+              'selected_services'   => "host1;svc1;".$backends->[0]->{'key'}.'~~host1;svc1;'.$backends->[1]->{'key'},
               'spread'              => '0',
               'start_time'          => POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime(time()+10)),
               'referer'             => 'status.cgi',
