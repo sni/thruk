@@ -579,9 +579,9 @@ sub cookie {
         $options->{'samesite'} = 'lax' unless $options->{'samesite'};
         $options->{'path'}     = $c->stash->{'cookie_path'} unless $options->{'path'};
         $options->{'secure'}   = 1 if $c->config->{'cookie_secure_only'} || _is_ssl_request($c);
-        if(length($value) > 3000) {
+        if(length($value) > $c->config->{'cookie_max_length'}) {
             my $stacktrace = Carp::longmess("cookie value too large");
-            Thruk::Utils::log_error_with_details($c, sprintf("cookie %s too long (len: %s)", $name, length($value)), $stacktrace);
+            Thruk::Utils::log_error_with_details($c, sprintf("cookie %s too long (len: %d > %d)", $name, length($value), $c->config->{'cookie_max_length'}), $stacktrace);
             $value = substr($value, 0, 3000);
         }
         $c->res->cookies->{$name} = { value => $value, %{$options}};

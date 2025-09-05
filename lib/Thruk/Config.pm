@@ -220,6 +220,7 @@ my $base_defaults = {
     'default_user_timezone'                 => 'Server Setting',
     'pnp_url_regex'                         => '/pnp[^/]*/',
     'grafana_url_regex'                     => 'histou\.js\?|/grafana/',
+    'cookie_max_length'                     => 2000, # maximum length of cookie data
     'audit_logs'                            => {
                 'login'                         => 1,
                 'logout'                        => 1,

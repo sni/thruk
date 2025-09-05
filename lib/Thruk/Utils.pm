@@ -525,8 +525,12 @@ sub set_message {
         $escaped_details = Thruk::Utils::Filter::escape_html($details) if defined $details;
     }
 
+    my $cookie_data = $style.'~~'.$message;
+    if(length($cookie_data) > $c->config->{'cookie_max_length'}) {
+        $cookie_data = substr($cookie_data, 0, $c->config->{'cookie_max_length'}-3)."...";
+    }
     # cookie does not get escaped, it will be escaped upon read
-    $c->cookie('thruk_message', $style.'~~'.$message, { httponly => 0 });
+    $c->cookie('thruk_message', $cookie_data, { httponly => 0 });
     # use escaped data if possible, but store original data as well
     $c->stash->{'thruk_message'}         = $style.'~~'.($escaped_message // $message);
     $c->stash->{'thruk_message_details'} = $escaped_details // $details;

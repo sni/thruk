@@ -1224,7 +1224,7 @@ sub _finished_job_page {
 
         # make sure we always have a template set
         $c->stash->{template} = $c->stash->{template} // 'passthrough.tt';
-        $c->stash->{text}     = $c->stash->{text}     // sprintf("job %s done", $stash->{'job_id'});
+        $c->stash->{text}     = $c->stash->{text}     // sprintf("job %s done", ($stash->{'job_id'}//''));
 
         return;
     }
