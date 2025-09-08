@@ -60,7 +60,7 @@ TestUtils::test_page(
 
 TestUtils::test_command({
     cmd    => '/usr/bin/env thruk nc list',
-    like   => ['/tier2c/', '/Rocky/', '/Ubuntu/', '/demo/', '/OK/'],
+    like   => ['/tier2c/', '/Rocky/', '/Debian/', '/demo/', '/OK/'],
 });
 
 TestUtils::test_command({
