@@ -846,7 +846,7 @@ sub _omd_install_update_cleanup_step2 {
         push @steps_done, "cleanup";
     }
 
-    printf(Thruk::Utils::Log::time_prefix()."*** ".join(@steps_done, " / ")." finished.\n");
+    printf(Thruk::Utils::Log::time_prefix()."*** ".join(" / ", @steps_done)." finished.\n");
 
     _set_job_done($c, 'run_all', $peer->{'key'});
 
