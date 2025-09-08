@@ -197,6 +197,7 @@ store cache to disk
 =cut
 sub _store {
     my($self) = @_;
+    $self->{'_data'} = {} unless defined $self->{'_data'};
     Thruk::Utils::IO::json_lock_store($self->{'_cachefile'}, $self->{'_data'});
     my @stat = stat($self->{'_cachefile'}) or die("cannot stat ".$self->{'_cachefile'}.": ".$!);
     $self->{'_stat'} = \@stat;
