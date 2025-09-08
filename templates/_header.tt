@@ -22,9 +22,9 @@
   <div style="display:none;" id="search-results"></div>
 
   <div class="flexrow flex-nowrap gap-0 h-screen w-screen overflow-visible">
-    [%- IF show_nav == 1 -%]
+    [%- IF show_nav == 1 %]
       <div id="navbar">
-        [%- PROCESS side.tt -%]
+        [%- PROCESS side.tt %]
       </div>
     [%- END -%]
 
@@ -67,19 +67,19 @@
               [% END %]
             </div>
             <button class="noprint big primary round" title="reload page" id="refresh_button" onClick="refresh_button()"><i class="uil uil-sync"></i></button>
-            [%- IF c.user_exists || c.errored -%]
+            [%- IF c.user_exists || c.errored %]
               <button class="noprint big primary round"  title="user preferences" onClick="toggleElementRemote('pref_pane', '_header_prefs', true); return false;"[% IF !c.user_exists %] disabled[% END %]><i class="uil uil-cog"></i></button>
-              [%- IF (cookie_auth && show_logout_button) || c.errored -%]
+              [%- IF (cookie_auth && show_logout_button) || c.errored %]
                 <form action="[% IF c.config.logout_link; c.config.logout_link; ELSE %][% url_prefix %]cgi-bin/login.cgi?logout[% END %]" method='POST' target='_top' style="display: initial;">
                   <button class="noprint big primary round" title="sign out"><i class="uil uil-signout"></i></button>
                 </form>
               [%- END -%]
-            [%- END -%]
+            [%- END %]
           </div>
-          [%- IF c.user_exists -%]
+          [%- IF c.user_exists %]
             <div id="pref_pane" class="card z-50 shadow-float fixed left-0 md:left-auto md:right-0 top-[50px] mt-0 min-h-[150px] w-full md:w-[500px] rounded-t-none rounded-r-none" style="display: none;"></div>
           [%- END -%]
         </div>
       </header>
-    [%- END -%]
+    [%- END %]
 <main class="relative [% IF !iframed %]p-5 scrollauto[% END %] flex-grow">

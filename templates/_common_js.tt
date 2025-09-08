@@ -1,7 +1,7 @@
 ﻿<script>
 <!--
   jQuery.noConflict();
-  [%- PROCESS _header_initial_states.tt -%]
+  [% PROCESS _header_initial_states.tt -%]
   var thruk_static_export = false;
   var refresh_rate        = [% IF refresh_rate %][% refresh_rate %][% ELSE %]null[% END %];
   [%- IF auto_reload_fn +%]
@@ -46,9 +46,9 @@
   var is_executing_timeout = [% 1000 * c.config.is_executing_timeout %];
   var sort_options        = [% json_encode(data_sorted) %];
   var menuState           = [% json_encode(menu_states) %];
-  [% IF defined("pager") %]
+  [% IF defined("pager") -%]
   var pager = [% json_encode(pager) %];
-  [% END %]
+  [%- END %]
   [%- PROCESS _common_js_bugs.tt -%]
 
   [%- IF disable_backspace -%]
@@ -85,7 +85,7 @@
     [%- END -%]
   [%- END -%]
 
-  // switch to dark theme if prefered by the user
+  [%# switch to dark theme if preferred by the user #%]
   [% IF !c.req.parameters.defined("theme") %]
   var cookieTheme = readCookie('thruk_theme');
   if(!cookieTheme || cookieTheme.match(/^auto:/)) {
