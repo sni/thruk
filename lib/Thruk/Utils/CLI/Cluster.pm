@@ -24,13 +24,13 @@ Show information about a Thruk cluster
 
     available commands are:
 
-    - status       displays status of the cluster
-    - restart      restart thruk instance on each cluster node
-    - ping         send heartbeat to cluster nodes
-    - maintenance  set current node into maintenance mode
-    - maint        alias for maintenance
-    - activate     removes maintenance mode from current node
-    - unmaint      alias for activate
+    - status               displays status of the cluster
+    - restart              restart thruk instance on each cluster node
+    - ping                 send heartbeat to cluster nodes
+    - maintenance [node]   set current node into maintenance mode
+    - maint       [node]   alias for maintenance
+    - activate    [node]   removes maintenance mode from current node
+    - unmaint     [node]   alias for activate
 
 =back
 
@@ -124,17 +124,46 @@ sub cmd {
             $rc     = 2;
         }
     } elsif($mode eq 'maint' || $mode eq 'maintenance') {
-        $c->cluster->maint($c->cluster->{'node'}, time());
-        $output = sprintf("OK - node %s set into maintenance mode\n", $Thruk::Globals::HOSTNAME);
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
+        my $node = _get_node($c, $commandoptions);
+        $c->cluster->maint($node, time());
+        $output = sprintf("OK - node %s set into maintenance mode\n", $node->{'hostname'});
     } elsif($mode eq 'activate' || $mode eq 'unmaint') {
-        $c->cluster->maint($c->cluster->{'node'}, 0);
-        $output = sprintf("OK - removed maintenance mode for node %s.\n", $Thruk::Globals::HOSTNAME);
+        local $ENV{'THRUK_SKIP_CLUSTER'} = 0;
+        my $node = _get_node($c, $commandoptions);
+        $c->cluster->maint($node, 0);
+        $output = sprintf("OK - removed maintenance mode for node %s.\n", $node->{'hostname'});
     } else {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     }
 
     $c->stats->profile(end => "_cmd_cluster($action)");
     return($output, $rc);
+}
+
+##############################################
+sub _get_node {
+    my($c, $commandoptions) = @_;
+
+    my $node;
+    my $find = shift @{$commandoptions};
+    if($find) {
+        for my $n (@{$c->cluster->{'nodes'}}) {
+            if($n->{'hostname'} eq $find || $n->{'node_id'} eq $find) {
+                $node = $n;
+                last;
+            }
+        }
+        if(!$node) {
+            die("no node found by name: ".$find);
+        }
+    }
+
+    if(!$node) {
+        $node = $c->cluster->{'node'};
+    }
+
+    return($node);
 }
 
 ##############################################

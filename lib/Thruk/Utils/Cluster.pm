@@ -484,7 +484,7 @@ sub maint {
         confess("cluster not ready") unless($node && $node->{'node_id'});
         # is that us?
         if($self->is_it_me($node)) {
-            # save to both files, otherwise information would be lost after an omd update where the tmp fs might be remountet
+            # save to both files, otherwise information would be lost after an omd update where the tmp fs might be remounted
             for my $file ($self->{'registerfile'}, $self->{'localstate'}) {
                 Thruk::Utils::IO::json_lock_patch($file, {
                     $node->{'node_id'} => {
