@@ -32,6 +32,10 @@ echo "<<<HAS TMUX>>>"
 command -v tmux
 echo "<<<>>>"
 
+echo "<<<DETECT VIRT>>>"
+/usr/bin/systemd-detect-virt 2>/dev/null
+echo "<<<>>>"
+
 if [ "$1" = "" ]; then
   echo "<<<CPUTOP>>>"
   top -bn2 | grep Cpu | tail -n 1

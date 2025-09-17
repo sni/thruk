@@ -473,6 +473,10 @@ sub _runtime_data {
         $runtime->{'omd_cpu_perc'}  = (100-$val[7])/100;
     }
 
+    if($blocks{'DETECT VIRT'} && $blocks{'DETECT VIRT'} ne 'none') {
+        $runtime->{'virtualization_type'} = $blocks{'DETECT VIRT'};
+    }
+
     # run addons parser
     for my $mod (@{$modules}) {
         if($mod->can("extra_runtime_parse")) {
@@ -1441,6 +1445,9 @@ sub get_available_omd_versions {
 ##########################################################
 sub _machine_type {
     my($facts) = @_;
+    if($facts->{'virtualization_type'}) {
+        return($facts->{'virtualization_type'});
+    }
     if($facts->{'ansible_facts'}->{'ansible_virtualization_role'} && $facts->{'ansible_facts'}->{'ansible_virtualization_role'} eq 'guest') {
         return($facts->{'ansible_facts'}->{'ansible_virtualization_type'});
     }
