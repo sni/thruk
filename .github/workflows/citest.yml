@@ -29,7 +29,9 @@ jobs:
       - name: ./.ci/prepare_machine.sh
         run: timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
       - name: ./.ci/install_deps.sh
-        run: timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
+        run: |
+            chmod o+x /home/runner/
+            timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
       - name: ./script/install_puppeteer.sh
         run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
       - name: cache files
