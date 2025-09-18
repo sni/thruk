@@ -29,7 +29,7 @@ my $available_checks = {
     'filesystem'          => \&_filesystem_checks,
     'logfiles'            => \&_logfile_checks,
     'reports'             => \&_report_checks,
-    'recurring_downtimes' => \&_reccuring_downtime_checks,
+    'recurring_downtimes' => \&_recurring_downtime_checks,
     'lmd'                 => \&_lmd_checks,
     'logcache'            => \&_logcache_checks,
     'backends'            => \&_backends_checks,
@@ -91,7 +91,7 @@ sub self_check {
             push @{$results}, {
                 sub     => $t,
                 rc      => 3,
-                msg     => 'UNKNOW - unknown subcheck type',
+                msg     => 'UNKNOWN - unknown subcheck type',
                 details => "available subcheck types are: ".join(", ", (sort keys %{$available_checks})),
             };
             next;
@@ -258,14 +258,14 @@ sub _report_checks  {
 
 ##############################################
 
-=head2 _reccuring_downtime_checks
+=head2 _recurring_downtime_checks
 
-    _reccuring_downtime_checks($c)
+    _recurring_downtime_checks($c)
 
 verify errors in recurring downtimes
 
 =cut
-sub _reccuring_downtime_checks  {
+sub _recurring_downtime_checks  {
     my($c) = @_;
     my $details = "Recurring Downtimes:\n";
     my $rc      = 0;
