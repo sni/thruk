@@ -6,7 +6,6 @@
         - krb5-user
         - krb5-admin-server
         - krb5-kdc
-        - ntpdate
       state: present
   - shell: "kdb5_util create -s -P krbmasterpw"
   - shell: "service krb5-kdc start"
