@@ -1775,10 +1775,10 @@ sub _update_logcache_auth {
     #$dbh->do("TRUNCATE TABLE `".$prefix."_contact`");
     my $contact_lookup = _get_contact_lookup($dbh,$peer,$prefix);
     my $host_lookup    = _get_host_lookup($dbh,$peer,$prefix);
-    my $service_lookup = _get_service_lookup($dbh,$peer,$prefix);
+    my $service_lookup = _get_service_lookup($dbh,$peer,$prefix,$host_lookup);
 
     # update hosts
-    my($hosts)    = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
+    my($hosts) = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
     _debugs("hosts: ");
     my $stm = "INSERT INTO `".$prefix."_contact_host_rel` (contact_id, host_id) VALUES";
     $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
