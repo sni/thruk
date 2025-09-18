@@ -1302,6 +1302,66 @@ sub _log_removeunused {
 
 ##########################################################
 
+=head2 _log_check_inconsistency
+
+  _log_check_inconsistency
+
+report inconsistancies
+
+=cut
+sub _log_check_inconsistency {
+    my($self, $c, $backends) = @_;
+
+    $c->stats->profile(begin => "Mysql::_log_check_inconsistency()");
+
+    if(!defined $backends) {
+        ($backends) = $c->db->select_backends('get_logs');
+    }
+    $backends = Thruk::Base::list($backends);
+    my @peer_keys;
+    for my $key (@{$backends}) {
+        my $peer   = $c->db->get_peer_by_key($key);
+        next unless $peer->{'enabled'};
+        push @peer_keys, $key;
+    }
+
+    my $errors = {};
+    for my $key (@{$backends}) {
+        my $prefix = $key;
+        my $peer   = $c->db->get_peer_by_key($key);
+        next unless $peer->{'enabled'};
+        next unless $peer->{'logcache'};
+        _debug("checking inconsistancies for site ".$peer->{'name'});
+
+        $c->stats->profile(begin => "$key");
+        $peer->logcache->reconnect();
+        my $dbh = $peer->logcache->_dbh;
+
+        my $sth = $dbh->prepare("select count(host_id) as count, host_name from `".$prefix."_host` group by host_name having count > 1");
+        $sth->execute;
+        my $num = 0;
+        for my $r (@{$sth->fetchall_arrayref()}) {
+            $num++;
+            _debug("  - %s: got %d ids for host: '%s'", $peer->{'name'}, $r->[0], $r->[1]);
+        }
+        $errors->{$key} = "host_id table integrity broken, logcache must be recreated" if $num > 0;
+
+        # cleanup connection
+        eval {
+            $peer->logcache->_disconnect();
+        };
+
+        $c->stats->profile(end => "$key");
+    }
+
+
+    $c->stats->profile(end => "Mysql::_log_check_inconsistency()");
+
+    return $errors;
+}
+
+##########################################################
+
 =head2 _import_logs
 
   _import_logs

@@ -529,6 +529,7 @@ sub _logcache_checks  {
     my $errors  = 0;
     my @stats     = Thruk::Backend::Provider::Mysql->_log_stats($c);
     my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
+    my $incons    = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
@@ -546,6 +547,11 @@ sub _logcache_checks  {
         }
         elsif($s->{'last_reorder'} < time() - (31*86400)) {
             $details .= sprintf('  - [logcache %s] last optimize run too old: %s (hint: run `thruk logcache optimize` once a week)'."\n", $s->{'name'}, scalar localtime $s->{'last_reorder'});
+            $errors++;
+        }
+
+        if($incons->{$s->{'key'}}) {
+            $details .= sprintf('  - [logcache %s] %s'."\n", $s->{'name'}, $incons->{$s->{'key'}});
             $errors++;
         }
     }
