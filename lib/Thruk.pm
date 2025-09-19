@@ -561,7 +561,7 @@ sub _check_exit_reason {
     ## no critic
     if($reason =~ m|Thruk::Utils::CLI::from_local|mx && -t 0 && $sig eq 'INT') {
     ## use critic
-        # this means someone hit ctrl+c, no need for a stracktrace then
+        # this means someone hit ctrl+c, no need for a stacktrace then
         printf(STDERR "\nbailing out, got signal SIG%s\n", $sig);
         return;
     }
