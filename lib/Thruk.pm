@@ -585,10 +585,10 @@ sub _check_exit_reason {
     # print stacktrace
     my $log = \&_error;
     if($request_runtime >= 20 && $sig eq 'TERM') {
-        _error("got signal %s while handling %s request, possible timeout in %s\n", $sig, $c->req->method, $url);
+        &{$log}("got signal %s while handling %s request, possible timeout in %s\n", $sig, $c->req->method, $url);
     } else {
-        _warn("got signal %s while handling %s request in %s\n", $sig, $c->req->method, $url);
         $log = \&_warn;
+        &{$log}("got signal %s while handling %s request in %s\n", $sig, $c->req->method, $url);
     }
     &{$log}("User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
     &{$log}("Runtime:    %.2fs\n", $request_runtime);
