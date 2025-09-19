@@ -587,6 +587,7 @@ sub _check_exit_reason {
     if($request_runtime >= 20 && $sig eq 'TERM') {
         &{$log}("got signal %s while handling %s request, possible timeout in %s\n", $sig, $c->req->method, $url);
     } else {
+        return if $ENV{'THRUK_NO_SHUTDOWN_WARNINGS'};
         $log = \&_warn;
         &{$log}("got signal %s while handling %s request in %s\n", $sig, $c->req->method, $url);
     }
