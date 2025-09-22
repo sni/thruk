@@ -503,7 +503,7 @@ sub _ansible_available_packages {
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'dnf') {
         $cmd = 'dnf search omd- 2>/dev/null';
     } elsif($facts->{'ansible_facts'}->{'ansible_pkg_mgr'} eq 'apt') {
-        $cmd = 'apt-cache search omd- 2>/dev/null';
+        $cmd = 'apt-cache search ^omd- 2>/dev/null';
     } else {
         die("unknown package manager: ".$facts->{'ansible_facts'}->{'ansible_pkg_mgr'}//'none');
     }
@@ -1075,8 +1075,10 @@ sub _remote_cmd_background_wait {
         return(1, "remote job failed to start: ".$err);
     }
 
+    my $print = Thruk::Base->verbose ? 1 : 0;
+
     # wait for $max_wait seconds
-    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 2, $max_wait, 1);
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 2, $max_wait, $print);
     if(!$jobdata) {
         return(1, "remote job ".$job." failed for unknown reason");
     }
