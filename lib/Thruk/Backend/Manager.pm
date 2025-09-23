@@ -1540,24 +1540,32 @@ sub _set_host_macros {
     my( $self, $host, $macros ) = @_;
 
     # normal host macros
-    $macros->{'$HOSTADDRESS$'}        = (defined $host->{'host_address'})            ? $host->{'host_address'}            : $host->{'address'};
-    $macros->{'$HOSTNAME$'}           = (defined $host->{'host_name'})               ? $host->{'host_name'}               : $host->{'name'};
-    $macros->{'$HOSTALIAS$'}          = (defined $host->{'host_alias'})              ? $host->{'host_alias'}              : $host->{'alias'};
-    $macros->{'$HOSTSTATEID$'}        = (defined $host->{'host_state'})              ? $host->{'host_state'}              : $host->{'state'};
-    $macros->{'$HOSTSTATETYPE'}       = (defined $host->{'host_state_type'})         ? $host->{'host_state_type'}         : $host->{'state_type'};
-    $macros->{'$HOSTLATENCY$'}        = (defined $host->{'host_latency'})            ? $host->{'host_latency'}            : $host->{'latency'};
-    $macros->{'$HOSTOUTPUT$'}         = (defined $host->{'host_plugin_output'})      ? $host->{'host_plugin_output'}      : $host->{'plugin_output'};
-    $macros->{'$HOSTPERFDATA$'}       = (defined $host->{'host_perf_data'})          ? $host->{'host_perf_data'}          : $host->{'perf_data'};
-    $macros->{'$HOSTATTEMPT$'}        = (defined $host->{'host_current_attempt'})    ? $host->{'host_current_attempt'}    : $host->{'current_attempt'};
-    $macros->{'$MAXHOSTATTEMPTS$'}    = (defined $host->{'host_max_check_attempts'}) ? $host->{'host_max_check_attempts'} : $host->{'max_check_attempts'};
-    $macros->{'$HOSTDOWNTIME$'}       = (defined $host->{'host_scheduled_downtime_depth'}) ? $host->{'host_scheduled_downtime_depth'} : $host->{'scheduled_downtime_depth'};
-    $macros->{'$HOSTCHECKCOMMAND$'}   = (defined $host->{'host_check_command'})      ? $host->{'host_check_command'}      : $host->{'check_command'};
-    $macros->{'$HOSTNOTES$'}          = (defined $host->{'host_notes'})              ? $host->{'host_notes'}              : $host->{'notes'};
-    $macros->{'$HOSTNOTESURL$'}       = (defined $host->{'host_notes_url_expanded'}) ? $host->{'host_notes_url_expanded'} : $host->{'notes_url_expanded'};
-    $macros->{'$HOSTDURATION$'}       = (defined $host->{'host_last_state_change'})  ? $host->{'host_last_state_change'}  : $host->{'last_state_change'};
+    $macros->{'$HOSTADDRESS$'}        = $host->{'host_address'}                  // $host->{'address'};
+    $macros->{'$HOSTNAME$'}           = $host->{'host_name'}                     // $host->{'name'};
+    $macros->{'$HOSTALIAS$'}          = $host->{'host_alias'}                    // $host->{'alias'};
+    $macros->{'$HOSTSTATEID$'}        = $host->{'host_state'}                    // $host->{'state'};
+    $macros->{'$HOSTSTATETYPE'}       = $host->{'host_state_type'}               // $host->{'state_type'};
+    $macros->{'$HOSTLATENCY$'}        = $host->{'host_latency'}                  // $host->{'latency'};
+    $macros->{'$HOSTOUTPUT$'}         = $host->{'host_plugin_output'}            // $host->{'plugin_output'};
+    $macros->{'$HOSTPERFDATA$'}       = $host->{'host_perf_data'}                // $host->{'perf_data'};
+    $macros->{'$HOSTATTEMPT$'}        = $host->{'host_current_attempt'}          // $host->{'current_attempt'};
+    $macros->{'$MAXHOSTATTEMPTS$'}    = $host->{'host_max_check_attempts'}       // $host->{'max_check_attempts'};
+    $macros->{'$HOSTDOWNTIME$'}       = $host->{'host_scheduled_downtime_depth'} // $host->{'scheduled_dow;ntime_depth'};
+    $macros->{'$HOSTCHECKCOMMAND$'}   = $host->{'host_check_command'}            // $host->{'check_command'};
+    $macros->{'$HOSTNOTES$'}          = $host->{'host_notes'}                    // $host->{'notes'};
+    $macros->{'$HOSTNOTESURL$'}       = $host->{'host_notes_url_expanded'}       // $host->{'notes_url_expanded'};
+    $macros->{'$HOSTDURATION$'}       = $host->{'host_last_state_change'}        // $host->{'last_state_change'};
+
     $macros->{'$HOSTDURATION$'}       = (defined $macros->{'$HOSTDURATION$'})        ? time() - $macros->{'$HOSTDURATION$'} : 0;
     $macros->{'$HOSTSTATE$'}          = Thruk::Utils::Filter::hoststate2text($macros->{'$HOSTSTATEID$'}) // "";
     $macros->{'$HOSTSTATETYPE'}       = (defined $macros->{'$HOSTSTATETYPE'})        ? $macros->{'$HOSTSTATETYPE'} == 1 ? 'HARD' : 'SOFT' : '';
+
+    $macros->{'$LASTHOSTCHECK$'}       = $host->{'host_last_state_change'}       // $host->{'last_state_change'};
+    $macros->{'$LASTHOSTSTATECHANGE$'} = $host->{'host_last_state_change'}       // $host->{'last_state_change'};
+    $macros->{'$LASTHOSTUP$'}          = $host->{'host_last_time_ok'}            // $host->{'last_time_ok'};
+    $macros->{'$LASTHOSTDOWN$'}        = $host->{'host_last_time_warning'}       // $host->{'last_time_warning'};
+    $macros->{'$LASTHOSTUNREACHABLE$'} = $host->{'host_last_time_unknown'}       // $host->{'last_time_unknown'};
+
     $macros->{'$HOSTBACKENDNAME$'}    = '';
     $macros->{'$HOSTBACKENDADDRESS$'} = '';
     my $peer = defined $host->{'peer_key'} ? $self->get_peer_by_key($host->{'peer_key'}) : undef;
@@ -1614,6 +1622,13 @@ sub _set_service_macros {
         $macros->{'$SERVICEBACKENDNAME$'}    = (defined $peer->{'name'}) ? $peer->{'name'} : '';
         $macros->{'$SERVICEBACKENDADDRESS$'} = (defined $peer->{'addr'}) ? $peer->{'addr'} : '';
     }
+
+    $macros->{'$LASTSERVICECHECK$'}       = $service->{'last_check'};
+    $macros->{'$LASTSERVICESTATECHANGE$'} = $service->{'last_state_change'};
+    $macros->{'$LASTSERVICEOK$'}          = $service->{'last_time_ok'};
+    $macros->{'$LASTSERVICEWARNING$'}     = $service->{'last_time_warning'};
+    $macros->{'$LASTSERVICEUNKNOWN$'}     = $service->{'last_time_unknown'};
+    $macros->{'$LASTSERVICECRITICAL$'}    = $service->{'last_time_critical'};
 
     # service user macros...
     my $x = 0;
