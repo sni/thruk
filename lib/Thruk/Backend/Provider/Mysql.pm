@@ -1382,6 +1382,10 @@ sub _fix_multiple_host_ids {
         my $hostname = $r->[1];
         $num++;
 
+        if($num%100 == 0) {
+            $dbh->commit || confess $dbh->errstr;
+        }
+
         _infos("[%0".$sp."d/%0".$sp."d] %s ", $num, $total, $hostname);
 
         my $sth2 = $dbh->prepare("select host_id from `".$prefix."_host` WHERE host_name = "._quote($hostname));
@@ -1401,6 +1405,7 @@ sub _fix_multiple_host_ids {
         }
         _info("OK");
     }
+    $dbh->commit || confess $dbh->errstr;
 
     return;
 }
