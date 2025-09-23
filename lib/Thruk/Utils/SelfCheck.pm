@@ -60,7 +60,7 @@ return:
 
 =cut
 sub self_check {
-    my($self, $c, $type) = @_;
+    my($self, $c, $type, $options) = @_;
     my($rc, $msg, $details);
 
     my $t1 = [gettimeofday];
@@ -97,7 +97,7 @@ sub self_check {
             next;
         }
         $c->stats->profile(begin => "selfcheck: $t");
-        push @{$results}, &{$available_checks->{$t}}($c);
+        push @{$results}, &{$available_checks->{$t}}($c, $options);
         $c->stats->profile(end => "selfcheck: $t");
     }
 
@@ -517,7 +517,7 @@ verify errors in logcache
 
 =cut
 sub _logcache_checks  {
-    my($c) = @_;
+    my($c, $options) = @_;
     my $details = "Logcache:\n";
 
     return unless defined $c->config->{'logcache'};
@@ -525,11 +525,12 @@ sub _logcache_checks  {
     require Thruk::Backend::Provider::Mysql;
     Thruk::Backend::Provider::Mysql->import;
 
+    my $heal    = $options->{'heal'};
     my $rc      = 0;
     my $errors  = 0;
     my @stats     = Thruk::Backend::Provider::Mysql->_log_stats($c);
     my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
-    my $incons    = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c);
+    my $incons    = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c, undef, $heal);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};

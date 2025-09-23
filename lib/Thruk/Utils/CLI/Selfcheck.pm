@@ -10,7 +10,7 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
 
 =head1 SYNOPSIS
 
-  Usage: thruk [globaloptions] selfcheck <checktype[s]>...
+  Usage: thruk [globaloptions] selfcheck <checktype[s]>... [--heal]
 
 =head1 OPTIONS
 
@@ -32,6 +32,10 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
     - reports                   runs reporting checks
     - logcache                  runs logcache checks
     - backends                  runs backend connection checks
+
+=item B<--heal>
+
+    try automatic heal if possible.
 
 =back
 
@@ -57,8 +61,17 @@ sub cmd {
         return("ERROR - authorized_for_admin role required", 1);
     }
 
+    # parse options
+    my $opt = {};
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptionsFromArray($commandoptions,
+       "heal" => \$opt->{'heal'},
+    ) or do {
+        return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
+    };
+
     require Thruk::Utils::SelfCheck;
-    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $commandoptions);
+    my($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, $commandoptions, $opt);
     $data->{'all_stdout'} = 1;
 
     $c->stats->profile(end => "_cmd_selfcheck($action)");

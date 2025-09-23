@@ -1310,7 +1310,7 @@ report inconsistancies
 
 =cut
 sub _log_check_inconsistency {
-    my($self, $c, $backends) = @_;
+    my($self, $c, $backends, $heal) = @_;
 
     $c->stats->profile(begin => "Mysql::_log_check_inconsistency()");
 
@@ -1344,7 +1344,14 @@ sub _log_check_inconsistency {
             $num++;
             _debug("  - %s: got %d ids for host: '%s'", $peer->{'name'}, $r->[0], $r->[1]);
         }
-        $errors->{$key} = "host_id table integrity broken, logcache must be recreated" if $num > 0;
+        if($num > 0) {
+            $errors->{$key} = "host_id table integrity broken (hint: run selfcheck with --heal to fix)";
+            if($heal) {
+                $errors->{$key} = "host_id table integrity broken, trying autofix";
+                _info("[%s] trying to autofix host_id for backend %s", $peer->{'name'}, $prefix);
+                _fix_multiple_host_ids($c, $prefix, $num);
+            }
+        }
 
         # cleanup connection
         eval {
@@ -1354,10 +1361,46 @@ sub _log_check_inconsistency {
         $c->stats->profile(end => "$key");
     }
 
-
     $c->stats->profile(end => "Mysql::_log_check_inconsistency()");
 
     return $errors;
+}
+
+##########################################################
+sub _fix_multiple_host_ids {
+    my($c, $prefix, $total) = @_;
+
+    my $peer = $c->db->get_peer_by_key($prefix);
+    my $dbh  = $peer->logcache->_dbh;
+
+    my $sth = $dbh->prepare("select count(host_id) as count, host_name from `".$prefix."_host` group by host_name having count > 1");
+    $sth->execute;
+
+    my $sp  = length("$total");
+    my $num = 0;
+    for my $r (@{$sth->fetchall_arrayref()}) {
+        my $hostname = $r->[1];
+        $num++;
+
+        _infos("[%0".$sp."d/%0".$sp."d] %s ", $num, $total, $hostname);
+
+        my $sth2 = $dbh->prepare("select host_id from `".$prefix."_host` WHERE host_name = "._quote($hostname));
+        $sth2->execute;
+        my $keepId;
+        for my $r (@{$sth2->fetchall_arrayref()}) {
+            _infoc(".");
+            my $id = $r->[0];
+            if(!defined $keepId) {
+                $keepId = $id;
+                next;
+            }
+            $dbh->do("UPDATE `".$prefix."_log` SET host_id = ".$keepId." WHERE host_id = ".$id);
+            $dbh->do("UPDATE `".$prefix."_service` SET host_id = ".$keepId." WHERE host_id = ".$id);
+            $dbh->do("DELETE FROM `".$prefix."_contact_host_rel` WHERE host_id = ".$id);
+            $dbh->do("DELETE FROM `".$prefix."_host` WHERE host_id = ".$id);
+        }
+        _info("OK");
+    }
 }
 
 ##########################################################
