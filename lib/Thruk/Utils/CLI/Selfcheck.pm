@@ -43,6 +43,9 @@ The selfcheck command runs a couple of selfchecks to identify typical issues whe
 
 use warnings;
 use strict;
+use Getopt::Long ();
+
+use Thruk::Utils::CLI ();
 
 ##############################################
 
