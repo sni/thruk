@@ -1616,6 +1616,17 @@ sub _expand_perfdata_and_custom_vars {
             $row->{'peer_section'} = Thruk::Utils::Filter::peer_section($row);
         }
     }
+
+    # add all available columns if grafana datasource is used
+    if($c->req->headers->{'x-thruk-columns'} && ($type eq 'hosts' || $type eq 'services')) {
+        my $vars = Thruk::Utils::get_exposed_custom_vars($c->config, 1);
+        for my $row (@{$data}) {
+            for my $v (@{$vars}) {
+                $row->{'_'.$v} = "" unless exists $row->{$v};
+            }
+        }
+    }
+
     return($data);
 }
 
