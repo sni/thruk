@@ -1947,6 +1947,9 @@ sub _update_logcache_optimize {
     }
     my $start = time();
 
+    # start logcache self heal
+    $self->_log_check_inconsistency($c, [$prefix], 1);
+
     my $disk_space_ok = $self->_check_db_fs($c, $peer, $prefix);
     if($disk_space_ok) {
         my $t1 = [gettimeofday];
