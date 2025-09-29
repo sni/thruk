@@ -32,4 +32,5 @@
       create: true
       line: "export THRUK_NO_SHUTDOWN_WARNINGS=1"
       regexp: 'export THRUK_NO_SHUTDOWN_WARNINGS'
-  - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
+  - name: "thruk bp commit"
+    shell: sudo su - demo -c "thruk bp commit"

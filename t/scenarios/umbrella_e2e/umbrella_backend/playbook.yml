@@ -28,7 +28,8 @@
       owner: demo
       group: demo
 
-  - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
+  - name: "thruk bp commit"
+    shell: sudo su - demo -c "thruk bp commit"
 
   - name: "thruk cron install "
     shell: sudo su - demo -c "thruk cron install"

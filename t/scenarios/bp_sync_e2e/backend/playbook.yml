@@ -30,7 +30,8 @@
       dest: /omd/sites/demo/etc/thruk/bp/
       owner: demo
       group: demo
-  - shell: sudo su - demo -c "omd start core; thruk bp commit; omd stop core"
+  - name: "thruk bp commit"
+    shell: sudo su - demo -c "thruk bp commit"
   - name: wait for ssh config to become available
     wait_for:
       path: /mnt/shared/.ssh
