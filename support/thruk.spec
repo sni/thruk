@@ -9,8 +9,8 @@
 %endif
 
 Name:          thruk
-Version:       3.22.2
-Release:       13974.1
+Version:       3.24
+Release:       14133.1
 License:       GPL-2.0-or-later
 Packager:      Sven Nierlein <sven.nierlein@consol.de>
 Vendor:        Labs Consol

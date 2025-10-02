@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.24     Thu Oct  2 09:20:56 CEST 2025
           - teams: add role based permissions based on oauth group memberships
           - config: add support for resetting list values
           - fix sending remove downtime commands to all backends
