@@ -66,6 +66,7 @@ services:
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
+        - "traefik.docker.network=test.local"
 
   umbrella_b:
     build: umbrella/
@@ -100,6 +101,7 @@ services:
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
+        - "traefik.docker.network=test.local"
 
   umbrella_backend:
     build: umbrella_backend/
