@@ -7626,6 +7626,7 @@ function collectFormData(form_id) {
     check_quick_command_reschedule_icons();
 
     // check form values
+    var all_ok = true;
     jQuery("#"+form_id+" input[required]:visible").each(function(i, el) {
         var val = jQuery(el).val();
         if(val == '') {
@@ -7636,9 +7637,13 @@ function collectFormData(form_id) {
             } else {
                 alert("please enter all required values");
             }
+            all_ok = false;
             return(false);
         }
     });
+    if(!all_ok) {
+        return(false);
+    }
 
     var combine_str = "~~";
     var ids_form = document.getElementById('selected_ids');
