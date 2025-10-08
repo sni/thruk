@@ -189,6 +189,14 @@ function js_adv_menu_submenu(cfg) {
 .....
 
 
+== Custom Quick Actions
+
+{% include new_since.ad version="3.24" %}
+
+Custom server actions can be added to the quick action menu on host and service detail pages.
+There is a detailed example in the link:custom-quick-actions.html[quick actions] documentation.
+
+
 == Examples
 
 === Panorama Dashboard
