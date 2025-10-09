@@ -547,6 +547,7 @@ sub _get_file_logger {
 
 =cut
 sub set_screen_logger {
+    #my($config, $withdate, $prefix) = @_;
     $logger = get_screen_logger(@_);
     return;
 }

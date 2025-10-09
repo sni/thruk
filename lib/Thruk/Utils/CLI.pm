@@ -37,7 +37,8 @@ use Thruk::Utils::Log qw/:all/;
     new([ $options ])
 
  $options = {
-    verbose => 0-4, # be more verbose
+    verbose  => 0-4, # be more verbose
+    backends => [ 'backend1', 'backend2' ], # backends to use
  }
 
 create CLI tool object

@@ -64,7 +64,7 @@
 [% BLOCK cmd_form_comment %]
 <tr>
   <th class='w-1/4'>Comment</th>
-  <td><input type='text' name='com_data' value='' class="w-full" required></td>
+  <td><input type='text' name='com_data' value='[% c.config.cmd_defaults.comment %]' class="w-full" required></td>
 </tr>
 [% END %]
 

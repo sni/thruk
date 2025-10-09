@@ -75,7 +75,7 @@
         </tr>
         <tr id="row_comment" class="js-quick-command-form-options">
           <th>Comment</th>
-          <td><input type="text" value="" name="com_data" id="com_data" class="w-full" required></td>
+          <td><input type="text" value="[% c.config.cmd_defaults.comment %]" name="com_data" id="com_data" class="w-full" required></td>
         </tr>
         [% IF c.stash.require_comments_for_disable_cmds %]
         <tr id="row_comment_disable_cmd" class="js-quick-command-form-options">

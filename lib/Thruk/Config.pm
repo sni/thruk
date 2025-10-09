@@ -131,6 +131,7 @@ my $base_defaults = {
                 'force_notification'            => 0,
                 'send_notification'             => 1,
                 'sticky_ack'                    => 1,
+                'comment'                       => "",
                 'persistent_comments'           => 1,
                 'persistent_ack'                => 0,
                 'ptc'                           => 0,
