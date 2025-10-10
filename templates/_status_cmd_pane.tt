@@ -60,12 +60,17 @@
             </select>
             <div class="card shadow-float absolute w-[376px] rounded-t-none overflow-hidden" style="display: none;" id="command_select">
               <div class="actionbox less-padding">
+                [% insert_ruler = 0 %]
                 [% FOREACH qc = quick_commands %]
                   [% IF qc == "-" %]
-                    <hr class="pt-px mb-px">
+                    [% insert_ruler = 1 %]
                     [% NEXT %]
                   [% END %]
                   [% IF !qc.hide && !command_disabled_all(c, qc.cmd_chk) %]
+                    [% IF insert_ruler %]
+                      <hr class="pt-px mb-px">
+                      [% insert_ruler = 0 %]
+                    [% END %]
                     <div><a onclick="selectCommand('[% qc.val | html %]'); return false;" class="flex [% qc.cls | html %]" href="#"><i class="[% qc.icon | html %]"></i>[% qc.label | html %]</a></div>
                   [% END %]
                 [% END %]
