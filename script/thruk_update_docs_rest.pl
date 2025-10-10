@@ -285,7 +285,7 @@ sub _update_cmds {
             }
             $content .= "#\n";
             if(!$cmd->{'thrukcmd'}) {
-                $content .= "# See http://www.naemon.io/documentation/developer/externalcommands/$name.html for details.\n";
+                $content .= "# See https://www.naemon.io/documentation/developer/externalcommands/$name.html for details.\n";
                 $content .= "\n";
             }
         }
@@ -491,7 +491,7 @@ sub _update_cmds_list {
             $content .= sprintf("<td>%s</td>", $cmd->{'nr'});
             $content .= sprintf("<td>%s</td>", $cat);
             $content .= sprintf("<td>%s</td>", $name);
-            $content .= sprintf("<td><a href=\"http://www.naemon.io/documentation/developer/externalcommands/%s.html\" target=\"_blank\">details</a></td>", $name);
+            $content .= sprintf("<td><a href=\"https://www.naemon.io/documentation/developer/externalcommands/%s.html\" target=\"_blank\">details</a></td>", $name);
             $content .= "</tr>\n";
         }
     }

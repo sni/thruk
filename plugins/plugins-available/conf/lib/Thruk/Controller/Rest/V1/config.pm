@@ -53,7 +53,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /hosts/<name>/config
 # Returns configuration for given host.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#host
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#host
 
 ##########################################################
 # REST PATH: POST /hosts/<name>/config
@@ -70,7 +70,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /hostgroups/<name>/config
 # Returns configuration for given hostgroup.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#hostgroup
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#hostgroup
 
 ##########################################################
 # REST PATH: POST /hostgroups/<name>/config
@@ -87,7 +87,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /servicegroups/<name>/config
 # Returns configuration for given servicegroup.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#servicegroup
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#servicegroup
 
 ##########################################################
 # REST PATH: POST /servicegroups/<name>/config
@@ -104,7 +104,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /contacts/<name>/config
 # Returns configuration for given contact.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#contact
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#contact
 
 ##########################################################
 # REST PATH: POST /contacts/<name>/config
@@ -121,7 +121,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /contactgroups/<name>/config
 # Returns configuration for given contactgroup.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#contactgroup
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#contactgroup
 
 ##########################################################
 # REST PATH: POST /contactgroups/<name>/config
@@ -138,7 +138,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /timeperiods/<name>/config
 # Returns configuration for given timeperiod.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#timeperiod
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#timeperiod
 
 ##########################################################
 # REST PATH: POST /timeperiods/<name>/config
@@ -155,7 +155,7 @@ sub _rest_get_config_files {
 ##########################################################
 # REST PATH: GET /commands/<name>/config
 # Returns configuration for given command.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#command
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#command
 
 ##########################################################
 # REST PATH: POST /commands/<name>/config
@@ -238,7 +238,7 @@ sub _rest_get_config {
 ##########################################################
 # REST PATH: GET /services/<host>/<service>/config
 # Returns configuration for given service.
-# You will find available attributes here: http://www.naemon.io/documentation/usersguide/objectdefinitions.html#service
+# You will find available attributes here: https://www.naemon.io/documentation/usersguide/objectdefinitions.html#service
 
 ##########################################################
 # REST PATH: POST /services/<host>/<service>/config
