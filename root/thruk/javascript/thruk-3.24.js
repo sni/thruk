@@ -465,6 +465,8 @@ function cleanUnderscore(str) {
     str = str.replace(/\&_=\d+/g, '');
     str = str.replace(/\?scrollTo=[_\d\.]+/g, '?');
     str = str.replace(/\&scrollTo=[_\d\.]+/g, '');
+    str = str.replace(/\?update=&/g, '?');
+    str = str.replace(/\&update=&/g, '&');
     str = str.replace(/\?$/g, '');
     str = str.replace(/\?&/g, '?');
     return(str);
@@ -8491,24 +8493,43 @@ function remove_empty_form_params(form) {
     var f = s_data[i];
     if(f["name"].match(/_hoststatustypes$/) && f["value"] == "15") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/_servicestatustypes/) && f["value"] == "31") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/_(host|service)props/) && f["value"] == "0") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/_columns_select$/)) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/^(host|service)_columns$/)) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/_columns$/) && f["value"] == "") {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
     if(f["name"].match(/^(referer|bookmarks?|section)$/)) {
         jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
+    }
+    if(f["name"] == "nav" && f["value"] === "1") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
+    }
+    if(f["name"] == "hidetop" && f["value"] === "0") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
+    }
+    if(f["name"] == "update" && f["value"] === "") {
+        jQuery("INPUT[name='"+f["name"]+"']").remove();
+        continue;
     }
   }
   jQuery(form).find("TR.template").remove();
