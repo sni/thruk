@@ -1371,6 +1371,9 @@ sub TIEHANDLE {
 ##############################################
 sub BINMODE {
     my($self, $mode) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
     return binmode $self->{'fh'}, $mode;
 }
 
@@ -1378,14 +1381,17 @@ sub BINMODE {
 sub PRINTF {
     my($self, $fmt, @data) = @_;
     return unless defined $self;
+    return unless defined $self->{'fh'};
+
     return($self->PRINT(sprintf($fmt, @data)));
 }
 
 ##############################################
 sub PRINT {
     my($self, @data) = @_;
-
     return unless defined $self;
+    return unless defined $self->{'fh'};
+
     my $fh = $self->{'fh'};
     return unless $fh;
 
@@ -1419,15 +1425,34 @@ sub PRINT {
 ##############################################
 sub CLOSE {
     my($self) = @_;
-    return CORE::close($self->{'fh'});
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
+    my $fh = $self->{'fh'};
+    delete $self->{'fh'};
+
+    return CORE::close($fh);
 }
 
 ##############################################
 sub FILENO {
     my($self) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
     return CORE::fileno($self->{'fh'});
 }
 
+##############################################
+sub DESTROY {
+    my($self) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
+    $self->CLOSE();
+
+    return;
+}
 ##############################################
 
 1;

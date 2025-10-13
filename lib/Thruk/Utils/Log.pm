@@ -445,6 +445,9 @@ sub TIEHANDLE {
 ##############################################
 sub BINMODE {
     my($self, $mode) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
     return binmode $self->{'fh'}, $mode;
 }
 
@@ -452,14 +455,17 @@ sub BINMODE {
 sub PRINTF {
     my($self, $fmt, @data) = @_;
     return unless defined $self;
+    return unless defined $self->{'fh'};
+
     return($self->PRINT(sprintf($fmt, @data)));
 }
 
 ##############################################
 sub PRINT {
     my($self, @data) = @_;
-
     return unless defined $self;
+    return unless defined $self->{'fh'};
+
     my $last_newline = $self->{'newline'};
     $self->{'newline'} = (join("", @data) =~ m/\n$/mx) ? 1 : 0;
 
@@ -472,6 +478,29 @@ sub PRINT {
     else {
         _info(@data);
     }
+    return;
+}
+
+##############################################
+sub CLOSE {
+    my($self) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
+    my $fh = $self->{'fh'};
+    delete $self->{'fh'};
+
+    return CORE::close($fh);
+}
+
+##############################################
+sub DESTROY {
+    my($self) = @_;
+    return unless defined $self;
+    return unless defined $self->{'fh'};
+
+    $self->CLOSE();
+
     return;
 }
 
