@@ -745,20 +745,24 @@ sub _process_overview_page_by_hostgroup {
     my $groups;
     if($c->stash->{'hostgroup'} ne 'all') {
         $groups = [$c->stash->{'hostgroup'}];
+    } elsif(defined $hostgroupfilter) {
+        $groups = $c->db->get_hostgroups( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), $hostgroupfilter ], columns => [qw/name/] );
+        $groups = [sort keys %{Thruk::Base::array2hash($groups, 'name')}];
+        $c->stash->{'hostgroup'} = $groups->[0] if scalar @{$groups} == 1;
     } else {
         $groups = $c->db->get_hostgroup_names_from_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ] );
     }
     my $paged  = Thruk::Utils::page_data($c, $groups);
-    my(@hostfilter, @servicefilter , @hostgroupfilter);
-    for my $group (@{$paged}) {
-        push @hostfilter,      { groups      => { '>=' => $group } };
-        push @servicefilter,   { host_groups => { '>=' => $group } };
-        push @hostgroupfilter, { name => $group };
-    }
     if(scalar @{$paged} > 0 && scalar @{$paged} <= 100) {
+        my(@hostfilter, @servicefilter , @hostgroupfilter);
+        for my $group (@{$paged}) {
+            push @hostfilter,      { groups      => { '>=' => $group } };
+            push @servicefilter,   { host_groups => { '>=' => $group } };
+            push @hostgroupfilter, { name => $group };
+        }
         $hostfilter      = Thruk::Utils::combine_filter('-and', [$hostfilter,      Thruk::Utils::combine_filter('-or', \@hostfilter)]);
         $servicefilter   = Thruk::Utils::combine_filter('-and', [$servicefilter,   Thruk::Utils::combine_filter('-or', \@servicefilter)]);
-        $hostgroupfilter = Thruk::Utils::combine_filter('-and', [$hostgroupfilter, Thruk::Utils::combine_filter('-or', \@hostgroupfilter)]);
+        $hostgroupfilter = Thruk::Utils::combine_filter('-or', \@hostgroupfilter);
     }
 
     # we need the hostname, address etc...
