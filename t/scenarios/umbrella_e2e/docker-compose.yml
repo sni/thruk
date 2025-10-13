@@ -17,6 +17,7 @@ services:
         - "--entrypoints.websecure.address=:443"
         - "--serverstransport.insecureskipverify=true"
         - "--providers.docker.exposedbydefault=false"
+        - "--providers.docker.network=umbrella_e2e_test.local"
     depends_on:
         - umbrella_a
         - umbrella_b
@@ -66,7 +67,6 @@ services:
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
-        - "traefik.docker.network=test.local"
 
   umbrella_b:
     build: umbrella/
@@ -101,7 +101,6 @@ services:
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.path=/demo/thruk/cgi-bin/remote.cgi?lb_ping"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.interval=3s"
         - "traefik.http.services.umbrella.loadbalancer.healthcheck.scheme=https"
-        - "traefik.docker.network=test.local"
 
   umbrella_backend:
     build: umbrella_backend/
