@@ -8760,9 +8760,11 @@ function show_cal(ev) {
             }
         }
         // reverse dates, because we always click on the end date when having ranges
-        var tmp = date2;
-        date2 = date1;
-        date1 = tmp;
+        if(date1 > date2) {
+            var tmp = date2;
+            date2 = date1;
+            date1 = tmp;
+        }
     }
 
     var options = {
@@ -8854,8 +8856,14 @@ function show_cal(ev) {
     };
     var apply = function(start, end, label) {
         if(hasRange) {
-            document.getElementById(id1).value = end.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
-            document.getElementById(id2).value = start.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
+            if(id1 == 'end_time' || id1 == 'end_date' || id1 == 't2') {
+                // reverse back if required
+                var tmp = id2;
+                id2 = id1;
+                id1 = tmp;
+            }
+            document.getElementById(id1).value = start.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
+            document.getElementById(id2).value = end.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
         } else {
             document.getElementById(id1).value = start.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
         }
