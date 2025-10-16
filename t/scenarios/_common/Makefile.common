@@ -15,6 +15,11 @@ else
 endif
 export COMPOSE_HTTP_TIMEOUT=180
 export COMPOSE_BAKE=true
+ifeq ($(shell uname),Linux)
+  TIMEOUT_CMD=timeout -v 30m
+else
+  TIMEOUT_CMD=
+endif
 
 wait_start:
 	$(THRUK) cache clean
@@ -152,7 +157,7 @@ pre_prepare:
 prepare: base_images
 	$(MAKE) pre_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	timeout -v 30m docker compose build
+	$(TIMEOUT_CMD) docker compose build
 	docker compose up --remove-orphans -d
 	docker ps
 	@docker compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
