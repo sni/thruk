@@ -1431,6 +1431,9 @@ sub CLOSE {
     my $fh = $self->{'fh'};
     delete $self->{'fh'};
 
+    # do not close standard handles
+    return if(fileno($fh) == fileno(*STDOUT) || fileno($fh) == fileno(*STDERR));
+
     return CORE::close($fh);
 }
 

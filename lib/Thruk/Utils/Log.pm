@@ -395,6 +395,7 @@ sub wrap_stdout2log_stop {
     ## no critic
     select *STDOUT;
     ## use critic
+    untie *STDOUT;
     return;
 }
 
@@ -428,6 +429,7 @@ sub wrap_stderr2log_stop {
     ## no critic
     select *STDERR;
     ## use critic
+    untie *STDERR;
     return;
 }
 
@@ -489,6 +491,9 @@ sub CLOSE {
 
     my $fh = $self->{'fh'};
     delete $self->{'fh'};
+
+    # do not close standard handles
+    return if(fileno($fh) == fileno(*STDOUT) || fileno($fh) == fileno(*STDERR));
 
     return CORE::close($fh);
 }
