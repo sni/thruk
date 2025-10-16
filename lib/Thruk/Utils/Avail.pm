@@ -1043,7 +1043,7 @@ sub outages {
         if($l->{'type'} =~ m/DOWNTIME\ STOP$/mx)  { $in_downtime   = 0; }
 
         # detect outage status
-        my $class = $l->{'class'};
+        my $class = $l->{'class'} // 'indeterminate';
         $class = $current_state->{'class'} if $class eq 'indeterminate';
         my $in_outage = 0;
         if($in_timeperiod) {
