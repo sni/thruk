@@ -1009,86 +1009,81 @@ sub outages {
 
     # combine outages
     my @reduced_logs;
-    my($current, $last, $current_state);
+    my($last, $current_state);
     my $in_timeperiod  = 1;
+    my $in_downtime    = 0;
+    my $cur_in_outage  = 0;
 
     for my $l (@{$logs}) {
         next unless $l->{'type'};
-        if($only_host_services) {
-            next if  $l->{'host'} ne $host;
-            next if !$l->{'service'};
-        } else {
-            next if(defined $l->{'host'} && $l->{'host'} ne $host);
-            if($service) {
-                next if(defined $l->{'service'} &&  $l->{'service'} ne $service);
-                next if(defined $l->{'host'}    && !$l->{'service'});
-            } else {
-                next if(defined $l->{'host'}    && $l->{'service'});
-            }
-        }
 
-        if($l->{'type'} eq 'TIMEPERIOD START') {
-            $in_timeperiod = 1;
-        }
-        elsif($l->{'type'} eq 'TIMEPERIOD STOP') {
-            $in_timeperiod = 0;
-            if($current) {
-                $current->{'real_end'} = $l->{'start'};
-                push @reduced_logs, $current if $in_timeperiod;
-                undef $current;
-            }
-            next;
-        }
-
-        # set current state
+        # skip status messages when not matching host or service
         $l->{'class'} = lc $l->{'class'};
-        if($current_state && $l->{'class'} eq 'indeterminate') {
-            if($current_state->{'class'} ne 'indeterminate') {
-                for my $key (qw/class host service plugin_output type/) {
-                    $l->{$key} = $current_state->{$key};
+        if($l->{'class'} ne 'indeterminate') {
+            if($only_host_services) {
+                next if  $l->{'host'} ne $host;
+                next if !$l->{'service'};
+            } else {
+                next if(defined $l->{'host'} && $l->{'host'} ne $host);
+                if($service) {
+                    next if(defined $l->{'service'} &&  $l->{'service'} ne $service);
+                    next if(defined $l->{'host'}    && !$l->{'service'});
+                } else {
+                    next if(defined $l->{'host'}    && $l->{'service'});
                 }
             }
-        } else {
+            $current_state = $l unless defined $current_state;
+        }
+
+        # set timeperiod && downtime status
+        if($l->{'type'} eq 'TIMEPERIOD START')    { $in_timeperiod = 1; }
+        if($l->{'type'} eq 'TIMEPERIOD STOP')     { $in_timeperiod = 0; }
+        if($l->{'type'} =~ m/DOWNTIME\ START$/mx) { $in_downtime   = 1; }
+        if($l->{'type'} =~ m/DOWNTIME\ END$/mx)   { $in_downtime   = 0; }
+        if($l->{'type'} =~ m/DOWNTIME\ STOP$/mx)  { $in_downtime   = 0; }
+
+        # detect outage status
+        my $class = $l->{'class'};
+        $class = $current_state->{'class'} if $class eq 'indeterminate';
+        my $in_outage = 0;
+        if($in_timeperiod) {
+            if($in_downtime) {
+                $in_outage = 1 if $u->{$class.'_downtime'};
+            } else {
+                $in_outage = 1 if $u->{$class};
+            }
+        }
+
+        # set current state to last possible output
+        if($in_outage && $current_state && $l->{'class'} ne 'indeterminate') {
+            for my $key (qw/class plugin_output type/) {
+                $current_state->{$key} = $l->{$key};
+            }
+        }
+
+        # outage status changed?
+        if($cur_in_outage != $in_outage) {
+            if($in_outage) {
+                # new outage started
+                $current_state->{'start'} = $l->{'start'};
+            } else {
+                # current outage ended
+                $current_state->{'real_end'} = $l->{'start'};
+                push @reduced_logs, $current_state;
+                $current_state = Thruk::Utils::IO::dclone($current_state);
+            }
+        }
+        $cur_in_outage = $in_outage;
+        if(!$in_outage && $l->{'class'} ne 'indeterminate') {
             $current_state = $l;
         }
 
-        # are we currently in the middle of an outage
-        my $in_outage = 0;
-        if($in_timeperiod) {
-            if($l->{'in_downtime'}) {
-                if($u->{$l->{'class'}.'_downtime'}) {
-                    $in_outage = 1;
-                }
-            } else {
-                if($u->{$l->{'class'}}) {
-                    $in_outage = 1;
-                }
-            }
-        }
-
-        # end of current outage
-        if($current && !$in_outage) {
-            $current->{'real_end'} = $l->{'start'};
-            push @reduced_logs, $current if $in_timeperiod;
-            undef $current;
-            next;
-        }
-
-        # start of new outage
-        if(!$current && $in_outage) {
-            $last    = $l;
-            $current = $l;
-            next;
-        }
-
-        if($current && $l->{'class'} ne 'indeterminate') {
-            $current->{'class'} = $l->{'class'};
-        }
         $last = $l;
     }
-    if($current && $last) {
-        $current->{'real_end'} = $last->{'end'};
-        push @reduced_logs, $current if $in_timeperiod;
+
+    if($current_state && $last && $cur_in_outage) {
+        $current_state->{'real_end'} = $last->{'end'};
+        push @reduced_logs, $current_state;
     }
 
     my $outages = [];
@@ -1104,6 +1099,7 @@ sub outages {
             $l->{'end'} = $l->{'real_end'};
         }
         delete $l->{'real_end'};
+        delete $l->{'in_downtime'};
         if($l->{'duration'} > 0) {
             push @{$outages}, $l;
         }

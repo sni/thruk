@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 7;
+plan tests => 8;
 
 use_ok("Monitoring::Availability");
 use_ok("Thruk::Utils::Avail");
@@ -32,7 +32,6 @@ my $ma = Monitoring::Availability->new();
         'plugin_output' => 'check is unknown',
         'type'          => 'SERVICE UNKNOWN (HARD)',
         'class'         => 'unknown',
-        'in_downtime'   => 0,
     }];
     my $ma_options = {
         'start'                        => $start,
@@ -63,9 +62,8 @@ my $ma = Monitoring::Availability->new();
         'end'           => 1264115000,
         'duration'      => 4000,
         'plugin_output' => 'check is unknown',
-        'type'          => 'SERVICE UNKNOWN',
+        'type'          => 'SERVICE UNKNOWN (HARD)',
         'class'         => 'unknown',
-        'in_downtime'   => 0,
     }];
     my $ma_options = {
         'start'                        => $start,
@@ -118,7 +116,6 @@ my $ma = Monitoring::Availability->new();
         'plugin_output' => 'check is unknown again',
         'type'          => 'SERVICE UNKNOWN (HARD)',
         'class'         => 'unknown',
-        'in_downtime'   => 0,
     }, {
         'host'          => 'test_host',
         'service'       => 'service',
@@ -128,7 +125,6 @@ my $ma = Monitoring::Availability->new();
         'plugin_output' => 'check is unknown',
         'type'          => 'SERVICE UNKNOWN (HARD)',
         'class'         => 'unknown',
-        'in_downtime'   => 0,
     }, {
         'host'          => 'test_host',
         'service'       => 'service',
@@ -138,7 +134,6 @@ my $ma = Monitoring::Availability->new();
         'plugin_output' => 'check is unknown',
         'type'          => 'SERVICE UNKNOWN (HARD)',
         'class'         => 'unknown',
-        'in_downtime'   => 0,
     }];
     my $avail_data = $ma->calculate(%{$ma_options});
     my $logs       = $ma->get_condensed_logs();
@@ -212,7 +207,6 @@ my $ma = Monitoring::Availability->new();
         'duration'      => 1250,
         'plugin_output' => 'critical...',
         'type'          => 'SERVICE CRITICAL (HARD)',
-        'in_downtime'   => 0,
         },
         {
         'host'          => 'test_host',
@@ -223,7 +217,6 @@ my $ma = Monitoring::Availability->new();
         'duration'      => 500,
         'plugin_output' => 'critical...',
         'type'          => 'SERVICE CRITICAL (HARD)',
-        'in_downtime'   => 0,
     }];
     my $ma_options = {
         'start'                        => $start,
@@ -237,3 +230,41 @@ my $ma = Monitoring::Availability->new();
     my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
     is_deeply($outages, $expected_outages, "soft recovery outage as expected");
 };
+
+###########################################################
+# service outage with host downtime in between
+{
+    my $log = '
+[1747173600] CURRENT HOST STATE: test_host;UP;HARD;1;OK...
+[1747173600] CURRENT SERVICE STATE: test_host;service;OK;HARD;1;OK:
+[1747224000] HOST DOWNTIME ALERT: test_host;STARTED; Host has entered a period of scheduled downtime
+[1747225000] SERVICE ALERT: test_host;service;CRITICAL;HARD;1;critical...
+[1747227000] HOST DOWNTIME ALERT: test_host;CANCELLED; Scheduled downtime for host has been cancelled.
+[1747227500] SERVICE ALERT: test_host;service;OK;HARD;1;ok again...
+';
+    my $start   = 1747223000;
+    my $end     = 1747228000;
+    my $expected_outages =[{
+        'host'          => 'test_host',
+        'service'       => 'service',
+        'class'         => 'critical',
+        'start'         => 1747227000,
+        'end'           => 1747227500,
+        'duration'      => 500,
+        'plugin_output' => 'critical...',
+        'type'          => 'SERVICE CRITICAL (HARD)',
+    }];
+    my $ma_options = {
+        'start'                        => $start,
+        'end'                          => $end,
+        'log_string'                   => $log,
+        'services'                     => [{ 'host' => $host, 'service' => $service }],
+        'assumeinitialstates'          => "yes",
+    };
+    my $avail_data = $ma->calculate(%{$ma_options});
+    my $logs       = $ma->get_condensed_logs();
+    my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
+    is_deeply($outages, $expected_outages, "host downtimes in the middle outage as expected");
+};
+
+###########################################################
