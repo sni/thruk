@@ -870,12 +870,6 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
-     "type": "",
-     "unit": ""
-    },
-    {
      "description": "last plugin output during outage",
      "name": "plugin_output",
      "type": "",
@@ -1104,12 +1098,6 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
-     "type": "",
-     "unit": ""
-    },
-    {
      "description": "last plugin output during outage",
      "name": "plugin_output",
      "type": "",
@@ -1286,12 +1274,6 @@ __DATA__
     {
      "description": "host name",
      "name": "host",
-     "type": "",
-     "unit": ""
-    },
-    {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
      "type": "",
      "unit": ""
     },
@@ -1932,12 +1914,6 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
-     "type": "",
-     "unit": ""
-    },
-    {
      "description": "last plugin output during outage",
      "name": "plugin_output",
      "type": "",
@@ -2196,12 +2172,6 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
-     "type": "",
-     "unit": ""
-    },
-    {
      "description": "last plugin output during outage",
      "name": "plugin_output",
      "type": "",
@@ -2414,12 +2384,6 @@ __DATA__
     {
      "description": "host name",
      "name": "host",
-     "type": "",
-     "unit": ""
-    },
-    {
-     "description": "0/1 flag wether this outage is in a downtime",
-     "name": "in_downtime",
      "type": "",
      "unit": ""
     },

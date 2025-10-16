@@ -1198,7 +1198,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |service                           |            |          | service description (only for service outages)
 |start                             | time       |          | unix timestamp of outage start
@@ -1380,7 +1379,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |start                             | time       |          | unix timestamp of outage start
 |type                              |            |          | log entry type
@@ -1455,7 +1453,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |start                             | time       |          | unix timestamp of outage start
 |type                              |            |          | log entry type
@@ -1702,7 +1699,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |service                           |            |          | service description (only for service outages)
 |start                             | time       |          | unix timestamp of outage start
@@ -1867,7 +1863,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |service                           |            |          | service description (only for service outages)
 |start                             | time       |          | unix timestamp of outage start
@@ -1940,7 +1935,6 @@ Optional arguments:
 |duration                          | number     | s        | outage duration in seconds
 |end                               | time       |          | unix timestamp of outage end
 |host                              |            |          | host name
-|in_downtime                       |            |          | 0/1 flag wether this outage is in a downtime
 |plugin_output                     |            |          | last plugin output during outage
 |service                           |            |          | service description (only for service outages)
 |start                             | time       |          | unix timestamp of outage start
@@ -2698,3 +2692,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+
