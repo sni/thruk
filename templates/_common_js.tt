@@ -46,6 +46,8 @@
   var is_executing_timeout = [% 1000 * c.config.is_executing_timeout %];
   var sort_options        = [% json_encode(data_sorted) %];
   var menuState           = [% json_encode(menu_states) %];
+  var server_time_unix_millis = [% ts = date_now_millis(); ts %];
+  var server_time_str         = "[% tsu = ts / 1000; date_format(c, tsu, '%Y-%m-%d %H:%M:%S') %]";
   [% IF defined("pager") -%]
   var pager = [% json_encode(pager) %];
   [%- END %]

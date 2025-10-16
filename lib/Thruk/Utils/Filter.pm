@@ -19,6 +19,7 @@ use Date::Calc ();
 use Encode ();
 use POSIX ();
 use Scalar::Util ();
+use Time::HiRes ();
 use URI::Escape ();
 
 use Thruk::Utils ();
@@ -2206,5 +2207,16 @@ sub defined {
 
 ########################################
 
+=head2 date_now_millis
+
+  date_now_millis()
+
+return current time in milliseconds
+
+=cut
+
+sub date_now_millis {
+    return(int(Time::HiRes::time()*1000));
+}
 
 1;

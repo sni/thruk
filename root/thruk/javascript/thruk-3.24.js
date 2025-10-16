@@ -8795,17 +8795,19 @@ function show_cal(ev) {
     if(hasRange) {
         options.endDate = moment(date2);
     }
+    var server_ts = _parseDate(server_time_str);
+    var tsOffset  = Math.round((server_ts.valueOf() - server_time_unix_millis) / 60000)*60000; // this is the offset based on timezones rounded to full minutes
     if(hasSelect) {
         if(hasSelFut) {
             var now = _parseDate((new Date).strftime("%Y-%m-%d %H:%M:00"));
             options.ranges = {
-                '30 Minutes':   [moment(now), moment(now).add(30,'minutes')],
-                '1 Hour':       [moment(now), moment(now).add(1, 'hours')],
-                '2 Hours':      [moment(now), moment(now).add(2, 'hours')],
-                '1 Day':        [moment(now), moment(now).add(1, 'days')],
-                '3 Day':        [moment(now), moment(now).add(3, 'days')],
-                '1 Week':       [moment(now), moment(now).add(7, 'days')],
-                '2 Weeks':      [moment(now), moment(now).add(14,'days')]
+                '30 Minutes':   [moment(now).add(tsOffset), moment(now).add(tsOffset).add(30,'minutes')],
+                '1 Hour':       [moment(now).add(tsOffset), moment(now).add(tsOffset).add(1, 'hours')],
+                '2 Hours':      [moment(now).add(tsOffset), moment(now).add(tsOffset).add(2, 'hours')],
+                '1 Day':        [moment(now).add(tsOffset), moment(now).add(tsOffset).add(1, 'days')],
+                '3 Day':        [moment(now).add(tsOffset), moment(now).add(tsOffset).add(3, 'days')],
+                '1 Week':       [moment(now).add(tsOffset), moment(now).add(tsOffset).add(7, 'days')],
+                '2 Weeks':      [moment(now).add(tsOffset), moment(now).add(tsOffset).add(14,'days')]
             };
         } else {
             var today = _parseDate((new Date).strftime("%Y-%m-%d"));
@@ -10364,8 +10366,8 @@ function move_histou_img(factor) {
 }
 
 function toUnixtime(ts) {
-    if(ts == 0) { ts   = Math.floor(Date.now() / 1000); }
-    if(ts < 0)  { ts   = Math.floor(Date.now() / 1000) - (-1*ts);   }
+    if(ts == 0) { ts = Math.floor(Date.now() / 1000); }
+    if(ts < 0)  { ts = Math.floor(Date.now() / 1000) - (-1*ts); }
     return(ts);
 }
 
