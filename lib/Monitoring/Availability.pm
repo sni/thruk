@@ -1060,6 +1060,11 @@ sub _process_log_line {
 
             undef $data->{'state'}; # we dont know the current state, so make sure it wont be overwritten
 
+            # set an event for all services
+            for my $service_description (keys %{$self->{'service_data'}->{$data->{'host_name'}}}) {
+                &_set_service_event($self, $data->{'host_name'}, $service_description, $result, { 'start' => $data->{'start'}, 'end' => $data->{'end'}, 'time' => $data->{'time'} });
+            }
+
             # set the host event itself
             &_set_host_event($self,$data->{'host_name'}, $result, $data);
 
@@ -1087,11 +1092,6 @@ sub _process_log_line {
                                 'host'          => $data->{'host_name'},
                             },
             );
-
-            # set an event for all services
-            for my $service_description (keys %{$self->{'service_data'}->{$data->{'host_name'}}}) {
-                &_set_service_event($self, $data->{'host_name'}, $service_description, $result, { 'start' => $data->{'start'}, 'end' => $data->{'end'}, 'time' => $data->{'time'} });
-            }
         }
         else {
             $self->_log('  -> unknown log type') if $verbose;
@@ -1298,7 +1298,7 @@ sub _log {
 ########################################
 sub _logging_filter {
     my ($hash) = @_;
-    my @keys = keys %{$hash};
+    my @keys = sort keys %{$hash};
     # filter a few keys we don't want to log
     @keys = grep {!/^(state_string_2_int
                       |logger

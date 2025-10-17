@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 9;
+plan tests => 12;
 
 use_ok("Monitoring::Availability");
 use_ok("Thruk::Utils::Avail");
@@ -225,7 +225,35 @@ my $ma = Monitoring::Availability->new();
         'services'                     => [{ 'host' => $host, 'service' => $service }],
         'assumeinitialstates'          => "yes",
     };
+    my $expected_availability = {
+        'hosts' => {},
+        'services' => {
+            'test_host' => {
+                'service' => {
+                                'scheduled_time_critical'               => 0,
+                                'scheduled_time_indeterminate'          => 0,
+                                'scheduled_time_ok'                     => 0,
+                                'scheduled_time_unknown'                => 0,
+                                'scheduled_time_warning'                => 0,
+                                'time_critical'                         => 1750,
+                                'time_indeterminate_nodata'             => 3600,
+                                'time_indeterminate_notrunning'         => 0,
+                                'time_indeterminate_outside_timeperiod' => 0,
+                                'time_ok'                               => 54650,
+                                'time_unknown'                          => 0,
+                                'time_warning'                          => 0,
+                },
+            },
+        },
+        'total' => {
+            'start'     => 1747170000,
+            'end'       => 1747230000,
+            'duration'  => 60000,
+            'time_indeterminate_outside_timeperiod' => 0,
+        },
+    };
     my $avail_data = $ma->calculate(%{$ma_options});
+    is_deeply($avail_data, $expected_availability, "host downtimes in between availability as expected");
     my $logs       = $ma->get_condensed_logs();
     my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
     is_deeply($outages, $expected_outages, "soft recovery outage as expected");
@@ -261,10 +289,38 @@ my $ma = Monitoring::Availability->new();
         'services'                     => [{ 'host' => $host, 'service' => $service }],
         'assumeinitialstates'          => "yes",
     };
+    my $expected_availability = {
+        'hosts' => {},
+        'services' => {
+            'test_host' => {
+                'service' => {
+                    'scheduled_time_critical'               => 2000,
+                    'scheduled_time_indeterminate'          => 0,
+                    'scheduled_time_ok'                     => 1000,
+                    'scheduled_time_unknown'                => 0,
+                    'scheduled_time_warning'                => 0,
+                    'time_critical'                         => 2500,
+                    'time_indeterminate_nodata'             => 0,
+                    'time_indeterminate_notrunning'         => 0,
+                    'time_indeterminate_outside_timeperiod' => 0,
+                    'time_ok'                               => 2500,
+                    'time_unknown'                          => 0,
+                    'time_warning'                          => 0
+                }
+            }
+        },
+        'total' => {
+            'start'    => 1747223000,
+            'end'      => 1747228000,
+            'duration' => 5000,
+            'time_indeterminate_outside_timeperiod' => 0,
+        },
+    };
     my $avail_data = $ma->calculate(%{$ma_options});
+    is_deeply($avail_data, $expected_availability, "host downtimes in between availability as expected");
     my $logs       = $ma->get_condensed_logs();
     my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
-    is_deeply($outages, $expected_outages, "host downtimes in the middle outage as expected");
+    is_deeply($outages, $expected_outages, "host downtimes in between outage as expected");
 };
 
 ###########################################################
@@ -309,7 +365,36 @@ my $ma = Monitoring::Availability->new();
         'services'                     => [{ 'host' => $host, 'service' => $service }],
         'assumeinitialstates'          => "yes",
     };
+    my $expected_availability = {
+        'hosts'    => {},
+        'services' => {
+            'test_host' => {
+                'service' => {
+                    'time_indeterminate_notrunning'         => 0,
+                    'time_indeterminate_nodata'             => 0,
+                    'scheduled_time_unknown'                => 0,
+                    'scheduled_time_warning'                => 0,
+                    'time_ok'                               => 500,
+                    'time_warning'                          => 0,
+                    'time_critical'                         => 4500,
+                    'time_unknown'                          => 0,
+                    'scheduled_time_indeterminate'          => 0,
+                    'scheduled_time_critical'               => 3200,
+                    'time_indeterminate_outside_timeperiod' => 0,
+                    'scheduled_time_ok'                     => 0,
+                },
+            },
+        },
+        'total' => {
+            'start'    => 1747223000,
+            'end'      => 1747228000,
+            'duration' => 5000,
+            'time_indeterminate_outside_timeperiod' => 0,
+        },
+    };
+
     my $avail_data = $ma->calculate(%{$ma_options});
+    is_deeply($avail_data, $expected_availability, "host downtimes in the middle availability as expected");
     my $logs       = $ma->get_condensed_logs();
     my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
     is_deeply($outages, $expected_outages, "host downtimes in the middle outage as expected");
