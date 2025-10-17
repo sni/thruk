@@ -783,12 +783,40 @@ sub do_send_command {
 
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
 
+        # add log note for some global system commands
+        if($cmd_typ == 11) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global notifications disabled by %s',           $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 12) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global notifications enabled by %s',            $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 36) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global active service checks disabled by %s',   $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 35) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global active service checks enabled by %s',    $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 89) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global active host checks disabled by %s',      $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 88) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global active host checks enabled by %s',       $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 42) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global eventhandler disabled by %s',            $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 41) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('NOTE: global eventhandler enabled by %s',             $c->req->parameters->{'com_author'})); }
+
+        # host notes
+        if($cmd_typ == 48) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;active checks disabled by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 47) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;active checks enabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 25) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;notifications disabled by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 24) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;notifications enabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 44) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;eventhandler disabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 43) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;eventhandler enabled by %s',   $c->req->parameters->{'host'}, $c->req->parameters->{'com_author'})); }
+
+        # service notes
+        if($cmd_typ == 6)  { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;active checks disabled by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 5)  { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;active checks enabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 23) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;notifications disabled by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 22) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;notifications enabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 46) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;eventhandler disabled by %s',  $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+        if($cmd_typ == 45) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;eventhandler enabled by %s',   $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
+
         # add log comment if removing downtimes and comments by id
-        if($cmd_typ == 4 or $cmd_typ == 79) {
+        if($cmd_typ == 4 || $cmd_typ == 79) {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.';'.$c->req->parameters->{'service'}.')';
+            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
         }
-        if($cmd_typ == 2 or $cmd_typ == 78) {
+        if($cmd_typ == 2 || $cmd_typ == 78) {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
+            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;%s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
         }
     }
 
@@ -1279,6 +1307,27 @@ sub _escape_obj_slashes {
     $str =~ s/\\/\\\\/gmx;
     return($str);
 }
+
+######################################
+sub _add_cmd_note {
+    my($c, $backends_list, $joined_backends, $note) = @_;
+
+    # check naemon version for notes command support (added in v1.4.3)
+    for my $peer_key (@{$backends_list}) {
+        my $peer = $c->db->get_peer_by_key($peer_key);
+        my $v_num = $peer->get_remote_naemon_version($c);
+        if(!$v_num || !Thruk::Utils::version_compare($v_num, '1.4.3')) {
+            _debug("skipping command note, backend ".$peer->peer_name()." has version ".($v_num // 'unknown')." which is < 1.4.3");
+
+            return;
+        }
+    }
+
+    push @{$c->stash->{'commands2send'}->{$joined_backends}}, sprintf('COMMAND [%d] LOG;%s', time(), $note);
+
+    return;
+}
+
 ######################################
 
 

@@ -606,4 +606,26 @@ sub get_remote_thruk_version {
 
 ##########################################################
 
+=head2 get_remote_naemon_version
+
+  get_remote_naemon_version()
+
+returns version of remote naemon instance
+
+=cut
+sub get_remote_naemon_version {
+    my($self, $c) = @_;
+    my $key = $self->{'key'};
+    if($c->stash->{'pi_detail'}->{$key}
+       && $c->stash->{'pi_detail'}->{$key}->{'program_version'}
+       && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'}
+       && $c->stash->{'pi_detail'}->{$key}->{'data_source_version'} =~ m/naemon/mxi
+    ) {
+       return($c->stash->{'pi_detail'}->{$key}->{'program_version'});
+    }
+    return;
+}
+
+##########################################################
+
 1;
