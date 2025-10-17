@@ -1052,6 +1052,7 @@ sub outages {
         # detect outage status
         my $class = $l->{'class'} // 'indeterminate';
         $class = $current_state->{'class'} if $class eq 'indeterminate';
+        $class = 'indeterminate' unless defined $class;
         my $in_outage = 0;
         if($in_timeperiod) {
             if($in_downtime || $in_hst_downtime) {
