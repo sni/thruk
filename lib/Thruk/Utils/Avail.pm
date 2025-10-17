@@ -1010,9 +1010,10 @@ sub outages {
     # combine outages
     my @reduced_logs;
     my($last, $current_state);
-    my $in_timeperiod  = 1;
-    my $in_downtime    = 0;
-    my $cur_in_outage  = 0;
+    my $in_timeperiod   = 1;
+    my $in_hst_downtime = 0;
+    my $in_downtime     = 0;
+    my $cur_in_outage   = 0;
 
     for my $l (@{$logs}) {
         next unless $l->{'type'};
@@ -1035,19 +1036,25 @@ sub outages {
             $current_state = $l unless defined $current_state;
         }
 
-        # set timeperiod && downtime status
+        # set timeperiod status
         if($l->{'type'} eq 'TIMEPERIOD START')    { $in_timeperiod = 1; }
         if($l->{'type'} eq 'TIMEPERIOD STOP')     { $in_timeperiod = 0; }
-        if($l->{'type'} =~ m/DOWNTIME\ START$/mx) { $in_downtime   = 1; }
-        if($l->{'type'} =~ m/DOWNTIME\ END$/mx)   { $in_downtime   = 0; }
-        if($l->{'type'} =~ m/DOWNTIME\ STOP$/mx)  { $in_downtime   = 0; }
+
+        # set downtime status
+        if(defined $l->{'in_downtime'}) {
+            if($service && !$l->{'service'}) {
+                $in_hst_downtime = $l->{'in_downtime'};
+            } else {
+                $in_downtime = $l->{'in_downtime'};
+            }
+        }
 
         # detect outage status
         my $class = $l->{'class'} // 'indeterminate';
         $class = $current_state->{'class'} if $class eq 'indeterminate';
         my $in_outage = 0;
         if($in_timeperiod) {
-            if($in_downtime) {
+            if($in_downtime || $in_hst_downtime) {
                 $in_outage = 1 if $u->{$class.'_downtime'};
             } else {
                 $in_outage = 1 if $u->{$class};

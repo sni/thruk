@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 8;
+plan tests => 9;
 
 use_ok("Monitoring::Availability");
 use_ok("Thruk::Utils::Avail");
@@ -251,6 +251,54 @@ my $ma = Monitoring::Availability->new();
         'start'         => 1747227000,
         'end'           => 1747227500,
         'duration'      => 500,
+        'plugin_output' => 'critical...',
+        'type'          => 'SERVICE CRITICAL (HARD)',
+    }];
+    my $ma_options = {
+        'start'                        => $start,
+        'end'                          => $end,
+        'log_string'                   => $log,
+        'services'                     => [{ 'host' => $host, 'service' => $service }],
+        'assumeinitialstates'          => "yes",
+    };
+    my $avail_data = $ma->calculate(%{$ma_options});
+    my $logs       = $ma->get_condensed_logs();
+    my $outages    = Thruk::Utils::Avail::outages($logs, {'critical' => 1, 'unknown' => 1}, $start, $end, $host, $service);
+    is_deeply($outages, $expected_outages, "host downtimes in the middle outage as expected");
+};
+
+###########################################################
+# service outage with downtime in the middle
+{
+    my $log = '
+[1747173600] CURRENT HOST STATE: test_host;UP;HARD;1;OK...
+[1747173600] CURRENT SERVICE STATE: test_host;service;OK;HARD;1;OK:
+[1747223000] SERVICE ALERT: test_host;service;CRITICAL;HARD;1;critical...
+[1747224000] HOST DOWNTIME ALERT: test_host;STARTED; Host has entered a period of scheduled downtime
+[1747224500] SERVICE ALERT: test_host;service;CRITICAL;HARD;1;still critical...
+[1747225000] SERVICE DOWNTIME ALERT: test_host;service;STARTED; Service has entered a period of scheduled downtime
+[1747227000] HOST DOWNTIME ALERT: test_host;CANCELLED; Scheduled downtime for host has been cancelled.
+[1747227200] SERVICE DOWNTIME ALERT: test_host;service;CANCELLED; Scheduled downtime for service has been cancelled.
+[1747227500] SERVICE ALERT: test_host;service;OK;HARD;1;ok again...
+';
+    my $start   = 1747223000;
+    my $end     = 1747228000;
+    my $expected_outages =[{
+        'host'          => 'test_host',
+        'service'       => 'service',
+        'class'         => 'critical',
+        'start'         => 1747227200,
+        'end'           => 1747227500,
+        'duration'      => 300,
+        'plugin_output' => 'still critical...',
+        'type'          => 'SERVICE CRITICAL (HARD)',
+    }, {
+        'host'          => 'test_host',
+        'service'       => 'service',
+        'class'         => 'critical',
+        'start'         => 1747223000,
+        'end'           => 1747224000,
+        'duration'      => 1000,
         'plugin_output' => 'critical...',
         'type'          => 'SERVICE CRITICAL (HARD)',
     }];
