@@ -7,7 +7,7 @@ use URI::Escape qw/uri_escape/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 313;
+    plan tests => 315;
 }
 
 
@@ -110,7 +110,9 @@ TestUtils::test_page(
     TestUtils::test_command($test);
     my @matches = $test->{'stderr'} =~ m/^(.*cmd:\s+COMMAND.*)$/gmx;
     require Data::Dumper;
-    is(scalar @matches, 1, "one command sent") or diag(Data::Dumper::Dumper(\@matches));
+    is(scalar @matches, 2, "one command sent") or diag(Data::Dumper::Dumper(\@matches));
+    like($matches[0], qr/DEL_SVC_DOWNTIME;/, "downtime delete command") or diag(Data::Dumper::Dumper(\@matches));
+    like($matches[1], qr/LOG;SERVICE NOTE:/, "downtime delete command") or diag(Data::Dumper::Dumper(\@matches));
 };
 
 ###############################################################################
