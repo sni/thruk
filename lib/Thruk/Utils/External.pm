@@ -1450,9 +1450,8 @@ sub FILENO {
 sub DESTROY {
     my($self) = @_;
     return unless defined $self;
-    return unless defined $self->{'fh'};
 
-    $self->CLOSE();
+    delete $self->{'fh'};
 
     return;
 }
