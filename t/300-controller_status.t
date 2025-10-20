@@ -24,8 +24,8 @@ my $pages = [
     {
         url  => '/thruk/cgi-bin/status.cgi',
         like => [
-            '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark">', # test bookmarks
-            '<input[^>]+checkbox[^>]+_host_name[^>]+checked[^>]*>', # colum selection
+            '<input\ type="text".*?value=".*\/thruk\/cgi\-bin\/status\.cgi"\ name="bookmark"', # test bookmarks
+            '<input[^>]+checkbox[^>]+_host_name[^>]+checked[^>]*>', # column selection
         ],
     },
 
