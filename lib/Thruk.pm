@@ -247,6 +247,7 @@ sub _build_app {
     ###################################################
     my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
     if($c->config->{'use_lmd_core'}) {
+        local $Thruk::Globals::c = $c;
         require Thruk::Utils::LMD;
         Thruk::Utils::LMD::check_initial_start($c, $config, 1);
     }
