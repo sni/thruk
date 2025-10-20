@@ -816,7 +816,7 @@ sub do_send_command {
         }
         if($cmd_typ == 2 || $cmd_typ == 78) {
             $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
-            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;%s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
+            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
         }
     }
 
