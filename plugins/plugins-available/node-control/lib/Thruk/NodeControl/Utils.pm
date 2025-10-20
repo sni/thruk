@@ -592,6 +592,8 @@ sub omd_install {
     return if $facts->{'installing'};
     return if($facts->{'run_all'} && !$force);
 
+    _audit_log("node-control", sprintf("installing omd version %s on peer %s", $version, $peer->{'name'}));
+
     # continue in background job
     _set_job_started($c, 'installing', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
@@ -663,6 +665,8 @@ sub omd_update {
     my $facts = _ansible_get_facts($c, $peer, 0);
     return if $facts->{'updating'};
     return if ($facts->{'run_all'} && !$force);
+
+    _audit_log("node-control", sprintf("updating omd site %s to version %s on peer %s", $facts->{'omd_site'}, $version, $peer->{'name'}));
 
     # continue in background job
     _set_job_started($c, 'updating', $peer->{'key'});
@@ -956,6 +960,8 @@ sub omd_cleanup {
     my $facts = _ansible_get_facts($c, $peer, 0);
     return if $facts->{'cleaning'};
     return if($facts->{'run_all'} && !$force);
+
+    _audit_log("node-control", sprintf("cleaning unused omd versions on peer %s", $peer->{'name'}));
 
     # continue in background job
     _set_job_started($c, 'cleaning', $peer->{'key'});
