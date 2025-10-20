@@ -18,7 +18,7 @@
       <table class="body sub_2">
         <tr>
           <th>Url</th>
-          <td><input type="text" class="w-full" value="[% full_uri(c) %]" name="bookmark"></td>
+          <td><input type="text" class="w-full" value="[% full_uri(c) %]" name="bookmark" onchange="stripOwnURL(this)" onkeyup="stripOwnURL(this)"></td>
         </tr>
         <tr>
           <th>Category</th>
@@ -185,4 +185,12 @@
       initTableRowSorting("user_bookmarks");
       initTableRowSorting("public_bookmarks");
   }
+
+  function stripOwnURL(input) {
+    var own_url = window.location.protocol + "//" + window.location.host + "/";
+    if(input.value.startsWith(own_url)) {
+      input.value = input.value.replace(own_url, "/");
+    }
+  }
+
 </script>
