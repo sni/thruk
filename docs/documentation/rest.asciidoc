@@ -415,17 +415,72 @@ Transformation functions can be used to adjust result data.
 
 Available transformations functions are:
 
-  * `upper`: make column upper case
-  * `uc`: alias for upper
-  * `lower`: make column lower case
-  * `lc`: alias for lower
-  * `substr`: extract substring (substr(columnname, offset [, length]))
-  * `calc`: apply mathematical operation (calc(column, op , value) ex.: calc(last_check, '*', 1000))
-  * `s`: apply regex replacement (s(column, regex, replace) ex.: s(host_name, '/\..*$/', '') Note: you cannot use backreferences like $1 in the replacement string for security reasons.
-  * `unit`: set the unit for this column (unit(column, unit) ex.: unit(calc(rta, "*", 1000), "s")
-  * `concat`: combine multiple columns into one ex.: concat(name, ";", state) will return "host1;0")
+[options="header"]
+|===========================
+|Function |Example |Description
 
-ex.: return first 3 characters from upper case host name.
+|`age(<column>)`
+|`age(last_check)`
+|Subtract value from current unix timestamp to get the age in seconds.
+
+|`calc(<column>, <operator>, <value>)`
+|`calc(last_check, '*', 1000)`
+|Apply a mathematical operation.
+
+|`concat(<column>|<text>, ...)`
+|`concat(name, ";", state)`
+|Combine multiple columns into one.
+
+|`duration(<column>)`
+|`duration(execution_time)`
+|Convert amount of seconds into human readable duration.
+
+|`lc(<column>)`
+|`lc(host_name)`
+|Make column lower case.
+
+|`lower(<column>)`
+|`lower(host_name)`
+|Make column lower case.
+
+|`s(<column>, <regex>, <replacement>)`
+|`s(host_name, '/\..*$/', '')`
+|Apply regex replacement. Note: you cannot use backreferences like `$1` in the replacement string for security reasons.
+
+|`substr(<column>, <offset> [, <length>])`
+|`substr(name, 0, 3)`
+|Extract substring.
+
+|`unit(<column>, <unit>)`
+|`unit(calc(rta, '*', 1000), "s")`
+|Set the unit for this column.
+
+|`uc(<column>)`
+|`uc(host_name)`
+|Make column upper case.
+
+|`upper(<column>)`
+|`upper(host_name)`
+|Make column upper case.
+
+|`utc(<column>, [<format>])`
+|`utc(last_check, "%Y-%m-%d %H:%M:%S %Z")`
+|Convert unix timestamp to UTC date.
+
+|`date(<column>, [<format>])`
+|`date(last_check, "%Y-%m-%d %H:%M:%S %Z")`
+|Convert unix timestamp to date in local timezone.
+
+|`hoststate(<column>)`
+|`hoststate(state)`
+|Convert numeric host state into text representation, ex.: 0 -> UP, 1 -> DOWN, ...
+
+|`servicestate(<column>)`
+|`servicestate(state)`
+|Convert numeric service state into text representation, ex.: 0 -> OK, 1 -> WARNING, ...
+|===========================
+
+Example: return first 3 characters from upper case host name.
 
 ------
   %> thruk r '/hosts?columns=upper(substr(name, 0, 3)) as host'
@@ -2692,4 +2747,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

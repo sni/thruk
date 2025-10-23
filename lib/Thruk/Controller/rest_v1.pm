@@ -1144,6 +1144,49 @@ sub _apply_data_function {
         return($val);
     }
 
+    if($name eq 'utc') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            local $ENV{'TZ'} = 'UTC';
+            $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
+        }
+        return ($val);
+    }
+
+    if($name eq 'date') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
+        }
+        return ($val);
+    }
+
+    if($name eq 'age') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            $val = time() - $val;
+        }
+        return ($val);
+    }
+
+    if($name eq 'duration') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            $val = Thruk::Utils::Filter::duration($val, 6);
+        }
+        return ($val);
+    }
+
+    if($name eq 'hoststate' || $name eq 'hststate') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            $val = Thruk::Utils::Filter::hoststate2text($val);
+        }
+        return ($val);
+    }
+
+    if($name eq 'servicestate' || $name eq 'svcstate') {
+        if(Thruk::Backend::Manager::looks_like_number($val)) {
+            $val = Thruk::Utils::Filter::state2text($val);
+        }
+        return ($val);
+    }
+
     # just set the unit, do not change the value
     if($name eq 'unit') {
         $col->{'unit'} = _trim_quotes($args->[0]);

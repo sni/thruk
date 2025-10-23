@@ -88,7 +88,7 @@ sub format_date {
 
   my $string = format_number($number)
 
-return number with thousands seperator
+return number with thousands separator
 
 =cut
 sub format_number {
