@@ -1147,14 +1147,14 @@ sub _apply_data_function {
     if($name eq 'utc') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             local $ENV{'TZ'} = 'UTC';
-            $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
+            $val = Thruk::Utils::format_date($val, _trim_quotes($args->[0] // "%Y-%m-%d %H:%M:%S %Z"));
         }
         return($val);
     }
 
     if($name eq 'date') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
-            $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
+            $val = Thruk::Utils::format_date($val, _trim_quotes($args->[0] // "%Y-%m-%d %H:%M:%S %Z"));
         }
         return($val);
     }
