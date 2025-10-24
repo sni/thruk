@@ -3256,6 +3256,7 @@ Configuration Example:
     refresh_interval       = 1
     #favorite_custom_function = echo ; echo_function
     #worker                = 5
+    #offline_grace_time    = 180
     #default_filter        = add_recursive_output_filter
     #default_state_order   = down, unreachable, ...
     #sync_downtime_ack_state = 0
@@ -3320,6 +3321,13 @@ to 1 disables parallelization. Setting it to 0 trys to autodetect a
 suitable value.
 
 Automatic bp calculations will be disabled if set to zero.
+
+=== offline_grace_time
+Set the time (in seconds) how long a business process will wait for
+offline backends to recover. During this time the business process
+will keep its last known state.
+
+Default is 180 seconds.
 
 === default_filter
 Add global filter to all business processes, can be set multiple times.

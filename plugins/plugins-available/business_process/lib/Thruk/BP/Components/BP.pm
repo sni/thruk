@@ -218,8 +218,14 @@ sub update_status {
         my $previous_affected = $self->{'affected_peers'};
         $self->{'affected_peers'} = $self->_extract_affected_backends($livedata);
         my $failed = $self->_list_failed_backends($c, $previous_affected, $c->stash->{'failed_backends'});
-        if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - 180))) {
-            _warn("not updating business process '".$self->{'name'}."' because the backends ".join(",", @{$failed})." are unavailable. Waiting 3 minutes to recover, last successful update: ".(scalar localtime $self->{'last_check'}));
+        my $offline_grace_time = $c->config->{'Thruk::Plugin::BP'}->{'offline_grace_time'} // 180;
+        if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - $offline_grace_time))) {
+            _warn(sprintf("not updating business process '%s' because the backends %s are unavailable. Waiting %s to recover, last successful update: %s",
+                $self->{'name'},
+                join(",", @{$failed}),
+                Thruk::Utils::Filter::duration($offline_grace_time, 5),
+                (scalar localtime $self->{'last_check'}),
+            ));
             return;
         }
         for my $n (@{$self->{'nodes'}}) {
