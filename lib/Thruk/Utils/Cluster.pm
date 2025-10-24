@@ -478,6 +478,7 @@ returns true if this node is in maintenance mode.
 sub maint {
     my($self, $node, $val) = @_;
     my $c = $Thruk::Utils::Cluster::context;
+    $c->cluster->load_statefile(); # update current state, it is cached usually
     $node = $c->cluster->{'node'} unless defined $node;
     my $old = $node->{'maintenance'} || 0;
     if(defined $val) {
