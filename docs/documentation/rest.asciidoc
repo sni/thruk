@@ -435,6 +435,10 @@ Available transformations functions are:
 |`duration(execution_time)`
 |Convert amount of seconds into human readable duration.
 
+|`fmt("format", <column>|<text>, ...)`
+|`fmt("%.1f", execution_time)`
+|Applies format string to column value(s).
+
 |`lc(<column>)`
 |`lc(host_name)`
 |Make column lower case.

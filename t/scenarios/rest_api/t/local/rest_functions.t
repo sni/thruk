@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 74;
+plan tests => 84;
 
 ###########################################################
 # test thruks script path
@@ -30,7 +30,7 @@ TestUtils::test_command({
 # calc
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=calc(last_check, "/", 2) as calc"',
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=calc(last_check, \"/\", 2) as calc"',
         like => [qr/^#calc$/smx, qr/^\d+\.5+$/smx],
     });
 };
@@ -83,7 +83,7 @@ TestUtils::test_command({
 # s
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=s(name, "l.*l", "TST") as test"',
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=s(name, \"l.*l\", \"TST\") as test"',
         like => [qr/^#test$/smx, qr/^TSThost$/smx],
     });
 };
@@ -130,6 +130,19 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/services?columns=servicestate(state) as test"',
         like => [qr/^#test$/smx, qr/^(OK|WARNING|UNKNOWN|CRITICAL)$/smx],
+    });
+};
+
+###########################################################
+# fmt
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%.3f\", state) as test"',
+        like => [qr/^#test$/smx, qr/^\d\.000$/smx],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%s:%.3f\", name, state) as test"',
+        like => [qr/^#test$/smx, qr/^localhost:\d\.000$/smx],
     });
 };
 

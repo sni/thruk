@@ -1077,7 +1077,7 @@ sub _get_transformed_row_value {
 
     my $val = $row->{$col->{'orig'}//''} // $row->{$col->{'column'}//''} // $row->{$col->{'no_host_col'}//''};
     for my $f (@{$col->{'func'}}) {
-        $val = _apply_data_function($col, $f, $val, $row);
+        $val = _apply_data_function($col, $f, ($val // $col->{'column'}), $row);
     }
 
     return $val;
@@ -1149,42 +1149,66 @@ sub _apply_data_function {
             local $ENV{'TZ'} = 'UTC';
             $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
         }
-        return ($val);
+        return($val);
     }
 
     if($name eq 'date') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             $val = Thruk::Utils::format_date($val, $args->[0] // "%Y-%m-%d %H:%M:%S %Z");
         }
-        return ($val);
+        return($val);
     }
 
     if($name eq 'age') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             $val = time() - $val;
         }
-        return ($val);
+        return($val);
     }
 
     if($name eq 'duration') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             $val = Thruk::Utils::Filter::duration($val, 6);
         }
-        return ($val);
+        return($val);
+    }
+
+    if($name eq 'fmt') {
+        my $fmt = _trim_quotes($val);
+        die("usage: fmt(format_string, arg1, arg2, ...)") if(scalar @{$args} < 1 || !defined $fmt);
+        my @values;
+        for my $a (@{$args}) {
+            my $n = "$a";
+            if($n =~ m/^("|')/mx) {
+                $n = _trim_quotes($n);
+                push @values, $n;
+            } else {
+                $n = _trim_backticks($n);
+                push @values, $row->{$n}//'';
+            }
+        }
+        {
+            ## no critic
+            no warnings; # skip warnings for format string issues
+            ## use critic
+            $val = sprintf($fmt, @values);
+            use warnings;
+        }
+        return($val);
     }
 
     if($name eq 'hoststate' || $name eq 'hststate') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             $val = Thruk::Utils::Filter::hoststate2text($val);
         }
-        return ($val);
+        return($val);
     }
 
     if($name eq 'servicestate' || $name eq 'svcstate') {
         if(Thruk::Backend::Manager::looks_like_number($val)) {
             $val = Thruk::Utils::Filter::state2text($val);
         }
-        return ($val);
+        return($val);
     }
 
     # just set the unit, do not change the value
@@ -1244,8 +1268,8 @@ sub _extract_val {
 }
 
 ##########################################################
-# returns columns required from calculations
-sub _get_calc_concat_required_columns {
+# returns columns required from calculations, concat and fmt
+sub _get_calc_concat_fmt_required_columns {
     my($c) = @_;
 
     my $extra = [];
@@ -1262,6 +1286,15 @@ sub _get_calc_concat_required_columns {
             }
         }
         if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] eq 'concat') {
+            my $arg = $col->{'func'}->[0]->[1];
+            for my $a (@{$arg}) {
+                my $n = "$a";
+                next if $n =~ m/^("|')/mx; # skip quoted strings
+                $n = _trim_backticks($n);
+                push @{$extra}, $n;
+            }
+        }
+        if(scalar @{$col->{'func'}} > 0 && $col->{'func'}->[0]->[0] eq 'fmt') {
             my $arg = $col->{'func'}->[0]->[1];
             for my $a (@{$arg}) {
                 my $n = "$a";
@@ -1377,7 +1410,7 @@ sub _livestatus_options {
         }
         if(scalar @{$columns} > 0) {
             push @{$columns}, @{get_filter_columns($c)};
-            push @{$columns}, @{_get_calc_concat_required_columns($c)};
+            push @{$columns}, @{_get_calc_concat_fmt_required_columns($c)};
             $columns = Thruk::Base::array_uniq($columns);
             my $ref_columns;
             if($type eq 'hosts') {
