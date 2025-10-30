@@ -590,7 +590,7 @@ sub _check_exit_reason {
     } else {
         return if $ENV{'THRUK_NO_SHUTDOWN_WARNINGS'};
         $log = \&_warn;
-        &{$log}("got signal %s while handling %s request in %s\n", $sig, $c->req->method, $url);
+        &{$log}("got signal %s while handling %s request in %s\n", $sig, $c->req->method//'', $url//'');
     }
     &{$log}("User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
     &{$log}("Runtime:    %.2fs\n", $request_runtime);
