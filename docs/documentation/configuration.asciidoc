@@ -3329,6 +3329,13 @@ will keep its last known state.
 
 Default is 180 seconds.
 
+=== offline_handling
+Decide how to handle offline backends in business processes. Valid values are:
+
+    * `0` - do nothing if backends are offline, simply skips calculation for affected BP
+    * `1` - continue calculation after grace period (default)
+    * `2` - set to unknown state if any backend is offline
+
 === default_filter
 Add global filter to all business processes, can be set multiple times.
 

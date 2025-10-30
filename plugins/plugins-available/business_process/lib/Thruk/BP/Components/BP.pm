@@ -212,43 +212,75 @@ sub update_status {
     my $last_state = $self->{'status'};
 
     my $results = [];
-    my($livedata);
+    my($livedata, $skip_update);
     if($type == 0) {
         $livedata = $self->bulk_fetch_live_data($c);
         my $previous_affected = $self->{'affected_peers'};
         $self->{'affected_peers'} = $self->_extract_affected_backends($livedata);
         my $failed = $self->_list_failed_backends($c, $previous_affected, $c->stash->{'failed_backends'});
         my $offline_grace_time = $c->config->{'Thruk::Plugin::BP'}->{'offline_grace_time'} // 180;
-        if(scalar @{$failed} > 0 && ($self->{'last_check'} > (time() - $offline_grace_time))) {
-            _warn(sprintf("not updating business process '%s' because the backends %s are unavailable. Waiting %s to recover, last successful update: %s",
-                $self->{'name'},
-                join(",", @{$failed}),
-                Thruk::Utils::Filter::duration($offline_grace_time, 5),
-                (scalar localtime $self->{'last_check'}),
-            ));
-            return;
+        my $offline_handling   = $c->config->{'Thruk::Plugin::BP'}->{'offline_handling'}   // 1;
+        if(scalar @{$failed} > 0) {
+            if($offline_handling == 0) {
+                _warn(sprintf("not updating business process '%s' because the backends %s are unavailable. Waiting to recover, last successful update: %s",
+                    $self->{'name'},
+                    join(",", @{$failed}),
+                    (scalar localtime $self->{'last_check'}),
+                ));
+                return;
+            }
+            if($self->{'last_check'} > (time() - $offline_grace_time)) {
+                _warn(sprintf("not updating business process '%s' because the backends %s are unavailable. Waiting %s to recover, last successful update: %s",
+                    $self->{'name'},
+                    join(",", @{$failed}),
+                    Thruk::Utils::Filter::duration($offline_grace_time, 5),
+                    (scalar localtime $self->{'last_check'}),
+                ));
+                return;
+            }
+
+            # backends offline and grace period expired
+            if($offline_handling == 1) {
+                # continue normally
+            } elsif($offline_handling == 2) {
+                # set BP to unknown
+                $self->{'affected_peers'} = $previous_affected;
+                $skip_update = 1;
+                for my $n (@{$self->{'nodes'}}) {
+                    next unless $n->{'create_obj'};
+                    $n->set_status(3, 'UNKNOWN - backend(s) offline: '.join(", ", @{$failed}));
+                    push @{$results}, $n->{'id'};
+                }
+                $self->set_status(3, 'UNKNOWN - backend(s) offline: '.join(", ", @{$failed}));
+            } else {
+                die("invalid offline_handling value (valid from 0-2): ".$offline_handling);
+            }
         }
-        for my $n (@{$self->{'nodes'}}) {
-            my $r = $n->update_status($c, $self, $livedata);
-            push @{$results}, $n->{'id'} if $r;
+        if(!$skip_update) {
+            for my $n (@{$self->{'nodes'}}) {
+                my $r = $n->update_status($c, $self, $livedata);
+                push @{$results}, $n->{'id'} if $r;
+            }
         }
     }
 
-    my $iterations = 0;
-    while(scalar keys %{$self->{'need_update'}} > 0) {
-        $iterations++;
-        for my $id (keys %{$self->{'need_update'}}) {
-            my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $livedata, $type);
-            push @{$results}, $id if $r;
+    if(!$skip_update) {
+        my $iterations = 0;
+        while(scalar keys %{$self->{'need_update'}} > 0) {
+            $iterations++;
+            for my $id (keys %{$self->{'need_update'}}) {
+                my $r = $self->{'nodes_by_id'}->{$id}->update_status($c, $self, $livedata, $type);
+                push @{$results}, $id if $r;
+            }
+            die("circular dependencies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
         }
-        die("circular dependenies? Still have these on the update list: ".Dumper($self->{'need_update'})) if $iterations > 10;
     }
 
     $results = Thruk::Base::array_uniq($results);
 
     # update last check time
     my $now = time();
-    $self->{'last_check'} = $now;
+    $self->{'last_check'} = $now unless $skip_update;
     if($last_state != $self->{'status'}) {
         $self->{'last_state_change'} = $now;
     }
