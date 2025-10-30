@@ -6224,6 +6224,7 @@ function action_menu_icon(iconUrl, options) {
 function set_action_menu_link_action(link, menu_entry, options) {
     var href            = replace_macros(menu_entry.action, undefined, options);
     link.href           = href;
+    link.className      = "link";
     link.dataset["url"] = href; // href is normalized for ex. in chrome which lowercases and urlescapes the link
     if(menu_entry.target) { link.target = menu_entry.target; }
 }
@@ -6356,8 +6357,6 @@ function actionGetMenuItem(el, id, backend, host, service) {
     var link = document.createElement('a');
     if(el.disabled) {
         item.className = 'disabled no-hover';
-    } else {
-        item.className = 'clickable';
     }
     if(el.disabled || el.menu || !el.action) {
         jQuery(link).off("click").on("click", function(e) {
