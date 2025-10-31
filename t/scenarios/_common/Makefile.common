@@ -162,10 +162,10 @@ prepare: base_images
 	docker ps
 	@docker compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
 		echo "$${LOGLINE}"; \
-		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ "docker" -PIPE && exit 0; \
+		[[ "$${LOGLINE}" == *"Starting Apache web server"* ]] && pkill -P $$$$ "docker" -9 && exit 0; \
 		[[ "$${LOGLINE}" == *"ci container ready"* ]]         && pkill -P $$$$ "docker" -9 && exit 0; \
-		[[ "$${LOGLINE}" == *"ERROR"* ]]                      && pkill -P $$$$ "docker" -PIPE && exit 1; \
-		[[ "$${LOGLINE}" == *"exited with code"* ]]           && pkill -P $$$$ "docker" -PIPE && exit 1; \
+		[[ "$${LOGLINE}" == *"ERROR"* ]]                      && pkill -P $$$$ "docker" -9 && exit 1; \
+		[[ "$${LOGLINE}" == *"exited with code"* ]]           && pkill -P $$$$ "docker" -9 && exit 1; \
 	done
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_prepare
