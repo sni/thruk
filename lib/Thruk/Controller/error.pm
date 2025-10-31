@@ -439,7 +439,7 @@ sub _get_connection_details {
                                 $name,
                                 _state2txt($c->stash->{'backend_detail'}->{$pd}->{'state'}),
                                 ($c->stash->{'failed_backends'}->{$pd}//''),
-                                $peer->{'addr'},
+                                $peer->{'addr'}//'',
                     );
     }
 
@@ -460,7 +460,10 @@ sub _get_connection_details {
 
 sub _state2txt {
     my($state) = @_;
-    if($state == 1) {
+    if(!defined $state) {
+        return("PENDING");
+    }
+    if($state eq "1") {
         return("DOWN");
     }
     return("OK");
