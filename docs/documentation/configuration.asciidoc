@@ -12,6 +12,7 @@ which they are read):
   * thruk.conf                     # shipped default Thruk config
   * thruk_local.d/*.{cfg,conf}     # local override drop dir
   * thruk_local.conf               # local override of Thruks settings
+  * cgi.cfg                        # the cgi.cfg overrides some settings
 -------
 
 WARNING: All configuration options described in this file should go into the
