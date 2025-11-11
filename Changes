@@ -7,6 +7,8 @@ next:
           - Business Process:
             - add option to configure offline backends grade period (offline_grace_time)
             - add option to configure handling offline backends (offline_handling)
+          - self check:
+            - add logcache data consistency checks (logcache_data)
 
 3.24     Thu Oct  2 09:20:56 CEST 2025
           - teams: add role based permissions based on oauth group memberships

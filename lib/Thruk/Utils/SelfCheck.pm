@@ -32,6 +32,7 @@ my $available_checks = {
     'recurring_downtimes' => \&_recurring_downtime_checks,
     'lmd'                 => \&_lmd_checks,
     'logcache'            => \&_logcache_checks,
+    'logcache_data'       => \&_logcache_data_check,
     'backends'            => \&_backends_checks,
 };
 
@@ -517,7 +518,7 @@ verify errors in logcache
 
 =cut
 sub _logcache_checks  {
-    my($c, $options) = @_;
+    my($c) = @_;
     my $details = "Logcache:\n";
 
     return unless defined $c->config->{'logcache'};
@@ -525,12 +526,10 @@ sub _logcache_checks  {
     require Thruk::Backend::Provider::Mysql;
     Thruk::Backend::Provider::Mysql->import;
 
-    my $heal    = $options->{'heal'};
     my $rc      = 0;
     my $errors  = 0;
     my @stats     = Thruk::Backend::Provider::Mysql->_log_stats($c);
     my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
-    my $incons    = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c, undef, $heal);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
@@ -548,11 +547,6 @@ sub _logcache_checks  {
         }
         elsif($s->{'last_reorder'} < time() - (31*86400)) {
             $details .= sprintf('  - [logcache %s] last optimize run too old: %s (hint: run `thruk logcache optimize` once a week)'."\n", $s->{'name'}, scalar localtime $s->{'last_reorder'});
-            $errors++;
-        }
-
-        if($incons->{$s->{'key'}}) {
-            $details .= sprintf('  - [logcache %s] %s'."\n", $s->{'name'}, $incons->{$s->{'key'}});
             $errors++;
         }
     }
@@ -574,6 +568,48 @@ sub _logcache_checks  {
 
     my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
     return({sub => 'logcache', rc => $rc, msg => $msg, details => $details});
+}
+
+##############################################
+
+=head2 _logcache_data_check
+
+    _logcache_data_check($c)
+
+verify logcache data consistency
+
+=cut
+sub _logcache_data_check  {
+    my($c, $options) = @_;
+    my $details = "Logcache Data:\n";
+
+    return unless defined $c->config->{'logcache'};
+
+    require Thruk::Backend::Provider::Mysql;
+    Thruk::Backend::Provider::Mysql->import;
+
+    my $heal    = $options->{'heal'};
+    my $rc      = 0;
+    my $errors  = 0;
+    my @stats   = Thruk::Backend::Provider::Mysql->_log_stats($c);
+    my $incons  = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c, undef, $heal);
+
+    for my $s (@stats) {
+        next unless $s->{'enabled'};
+        if($incons->{$s->{'key'}}) {
+            $details .= sprintf('  - [logcache %s] %s'."\n", $s->{'name'}, $incons->{$s->{'key'}});
+            $errors++;
+        }
+    }
+
+    if($errors == 0) {
+        $details .= "  - no errors in ".(scalar @stats)." logcaches\n";
+    } else {
+        $rc = 2;
+    }
+
+    my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
+    return({sub => 'logcache_data', rc => $rc, msg => $msg, details => $details});
 }
 
 ##############################################
