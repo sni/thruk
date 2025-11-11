@@ -3016,6 +3016,7 @@ t/scenarios/logfile_cache_http/Makefile
 t/scenarios/logfile_cache_http/omd/Dockerfile
 t/scenarios/logfile_cache_http/omd/playbook.yml
 t/scenarios/logfile_cache_http/omd/thruk_local.conf
+t/scenarios/logfile_cache_http/README.md
 t/scenarios/logfile_cache_http/t/100-backend_mysql_utf8.t
 t/scenarios/logfile_cache_http/t/100-logcache.t
 t/scenarios/logfile_cache_http/t/300-controller_extinfo.t
