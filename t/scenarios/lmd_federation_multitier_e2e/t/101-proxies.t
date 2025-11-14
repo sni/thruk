@@ -6,7 +6,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 245;
+    plan tests => 290;
 }
 
 
@@ -73,6 +73,38 @@ ok(defined $ids->{'tier1a'}, 'got backend ids II');
             'like'   => ['Tactical Monitoring Overview', 'class="proxy_header"'],
         );
     }
+}
+
+###############################################################################
+# test proxying grafana
+{
+    # viewing host tier3b on by proxy on tier2a
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/proxy.cgi/c21da/demo/thruk/cgi-bin/status.cgi?style=detail&host=tier3b',
+        'like'           => ['Service Status Details For Host', 'tier3b', 'Ping', 'Load'],
+    );
+
+    # view service Load on host tier3b on by proxy on tier2a
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/proxy.cgi/c21da/demo/thruk/cgi-bin/extinfo.cgi?type=2&host=tier3b&service=Load&backend=e984d',
+        'like'           => ['Load', 'total load average', 'Performance Graph'],
+    );
+
+    # request histou template for grafana
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/proxy.cgi/c21da/demo/thruk/cgi-bin/proxy.cgi/e984d/demo/grafana/dashboard-solo/script/histou.js?host=tier3b&service=Load&theme=light&annotations=true&from=1763033126000&to=1763123126000&panelId=1',
+        'like'           => ['<base href="/thruk/cgi-bin/proxy.cgi/c21da/demo/thruk/cgi-bin/proxy.cgi/e984d/demo/grafana/"'],
+        'skip_html_lint' => 1,
+        'skip_doctype'   => 1,
+    );
+
+    # request histou data for grafana
+    TestUtils::test_page(
+        'url'            => '/thruk/cgi-bin/proxy.cgi/c21da/demo/thruk/cgi-bin/proxy.cgi/e984d/demo/histou/index.php?host=tier3b&service=Load',
+        'like'           => ['tier3b-Load', 'nagflux', 'rawQuery'],
+        'skip_html_lint' => 1,
+        'skip_doctype'   => 1,
+    );
 }
 
 ###############################################################################
