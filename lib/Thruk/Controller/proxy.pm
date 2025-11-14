@@ -36,13 +36,15 @@ sub index {
     }
 
     my($site, $url);
-    if($path_info =~ m%^.*/thruk/cgi-bin/proxy.cgi/([^/]+)(/.*)$%mx) {
+    if($path_info =~ m%^.*?/thruk/cgi-bin/proxy.cgi/([^/]+)(/.*)$%mx) {
         $site = $1;
         $url  = $2;
     }
     if(!$url || !$site) {
         return $c->detach('/error/index/25');
     }
+
+    _debug("[%s][-> %s] proxying request to url '%s' orig: '%s'", $c->config->{'hostname'}, $site, $url, $path_info);
     if(!$c->config->{'http_backend_reverse_proxy'}) {
         return $c->redirect_to($url);
     }
