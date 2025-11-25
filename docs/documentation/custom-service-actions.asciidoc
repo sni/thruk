@@ -1,0 +1,157 @@
+---
+layout: docs
+title: Custom Service Action
+---
+
+== Custom Service Actions
+
+{% include new_since.ad version="????" %}
+
+Custom service actions can be added to the Service Actions menu on service detail pages.
+This is done by creating a custom user template file called `user_service_commands.tt` in your user template path.
+
+image:source/custom_service_action.png[Custom Service Action]
+
+The template file will contain two parts:
+
+1. The first part is used to add new service actions that post GET requests. It conforms to the existing format of service commands. The user can call them by clicking on a link.
+
+2. The second part is used to add new service actions that post POST requests. For this a form with hidden fields are created and submitted with JavaScript upon clicking the link.
+
+The form fields will be available as POST variables in the script called by the quick action. 
+
+All variables are available as environment variables prefixed with `POST_`.
+
+There is a script for printing them out in the stdout, which can be used for testing purposes: `print_post_variables.sh` in the Thruk script folder.
+The template already includes an example that calls this script.
+
+Additionally, there are two special variables containing the selected objects:
+
+- `POST_SELECTED_SERVICES`: A list of all selected services.
+- `POST_SELECTED_HOSTS`: A list of all selected hosts.
+
+The format of the selected services is:
+```
+HOST;SERVICE;BACKEND~~HOST;SERVICE;BACKEND~~...
+```
+
+The format of the selected hosts is:
+```
+HOST;BACKEND~~HOST;BACKEND~~...
+```
+
+Even if the service actions are called from a service overview page with a single script, the selected_services variable will contain only that single service in the above format.
+The selected_hosts variable will be empty in that case.
+
+== Examples
+
+=== Add a custom quick action
+
+This custom service action will print all POST variables to stdout.
+
+image:source/service_print_post_variables.png[Print POST variables]
+
+If not already set, set the user template path in your `thruk_local.conf`:
+
+.thruk_local.conf
+-----
+  user_template_path = ./my_templates
+-----
+
+Then create the file `user_service_commands.tt` in that directory and add the following content:
+
+.my_templates/user_service_commands.tt
+.....
+{% raw %}
+[%# This template is for custom service commands that the user specifies. #%]
+[%# It will be put directly after the hardcoded service commands. It is evaluated all at once, does not need to be split into multiple blocks. #%]
+
+
+[%# ========================= Templated GET Service Actions ========================= #%]
+
+[%# The service commands pane already includes commands to be sent via GET to the CGI. #%]
+[%# Take note to adapt to their style for custom actions. #%]
+
+[%# Example GET command taken from template. It is disabled with IF 0 condition. #%]
+[% IF 0 %]
+    <div>
+        [% IF service.checks_enabled %]
+            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+                <i class="fa-solid fa-xmark round small red"></i>Disable active checks of this service
+            </a>
+        [% END %]
+    </div>
+[% END %]
+
+[%# ========================= Templated POST Service Actions ========================= #%]
+
+[%# These can put a form in the HTML for submitting POST requests to CGI. #%]
+[%# These forms can have hidden inputs, and can be sent with the link via JS, behaving like the GET requests. #%]
+
+[%# Example POST command. It is disabled with IF 0 condition. #%]
+[% IF 0 %]
+<div>
+    <form id="service_print_post_variables_form" action="cmd.cgi" method="POST" onsubmit="">
+
+        [%# These values here can be taken from the service object, which is in the scope where this template is included. #%]
+        <input type='hidden' name='host' value="[% service.host_name | html %]">
+        <input type='hidden' name='service' value="[% service.description | html %]">
+        <input type='hidden' name='backend' value="[% service.peer_key | html %]">
+
+        [%# In the quick command menu, one can select multiple services on a host. This builds a string called selected services. #%]
+        [%# An example of this string looks like this: localhost;Http;f4423~~localhost;Ping;f4423 #%]
+        [%# In the service commands pane, we only have one service, so we do not need to join multiple services with '~~' . #%]
+        [%# We are also adding this field so that the scripts for the quick commands can be used as a reference for further processing. #%]
+        <input type='hidden' name='selected_services' value="[% service.host_name | html %];[% service.description | html %];[% service.peer_key | html %]">
+        [%# Also define the other variable. In the service overview, there is no host to select. #%]
+        <input type='hidden' name='selected_hosts' value="">
+
+        [%# These values are taken from the template toolkit or other perl functions. #%]
+        <input type='hidden' name='start_time' value="[% date.now %]">
+        <input type='hidden' name='referer' value="[% short_uri(c, {referer => 'undef'}) %]">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+
+        [%# This is the command name that is defined in the Thruk configuration for this custom command #%]
+        [%# It should be defined under action_menu_actions section in one of the thruk configuration files #%]
+        [%# This example just calls the custom command 'print_post_variables'. #%]
+        <input type='hidden' name='quick_command' value="server://print_post_variables">
+    </form>
+    <script>
+        function submit_service_print_post_variables_form() {
+            document.getElementById('service_print_post_variables_form').submit();
+        }
+    </script>
+    <a class="js-modal-command-link" href="#" onclick="submit_service_print_post_variables_form(); return false;">
+        <i class="fa-solid fa-terminal"></i>Print POST variables
+    </a>
+</div>
+[% END %]
+{% endraw %}
+.....
+
+Add an entry for the script called if someone uses the quick action.
+
+.thruk_local.conf
+-----
+<action_menu_actions>
+  print_post_variables = ./local/share/Thruk/script/print_post_variables.sh
+</action_menu_actions>
+-----
+
+Finally the script `print_post_variables.sh` could look like this:
+
+.print_post_variables.sh
+++++++++++++++++++++++++
+{% highlight bash %}
+#!/bin/bash
+
+# This script is intended to print details of a post request to the CGI.
+# It should be invoked with a POST request to the CGI.
+# This should be added as a custom service/host action to the Thruk.
+# See the documentation for custom service/host actions more information.
+
+echo "Showing fields of the POST request:"
+env | grep 'POST_'
+
+{% endhighlight %}
+++++++++++++++++++++++++

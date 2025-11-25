@@ -179,6 +179,9 @@
           [% END %]
         </div>
       [% END %]
+      [%# Import template for custom user commands on the "Service Commands" pane #%]
+      [%# This is a single block, and does not need to be split up.  #%]
+      [% PROCESS user_service_commands.tt %]
     </div>
   </div>
 [% END %]
