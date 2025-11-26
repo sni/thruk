@@ -2335,6 +2335,7 @@ script/nagexp
 script/nagimp
 script/naglint
 script/pnp_export.sh
+script/print_post_variables.sh
 script/puppeteer.js
 script/reenable_actions
 script/templates_cleanup.pl
@@ -3426,8 +3427,10 @@ templates/trends_step_3.tt
 templates/user_api_keys.tt
 templates/user_ext_host_info.tt
 templates/user_ext_service_info.tt
+templates/user_host_commands.tt
 templates/user_profile.tt
 templates/user_quick_commands.tt
+templates/user_service_commands.tt
 templates/void.tt
 templates/waiting_for_job.tt
 THANKS

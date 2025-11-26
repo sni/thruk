@@ -224,7 +224,6 @@
       </div>
     [% END %]
     [%# Import template for custom host commands on the "Host Commands" pane #%]
-    [%# This is a single block, and does not need to be split up.  #%]
     [% PROCESS user_host_commands.tt %]
   </div>
 </div>

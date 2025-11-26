@@ -5,7 +5,7 @@ title: Custom Service Action
 
 == Custom Service Actions
 
-{% include new_since.ad version="????" %}
+{% include new_since.ad version="3.26" %}
 
 Custom service actions can be added to the Service Actions menu on service detail pages.
 This is done by creating a custom user template file called `user_service_commands.tt` in your user template path.
@@ -18,7 +18,7 @@ The template file will contain two parts:
 
 2. The second part is used to add new service actions that post POST requests. For this a form with hidden fields are created and submitted with JavaScript upon clicking the link.
 
-The form fields will be available as POST variables in the script called by the quick action. 
+The form fields will be available as POST variables in the script called by the quick action.
 
 All variables are available as environment variables prefixed with `POST_`.
 
@@ -69,30 +69,26 @@ Then create the file `user_service_commands.tt` in that directory and add the fo
 
 [%# ========================= Templated GET Service Actions ========================= #%]
 
-[%# The service commands pane already includes commands to be sent via GET to the CGI. #%]
+[%# The command pane already includes commands. #%]
 [%# Take note to adapt to their style for custom actions. #%]
 
-[%# Example GET command taken from template. It is disabled with IF 0 condition. #%]
-[% IF 0 %]
-    <div>
-        [% IF service.checks_enabled %]
-            <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
-                <i class="fa-solid fa-xmark round small red"></i>Disable active checks of this service
-            </a>
-        [% END %]
-    </div>
-[% END %]
+[%# Example GET command taken from template. #%]
+<div>
+    [% IF service.checks_enabled %]
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=6&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %]&amp;backend=[% service.peer_key %]">
+            <i class="fa-solid fa-xmark round small red"></i>Disable active checks of this service
+        </a>
+    [% END %]
+</div>
 
 [%# ========================= Templated POST Service Actions ========================= #%]
 
-[%# These can put a form in the HTML for submitting POST requests to CGI. #%]
-[%# These forms can have hidden inputs, and can be sent with the link via JS, behaving like the GET requests. #%]
+[%# You can insert a html form for submitting POST requests. #%]
+[%# These forms can be sent with the link via JS so they look like the other links. #%]
 
-[%# Example POST command. It is disabled with IF 0 condition. #%]
-[% IF 0 %]
+[%# Example POST command. #%]
 <div>
     <form id="service_print_post_variables_form" action="cmd.cgi" method="POST" onsubmit="">
-
         [%# These values here can be taken from the service object, which is in the scope where this template is included. #%]
         <input type='hidden' name='host' value="[% service.host_name | html %]">
         <input type='hidden' name='service' value="[% service.description | html %]">
@@ -106,8 +102,7 @@ Then create the file `user_service_commands.tt` in that directory and add the fo
         [%# Also define the other variable. In the service overview, there is no host to select. #%]
         <input type='hidden' name='selected_hosts' value="">
 
-        [%# These values are taken from the template toolkit or other perl functions. #%]
-        <input type='hidden' name='start_time' value="[% date.now %]">
+        [%# These values are are required for sending post requests. #%]
         <input type='hidden' name='referer' value="[% short_uri(c, {referer => 'undef'}) %]">
         <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
 
@@ -116,16 +111,10 @@ Then create the file `user_service_commands.tt` in that directory and add the fo
         [%# This example just calls the custom command 'print_post_variables'. #%]
         <input type='hidden' name='quick_command' value="server://print_post_variables">
     </form>
-    <script>
-        function submit_service_print_post_variables_form() {
-            document.getElementById('service_print_post_variables_form').submit();
-        }
-    </script>
-    <a class="js-modal-command-link" href="#" onclick="submit_service_print_post_variables_form(); return false;">
+    <a class="js-modal-command-link" href="#" onclick="document.getElementById('service_print_post_variables_form').submit(); return false;">
         <i class="fa-solid fa-terminal"></i>Print POST variables
     </a>
 </div>
-[% END %]
 {% endraw %}
 .....
 
@@ -134,7 +123,7 @@ Add an entry for the script called if someone uses the quick action.
 .thruk_local.conf
 -----
 <action_menu_actions>
-  print_post_variables = ./local/share/Thruk/script/print_post_variables.sh
+  print_post_variables = ./share/thruk/script/print_post_variables.sh
 </action_menu_actions>
 -----
 
