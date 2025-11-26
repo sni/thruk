@@ -448,7 +448,7 @@ sub _run_add_host {
     }
 
     my $orig_checks   = Thruk::Utils::Agents::build_checks_config($checks);
-    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'clear_manual'});
+    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'});
     if($opt->{'interactive'}) {
         my @lines = (
             "# edit host: ".$hostname,
@@ -484,7 +484,7 @@ sub _run_add_host {
         # start default editor for this file
         my $editor = $ENV{'editor'} // "vim";
         system("$editor $filename");
-        $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'clear_manual'});
+        $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'});
         for my $line (Thruk::Utils::IO::read_as_list($filename)) {
             next if $line =~ m/^\#/mx;
             $line =~ s/\#.*$//gmx;

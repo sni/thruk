@@ -980,7 +980,7 @@ sub _is_excluded {
         }
         if($tags) {
             my $list = Thruk::Base::comma_separated_list($tags // '');
-            next unless check_wildcard_match($list, ($ex->{'tag'}//'ANY'));
+            next unless check_wildcard_match($list, ($ex->{'tags'}//'ANY'));
         }
 
         my $names = [@{Thruk::Utils::list($ex->{'name'})}, @{Thruk::Utils::list($ex->{'service'})}];
@@ -999,13 +999,13 @@ sub _is_excluded {
 
 =head2 build_checks_config
 
-    build_checks_config($checks)
+    build_checks_config($checks, $fresh, $clear_manual)
 
 returns checks config used to build service objects
 
 =cut
 sub build_checks_config {
-    my($checks, $start_fresh) = @_;
+    my($checks, $start_fresh, $clear_manual) = @_;
     my $checks_config = {};
 
     for my $t (qw/new exists obsolete disabled/) {
@@ -1018,7 +1018,7 @@ sub build_checks_config {
             $chk->{'type'} = "keep" if $t eq 'exists';
             $chk->{'type'} = "off"  if $t eq 'disabled';
             $checks_config->{'check.'.$chk->{'id'}} = $chk->{'type'};
-            $checks_config->{'args.'.$chk->{'id'}} = $chk->{'args'} unless $start_fresh;
+            $checks_config->{'args.'.$chk->{'id'}} = $chk->{'args'} unless $clear_manual;
         }
     }
 
