@@ -172,7 +172,7 @@ The `<proc>` block is used to define process checks. There is a simple variant
 which only matches the process name and a advanced variant to match on the full
 command line.
 
-By default no specific process checks will be created, you have to set a list
+By default no specific process checks will be created, you have to define a list
 of processes to check.
 
 #### Basic
@@ -212,8 +212,10 @@ The `match` expression is applied as sub string match on the hole command line.
 
 The `<service>` block is used to define checks for windows or linux services.
 
-By default no specific service checks will be created, you have to set a list
-of processes to check.
+By default no specific service checks will be created, you have to define a list
+of services to check.
+
+#### Basic Service Check
 
 ...................................
 <service>
@@ -221,6 +223,25 @@ of processes to check.
   name     = service %s
   service  = apache2   # service name exact match
   service  ~ winlogon  # match all services containing 'winlogon'
+
+  #host    = ANY  # restrict to specific hosts
+  #section ~ test # apply this service only to sections containing "test"
+  #tags    = prod # apply this service only to hosts with tag "prod"
+</service>
+...................................
+
+Using wildcards or regexps in the example above will create multiple service checks
+for each matching service.
+
+#### Combine Multiple Services In One Check
+
+If you want to create a single check for multiple services, use the `all_in_one` attribute:
+
+...................................
+<service>
+  name       = all custom services
+  service    ~ ^custom
+  all_in_one = 1
 
   #host    = ANY  # restrict to specific hosts
   #section ~ test # apply this service only to sections containing "test"
