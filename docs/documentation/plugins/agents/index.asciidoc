@@ -408,11 +408,24 @@ Apply this option to all inventory checks:
       service  = mariadb
       service  = ntp
       service  = squid
+      service  ~ ^custom  # all services starting with custom will be created as separate checks
 
       #host    = ANY  # restrict to specific hosts
       #section ~ test # apply this service only to sections containing "test"
       #tags    = prod # apply this service only to hosts with tag "prod"
     </service>
+
+    # add a service check for multiple services in one check
+    <service>
+      name       = all custom services
+      service    ~ ^custom
+      all_in_one = 1
+
+      #host    = ANY  # restrict to specific hosts
+      #section ~ test # apply this service only to sections containing "test"
+      #tags    = prod # apply this service only to hosts with tag "prod"
+    </service>
+
 
     <proc>
       # service description (available placeholder: %u - user | %e - executable)

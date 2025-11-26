@@ -41,6 +41,8 @@ sub get_checks {
         };
     }
 
+    my $dups = {};
+
     # specifically configured service checks
     my $configs = Thruk::Base::list($c->config->{'Thruk::Agents'}->{'snclient'}->{'service'});
     for my $cfg (@{$configs}) {
@@ -49,18 +51,22 @@ sub get_checks {
         next unless $cfg->{'service'};
         for my $n (@{Thruk::Base::list($cfg->{'service'})}) {
             for my $svc (@{$services}) {
+                my $id = $svc->{'name'};
                 next if($svc->{'active'} && $svc->{'active'} eq 'inactive');
                 my $m = Thruk::Utils::Agents::check_wildcard_match($svc->{'name'}, $n);
                 next unless defined $m;
                 my($f, $v) = Thruk::Agents::SNClient::make_filter("name", $m);
                 my $args;
-                if($v eq $svc->{'name'}) {
-                    $args = sprintf("service='%s'", $v);
+                if($v eq $svc->{'name'} || !$cfg->{'all_in_one'}) {
+                    $args = sprintf("service='%s'", $svc->{'name'});
                 } else {
+                    $id   = $cfg->{'name'} // $id;
                     $args = sprintf('"filter=%s"', $f);
                 }
+                next if $dups->{$id};
+                $dups->{$id} = 1;
                 push @{$checks}, {
-                    'id'       => 'svc.'.Thruk::Utils::Agents::to_id($svc->{'name'}),
+                    'id'       => 'svc.'.Thruk::Utils::Agents::to_id($id),
                     'name'     => Thruk::Agents::SNClient::make_name($cfg->{'name'} // 'service %s', { '%s' => $svc->{'name'} }),
                     'check'    => 'check_service',
                     'args'     => [$args],

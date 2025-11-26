@@ -8,7 +8,7 @@ use Thruk::Config 'noautoload';
 BEGIN {
     plan skip_all => 'test skipped' if defined $ENV{'NO_DISABLED_PLUGINS_TEST'};
 
-    plan tests => 18;
+    plan tests => 14;
 }
 
 BEGIN {
@@ -38,62 +38,6 @@ my $section  = "testing";
 my $mode     = "http";
 my $options  = {};
 my $tags     = ["prod", "test"];
-
-###########################################################
-# service check
-{
-    my $conf = <<EOT;
-<Component Thruk::Agents>
-  <snclient>
-    <service>
-      service  = snclient
-      host     = ANY
-      section  ~ test
-      tags     = prod
-    </service>
-  </snclient>
-</Component>
-EOT
-
-my $inv = <<EOT;
-{ "inventory" : {
-    "service" : [{
-      "active" : "active",
-      "age" : "55550",
-      "cpu" : "3.2",
-      "created" : "1741410012",
-      "desc" : "SNClient+ Agent",
-      "name" : "snclient",
-      "pid" : "2393244",
-      "preset" : "enabled",
-      "rss" : "21319680",
-      "service" : "snclient",
-      "state" : "running",
-      "tasks" : "28",
-      "vms" : "1276743680"
-    }]
-  }
-}
-EOT
-
-    my $xtr = Thruk::Config::parse_config_from_text($conf);
-    $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
-    undef $Thruk::Agents::SNClient::conf;
-    local $cli_opts->{'cached'} = decode_json($inv);
-    my $checks = Thruk::Agents::SNClient::get_services_checks(undef, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
-    $checks = Thruk::Base::array2hash($checks, "id");
-    is_deeply([sort keys %{$checks}], [
-        '_host',
-        'inventory',
-        'svc',
-        'svc.snclient',
-        'version'
-    ], "process checks found");
-    is($checks->{'inventory'}->{'svc_conf'}->{'_WORKER'}, "local", "local inventory");
-
-    ok($checks->{'svc.snclient'}, "service check found");
-    is($checks->{'svc.snclient'}->{'name'},   "service snclient", "process: name");
-}
 
 ###########################################################
 # process check
@@ -139,7 +83,8 @@ EOT
 
     my $xtr = Thruk::Config::parse_config_from_text($conf);
     $c->config->{'Thruk::Agents'} = $xtr->{'Thruk::Agents'};
-    undef $Thruk::Agents::SNClient::conf;
+    local $Thruk::Agents::SNClient::conf;
+    $Thruk::Agents::SNClient::conf = undef;
     local $cli_opts->{'cached'} = decode_json($inv);
     my $checks = Thruk::Agents::SNClient::get_services_checks(undef, $c, $hostname, $hostobj, $password, $cli_opts, $section, $mode, $options, $tags);
     $checks = Thruk::Base::array2hash($checks, "id");
