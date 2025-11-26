@@ -108,7 +108,7 @@ sub _extra_config {
       tags    = ANY
 
       name    = extraping  # the actual service description
-      # add arbitray naemon config attributes here as well
+      # add arbitrary naemon config attributes here as well
       check_command = check-host-alive!\$HOSTADDRESS\$
       first_notification_delay = 30
     </extra_service_checks>
