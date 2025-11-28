@@ -22,6 +22,7 @@ use IO::Select ();
 use IPC::Open3 qw/open3/;
 use POSIX ":sys_wait_h";
 use Scalar::Util 'blessed';
+use Symbol 'gensym';
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
 
 use Thruk::Base ();
@@ -895,15 +896,17 @@ sub cmd {
         $cmd = ["/bin/sh", "-c", $cmd];
     }
 
-    my($rc, $output);
+    my($rc, $combined, $stdout, $stderr);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
         &timing_breakpoint('IO::cmd: '.$prog.' <args...>');
         _debug('running cmd: '.$prog.' '.join(' ', @{$cmd})) if $c;
+        my $errrdr = gensym;
         my($pid, $wtr, $rdr, @lines);
-        $pid = open3($wtr, $rdr, $rdr, $prog, @{$cmd});
+        $pid = open3($wtr, $rdr, $errrdr, $prog, @{$cmd});
         my $sel = IO::Select->new;
         $sel->add($rdr);
+        $sel->add($errrdr);
         if($options->{'stdin'}) {
             print $wtr $options->{'stdin'},"\n";
         }
@@ -920,6 +923,11 @@ sub cmd {
                     $sel->remove($fh);
                     next;
                 } else {
+                    if($fh == $errrdr) {
+                        $stderr .= $line;
+                    } else {
+                        $stdout .= $line;
+                    }
                     my($chomped);
                     if(defined $options->{'print_prefix'}) {
                         my $l       = "$line";
@@ -949,8 +957,8 @@ sub cmd {
         POSIX::waitpid($pid, 0);
         $rc = $?;
         @lines = grep defined, @lines;
-        $output = join('', @lines) // '';
-        $output = Thruk::Utils::Encode::decode_any($output) unless $options->{'no_decode'};
+        $combined = join('', @lines) // '';
+        $combined = Thruk::Utils::Encode::decode_any($combined) unless $options->{'no_decode'};
         # restore original array
         unshift @{$cmd}, $prog;
     } else {
@@ -963,23 +971,23 @@ sub cmd {
         if($cmd !~ m|2>&1|mx) {
             _warn(longmess("cmd does not redirect output but wants to run in the background, add >/dev/null 2>&1 to: ".$cmd)) if $c;
         }
-        $output = `$cmd`;
+        $combined = `$cmd`;
         $rc = $?;
         # rc will be -1 otherwise when ignoring SIGCHLD
         $rc = 0 if $rc == -1;
     }
 
     if($rc == -1) {
-        $output .= "[".$!."]";
+        $combined .= "[".$!."]";
     } else {
         $rc = $rc>>8;
     }
     if($c) {
         _debug( "rc:     ". $rc );
         if(Thruk::Base::verbose() > 1) {
-            _debug( "output: ". $output );
+            _debug( "output: ". $combined );
         } else {
-            _debug( "output: ".Thruk::Base::shorten($output, 300));
+            _debug( "output: ".Thruk::Base::shorten($combined, 300));
         }
     }
     &timing_breakpoint('IO::cmd done');
@@ -992,8 +1000,8 @@ sub cmd {
     # log full command line of slow commands
     $c->stats->profile(comment => join(" ", @{Thruk::Base::list($cmd)})) if($c && $elapsed > 1);
 
-    return($rc, $output) if wantarray;
-    return($output);
+    return($rc, $combined, $stdout, $stderr) if wantarray;
+    return($combined);
 }
 
 ########################################

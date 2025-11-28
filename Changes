@@ -4,6 +4,7 @@ next:
           - add option to set default comment in commands
           - Rest:
             - add more output functions: age, utc, date, duration, fmt, hoststate and servicestate
+            - add plain text and command line input to check_thruk_rest
           - Business Process:
             - add option to configure offline backends grade period (offline_grace_time)
             - add option to configure handling offline backends (offline_handling)

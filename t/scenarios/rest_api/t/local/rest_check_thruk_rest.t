@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 47;
+plan tests => 55;
 
 use_ok("MIME::Base64");
 
@@ -91,6 +91,24 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest /services/localhost/Users --template='data:$tpl64'",
         like => ["/'localhost'/"],
+    });
+};
+
+###########################################################
+# using text input data
+{
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest --template=\"[% IF RAW.text > 10 %]OK[% ELSE %]CRITICAL[% END %] - [% RAW.text %]\" --string 42",
+        like => ["/^OK - 42/"],
+    });
+};
+
+###########################################################
+# using input data from a command
+{
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest --template=\"OK - There are [% RAW.output %] files in /tmp\" --command \"ls -la /tmp | wc -l\"",
+        like => ["/^OK - There are \\d+ files in \/tmp/"],
     });
 };
 

@@ -82,6 +82,12 @@ sub _fetch_results {
     for my $opt (@{$opts}) {
         my $url = $opt->{'url'};
 
+        if(!defined $url) {
+            $opt->{'result'} = "no url, json data, text data or command specified\n";
+            $opt->{'rc'}     = 3;
+            next;
+        }
+
         # replace variables in the url, ex.: from previous queries
         unshift(@{$opts}, {}); # add empty totals up front to not mix up order
         $url =~ s/\{([^\}]+)\}/&_replace_output($1, $opts, {}, 1)/gemx;
@@ -90,14 +96,40 @@ sub _fetch_results {
         # Support local files and remote urls as well.
         # But for security reasons only from the command line
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
+            # text data
+            if($opt->{'string'}) {
+                $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({ text => $url });
+                $opt->{'rc'}     = 0;
+                _debug("text data from command line argument:");
+                _debug($opt->{'result'});
+                next;
+            }
+            # command line
+            elsif($opt->{'command'}) {
+                my($rc, $output, $stdout, $stderr) = Thruk::Utils::IO::cmd($url);
+                chomp($output) if defined $output;
+                chomp($stdout) if defined $stdout;
+                chomp($stderr) if defined $stderr;
+                $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
+                    output => $output,
+                    rc     => $rc,
+                    stdout => $stdout // '',
+                    stderr => $stderr // '' ,
+                });
+                $opt->{'rc'}     = 0;
+                _debug("text data from command line argument:");
+                _debug($opt->{'result'});
+                next;
+            }
             # json arguments
-            if($url =~ m/^\s*\[.*\]\s*$/mx || $url =~ m/^\s*\{.*\}\s*$/mx) {
+            elsif($url =~ m/^\s*\[.*\]\s*$/mx || $url =~ m/^\s*\{.*\}\s*$/mx) {
                 $opt->{'result'} = $url;
                 $opt->{'rc'}     = 0;
                 _debug("json data from command line argument:");
                 _debug($opt->{'result'});
                 next;
             }
+            # http/https url
             elsif($url =~ m/^https?:/mx) {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
                 if(Thruk::Base->verbose >= 2) {
@@ -118,7 +150,9 @@ sub _fetch_results {
                     })."\n";
                 }
                 next;
-            } elsif(-r $url && -f $url) {
+            }
+            # local file
+            elsif(-r $url && -f $url) {
                 _debug("loading local file: ".$url);
                 $opt->{'result'} = Thruk::Utils::IO::read($url);
                 $opt->{'rc'}     = 0;
@@ -201,6 +235,8 @@ sub _parse_args {
             'perffilter' => [],
             'format'     => '',
             'template'   => '',
+            'string'     => '',
+            'command'    => '',
         };
         Getopt::Long::GetOptionsFromArray($s,
             "H|header=s"      =>  $opt->{'headers'},
@@ -218,6 +254,8 @@ sub _parse_args {
               "xls"           =>  sub { $opt->{'format'} = 'xls' },
               "human"         =>  sub { $opt->{'format'} = 'human' },
             "t|text"          =>  sub { $opt->{'format'} = 'human' },
+              "string"        =>  \$opt->{'string'},
+              "command"       =>  \$opt->{'command'},
         );
 
         # last option of parameter set is the url
@@ -437,6 +475,11 @@ sub _create_output {
             require MIME::Base64;
             my $b64 = MIME::Base64::decode_base64($1);
             $tpl = \$b64;
+        }
+        elsif($totals->{'template'} =~ m/\[%/mx) {
+            # inline template
+            my $txt = "".$totals->{'template'};
+            $tpl = \$txt;
         }
         elsif(!-e $totals->{'template'}) {
             return($totals->{'template'}.": ".$!, 3);
