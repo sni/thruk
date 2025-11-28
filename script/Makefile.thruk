@@ -62,6 +62,17 @@ version:
 docs:
 	script/thruk_update_docs.sh
 	script/thruk_update_docs_rest.pl
+	$(MAKE) docs_check_thruk_rest
+
+docs_check_thruk_rest:
+	sed '/```/,$$d' docs/documentation/check_thruk_rest.asciidoc > docs/documentation/check_thruk_rest.asciidoc.tmp
+	mv docs/documentation/check_thruk_rest.asciidoc.tmp docs/documentation/check_thruk_rest.asciidoc
+	echo '```' >> docs/documentation/check_thruk_rest.asciidoc
+	./script/check_thruk_rest --help >> docs/documentation/check_thruk_rest.asciidoc 2>&1 || :
+	sed '/AUTHOR/,$$d' docs/documentation/check_thruk_rest.asciidoc > docs/documentation/check_thruk_rest.asciidoc.tmp
+	mv docs/documentation/check_thruk_rest.asciidoc.tmp docs/documentation/check_thruk_rest.asciidoc
+	echo '```' >> docs/documentation/check_thruk_rest.asciidoc
+
 
 docs_server:
 	$(MAKE) -C docs server
