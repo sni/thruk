@@ -117,8 +117,8 @@ sub index {
 
         $c->req->parameters->{'link'} = $quick_command;
         my($rc, $msg) = Thruk::Utils::Status::serveraction($c, {
-            '$SELECTED_HOSTS$'    => $c->req->parameters->{'selected_services'},
-            '$SELECTED_SERVICES$' => $c->req->parameters->{'selected_hosts'},
+            '$SELECTED_HOSTS$'    => $c->req->parameters->{'selected_hosts'},
+            '$SELECTED_SERVICES$' => $c->req->parameters->{'selected_services'},
         });
         if($c->req->parameters->{'json'} || $c->want_json_response()) {
             return $c->render(json => { 'rc' => $rc, 'msg' => $msg });
