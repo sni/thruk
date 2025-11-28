@@ -91,7 +91,7 @@ List sessions which had been active within the last 10minutes:
   %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
 ------
 
-==== Create new Host Object
+=== Create new Host Object
 
 To create objects via the config tool you can use the generic /config/objects
 endpoint like this:
