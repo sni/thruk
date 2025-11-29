@@ -13,10 +13,10 @@ The rest command is a cli interface to the rest api.
   Usage:
 
     - simple query:
-      thruk [globaloptions] rest [-m method] [-d postdata] <url>
+      thruk [global options] rest [-m method] [-d postdata] <url>
 
     - multiple queries_:
-      thruk [globaloptions] rest [-m method] [-d postdata] <url> [-m method] [-d postdata] <url>
+      thruk [global options] rest [-m method] [-d postdata] <url> [-m method] [-d postdata] <url>
 
 =cut
 
@@ -98,7 +98,13 @@ sub _fetch_results {
         if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
             # text data
             if($opt->{'string'}) {
-                $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({ text => $url });
+                $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
+                    text   => $url,
+                    output => $url,
+                    stdout => $url,
+                    stderr => '',
+                    rc     => 0,
+                });
                 $opt->{'rc'}     = 0;
                 _debug("text data from command line argument:");
                 _debug($opt->{'result'});
@@ -111,6 +117,7 @@ sub _fetch_results {
                 chomp($stdout) if defined $stdout;
                 chomp($stderr) if defined $stderr;
                 $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
+                    text   => $output,
                     output => $output,
                     rc     => $rc,
                     stdout => $stdout // '',
@@ -757,15 +764,20 @@ sub _get_value_ref_check {
 # determines if command requires backends or not
 sub _skip_backends {
     my($c, $opts, $src) = @_;
-    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless $c->stash->{'processinfo_time'};
-    return unless $opts->{'commandoptions'};
+    if(!$opts->{'commandoptions'}) {
+        # no idea what command this is, use safe defaults
+        Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless $c->stash->{'processinfo_time'};
+        return;
+    }
     my $cmds = _parse_args($opts->{'commandoptions'}, $src);
     $opts->{'_parsed_args'} = $cmds;
     for my $cmd (@{$cmds}) {
-        if(!$cmd->{'url'} || $cmd->{'url'} !~ m/^https?:\/\//mx) {
+        if(!$cmd->{'url'} || ($cmd->{'url'} !~ m/^https?:\/\//mx && !$cmd->{'string'} && !$cmd->{'command'})) {
+            Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS) unless $c->stash->{'processinfo_time'};
             return;
         }
     }
+    Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_USER_ONLY) unless $c->stash->{'processinfo_time'};
     return(1);
 }
 
