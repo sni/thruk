@@ -58,3 +58,18 @@
     insertafter: "FcgidCmdOptions"
     line: "    MaxProcesses 3 \\"
     regexp: 'MaxProcesses'
+
+- name: "create demo script"
+  copy:
+    dest: /usr/local/bin/demo
+    mode: '0755'
+    owner: root
+    group: root
+    content: |
+      #!/usr/bin/env bash
+      echo "**************************"
+      echo -n "https://"
+      ip a | grep inet | grep -v inet6 | grep -v 127.0. | awk '{ print $2 }' | sed -e 's/\/.*/\/demo\//'
+      echo "**************************"
+
+      su - demo
