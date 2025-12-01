@@ -198,6 +198,8 @@
                   [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
                     [% IF s.omd_status.OVERALL == 0 %]
                       <div class="badge OK">OK</div>
+                    [% ELSIF s.omd_status.OVERALL == 3 %]
+                      <div class="badge UNKNOWN">UNKNOWN</div>
                     [% ELSE %]
                       [% failed = []; %]
                       [% FOREACH service IN s.omd_status.keys.sort %]
@@ -377,9 +379,9 @@
                   </td>
                 [% END %]
 
-              [%# show error messages after omd version column #%]
+              [%# show error messages after omd status column #%]
               [% ELSIF error_lines.size > 0 %]
-                [% IF !hide_remaining_columns && ( col == "omd" ) %]
+                [% IF !hide_remaining_columns && ( col == "status" ) %]
                   [% hide_remaining_columns = 1 %]
                   [% clickable = 0 %]
                   <td

@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 84;
+    plan tests => 92;
 
     use lib('t');
     require TestUtils;
@@ -56,6 +56,12 @@ TestUtils::test_page(
     url      => 'https://localhost/demo/thruk/cgi-bin/node_control.cgi',
     post     => { "action" => "omd_restart", "peer" => "tier2c", "service" => "crontab" },
     like     => ['"success" : 1'],
+);
+TestUtils::test_page(
+    url      => 'https://localhost/demo/thruk/cgi-bin/node_control.cgi',
+    post     => { "action" => "omd_restart", "peer" => "tier2c", "service" => "crontab", "json" => 1 },
+    like     => ['"success" : 1'],
+    follow   => 1,
 );
 
 TestUtils::test_command({

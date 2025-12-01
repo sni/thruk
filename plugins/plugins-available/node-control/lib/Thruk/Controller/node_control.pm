@@ -68,6 +68,11 @@ sub index {
 
     my $action = $c->req->parameters->{'action'} || 'list';
 
+    if($action && ($action eq 'omd_start' || $action eq 'omd_restart' || $action eq 'omd_stop') && $c->req->parameters->{'json'}) {
+        # run in background... (needs to be done here, because caller() is run with $c arg only)
+        return if Thruk::Utils::External::render_page_in_background($c);
+    }
+
     if($action && $action ne 'list') {
         if($action eq 'save_options') {
             Thruk::NodeControl::Utils::save_config($c, {
@@ -89,7 +94,7 @@ sub index {
             _warn("action %s failed", $action);
             return($c->render(json => {'success' => 0, 'error' => 'action failed'}));
         }
-        return(1);
+        return($rc);
     }
 
     if(!$config->{'omd_default_version'}) {
@@ -296,13 +301,14 @@ sub _node_action {
 sub _omd_service_cmd {
     my($c, $peer, $cmd) = @_;
     return unless Thruk::Utils::check_csrf($c);
+
     my $service = $c->req->parameters->{'service'};
     my $res = Thruk::NodeControl::Utils::omd_service($c, $peer, $service, $cmd);
     if($res && $res->{'rc'} == 0) {
         return($c->render(json => {'success' => 1}));
     }
     my $details = "";
-    if($res && $res->{'stderr'}) {
+    if($res && ($res->{'stdout'} || $res->{'stderr'})) {
         $details = "\n".$res->{'stdout'}.$res->{'stderr'};
     }
     return($c->render(json => {'success' => 0, 'error' => "failed to ".$cmd." ".$service.$details }));

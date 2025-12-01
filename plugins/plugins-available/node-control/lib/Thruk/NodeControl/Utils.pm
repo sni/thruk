@@ -184,6 +184,13 @@ sub get_server {
     }
 
     $facts->{'last_error'} =~ s/\s+at\s+.*(Utils|HTTP)\.pm\s+line\s+\d+\.//gmx if $facts->{'last_error'};
+    if($facts->{'gather_failed'}) {
+        if($facts->{'omd_status'}) {
+            for my $k (keys %{$facts->{'omd_status'}}) {
+                $facts->{'omd_status'}->{$k} = 3;
+            }
+        }
+    }
 
     # gather available logs
     my @logs = glob($c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_*.log');
@@ -203,40 +210,40 @@ sub get_server {
     my $server = {
         peer_key                => $peer->{'key'},
         peer_name               => $peer->{'name'},
-        peer_type               => $peer->{'type'} // '',
+        peer_type               => $peer->{'type'}               // '',
         section                 => $peer->{'section'},
-        gathering               => $facts->{'gathering'}       || 0, # job id of current gathering job or 0
-        run_all                 => $facts->{'run_all'}         || 0, # job id when install/update/clean runs in one job
-        installing              => $facts->{'installing'}      || 0, # install job id
+        gathering               => $facts->{'gathering'}         || 0, # job id of current gathering job or 0
+        run_all                 => $facts->{'run_all'}           || 0, # job id when install/update/clean runs in one job
+        installing              => $facts->{'installing'}        || 0, # install job id
         installing_failed       => $facts->{'installing_failed'} // 0,
-        updating                => $facts->{'updating'}        || 0, # update job id
+        updating                => $facts->{'updating'}          || 0, # update job id
         updating_failed         => $facts->{'updating_failed'}   // 0,
-        cleaning                => $facts->{'cleaning'}        || 0, # cleaning job id
+        cleaning                => $facts->{'cleaning'}          || 0, # cleaning job id
         cleaning_failed         => $facts->{'cleaning_failed'}   // 0,
-        os_updating             => $facts->{'os_updating'}     || 0, # os update id
-        os_sec_updating         => $facts->{'os_sec_updating'} || 0, # sec update job id
+        os_updating             => $facts->{'os_updating'}       || 0, # os update id
+        os_sec_updating         => $facts->{'os_sec_updating'}   || 0, # sec update job id
         host_name               => undef,
         ansible_fqdn            => $facts->{'ansible_facts'}->{'ansible_fqdn'},
-        omd_version             => $facts->{'omd_version'} // '',
-        omd_versions            => $facts->{'omd_versions'} // [],
+        omd_version             => $facts->{'omd_version'}   // '',
+        omd_versions            => $facts->{'omd_versions'}  // [],
         omd_cleanable           => $facts->{'omd_cleanable'} // [],
-        omd_site                => $facts->{'omd_site'} // '',
-        omd_status              => $facts->{'omd_status'} // {},
-        os_name                 => $facts->{'ansible_facts'}->{'ansible_distribution'} // '',
+        omd_site                => $facts->{'omd_site'}      // '',
+        omd_status              => $facts->{'omd_status'}    // {},
+        os_name                 => $facts->{'ansible_facts'}->{'ansible_distribution'}         // '',
         os_version              => $facts->{'ansible_facts'}->{'ansible_distribution_version'} // '',
-        os_updates              => $facts->{'os_updates'} // [],
+        os_updates              => $facts->{'os_updates'}  // [],
         os_security             => $facts->{'os_security'} // [],
-        machine_type            => _machine_type($facts) // '',
+        machine_type            => _machine_type($facts)   // '',
         cpu_cores               => $facts->{'ansible_facts'}->{'ansible_processor_vcpus'} // '',
         cpu_perc                => $facts->{'omd_cpu_perc'} // '',
         memtotal                => $facts->{'ansible_facts'}->{'ansible_memtotal_mb'} // '',
         memfree                 => $facts->{'ansible_facts'}->{'ansible_memory_mb'}->{'nocache'}->{'free'} // '',
         omd_disk_total          => $facts->{'omd_disk_total'} // '',
-        omd_disk_free           => $facts->{'omd_disk_free'} // '',
+        omd_disk_free           => $facts->{'omd_disk_free'}  // '',
         omd_available_versions  => $facts->{'omd_packages_available'} // [],
-        last_error              => $facts->{'last_error'} // '',
+        last_error              => $facts->{'last_error'}    // '',
         last_error_ts           => $facts->{'last_error_ts'} // '',
-        last_job                => $facts->{'last_job'} // '',
+        last_job                => $facts->{'last_job'}      // '',
         last_gather_runtime     => $facts->{'last_gather_runtime'} // '',
         logs                    => $logs,
         facts                   => $facts || {},
@@ -352,9 +359,9 @@ sub update_runtime_data {
     my $err = $@;
     alarm(0);
     if($err) {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'gather_failed' => 1, 'last_error' => $err, 'last_error_ts' => time() }, { pretty => 1, allow_empty => 1 });
     } else {
-        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'last_error' => '', %{$runtime}  }, { pretty => 1, allow_empty => 1 });
+        $f = Thruk::Utils::IO::json_lock_patch($file, { 'gathering' => 0, 'gather_failed' => 0, 'last_error' => '', %{$runtime}  }, { pretty => 1, allow_empty => 1 });
     }
     return($f);
 }
@@ -1014,6 +1021,7 @@ sub _remote_cmd {
     my($rc, $out, $err);
     my $config = config($c);
 
+    confess("no peer") unless defined $peer;
     _debug("_remote_cmd: %s", $cmd);
     _debug2(" - is_local: %s", $peer->is_local() ? "true" : "false");
     _debug2(" - is_http:  %s", $peer->is_peer_machine_reachable_by_http() ? "true" : "false");
@@ -1311,12 +1319,16 @@ start/stop omd services
 =cut
 sub omd_service {
     my($c, $peer, $service, $cmd) = @_;
+    confess("no peer") unless defined $peer;
     my $job = Thruk::Utils::External::perl($c, {
         'expr'       => 'Thruk::NodeControl::Utils::_omd_service_cmd($c, "'.$peer->{'key'}.'", "'.$service.'", "'.$cmd.'");',
         'background' => 1,
         'clean'      => 1,
     });
     my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 0.2, 90);
+    print STDOUT $jobdata->{'stdout'} if $c->stash->{job_id} && $jobdata && $jobdata->{'stdout'};
+    print STDERR $jobdata->{'stderr'} if $c->stash->{job_id} && $jobdata && $jobdata->{'stderr'};
+
     delete $peer->{'ssh_ok'}; # http might work again now
     return $jobdata;
 }
@@ -1325,20 +1337,27 @@ sub omd_service {
 sub _omd_service_cmd {
     my($c, $peerkey, $service, $cmd) = @_;
     my $peer = $c->db->get_peer_by_key($peerkey);
-    my($rc, $out);
+    confess("no peer for key: ".($peerkey//'none')) unless defined $peer;
+
+    my($rc, $job);
+    if($service eq 'ALL') {
+        $service = '';
+    }
     eval {
-        ($rc, $out) = _remote_cmd($c, $peer, 'omd '.$cmd.' '.$service, $service eq 'apache' ? {} : undef);
+        ($rc, $job) = _remote_cmd($c, $peer, 'omd '.$cmd.' '.$service, {});
     };
     if($@) {
         _warn("omd cmd failed: %s", $@);
         return;
     }
-    if($rc != 0) {
-        _warn("omd cmd failed: %s", $out);
-        return;
-    }
+
+    my $jobdata = Thruk::Utils::External::wait_for_peer_job($c, $peer, $job, 0.2, 90);
+    print STDOUT $jobdata->{'stdout'} if $c->stash->{job_id} && $jobdata && $jobdata->{'stdout'};
+    print STDERR $jobdata->{'stderr'} if $c->stash->{job_id} && $jobdata && $jobdata->{'stderr'};
+
     update_runtime_data($c, $peer, 1);
-    return 1;
+
+    return $jobdata->{'rc'} ? undef : 1;
 }
 
 ##########################################################

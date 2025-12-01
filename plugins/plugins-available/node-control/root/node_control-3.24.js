@@ -112,13 +112,13 @@ function nc_omd_service(btn, extraData) {
     var form = jQuery(btn).parents('FORM');
     submitFormInBackground(form, function(form, success, data, textStatus, jqXHR) {
         // update service row
-        refresh_all_changed_rows({action: 'omd_status', modal: 1, peer: extraData['peer']}, 'TD.js-omd-status-'+extraData["peer"]+'-'+extraData["service"]);
+        refresh_all_changed_rows({action: 'omd_status', modal: 1, peer: extraData['peer']}, 'TD.js-omd-status-'+extraData["peer"]+'-'+extraData["service"]+', TD.js-omd-status-'+extraData["peer"]+'-ALL');
 
         // update node row
         refresh_all_changed_rows(null, 'TD.js-node-row');
 
         if(!success) {
-            thruk_xhr_error('setting omd service failed: ', '', textStatus, jqXHR, false);
+            thruk_xhr_error('omd service failed: ', '', textStatus, jqXHR, false);
             return;
         }
         if(data && data.error) {
