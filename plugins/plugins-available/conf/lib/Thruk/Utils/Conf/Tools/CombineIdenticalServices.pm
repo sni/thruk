@@ -51,6 +51,8 @@ sub get_list {
 
     my $uniq_services = {};
     for my $obj (@{$c->{'obj_db'}->get_objects_by_type('service')}) {
+        next if ($obj->{'file'} && $obj->{'file'}->{'path'} =~ m%/conf\.d/agents/%mx);
+
         my $conf = Thruk::Utils::IO::dclone($obj->{'conf'});
         delete $conf->{'host_name'};
         delete $conf->{'hostgroup_name'};
