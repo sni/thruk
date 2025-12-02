@@ -2040,6 +2040,7 @@ sub _set_files_stash {
     $c->stash->{'filenames_json'} = Thruk::Utils::Filter::json_encode([{ name => 'files', data => [ sort @filenames ]}]);
     $c->stash->{'files_json'}     = Thruk::Utils::Filter::json_encode($files_tree);
     $c->stash->{'files_tree'}     = $files_tree;
+    $c->stash->{'files_root'}     = $files_root;
 
     return $files_root;
 }
@@ -2144,6 +2145,16 @@ sub _object_delete {
                     for my $attr (keys %{$refs->{$type}->{$id}}) {
                         if(ref $ref_obj->{'conf'}->{$attr} eq 'ARRAY') {
                             $ref_obj->{'conf'}->{$attr} = [grep(!/^\Q$name\E$/mx, @{$ref_obj->{'conf'}->{$attr}})];
+                            $ref_obj->{'conf'}->{$attr} = [grep(!/^\Q!$name\E$/mx, @{$ref_obj->{'conf'}->{$attr}})];
+                            my $size = scalar @{$ref_obj->{'conf'}->{$attr}};
+                            $ref_obj->{'conf'}->{$attr} = [grep(!/^\Q+$name\E$/mx, @{$ref_obj->{'conf'}->{$attr}})];
+                            if($size > scalar @{$ref_obj->{'conf'}->{$attr}} && $size >= 2) {
+                                # we removed a plus entry, so add the plus to the next element
+                                $ref_obj->{'conf'}->{$attr}->[0] = '+'.$ref_obj->{'conf'}->{$attr}->[0];
+                            }
+                            if(scalar @{$ref_obj->{'conf'}->{$attr}} == 0) {
+                                delete $ref_obj->{'conf'}->{$attr};
+                            }
                         } elsif(ref $ref_obj->{'conf'}->{$attr} eq '') {
                             delete $ref_obj->{'conf'}->{$attr};
                         }
@@ -2826,6 +2837,8 @@ sub _host_list_services {
 ##########################################################
 sub _list_references {
     my($c, $obj) = @_;
+    my $files_root = _set_files_stash($c);
+    $c->stash->{'files_root'} = $files_root;
     _gather_references($c, $obj, 1);
     $c->stash->{'show_incoming'} = 1;
     $c->stash->{'show_outgoing'} = 1;

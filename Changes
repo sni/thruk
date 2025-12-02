@@ -13,6 +13,8 @@ next:
           - Agents:
             - fix excludes by tag
             - fix adding service checks by wildcards
+          - Config Tool:
+            - fix removing objects including references (#1473)
 
 3.24     Thu Oct  2 09:20:56 CEST 2025
           - teams: add role based permissions based on oauth group memberships

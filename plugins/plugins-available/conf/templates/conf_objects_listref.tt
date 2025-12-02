@@ -18,7 +18,7 @@
     <table class="body cellspacing">
       [% IF force_delete %]
         <tr>
-          <td colspan=2>
+          <td colspan=3>
             [% PROCESS _button btn = {
               skipform => 1,
               data     => { sub => 'objects', 'data.id' => object.get_id(), force => 1, action => "delete", CSRFtoken => get_user_token(c) },
@@ -29,31 +29,31 @@
       [% END %]
       [% IF show_incoming %]
         <tr>
-          <th class='text-center pt-2 border-t borderDefault' colspan=2><h4><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>Incoming references</h4></th>
+          <th class='text-center pt-2 border-t borderDefault' colspan=3><h4><i class="fa-solid fa-arrow-right-to-bracket mr-1"></i>Incoming references</h4></th>
         </tr>
         [% FOREACH t = incoming.keys.sort %]
-          <tr>
-            <th class="align-top">[% t | ucfirst %]</th>
-            <td>
-              <ul [% IF force_delete %]style="padding-left: 15px;"[% END %]>
-              [% FOREACH name = incoming.$t.keys.sort %]
-                [% inc_ref = incoming.$t.$name %]
-                [% IF force_delete %]
-                  <li class="list-none flexrow gap-1 flex-nowrap hoverable">
-                    <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
-                    <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name | html %]</a>
-                    <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]" class="pl-1">
-                      <i class="fa-solid fa-link small"></i>
-                    </a>
-                    [% IF inc_ref.readonly %] <span class="textHINT"> (read-only)</span>[% END %]
-                  </li>
-                [% ELSE %]
-                  <li><a class="link" href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% name | html %]</a></li>
-                [% END %]
+          [% first = 1 %]
+            [% FOREACH inc_ref = sort_by(incoming.$t, "name") %]
+            <tr>
+              <th class="align-top">[% IF first %][% t | ucfirst %][% END %]</th>
+              [% IF force_delete %]
+                <td class="hoverable clickable" onclick="toggleCheckBox(jQuery(this).children('input[type=checkbox]').first()); jQuery('input[name=none]').prop('checked', false); return false;">
+                  <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
+                  [% inc_ref.name | html %]
+                </td>
+              [% ELSE %]
+                <td><a class="link" href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">[% inc_ref.name | html %]</a></td>
               [% END %]
-              </ul>
-            </td>
-          </tr>
+              <td class="w-full">
+                <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]" class="link">
+                  <i class="fa-solid fa-link small"></i>
+                  [% IF inc_ref.line %][% inc_ref.file.replace(files_root, ".../") %]:[% inc_ref.line %][% END %]
+                </a>
+                [% IF inc_ref.readonly %] <span class="textHINT"> (read-only)</span>[% END %]
+              </td>
+            </tr>
+            [% first = 0 %]
+          [% END %]
         [% END %]
         [% IF force_delete %]
           <tr>
@@ -74,7 +74,7 @@
         [% END %]
         [% IF incoming.keys.size == 0 %]
           <tr>
-            <td colspan=2 class="text-center textHINT">No incoming references found</td>
+            <td colspan=3 class="text-center textHINT">No incoming references found</td>
           </tr>
         [% END %]
       [% END %]
@@ -82,7 +82,7 @@
       [% IF show_outgoing %]
         [% IF !force_delete %]
           <tr>
-            <th class="text-center pt-2 border-t borderDefault" colspan=2><h4><i class="fa-solid fa-right-from-bracket mr-1"></i>Outgoing references</h4></th>
+            <th class="text-center pt-2 border-t borderDefault" colspan=3><h4><i class="fa-solid fa-right-from-bracket mr-1"></i>Outgoing references</h4></th>
           </tr>
           [% FOREACH t = outgoing.keys.sort %]
             <tr>
@@ -94,11 +94,13 @@
                 [% END %]
                 </ul>
               </td>
+              <td class="w-full">
+              </td>
             </tr>
           [% END %]
           [% IF outgoing.keys.size == 0 %]
             <tr>
-              <td colspan=2 class="text-center textHINT">No outgoing references found</td>
+              <td colspan=3 class="text-center textHINT">No outgoing references found</td>
             </tr>
           [% END %]
         [% END %]
@@ -107,19 +109,19 @@
 
       [% IF other_refs.keys.size > 0 %]
         <tr>
-          <th class="text-center pt-2 border-t borderDefault" colspan=2><h4><i class="fa-solid fa-arrow-turn-down mr-1"></i>Outside references</h4></th>
+          <th class="text-center pt-2 border-t borderDefault" colspan=3><h4><i class="fa-solid fa-arrow-turn-down mr-1"></i>Outside references</h4></th>
         </tr>
         [% IF force_delete %]
           <tr>
-            <td colspan=2 class="text-center textHINT"><i class="fa-solid fa-exclamation round small yellow"></i> These references should be checked manually.</td>
+            <td colspan=3 class="text-center textHINT"><i class="fa-solid fa-exclamation round small yellow"></i> These references should be checked manually.</td>
           </tr>
         [% END %]
         [% IF show_renamed %]
           <tr>
-            <td colspan=2 class="text-center textHINT pt-3">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
+            <td colspan=3 class="text-center textHINT pt-3">The [% object.get_type() | ucfirst +%] has been renamed, please manually check references.</td>
           </tr>
           <tr>
-            <td style="text-align:center" colspan=2>
+            <td style="text-align:center" colspan=3>
               <br>
               [% PROCESS _button btn = {
                 form   => { action => 'conf.cgi', method => 'GET' },

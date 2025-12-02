@@ -1332,9 +1332,12 @@ sub gather_references {
         $incoming->{$type} = {};
         for my $id (keys %{$refs->{$type}}) {
             my $obj = $self->get_object_by_id($id);
-            $incoming->{$type}->{$obj->get_name()} = {
+            $incoming->{$type}->{$id} = {
                 id       => $id,
+                name     => $obj->get_name(),
                 readonly => $obj->{'file'} ? $obj->{'file'}->readonly() : 0,
+                file     => $obj->{'file'} ? $obj->{'file'}->{'display'} : '',
+                line     => $obj->{'line'} // '',
             };
         }
     }
