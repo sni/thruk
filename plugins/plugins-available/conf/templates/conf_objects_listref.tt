@@ -39,10 +39,10 @@
               [% FOREACH name = incoming.$t.keys.sort %]
                 [% inc_ref = incoming.$t.$name %]
                 [% IF force_delete %]
-                  <li class="list-none flexrow gap-1 flex-nowrap">
+                  <li class="list-none flexrow gap-1 flex-nowrap hoverable">
                     <input type="checkbox" name="ref" value="[% inc_ref.id %]" [% IF inc_ref.readonly %]disabled[% ELSE %]checked[% END %]>
                     <a href="#" onclick="jQuery(this).prev().click(); jQuery('input[name=none]').prop('checked', false); return false;">[% name | html %]</a>
-                    <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]">
+                    <a href="conf.cgi?sub=objects&amp;data.id=[% inc_ref.id %]" class="pl-1">
                       <i class="fa-solid fa-link small"></i>
                     </a>
                     [% IF inc_ref.readonly %] <span class="textHINT"> (read-only)</span>[% END %]
