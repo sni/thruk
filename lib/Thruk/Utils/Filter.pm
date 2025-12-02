@@ -2219,4 +2219,32 @@ sub date_now_millis {
     return(int(Time::HiRes::time()*1000));
 }
 
+########################################
+
+=head2 sort_by
+
+  sort_by($list|$hash_hata, $key)
+
+returns list of elements sorted by given key
+
+=cut
+sub sort_by {
+    my($data, $key) = @_;
+
+    if(ref $data eq 'HASH') {
+        $data = [values %{$data}];
+    }
+    if(ref $data ne 'ARRAY') {
+        die("need array or hash reference");
+    }
+
+    my @sorted = sort {
+        return $a->{$key} cmp $b->{$key};
+    } @{$data};
+
+    return(\@sorted);
+}
+
+########################################
+
 1;
