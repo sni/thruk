@@ -118,7 +118,7 @@ sub _make_hash {
     for my $attr (sort keys %{$conf}) {
         $string .= ";" if $string;
         if(ref $conf->{$attr} eq '') {
-            $string .= $attr.'='.$conf->{$attr};
+            $string .= $attr.'='.($conf->{$attr}//'');
         } else {
             $string .= $attr.'='.join(',', @{$conf->{$attr}});
         }
