@@ -911,6 +911,7 @@ sub _get_subfilter {
             my $k = [keys   %{$inp}]->[0];
             my $v = [values %{$inp}]->[0];
             ($k, $v) = $self->_replace_column_name($k, $v);
+            if($k eq 'IS NULL')                     { return $v.' '.$k; }
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
             if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
@@ -980,6 +981,10 @@ sub _replace_column_name {
     $op = '=' unless defined $op;
     if($col eq 'contact_name') {
         return("c.name", $val);
+    }
+
+    if($col eq 'service_description' && !defined $val) {
+        return("IS NULL", $col);
     }
 
     # using ids makes mysql prefer index
