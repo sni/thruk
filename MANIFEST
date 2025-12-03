@@ -33,6 +33,7 @@ examples/bp_filter.pm
 examples/bp_functions.pm
 examples/config_tool_git_checkin
 examples/contacts2csv
+examples/create_downtime_log_entries
 examples/dump_services
 examples/get_logs
 examples/list_hosts

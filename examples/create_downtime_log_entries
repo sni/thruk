@@ -1,0 +1,129 @@
+#!/bin/bash
+# vim: expandtab:ts=4:sw=4:syntax=perl
+
+# read rc files if exist
+unset PROFILEDOTD
+[ -e /etc/thruk/thruk.env  ] && . /etc/thruk/thruk.env
+[ -e ~/etc/thruk/thruk.env ] && . ~/etc/thruk/thruk.env
+[ -e ~/.thruk              ] && . ~/.thruk
+[ -e ~/.profile            ] && . ~/.profile
+
+BASEDIR=$(dirname $0)/..
+
+# git version
+if [ -d $BASEDIR/.git -a -e $BASEDIR/lib/Thruk.pm ]; then
+  export PERL5LIB="$BASEDIR/lib:$PERL5LIB";
+  if [ "$OMD_ROOT" != "" -a "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$BASEDIR/"; fi
+
+# omd
+elif [ "$OMD_ROOT" != "" ]; then
+  export PERL5LIB=$OMD_ROOT/share/thruk/lib:$PERL5LIB
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG="$OMD_ROOT/etc/thruk"; fi
+
+# pkg installation
+else
+  export PERL5LIB=$PERL5LIB:@DATADIR@/lib:@THRUKLIBS@;
+  if [ "$THRUK_CONFIG" = "" ]; then export THRUK_CONFIG='@SYSCONFDIR@'; fi
+fi
+
+eval 'exec perl -x $0 ${1+"$@"} ;'
+    if 0;
+# / this slash makes vscode syntax highlighting work
+#! -*- perl -*-
+#line 35
+
+##############################################
+use strict;
+use warnings;
+use Pod::Usage;
+use Getopt::Long;
+use Thruk::Utils::CLI;
+use Thruk::Controller::rest_v1;
+
+binmode(STDOUT, ":encoding(UTF-8)");
+binmode(STDERR, ":encoding(UTF-8)");
+
+my $opt ={
+    'help'      => 0,
+    'start'     => 0,
+    'end'       => 0,
+    'backend'   => undef,
+    'filter'    => undef,
+};
+Getopt::Long::Configure('no_ignore_case');
+Getopt::Long::Configure('bundling');
+GetOptions (
+   "h|help"         => \$opt->{'help'},
+   "s|start=s"      => \$opt->{'start'},
+   "e|end=s"        => \$opt->{'end'},
+   "b|backend=s"    => \$opt->{'backend'},
+   "f|filter=s"     => \$opt->{'filter'},
+) or pod2usage( { -verbose => 2, -message => 'error in options', -exit => 3 } );
+pod2usage( { -verbose => 2,  -exit => 3 } ) if $opt->{'help'};
+
+my $options = {};
+$options->{backends} = [$opt->{'backend'}] if $opt->{'backend'};
+my $cli     = Thruk::Utils::CLI->new($options);
+my $c       = $cli->get_c();
+Thruk::Action::AddDefaults::add_defaults($c);
+my $start   = Thruk::Utils::parse_date($c, $opt->{'start'});
+my $end     = Thruk::Utils::parse_date($c, $opt->{'end'});
+
+# use filter parser from rest api
+$c->req->parameters->{'q'} = $opt->{'filter'}//'';
+my $filter  = Thruk::Controller::rest_v1::_livestatus_filter($c);
+my $db      = $cli->get_db();
+my $hosts   = $db->get_hosts(filter => [$filter], columns => ['name']);
+
+for my $host (@{$hosts}) {
+    printf("[%d] HOST DOWNTIME ALERT: %s;STARTED; Host has entered a period of scheduled downtime\n", $start, $host->{'name'});
+}
+for my $host (@{$hosts}) {
+    printf("[%d] HOST DOWNTIME ALERT: %s;STOPPED; Host has exited from a period of scheduled downtime\n", $end, $host->{'name'});
+}
+
+exit 0;
+
+##############################################
+
+=head1 NAME
+
+create_downtime_log_entries - Command line utility to create downtime log entries
+
+=head1 SYNOPSIS
+
+  Usage: create_downtime_log_entries [-b backend] --start=<date> --end=<date> [filter] > /tmp/downtimes.log
+
+=head1 DESCRIPTION
+
+This script creates downtime log entries which can be imported into the logcache later
+in case downtimes have been forgotten to add and now the SLA reports are inaccurate.
+
+For now only host downtimes are supported.
+
+=head1 OPTIONS
+
+    -s|--start              set start date, can be timestamp or date definition
+    -e|--end                set end date, can be timestamp or date definition
+    -b|--backend            specify backend if there are multiple connected
+    -f|--filter             specify filter to select downtimes targets
+
+=head1 EXAMPLE
+
+    Create downtimes for hostgroup 'linux-servers' starting march 2nd until yesterday:
+
+create_downtime_log_entries --start=2025-03-02 --end=yesterday --filter='host_group=linux-servers' > /tmp/downtimes.log
+
+    Double check the content of the logfile and then import it into the logcache with:
+
+thruk logcache update /tmp/downtimes.log
+
+    Hint: you may need to import the additional log entries on each affected backend, old logs are usually
+    not replicated automatically.
+
+=head1 AUTHOR
+
+2025, Sven Nierlein, <sven@consol.de>
+
+=cut

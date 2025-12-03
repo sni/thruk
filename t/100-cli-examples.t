@@ -16,7 +16,7 @@ BEGIN {
 ###########################################################
 my @files;
 if(scalar @ARGV == 0) {
-    plan(tests => 24);
+    plan(tests => 28);
     @files = glob('examples/*');
 } else {
     @files = @ARGV;
@@ -28,6 +28,7 @@ my $args = {
     'examples/objectcache2csv'   => 't/data/naglint/basic/in.cfg hostgroup',
     'examples/contacts2csv'      => 't/data/naglint/basic/in.cfg',
     'examples/action_wrapper'    => '-u thrukadmin true',
+    'examples/create_downtime_log_entries '     => '--start=2025-05-01 --end=yesterday',
 };
 
 ###########################################################
