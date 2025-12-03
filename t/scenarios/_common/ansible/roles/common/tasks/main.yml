@@ -73,3 +73,15 @@
       echo "**************************"
 
       su - demo
+
+- name: "pimp root bashrc"
+  lineinfile:
+    dest: /root/.bashrc
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - 'alias d="/usr/local/bin/demo"'
+    - 'alias la="ls -la"'
+    - 'alias l="ls -la"'
+    - 'alias vi="vim"'
+    - 'alias psg="ps -efl | grep"'
