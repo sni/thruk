@@ -936,6 +936,18 @@ sub _req {
     $options->{'remote_name'} = $self->{'remote_name'};
     $options->{'args'}        = $args;
 
+    ## no critic
+    if($ENV{'THRUK_DB_LAST_QUERY'}) {
+        $ENV{'THRUK_DB_LAST_QUERY'} .= "\n\n***********\n";
+    } else {
+        $ENV{'THRUK_DB_LAST_QUERY'} = "";
+    }
+    $ENV{'THRUK_DB_LAST_QUERY'} .= sprintf("http(s) request to %s\nsub:  %s\nargs: %s", $self->peer_addr(), $sub, Thruk::Utils::dump_params($args, 2000, 0));
+    if(length($ENV{'THRUK_DB_LAST_QUERY'}) > 100000) {
+        $ENV{'THRUK_DB_LAST_QUERY'} = substr($ENV{'THRUK_DB_LAST_QUERY'}, 0, 100000)."\n**** CUT OFF ***\n";
+    }
+    ## use critic
+
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});
     $self->{'ua'}->timeout($self->{'logs_timeout'}) if $sub =~ m/logs/gmx;

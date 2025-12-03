@@ -3756,6 +3756,7 @@ sub dump_params {
     my($params, $max_length, $flat) = @_;
     $max_length = 250 unless defined $max_length;
     $flat       = 1   unless defined $flat;
+    return "" if !defined $params;
     $params = Thruk::Utils::IO::dclone($params) if ref $params;
     local $Data::Dumper::Indent  = 1;
     local $Data::Dumper::Indent  = 0 if $flat;
