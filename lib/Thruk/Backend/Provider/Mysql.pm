@@ -823,7 +823,6 @@ sub _get_filter {
     $filter = " WHERE ".$filter if $filter;
 
     $filter =~ s/WHERE\ \(\((.*)\)\ AND\ \)/WHERE ($1)/gmx;
-    $filter =~ s/\Qtype = ''\E/type IS NULL/gmx;
     $filter =~ s/\ AND\ \)/)/gmx;
     $filter =~ s/\(\ AND\ \(/((/gmx;
     $filter =~ s/AND\s+AND/AND/gmx;
@@ -912,6 +911,7 @@ sub _get_subfilter {
             my $v = [values %{$inp}]->[0];
             ($k, $v) = $self->_replace_column_name($k, $v);
             if($k eq 'IS NULL')                     { return $v.' '.$k; }
+            if($k eq 'IS NOT NULL')                 { return $v.' '.$k; }
             if($k eq '=')                           { return '= '._quote($v); }
             if($k eq '!=')                          { return '!= '._quote($v); }
             if($k eq '~')                           { return 'RLIKE '._quote_backslash(_quote(Thruk::Utils::clean_regex($v))); }
@@ -983,8 +983,22 @@ sub _replace_column_name {
         return("c.name", $val);
     }
 
-    if($col eq 'service_description' && !defined $val) {
-        return("IS NULL", $col);
+    if($col eq 'service_description' || $col eq 'type') {
+        if(ref $val eq 'HASH') {
+            my @keys = keys %{$val};
+            if(scalar @keys == 1) {
+                $op = $keys[0];
+                $val = $val->{$op};
+            }
+        }
+        if(!defined $val) {
+            if($op eq '=') {
+                return("IS NULL", $col);
+            }
+            if($op eq '!=') {
+                return("IS NOT NULL", $col);
+            }
+        }
     }
 
     # using ids makes mysql prefer index

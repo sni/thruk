@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More tests => 72;
+use Test::More tests => 74;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -183,7 +183,21 @@ test_filter(
 test_filter(
     'hash list',
     [{ '-or' => [ { 'service_description' => { '!=' => undef } }, { 'service_description' => undef } ] }, 'service_description', undef ],
-    " WHERE ((service_description != '' OR service_description = '') AND service_description = '')"
+    " WHERE ((service_description IS NOT NULL OR service_description IS NULL) AND service_description IS NULL)"
+);
+
+#####################################################################
+test_filter(
+    'scalar list',
+    [ 'type', undef ],
+    " WHERE type IS NULL",
+);
+
+#####################################################################
+test_filter(
+    'scalar list',
+    [ { 'type' => { '!=' => undef } } ],
+    " WHERE type IS NOT NULL",
 );
 
 #####################################################################
@@ -204,7 +218,7 @@ test_filter(
 test_filter(
     'tripple filter',
     { '-and' => [ { 'type' => 'SERVICE ALERT' }, { 'service_description' => { '!=' => undef },   'state' => 1 } ] },
-    " WHERE (type = 'SERVICE ALERT' AND (service_description != '' AND state = 1))"
+    " WHERE (type = 'SERVICE ALERT' AND (service_description IS NOT NULL AND state = 1))"
 );
 
 #####################################################################
