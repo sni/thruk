@@ -3308,7 +3308,7 @@ sub _parse_date {
     my($string) = @_;
 
     # simply try to expand first
-    return(_expand_timestring($string)) if $string =~ m/:/mx;
+    return(_expand_timestring($string)) if($string =~ m/:/mx || $string =~ m/^\d{4}\-\d{1,2}\-\d{1,2}$/mx);
 
     # time arithmetic
     my @parts = split(/\s*(\-|\+)\s*/mx, $string);
@@ -3369,6 +3369,12 @@ sub _expand_timestring {
     # real date without seconds (YYYY-MM-DD HH:MM)
     if($string =~ m/(\d{1,4})\-(\d{1,2})\-(\d{1,2})\ (\d{1,2}):(\d{1,2})/mx) {
         my $timestamp = Thruk::Utils::DateTime::mktime($1,$2,$3, $4,$5,0);
+        return($timestamp);
+    }
+
+    # real date only (YYYY-MM-DD)
+    if($string =~ m/^(\d{1,4})\-(\d{1,2})\-(\d{1,2})$/mx) {
+        my $timestamp = Thruk::Utils::DateTime::mktime($1,$2,$3, 0,0,0);
         return($timestamp);
     }
 
