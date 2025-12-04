@@ -810,13 +810,15 @@ sub do_send_command {
         if($cmd_typ == 45) { _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;eventhandler enabled by %s',   $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'com_author'})); }
 
         # add log comment if removing downtimes and comments by id
-        if($cmd_typ == 4 || $cmd_typ == 79) {
-            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.';'.$c->req->parameters->{'service'}.')';
-            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
-        }
-        if($cmd_typ == 2 || $cmd_typ == 78) {
-            $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
-            _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
+        if($c->req->parameters->{'down_id'}) {
+            if($cmd_typ == 4 || $cmd_typ == 79) {
+                $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.';'.$c->req->parameters->{'service'}.')';
+                _add_cmd_note($c, $backends_list, $joined_backends, sprintf('SERVICE NOTE: %s;%s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'service'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
+            }
+            if($cmd_typ == 2 || $cmd_typ == 78) {
+                $c->stash->{'extra_log_comment'}->{$cmd_line} = '  ('.$c->req->parameters->{'host'}.')';
+                _add_cmd_note($c, $backends_list, $joined_backends, sprintf('HOST NOTE: %s;downtime %d removed by %s', $c->req->parameters->{'host'}, $c->req->parameters->{'down_id'}, $c->req->parameters->{'com_author'}));
+            }
         }
     }
 
