@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 162;
+plan tests => 166;
 
 ###########################################################
 # test thruks script path
@@ -145,5 +145,12 @@ TestUtils::test_page(
     'url'    => '/thruk/cgi-bin/showlog.cgi?type=&statetype=0&host=localhost&service=Http&pattern=&exclude_pattern=&noflapping=on&nodowntime=on&nosystem=on&logcache=0',
     'like'   => ["SERVICE ALERT:", "EXTERNAL COMMAND: SCHEDULE_FORCED_SVC_CHECK"],
 );
+
+###########################################################
+# selfcheck
+TestUtils::test_command({
+    cmd     => "/usr/bin/env thruk selfcheck",
+    like    => ['/no errors in 1 logcache/'],
+});
 
 ###########################################################
