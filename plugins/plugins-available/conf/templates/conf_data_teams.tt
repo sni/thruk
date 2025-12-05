@@ -28,15 +28,17 @@
   <div class="flexrow flex-nowrap gap-5">
     [% IF show_team %]
       <form action="conf.cgi" method="POST" autocomplete="off" onsubmit="removeTemplateRows(this); setFormBtnSpinner(this)">
+        [% IF !scripted %]
         <input type="submit" name="send" value="save" style="display:none">
+        [% END %]
         <input type="hidden" name="sub" value="teams">
         <input type="hidden" name="action" value="store">
         <input type="hidden" name="team" value="[% team.name | html %]">
         <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
         <div class="card min-w-[650px] overflow-hidden">
           <div class="head justify-between">
-            <h3>Editing: [% team.name | html %]</h3>
-            <button class="submit green w-32"><i class="uil uil-save"></i>save</button>
+            <h3>Editing: [% team.name | html %][% IF scripted %] <span class="textHINT">(read-only / scripted)</span>[% ELSIF new_file %] <span class="textHINT">(new)</span>[% END %]</h3>
+            <button class="submit green w-32"[% IF scripted %] disabled[% END %]><i class="uil uil-save"></i>save</button>
           </div>
           <table class="body mt-2 striped js-permissions-table">
             <tbody>
@@ -323,11 +325,19 @@
               <tr>
                 <td colspan="2" class="border-b mt-0 pt-0"></td>
               </tr>
-              <tr>
-                <td colspan=2 onclick="permission_add_row(); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable">
-                  <i class="uil uil-angle-down text-lg leading-3" title="add new permission entry"></i> add permissions
-                </td>
-              </tr>
+              [% IF !scripted %]
+                <tr>
+                  <td colspan=2 onclick="permission_add_row(); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable">
+                    <i class="uil uil-angle-down text-lg leading-3" title="add new permission entry"></i> add permissions
+                  </td>
+                </tr>
+              [% ELSIF team.permissions.size == 0 %]
+                <tr>
+                  <td colspan=2 class="textHINT">
+                    no specific permissions
+                  </td>
+                </tr>
+              [% END %]
             </tbody>
           </table>
         </div>

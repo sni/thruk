@@ -740,7 +740,7 @@ sub _expand_teams {
             next;
         }
 
-        my $role_data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}."/teams/".$t.".json");
+        my $role_data = read_team_data($c, $t, 1);
         if($role_data->{'includes'}) {
             for my $i (@{$role_data->{'includes'}}) {
                 next if $already_included->{$i};
@@ -767,6 +767,61 @@ sub _expand_teams {
 
     if($added > 0) {
         $self->_expand_teams($c, $teams, $already_included);
+    }
+
+    return;
+}
+
+########################################
+
+=head2 read_team_data
+
+ read_team_data($c, $team, [$with_fallback])
+
+ returns team data including optional fallback
+
+=cut
+sub read_team_data {
+    my($c, $team, $with_fallback) = @_;
+
+    my $role_data;
+    if(-e $c->config->{'var_path'}."/teams/".$team.".json") {
+        _debug("reading teams data from: ".$c->config->{'var_path'}."/teams/".$team.".json") if Thruk::Base->verbose;
+        $role_data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}."/teams/".$team.".json");
+        return $role_data;
+    }
+
+    if(-x $c->config->{'var_path'}."/teams/".$team) {
+        _debug("running teams data script from: ".$c->config->{'var_path'}."/teams/".$team) if Thruk::Base->verbose;
+        my($rc, $output) = Thruk::Utils::IO::cmd([$c->config->{'var_path'}."/teams/".$team], { timeout => 10 });
+        if($rc == 0 && $output) {
+            my $jsonreader = Thruk::Utils::IO::json_reader();
+            $role_data = $jsonreader->decode($output);
+        }
+        $role_data->{'scripted_team'} = 1;
+        return $role_data;
+    }
+
+    return unless $with_fallback;
+
+    # no specific team found, try fallback json
+    if(-e $c->config->{'var_path'}."/teams/_fallback.json") {
+        _debug("reading fallback teams data from: ".$c->config->{'var_path'}."/teams/_fallback.json") if Thruk::Base->verbose;
+        $role_data = Thruk::Utils::IO::json_lock_retrieve($c->config->{'var_path'}."/teams/_fallback.json");
+        $role_data->{'real_file'} = '_fallback.json';
+        return $role_data;
+    }
+
+    if(-x $c->config->{'var_path'}."/teams/_fallback") {
+        _debug("running teams data fallback script from: ".$c->config->{'var_path'}."/teams/_fallback") if Thruk::Base->verbose;
+        my($rc, $output) = Thruk::Utils::IO::cmd([$c->config->{'var_path'}."/teams/_fallback", $team], { timeout => 10 });
+        if($rc == 0 && $output) {
+            my $jsonreader = Thruk::Utils::IO::json_reader();
+            $role_data = $jsonreader->decode($output);
+        }
+        $role_data->{'scripted_team'} = 1;
+        $role_data->{'real_file'}     = '_fallback';
+        return $role_data;
     }
 
     return;

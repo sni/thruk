@@ -770,7 +770,8 @@ sub _process_teams_page {
 
     my $action = $c->req->parameters->{'action'} || 'list';
     if($action eq 'edit') {
-        my $team = Thruk::Utils::IO::json_lock_retrieve($teamfile);
+        my $team = Thruk::Authentication::User::read_team_data($c, $teamname, 0);
+        $c->stash->{'new_file'}  = defined $team ? 0 : 1;
         $c->stash->{'team'} = {
             'name'        => $teamname,
             'cgi_roles'   => $team->{'roles'}       // [],
@@ -778,11 +779,18 @@ sub _process_teams_page {
             'permissions' => $team->{'permissions'} // [],
             'notes'       => $team->{'notes'}       // '',
         };
+        $c->stash->{'scripted'} = (defined $team && $team->{'scripted_team'} ) ? 1 : 0;
         $c->stash->{'team'}->{'cgi_roles'} = [map { my $n = $_; $n =~ s|^authorized_for_||gmx; "authorized_for_".$n; } @{$c->stash->{'team'}->{'cgi_roles'}} ];
         $c->stash->{'show_team'} = 1;
     }
 
     if($action eq 'delete') {
+        my $old_data = Thruk::Authentication::User::read_team_data($c, $teamname, 0);
+        if($old_data && $old_data->{'scripted_team'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Cannot remove read-only team.' );
+            return $c->redirect_to('conf.cgi?sub=teams&action=edit&team='.$teamname);
+        }
+
         unlink($teamfile);
         Thruk::Utils::set_message( $c, 'success_message', 'Team successfully deleted.');
 
@@ -807,6 +815,12 @@ sub _process_teams_page {
         $team->{'roles'}       = Thruk::Base::comma_separated_list($c->req->parameters->{'cgi_roles'} // '');
         $team->{'includes'}    = Thruk::Base::comma_separated_list($c->req->parameters->{'includes'}  // '');
         $team->{'permissions'} = _parse_teams_permission($c->req->parameters);
+
+        my $old_data = Thruk::Authentication::User::read_team_data($c, $new_name, 0);
+        if($old_data && $old_data->{'scripted_team'}) {
+            Thruk::Utils::set_message( $c, 'fail_message', 'Cannot save read-only team.' );
+            return $c->redirect_to('conf.cgi?sub=teams&action=edit&team='.$old_name);
+        }
 
         Thruk::Utils::IO::json_lock_store($new_file, $team);
 

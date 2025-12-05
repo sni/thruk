@@ -626,6 +626,24 @@ sub json_lock_store {
 
 ##############################################
 
+=head2 json_reader
+
+  json_reader()
+
+return a shared json reader
+
+=cut
+sub json_reader {
+    our $jsonreader;
+    if(!$jsonreader) {
+        $jsonreader = Cpanel::JSON::XS->new->utf8;
+        $jsonreader->relaxed();
+    }
+    return $jsonreader;
+}
+
+##############################################
+
 =head2 json_retrieve
 
   json_retrieve($file, [$fh], [$lock_fh])
@@ -636,13 +654,8 @@ retrieve json data
 sub json_retrieve {
     my($file, $fh, $lock_fh) = @_;
 
-    our $jsonreader;
-    if(!$jsonreader) {
-        $jsonreader = Cpanel::JSON::XS->new->utf8;
-        $jsonreader->relaxed();
-    }
-
-    my $t1 = [gettimeofday];
+    my $jsonreader = json_reader();
+    my $t1         = [gettimeofday];
 
     my($data, $content, $err);
     if(!$fh) {
