@@ -431,7 +431,10 @@ sub add_defaults {
             add_defaults($c, $flags, 1);
         }
     }
-    return if $flags_hash->{ADD_USER_ONLY};
+    if($flags_hash->{ADD_USER_ONLY}) {
+        $c->stats->profile(end => "AddDefaults::add_defaults(".$flags_name.")");
+        return;
+    }
 
     $c->stash->{'defaults_added'} = 1;
 

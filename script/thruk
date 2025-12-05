@@ -37,7 +37,6 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 use warnings;
 use strict;
 
-my $use_timer = 0;
 BEGIN {
     for my $a (@ARGV) {
         if($a eq '-T') {

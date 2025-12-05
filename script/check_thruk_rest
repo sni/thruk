@@ -36,7 +36,18 @@ eval 'exec perl -x $0 ${1+"$@"} ;'
 ###################################################
 use warnings;
 use strict;
-use Getopt::Long qw//;
+
+BEGIN {
+    for my $a (@ARGV) {
+        if($a eq '-T') {
+            $ENV{'THRUK_TIMER'} = 1;
+            last;
+        }
+    }
+    use Thruk::Timer qw/timing_breakpoint/;
+    &timing_breakpoint('./script/check_thruk_rest');
+};
+use Getopt::Long ();
 
 use Thruk::Config 'noautoload';
 
@@ -52,6 +63,7 @@ Getopt::Long::Configure('pass_through');
 Getopt::Long::GetOptions(
    "h|help"             => \$options->{'help'},
    "v|verbose"          => sub { $options->{'verbose'}++ },
+   "T"                  => sub {  }, # already processed
    "V|version"          => \$options->{'version'},
    "b|backend=s"        =>  $options->{'backends'},
    "k|insecure"         => \$options->{'insecure'},
