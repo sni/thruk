@@ -78,6 +78,7 @@ sub cmd {
 ##############################################
 sub _fetch_results {
     my($c, $opts, $global_opts) = @_;
+    $c->stats->profile(begin => "_fetch_results()");
 
     for my $opt (@{$opts}) {
         my $url = $opt->{'url'};
@@ -87,6 +88,9 @@ sub _fetch_results {
             $opt->{'rc'}     = 3;
             next;
         }
+
+        my $printable_url = Thruk::Base::url_clean_credentials($url);
+        $c->stats->profile(begin => "_fetch_results($printable_url)");
 
         # replace variables in the url, ex.: from previous queries
         unshift(@{$opts}, {}); # add empty totals up front to not mix up order
@@ -108,6 +112,7 @@ sub _fetch_results {
                 $opt->{'rc'}     = 0;
                 _debug("text data from command line argument:");
                 _debug($opt->{'result'});
+                $c->stats->profile(end => "_fetch_results($printable_url)");
                 next;
             }
             # command line
@@ -126,6 +131,7 @@ sub _fetch_results {
                 $opt->{'rc'}     = 0;
                 _debug("text data from command line argument:");
                 _debug($opt->{'result'});
+                $c->stats->profile(end => "_fetch_results($printable_url)");
                 next;
             }
             # json arguments
@@ -134,6 +140,7 @@ sub _fetch_results {
                 $opt->{'rc'}     = 0;
                 _debug("json data from command line argument:");
                 _debug($opt->{'result'});
+                $c->stats->profile(end => "_fetch_results($printable_url)");
                 next;
             }
             # http/https url
@@ -141,7 +148,7 @@ sub _fetch_results {
                 my($code, $result, $res) = Thruk::Utils::CLI::request_url($c, $url, undef, $opt->{'method'}, $opt->{'postdata'}, $opt->{'headers'}, $global_opts->{'insecure'});
                 if(Thruk::Base->verbose >= 2) {
                     _debug2("request:");
-                    _debug2($res->request->as_string());
+                    _debug2(Thruk::Base::url_clean_credentials($res->request->as_string()));
                     _debug2("response:");
                     _debug2($res->as_string());
                 }
@@ -156,6 +163,7 @@ sub _fetch_results {
                         'failed'   => Cpanel::JSON::XS::true,
                     })."\n";
                 }
+                $c->stats->profile(end => "_fetch_results($printable_url)");
                 next;
             }
             # local file
@@ -165,6 +173,7 @@ sub _fetch_results {
                 $opt->{'rc'}     = 0;
                 _debug("json data from local file ".$url.":");
                 _debug($opt->{'result'});
+                $c->stats->profile(end => "_fetch_results($printable_url)");
                 next;
             }
 
@@ -194,7 +203,10 @@ sub _fetch_results {
         }
         _debug2("json data:");
         _debug2($opt->{'result'});
+        $c->stats->profile(end => "_fetch_results($printable_url)");
     }
+
+    $c->stats->profile(end => "_fetch_results()");
     return($opts);
 }
 

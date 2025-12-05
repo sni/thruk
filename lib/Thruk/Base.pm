@@ -629,6 +629,23 @@ sub validate_options {
     return;
 }
 
+########################################
+
+=head2 url_clean_credentials
+
+    url_clean_credentials($url)
+
+returns url with credentials removed for safe printing
+
+=cut
+
+sub url_clean_credentials {
+    my($url) = @_;
+    return unless defined $url;
+    $url =~ s%//([^:]+):.*@%//$1:...@%gmx;
+    return $url;
+}
+
 ##############################################
 
 =head1 SEE ALSO

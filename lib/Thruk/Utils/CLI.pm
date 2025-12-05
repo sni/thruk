@@ -393,6 +393,9 @@ sub _external_request {
     if(!defined $method) {
         $method = $postdata ? "POST" : "GET";
     }
+    $method = uc($method);
+    my $debug_name = sprintf("_external_request(%s, %s)", $method, Thruk::Base::url_clean_credentials($url));
+    $c->stats->profile(begin => $debug_name);
     _debug(sprintf("_external_request(%s, %s)", $url, $method));
     my $ua = _get_user_agent($c->config);
     if($insecure) {
@@ -409,7 +412,7 @@ sub _external_request {
     }
 
     my $request = HTTP::Request->new($method, $url);
-    $request->method(uc($method));
+    $request->method($method);
     if($postdata) {
         $request->content_type('application/json; charset=utf-8');
         $request->content(Cpanel::JSON::XS->new->encode($postdata)); # using ->utf8 here would end in double encoding
@@ -427,6 +430,7 @@ sub _external_request {
     my $response = $ua->request($request);
     if($response->is_success) {
         _debug2(" -> success");
+        $c->stats->profile(end => $debug_name);
         return($response);
     }
     if(Thruk::Base->verbose >= 2) {
@@ -435,6 +439,7 @@ sub _external_request {
         _debug(" -> response:");
         _debug($response->as_string());
     }
+    $c->stats->profile(end => $debug_name);
     return($response);
 }
 
