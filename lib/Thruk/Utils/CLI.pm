@@ -349,7 +349,7 @@ sub _run_do {
     my $result = $self->from_local($c, $self->{'opt'});
 
     # remove print wrapper
-    Thruk::Utils::Log::wrap_stdout2log_stop();
+    Thruk::Utils::Log::wrap_stdout2log_stop() if $log_timestamps;
 
     my $elapsed = Time::HiRes::tv_interval($t0);
     _debug("_run(): building local response done (exitcode: %d, duration: %.3fs)", $result->{'rc'}, $elapsed);

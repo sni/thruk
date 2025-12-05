@@ -1,0 +1,317 @@
+package Thruk::CheckThrukRest;
+
+use warnings;
+use strict;
+use Getopt::Long ();
+
+use Thruk::Config 'noautoload';
+
+sub _check {
+    my $options = {
+        'verbose'        => 0,
+        'backends'       => [],
+        'commandoptions' => [],
+        'mode'           => 'monitoring-plugin',
+    };
+    Getopt::Long::Configure('no_ignore_case');
+    Getopt::Long::Configure('bundling');
+    Getopt::Long::Configure('pass_through');
+    Getopt::Long::GetOptions(
+      "h|help"             => \$options->{'help'},
+      "v|verbose"          => sub { $options->{'verbose'}++ },
+      "T"                  => sub {  }, # already processed
+      "V|version"          => \$options->{'version'},
+      "b|backend=s"        =>  $options->{'backends'},
+      "k|insecure"         => \$options->{'insecure'},
+        "local"            => \$options->{'local'},
+    ) or do {
+        print "usage: $0 [<globaloptions>] <plugin> [<options>]\nsee --help for detailed help.\n";
+        exit 3;
+    };
+    @{$options->{'commandoptions'}} = @ARGV;
+    unshift(@{$options->{'commandoptions'}}, "rest");
+    if($options->{'help'} || scalar @{$options->{'commandoptions'}} == 1) {
+        require Pod::Usage;
+        Pod::Usage::pod2usage( { -verbose => 2, -exit => 3, -input => __FILE__ } );
+        exit(3);
+    }
+    if($options->{'version'}) {
+        print "check_thruk_rest v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
+    }
+
+    require Thruk::Utils::CLI;
+    my $cli = Thruk::Utils::CLI->new($options);
+    exit $cli->_run();
+}
+
+1;
+
+__END__
+
+=head1 NAME
+
+check_thruk_rest - Generic Monitoring Plugin to check things from the Thruk REST API or other json/text sources
+
+=head1 SYNOPSIS
+
+  Usage: check_thruk_rest [global options] [plugin options] <rest url|json file|json data|text|command>
+
+  Global Options:
+    -h, --help                    Show this help message and exit
+    -v, --verbose                 Print verbose output
+    -V, --version                 Print version
+    -b, --backend=<backend>       Comma separated list of backends/sites
+                                  which should be used for queries.
+    -o, --output=<template txt>   Define output text template. Format see below.
+        --template=<file>         Define a template toolkit template which will be
+                                  used to create the output text.
+        --perfunit=<label>:<unit> Set performance data unit for given label.
+        --perffilter=<regex>      Filter performance data output by given regex.
+
+  HTTP options:
+    -k, --insecure                Skip ssl certificate verification when requesting https urls.
+    -H, --header                  Set extra http headers for http requests.
+    -d, --data                    Send post data to remote url.
+    -m, --method                  Set http method.
+
+  Plugin options:
+    -w, --warning=<threshold>     Apply warning threshold. Format see below.
+    -c, --critical=<threshold>    Apply critical threshold. Format see below.
+        --rename=<label:newname>  Rename/relabel attributes.
+        --string                  Assume input is text data and no json or url.
+        --command                 Assume input is a command to execute. See examples.
+    <rest url|json|text|cmd>      Rest url to query. When used multiple times, plugin options
+                                  are reset for each url.
+                                  Instead of a url, a local json file or json data string
+                                  may be used as well. When using --text option, plain text data
+                                  may be used too. When using --command option, a command may be used.
+                                  See examples.
+
+
+=head1 DESCRIPTION
+
+The check_thruk_rest plugin fetches data from the Thruk REST API and may apply thresholds.
+
+=head1 OPTIONS
+
+script has the following arguments
+
+=over 4
+
+=item B<-h> , B<--help>
+
+    print help and exit
+
+=item B<-v> , B<--verbose>
+
+    print verbose output too
+
+=item B<-V> , B<--version>
+
+    print version and exit
+
+=item B<-k>, B<--insecure>
+
+    Skip ssl certificate verification when accessing https urls.
+
+=item B<-H> I<headerstring>, B<--header>=I<headerstring>
+
+    specify extra headers which will be used when accessing remote urls.
+
+    ex.: --header="X-Request-Type: monitoring"
+
+=item B<-m> I<method>, B<--method>=I<method>
+
+    set http request method.
+
+=item B<-b> I<backend>, B<--backend>=I<backend>
+
+    specify backend(s), otherwise the default backends will be
+    used. Specify the key of the backend. Use <-l> to get a list
+    of backends.
+
+    All default backends (backends without the 'hidden' flag) will be used unless
+    backend(s) are specified with this option.
+
+    Use 'ALL' to use all backends, regardless of the hidden flag.
+
+
+=item B<-w> I<threshold>, B<--warning>=I<threshold>
+
+    Apply warning threshold.
+    Format is: <attribute>:<value> or <attribute>:<threshold> using
+    the threshold range syntax from
+    https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+
+    nested values can be accessed by :: or . between levels.
+    {<lvl1>::<lvl2>}<value> or <lvl1>.<lvl2>:<value>
+
+=item B<-c> I<threshold>, B<--critical>=I<threshold>
+
+    Apply critical threshold. Format is the same as for warnings.
+
+=item B<--rename>=I<label:newlabel>
+
+    Rename a label.
+
+=item B<-o> I<outputtemplate>, B<--output>=I<outputtemplate>
+
+    Use this template when creating the final text output of this plugin.
+    The template may contain macros/variables in curly brackets.
+
+    A macro can be either a reference to the fetched data.
+        - {attribute name}
+
+    Prefix with the number of the query when using multiple queries. Number
+    starts at 1.
+        - {nr:attribute name}
+
+    Simple calculation:
+        - {attribute name + another attribute}
+
+    Special macros:
+        - {STATUS}  contains the text status
+        - {RAW}     contains the raw json data as formatted text
+        - {RAW<nr>} contains the raw json data as formatted text of given query number
+
+    Use printf format strings like this:
+        - {var%format}, ex.: {execution_time:%02f}
+
+=item B<--perfunit>=I<label:unit>
+
+    Sets a unit used in performance data for given label.
+    You can use regular expressions which will be automatically
+    encapsulated by ^...$.
+
+    Simple unit, append 's' to performance label 'time'
+        --perfunit=time:s
+
+    Regular expression, set all units to 'c'
+        --perfunit=".*:c"
+
+=item B<--perffilter>=I<regex>
+
+    Sets a regular expressions to filter performance data.
+    For example, only output performance data for labels starting with an 'm'.
+        --perffilter="^m"
+
+=back
+
+=head1 NESTED JSON DATA
+
+Nested json data can be accessed by :: or . like for example:
+
+      check_thruk_rest -w {hits::value}80 -c hits.value:@10:20 /hosts/totals
+
+Details on the threshold format can be found here: https://www.monitoring-plugins.org/doc/guidelines.html#THRESHOLDFORMAT
+
+Lists can be enumerated like this {hits::0}
+
+=head1 TEMPLATE TOOLKIT
+
+Using --template=<file> will use a template toolkit template to create the output text.
+Find the documentation for the template syntax here: https://template-toolkit.org/docs/manual/
+
+Instead of a file, you can base64 encode the template and supply --template=data:<BASE64...> as well.
+Use 'base64 -w 0 file.tt' to decode your input file. This makes things more portable, but beware
+of the maximum command line length.
+
+The exit code is parsed from the template output. Either make the output start with a
+naemon/nagios exit code like this: OK - ... or CRITICAL - ... or print the text:
+{EXITCODE:OK} or {EXITCODE:3} anywhere in the output.
+
+An example template could look like this:
+
+    [% IF RAW.0.state == 0 %]
+       OK - [% RAW.0.description %]
+    [% ELSE %]
+      CRITICAL - [% RAW.0.description %]
+    [% END %]
+
+Or another example to get started:
+
+    [% dump(macros) %][%# pretty print all available variables #%]
+    {EXITCODE:OK}
+
+=head1 RETURN VALUE
+
+check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
+
+=head1 EXAMPLES
+
+    - notifiy if more than 80 hosts are down
+      check_thruk_rest -w down:80 -c down:100 /hosts/totals
+
+    - advanced monitoring plugin:
+      thruk [globaloptions] rest -o "outputtemplate" [-w attribute:value] [-c attribute:value] <url>
+
+    - multiple queries, options are used for the following query. Notify if more than 20 hosts are down or more than 50 services issues are unhandled.
+      check_thruk_rest \
+        --critical=down_and_unhandled:20
+        "/hosts/totals"
+        --critical=critical_and_unhandled:50
+        "/services/totals"
+
+    - multiple queries with output template.
+      check_thruk_rest \
+        -o "{STATUS} - There are {down} of {1:total} hosts down and {critical+unknown} of {2:total} services have issues."
+        --warning=total:20:100
+        "/hosts/totals"
+        --warning=total:20:100
+        "/services/totals"
+
+    - show active session using renamed aggregation functions
+      check_thruk_rest \
+        -o '{STATUS} - There are {sessions} active sessions.' \
+        --warning=sessions:20 \
+        --critical=sessions:30 \
+        '/thruk/sessions?columns=count(*):sessions&active[gte]=-10m'
+
+    - check number of available backends:
+      check_thruk_rest \
+        -o "{STATUS} - {down} backends are down.\n{RAW2}" \
+        --warning=down:0 --critical=down:1 \
+        '/sites?columns=count(*):down&status[ne]=0' '/sites?columns=id,name&status[ne]=0'
+
+    - set performance data units
+      check_thruk_rest \
+        -o "{STATUS} - maximum rta is {rta%d}ms" \
+        --perfunit=rta:ms
+        "/hosts?columns=max(rta):rta&rta[gt]=0"
+
+    - rename label:
+      check_thruk_rest \
+        -o "{STATUS} - got {total_hosts%d} hosts" \
+        --rename=total:total_hosts
+        "/hosts/stats"
+
+    - external url with timestamp:
+      check_thruk_rest \
+        -o "{STATUS} - iss position lat:{iss_position::latitude} lon:{iss_position::longitude} (last update {timestamp%strftime:%m/%d/%y %H:%M:%S})" \
+        http://api.open-notify.org/iss-now.json
+
+    - checking local json files:
+      check_thruk_rest \
+        -o "{STATUS} - {hits}" \
+        "/path/to/file.json"
+
+    - checking json from string argument:
+      check_thruk_rest \
+        -o "{STATUS} - {hits}" \
+        '{"hits":5}'
+
+    - checking text data from string argument:
+      check_thruk_rest \
+        --template "[% IF RAW.text > 10 %]OK[% ELSE %]CRITICAL[% END %] - [% RAW.text %]" \
+        --string "$(echo $RANDOM)"
+
+    - checking input data from executing a command:
+      check_thruk_rest \
+        --template "OK - There are [% RAW.output %] files in /tmp (RC: [% RAW.rc %])" \
+        --command "ls -la /tmp | wc -l"
+
+=head1 AUTHOR
+
+Sven Nierlein, 2009-present, <sven@nierlein.org>
+
+=cut
