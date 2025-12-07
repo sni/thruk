@@ -169,6 +169,7 @@ local_install: local_patches
 	# rpmlint requires absolute perl path
 	${SED} -e 's+/usr/bin/env perl+/usr/bin/perl+g' \
 		-i ${DESTDIR}${BINDIR}/nagexp \
+		-i ${DESTDIR}${DATADIR}/script/check_thruk_rest \
 		-i ${DESTDIR}${DATADIR}/script/thruk_fastcgi.pl \
 		-i ${DESTDIR}${DATADIR}/script/thruk.psgi
 	############################################################################
