@@ -60,6 +60,7 @@
 /usr/share/thruk/script/pnp_export.sh
 /usr/share/thruk/script/convert_old_datafile
 /usr/share/thruk/script/check_thruk_rest
+/usr/share/thruk/script/check_thruk_rest.sh
 /usr/share/thruk/support
 /usr/share/thruk/templates
 /usr/share/thruk/themes
