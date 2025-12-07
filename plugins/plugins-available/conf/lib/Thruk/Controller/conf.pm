@@ -837,6 +837,8 @@ sub _process_teams_page {
             'notes'       => '',
         };
         $c->stash->{'show_team'} = 1;
+        $c->stash->{'scripted'}  = 0;
+        $c->stash->{'new_file'}  = 1;
     }
 
     $c->stash->{'subtitle'} = "Team Configuration";
