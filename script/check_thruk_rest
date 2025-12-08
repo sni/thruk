@@ -14,14 +14,14 @@ BEGIN {
 
     # git version
     if(-d "$basedir/.git" && -e "$basedir/lib/Thruk.pm") {
-        push @INC, $basedir."/lib";
+        unshift @INC, $basedir."/lib";
         if($ENV{'OMD_ROOT'} && !$ENV{'THRUK_CONFIG'}) { $ENV{'THRUK_CONFIG'} = $ENV{'OMD_ROOT'}."/etc/thruk"; }
         if(!$ENV{'THRUK_CONFIG'}) { $ENV{'THRUK_CONFIG'} = $basedir."/"; }
     }
 
     # omd
     elsif($ENV{'OMD_ROOT'}) {
-        push @INC, $ENV{'OMD_ROOT'}."/share/thruk/lib";
+        unshift @INC, $ENV{'OMD_ROOT'}."/share/thruk/lib";
         if(!$ENV{'THRUK_CONFIG'}) { $ENV{'THRUK_CONFIG'} = $ENV{'OMD_ROOT'}."/etc/thruk"; }
     }
 
