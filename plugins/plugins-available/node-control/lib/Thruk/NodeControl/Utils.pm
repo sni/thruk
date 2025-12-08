@@ -9,6 +9,7 @@ use File::Temp qw/tempfile/;
 
 use Thruk::Constants qw/:peer_states/;
 use Thruk::Utils ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

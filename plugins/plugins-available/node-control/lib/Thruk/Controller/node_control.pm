@@ -6,6 +6,7 @@ use strict;
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
 use Thruk::NodeControl::Utils ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 
 =head1 NAME

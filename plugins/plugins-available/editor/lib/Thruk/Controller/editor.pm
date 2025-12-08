@@ -8,6 +8,7 @@ use Encode qw/decode_utf8/;
 use File::Temp qw/tempfile/;
 
 use Thruk::Utils ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Status ();
 
 #use Thruk::Timer qw/timing_breakpoint/;

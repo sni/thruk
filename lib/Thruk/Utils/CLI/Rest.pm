@@ -26,8 +26,8 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Cwd ();
 use Getopt::Long ();
 use POSIX ();
-use Template ();
 use Scalar::Util qw/looks_like_number/;
+use Template ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::CLI ();

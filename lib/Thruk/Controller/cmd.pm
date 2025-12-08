@@ -6,6 +6,7 @@ use Data::Dumper;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 use Thruk::Views::ToolkitRenderer ();

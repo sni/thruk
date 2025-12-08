@@ -8,6 +8,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
 use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 

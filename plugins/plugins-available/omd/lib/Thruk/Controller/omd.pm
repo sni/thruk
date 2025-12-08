@@ -5,6 +5,7 @@ use strict;
 
 use Thruk::Backend::Manager ();
 use Thruk::Utils ();
+use Thruk::Utils::External ();
 
 #use Thruk::Timer qw/timing_breakpoint/;
 
