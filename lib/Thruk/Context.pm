@@ -12,7 +12,6 @@ use URI::Escape qw/uri_escape uri_unescape/;
 use Thruk::Action::AddDefaults ();
 use Thruk::Authentication::User ();
 use Thruk::Config 'noautoload';
-use Thruk::Controller::error ();
 use Thruk::Request ();
 use Thruk::Stats ();
 use Thruk::Utils::APIKeys ();
@@ -185,6 +184,7 @@ sub detach {
     # errored flag is set in error controller to avoid recursion if error controller
     # itself throws an error, just bail out in that case
     if(!$c->{'errored'} && $url =~ m|/error/index/(\d+)$|mx) {
+        require Thruk::Controller::error;
         Thruk::Controller::error::index($c, $1);
         $c->{'detached'} = 1;
         die("prevent further page processing from detach() via ".$filename.":".$line);
@@ -221,6 +221,7 @@ sub detach_error {
     # errored flag is set in error controller to avoid recursion if error controller
     # itself throws an error, just bail out in that case
     if(!$c->{'errored'}) {
+        require Thruk::Controller::error;
         Thruk::Controller::error::index($c, 99);
         $c->{'detached'} = 1;
         die("prevent further page processing from detach_eror() via ".$filename.":".$line);

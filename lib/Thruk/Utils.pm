@@ -24,7 +24,6 @@ use Thruk::Base qw/:compat/;
 use Thruk::Constants ':backend_handling';
 use Thruk::Utils::DateTime ();
 use Thruk::Utils::Encode ();
-use Thruk::Utils::External ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -2586,6 +2585,7 @@ sub restart_later {
         return $c->redirect_to($redirect);
     }
 
+    require Thruk::Utils::External;
     return(Thruk::Utils::External::cmd($c, {
         'cmd'        => "sleep 1 ; ".$cmd."; sleep 1",
         'forward'    => $redirect,

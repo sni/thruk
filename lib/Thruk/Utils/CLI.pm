@@ -447,12 +447,6 @@ sub _external_request {
 sub _dummy_c {
     _debug2("create internal context");
     my($c) = _internal_request('/thruk/cgi-bin/remote.cgi');
-    #require Thruk;
-    #if(!$Thruk::thruk) {
-    #    Thruk->startup();
-    #}
-    #my $c = Thruk::Context->new($Thruk::thruk, {'PATH_INFO' => '/dummy-internal/'.__FILE__.':'.__LINE__});
-    #Thruk::Action::AddDefaults::begin($c);
     _debug2("create internal context done");
     return($c);
 }

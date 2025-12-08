@@ -24,7 +24,6 @@ use URI::Escape ();
 
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
-use Thruk::Utils::Status ();
 
 ##############################################
 # use faster HTML::Escape if available
@@ -2017,6 +2016,7 @@ returns text/lexical filter for structured filter
 =cut
 sub search2text {
     my $c = $Thruk::Globals::c;
+    require Thruk::Utils::Status;
     return(Thruk::Utils::Status::search2text($c, @_));
 }
 

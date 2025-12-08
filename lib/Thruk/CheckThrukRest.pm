@@ -4,8 +4,6 @@ use warnings;
 use strict;
 use Getopt::Long ();
 
-use Thruk::Config 'noautoload';
-
 sub _check {
     my $options = {
         'verbose'        => 0,
@@ -36,9 +34,11 @@ sub _check {
         exit(3);
     }
     if($options->{'version'}) {
+        require Thruk::Config;
         print "check_thruk_rest v", Thruk::Config::get_thruk_version(), "\n"; exit 0;
     }
 
+    local $ENV{'THRUK_NO_STARTUP_POOL'} = 1;
     require Thruk::Utils::CLI;
     my $cli = Thruk::Utils::CLI->new($options);
     exit $cli->_run();

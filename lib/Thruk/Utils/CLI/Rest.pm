@@ -27,10 +27,9 @@ use Cwd ();
 use Getopt::Long ();
 use POSIX ();
 use Template ();
+use Scalar::Util qw/looks_like_number/;
 
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
-use Thruk::Request ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Log qw/:all/;
 
@@ -335,6 +334,7 @@ sub _set_postdata {
     if($src && $src eq 'local' && defined $val) {
         $val =~ s/^\+/%2B/gmx;
         $val =~ s/\+/ /gmx;
+        require Thruk::Request;
         $val = Thruk::Request->unescape($val);
     }
     return unless $key;
@@ -576,7 +576,7 @@ sub _append_performance_data_string {
         }
         return \@res;
     }
-    if(defined $data && !Thruk::Backend::Manager::looks_like_number($data)) {
+    if(defined $data && !looks_like_number($data)) {
         return;
     }
     my($min,$max,$warn,$crit) = ("", "", "", "");

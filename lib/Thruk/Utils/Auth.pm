@@ -14,7 +14,6 @@ use warnings;
 use strict;
 use Carp;
 
-use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
@@ -356,6 +355,7 @@ sub _filter_dups {
     my %seen;
     my @filtered;
 
+    require Monitoring::Livestatus::Class::Lite;
     for my $f (@{$filter}) {
         my $key = join("\n", @{Monitoring::Livestatus::Class::Lite::filter_statement($f, "F:")});
         next if $seen{$key}++;
