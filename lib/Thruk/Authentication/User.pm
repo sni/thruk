@@ -117,6 +117,7 @@ sets attributes based on livestatus data
 =cut
 sub set_dynamic_attributes {
     my($self, $c, $skip_db_access,$roles, $force_roles) = @_;
+    return $self if $ENV{'THRUK_BASH_COMP'};
     $c->stats->profile(begin => "User::set_dynamic_attributes");
 
     my $username = $self->{'username'};

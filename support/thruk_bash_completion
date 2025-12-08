@@ -9,7 +9,7 @@ _thruk_cmd_options() {
 }
 
 _thruk_sub_commands() {
-    thruk | grep ^Enabled | awk -F: '{ print $2 }' | tr -d ','
+    THRUK_BASH_COMP=1 thruk | grep ^Enabled | awk -F: '{ print $2 }' | tr -d ','
     return
 }
 
@@ -54,13 +54,15 @@ _thruk()
         i=$((i + 1))
     done
 
-    # simply expland files and folders if current item starts with . or /
+    # simply expand files and folders if current item starts with . or /
     if [[ $cur =~ ^/|^\. ]] && ! [[ $subcmd =~ r|rest ]]; then
         COMPREPLY=( $(compgen -o default -- ${cur}) )
         return 0
     fi
 
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    #echo "DEBUG: subcmd='$subcmd' subcmdargs='${subcmdargs[*]}' cur='$cur' prev='$prev'" >&2
 
     # thruk ...
     if [ "x$subcmd" = "x" ]; then
@@ -150,6 +152,10 @@ _thruk()
             compopt -o nospace;
         fi
         return 0
+
+    # thruk agents | ta ...
+    elif [[ $subcmd =~ ^agents ]] && [[ $prev =~ ^(-II|-III|-add|-update|-rm|-D)$ ]]; then
+        opts="ALL $(thruk host list)"
 
     else
         local SUBCOMMANDS=$(_thruk_sub_commands | tr ' ' '|')

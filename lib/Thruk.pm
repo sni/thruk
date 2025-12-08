@@ -67,7 +67,7 @@ returns the psgi code ref
 sub startup {
     my($class, $pool) = @_;
 
-    if(Thruk::Base->mode() ne 'TEST' && !$pool) {
+    if(Thruk::Base->mode() ne 'TEST' && !$pool && !$ENV{'THRUK_BASH_COMP'}) {
         require Thruk::Backend::Pool;
         $pool = Thruk::Backend::Pool->new();
     }

@@ -129,6 +129,7 @@ if($action eq 'bash_complete') {
 }
 
 require Thruk::Utils::CLI;
+&timing_breakpoint('modules loaded');
 my $cli = Thruk::Utils::CLI->new($options);
 exit $cli->_run();
 

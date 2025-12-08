@@ -43,4 +43,5 @@ BEGIN {
 };
 
 use Thruk::CheckThrukRest;
+&timing_breakpoint('modules loaded');
 Thruk::CheckThrukRest::_check();

@@ -2,14 +2,24 @@ package Thruk::Timer;
 
 use warnings;
 use strict;
+
+my $starttime;
+BEGIN {
+    use Time::HiRes qw/gettimeofday tv_interval/;
+    $starttime = [gettimeofday];
+}
+END {
+    if($ENV{'THRUK_TIMER'}) {
+        timing_breakpoint('END');
+    }
+}
+
 use Exporter 'import';
 use POSIX ();
-use Time::HiRes qw/gettimeofday tv_interval/;
 use threads ();
 
 our @EXPORT_OK = qw(timing_breakpoint);
 
-my $starttime   = [gettimeofday];
 my $lasttime    = $starttime;
 my $lastmemory  = 0;
 my $has_threads = 0;

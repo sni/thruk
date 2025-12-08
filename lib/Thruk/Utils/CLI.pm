@@ -842,11 +842,17 @@ sub get_submodule_help {
         $file = $module.'.pm';
     }
     $file =~ s/::/\//gmx;
+
+    my $sections = "DESCRIPTION|SYNOPSIS|OPTIONS|EXAMPLES";
+    if($ENV{'THRUK_BASH_COMP'}) {
+        $sections = "OPTIONS";
+    }
+
     my $output = "";
     open my $fh, ">", \$output or die $!;
     Pod::Usage::pod2usage({
             -verbose    => 99,
-            -sections   => "DESCRIPTION|SYNOPSIS|OPTIONS|EXAMPLES",
+            -sections   => $sections,
             -noperldoc  => 1,
             -input      => $INC{$file},
             -output     => $fh,

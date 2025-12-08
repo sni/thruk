@@ -167,6 +167,7 @@ sub _parse_file {
         $test =~ s|\->detach\('[^']*'\)||gmx;
         $test =~ s%(fail|is)\([^\)]*\)%%gmx;
         $test =~ s|sprintf\("[^"]*"||gmx;
+        $test =~ s|sprintf\('[^']*'||gmx;
         $test =~ s|_trace\("[^"]*"||gmx;
         $test =~ s|_debug\("[^"]*"||gmx;
         $test =~ s|timing_breakpoint\([^\)]*||gmx;

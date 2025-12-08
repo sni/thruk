@@ -51,11 +51,12 @@ sub set_timezone {
     returns current timezone
 
 Try to detect current timezone
-Locations like Europe/Berlin are prefered over CEST
+Locations like Europe/Berlin are preferred over CEST
 
 =cut
 
 sub detect_timezone {
+    return if $ENV{'THRUK_BASH_COMP'};
     if($ENV{'TZ'}) {
         _debug(sprintf("server timezone: %s (from ENV)", $ENV{'TZ'})) if Thruk::Base->verbose;
         return($ENV{'TZ'});
@@ -95,7 +96,7 @@ sub detect_timezone {
         return($std);
     }
 
-    # last ressort, date, fails for ex. to set CET instead of CEST
+    # last resort, date, fails for ex. to set CET instead of CEST
     my $tz = Thruk::Utils::IO::cmd("date +%Z");
     _debug(sprintf("server timezone: %s (from date +%%Z)", $tz)) if Thruk::Base->verbose;
     return $tz;
