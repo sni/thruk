@@ -136,6 +136,8 @@ following cronjobs should cover that. When not using OMD, you will have to
 adjust the paths.
 
 -------
+  THRUK_CRON=1
+
   # update logcache data
   */5 * * * * $OMD_ROOT/bin/thruk -a logcache update     >>$OMD_ROOT/var/log/thruk.log 2>&1
 
@@ -150,6 +152,8 @@ adjust the paths.
 
   # compact logfiles from cache after default duration (thruk.conf: logcache_compact_duration)
   0   1 * * * $OMD_ROOT/bin/thruk -a logcache compact    >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  THRUK_CRON=0
 -------
 
 
@@ -178,6 +182,8 @@ compat logfiles.
 
 etc/cron.d/thruk_logcache
 -------
+  THRUK_CRON=1
+
   # update logcache data
   * * * * * $OMD_ROOT/bin/thruk -a logcache update var/icinga2/log/icinga2/compat/icinga.log >>$OMD_ROOT/var/log/thruk.log 2>&1
   5 0 * * * $OMD_ROOT/bin/thruk -a logcache update $(ls -1tr var/icinga2/log/icinga2/compat/archives/*.log) >>$OMD_ROOT/var/log/thruk.log 2>&1
@@ -193,6 +199,8 @@ etc/cron.d/thruk_logcache
 
   # compact logfiles from cache after default duration (thruk.conf: logcache_compact_duration)
   0   1 * * * $OMD_ROOT/bin/thruk -a logcache compact    >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  THRUK_CRON=0
 -------
 
 
