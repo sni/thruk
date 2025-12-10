@@ -9,6 +9,7 @@ services:
         - "--log.level=DEBUG"
         - "--accesslog"
         - "--entrypoints.web.address=:80"
+        - "--entrypoints.web.http.encodedCharacters.allowEncodedSlash=true"
         - "--providers.docker.exposedbydefault=false"
     ports:
         - "127.0.0.3:60080:80"
