@@ -258,7 +258,7 @@ sub _process_new {
         'mode'     => $c->req->parameters->{'mode'}     // 'https',
         'peer_key' => $c->req->parameters->{'backend'}  // $c->stash->{'param_backend'},
         'settings' => {},
-        'tags'     => [],
+        'tags'     => $c->req->parameters->{'tags'}     // [],
     };
     return _process_edit($c, $agent);
 }
