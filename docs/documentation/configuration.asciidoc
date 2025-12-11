@@ -2133,6 +2133,7 @@ ex.:
       #enable_pkce  = 0                                           # enable oauth 2.1 pkce workflow if set to 1. Disabled by default
       #https_proxy  = http://<server>:<port>                      # optional proxy to use for accessing URLs from above
       #ssl_verify_hostnames = 1                                   # skip ssl hostname verfication when set to 0
+      #autologin    = 0                                           # automatically select and submit this provider when set to 1
     </provider>
   </auth_oauth>
 

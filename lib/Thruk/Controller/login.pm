@@ -137,6 +137,18 @@ sub index {
         return $c->redirect_to($referer);
     }
 
+    # auto login oauth provider
+    my $num = 0;
+    if($keywords) {
+        if($keywords eq 'nocookie' || $keywords eq 'expired') {
+            for my $oauth (@{$c->config->{'auth_oauth'}->{'provider'}}) {
+                if($oauth->{'autologin'}) {
+                    $c->req->parameters->{'oauth'} = $num;
+                    last;
+                }
+            }
+        }
+    }
     if($c->req->parameters->{'state'} || (defined $c->req->parameters->{'oauth'} && $c->req->parameters->{'oauth'} ne "")) {
         require Thruk::Utils::OAuth;
         return(Thruk::Utils::OAuth::handle_oauth_login($c, $referer, $cookie_path, $cookie_domain));
