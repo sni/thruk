@@ -36,7 +36,7 @@ jobs:
         run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
       - name: cache files
         id: thruk-test-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ${{ env.THRUK_TEST_MODULES_CACHE }}
