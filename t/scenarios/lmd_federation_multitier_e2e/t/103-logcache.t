@@ -36,7 +36,7 @@ for my $name (qw/tier2a tier3a/) {
     my $id = $ids->{"tier2a"};
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
-        'waitfor'=> 'EXTERNAL\ COMMAND:',
+        'waitfor'=> 'EXTERNAL\ COMMAND:\ SCHEDULE_FORCED_SVC_CHECK;'.$name,
     );
     my $unlike = [ 'internal server error', 'HASH', 'ARRAY' ];
     if($name eq 'tier2a') {
@@ -58,7 +58,7 @@ for my $name (qw/tier1a tier2a tier3a/) {
     my $id = $ids->{"tier1a"};
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/proxy.cgi/'.$id.'/demo/thruk/cgi-bin/showlog.cgi?pattern='.$name.'&backend='.$ids->{$name},
-        'waitfor'=> 'EXTERNAL\ COMMAND:',
+        'waitfor'=> 'EXTERNAL\ COMMAND:\ SCHEDULE_FORCED_SVC_CHECK;'.$name,
     );
     my $unlike = [ 'internal server error', 'HASH', 'ARRAY' ];
     if($name eq 'tier1a') {
