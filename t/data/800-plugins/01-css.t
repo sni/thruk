@@ -65,6 +65,7 @@ sub check_templates {
             next if $c =~ m/^infosub_$/gmx;
             next if $c =~ m/^_\d+$/gmx;
             next if $c =~ m/^-ALL$/gmx;
+            next if $c eq 'deletable';
             next if $c eq '';
             next if $c eq '-';
             if(!defined $available_classes->{$c}) {
