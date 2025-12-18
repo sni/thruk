@@ -14,7 +14,7 @@
       <thead>
         <tr>
           <td align="center" colspan="7">
-            <button class="my-2" onclick="jQuery('.js-radio-new[value=\'on\']').attr('checked', true); return false;">Accept All New Checks</button>
+            <button class="my-2" onclick="jQuery('.js-radio-new[value=\'on\']:visible').attr('checked', true); return false;">Accept All New Checks</button>
           </td>
         </tr>
       </thead>
@@ -22,7 +22,7 @@
       <thead>
         <tr>
           <td align="center" colspan="7">
-            <button class="my-2" onclick="jQuery('.js-radio-obsolete[value=\'off\']').attr('checked', true); return false;">Remove All Obsolete Checks</button>
+            <button class="my-2" onclick="jQuery('.js-radio-obsolete[value=\'off\']:visible').attr('checked', true); return false;">Remove All Obsolete Checks</button>
           </td>
         </tr>
       </thead>
@@ -31,7 +31,7 @@
     [% FOREACH check = checks.$type; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
       <tr>
-        <th>
+        <th data-name="[% check.name | html %]">
           <div class="flex items-center min-w-max justify-between">
             <div class="text-ellipsis overflow-hidden max-w-lg">[% IF services.exists(name) %]<a href="extinfo.cgi?type=2&host=[% s.host_name | uri %]&service=[% s.description | uri %]&backend=[% s.peer_key %]" class="link">[% END %][% check.name | html %][% IF services.exists(name) %]</a>[% END %]</div>
             [% IF services.exists(name) %]
@@ -465,7 +465,9 @@
         </table>
       </div>
       <div class="head justify-between" style="flex: 0 0 40px;">
-        <div class="grow"></div>
+        <div class="grow">
+          <input type="text" class="w-32 deletable" id="check_filter" placeholder="filter services..." onkeyup="filterServices(this); return false;" onchange="filterServices(this); return false;">
+        </div>
         <span
           class="tabs clickable text-center text-sm w-40 active"
           id="sub_1"
@@ -490,7 +492,9 @@
           onclick="set_sub(4)"
           title="Disabled checks are not monitored."
         >Unwanted Checks (<span class="js-type-4-size">[% checks.disabled.size %]</span>)</span>
-        <div class="grow"></div>
+        <div class="grow">
+          <div class="w-32">&nbsp;</div>
+        </div>
       </div>
       <div id="checksTable" class="h-full overflow-auto">
         <div id="checksTableContent">
@@ -723,6 +727,21 @@ function previewChanges(btn) {
   });
 
   return false;
+}
+
+function filterServices(input) {
+  var filter = jQuery(input).val().toLowerCase();
+  jQuery("table.js-checks tbody tr").each(function(i, row) {
+    var name = jQuery(row).find("th").first().data("name");
+    if(!name) {
+      return;
+    }
+    if(matchOrIndex(name, filter, 'i')) {
+      jQuery(row).show();
+    } else {
+      jQuery(row).hide();
+    }
+  });
 }
 
 -->
