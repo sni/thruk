@@ -70,6 +70,16 @@ returns ref
 sub type {
     return(CORE::ref($_[0]));
 }
+
+##############################################
+
+=head2 perl_ref
+
+  perl_ref($any)
+
+returns ref
+
+=cut
 *perl_ref = *type;
 
 ##############################################
