@@ -87,7 +87,8 @@ sub new {
     # expand teams recursively
     $self->_expand_teams($c, $self->{'teams'});
 
-    $self->{'roles'} = Thruk::Base::array_uniq($self->{'roles'});
+    $self->{'permissions'} = Thruk::Base::array_uniq_obj($self->{'permissions'});
+    $self->{'roles'}       = Thruk::Base::array_uniq($self->{'roles'});
 
     # Is this user internal or an admin user?
     if($self->{'internal'} || $self->check_user_roles('admin')) {
@@ -385,11 +386,36 @@ sub is_locked {
     return(0);
 }
 
+########################################
+
+=head2 can_choose_role
+
+ can_choose_role(<$role>)
+
+ returns 1 if user has given role.
+
+ for example:
+  $c->user->check_user_role('authorized_for_all_services')
+
+=cut
+
+sub can_choose_role {
+    my($self, $role) = @_;
+
+    return 1 if $role eq 'authorized_for_read_only';
+
+    my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
+    return 1 if scalar @found >= 1;
+    return(0);
+}
+
+########################################
+
 =head2 check_user_roles
 
  check_user_roles(<$role>)
 
- returns 1 if user has all given roles.
+ returns 1 if user has permissions as in all given roles.
 
  for example:
   $c->user->check_user_roles('admin')
@@ -450,6 +476,8 @@ sub check_user_roles {
 
     return(0);
 }
+
+########################################
 
 =head2 check_permissions
 
@@ -539,6 +567,8 @@ sub check_permissions {
     return 0;
 }
 
+########################################
+
 =head2 check_cmd_permissions
 
  check_cmd_permissions('system')
@@ -620,6 +650,8 @@ sub _check_cmd_permissions {
     return 0;
 }
 
+########################################
+
 =head2 check_role_permissions
 
  check_role_permissions($role)
@@ -632,9 +664,11 @@ sub check_role_permissions {
     my($self, $role) = @_;
     return 1 if $role eq 'authorized_for_read_only';
     return 1 if $self->check_user_roles('admin');
-    return 1 if $self->check_user_roles($role);
+    return 1 if $self->can_choose_roles($role);
     return 0;
 }
+
+########################################
 
 =head2 transform_username
 
@@ -664,6 +698,8 @@ sub transform_username {
     }
     return($username);
 }
+
+########################################
 
 =head2 grant
 
@@ -792,12 +828,15 @@ sub read_team_data {
         return $role_data;
     }
 
-    if(-x $c->config->{'var_path'}."/teams/".$team) {
-        _debug("running teams data script from: ".$c->config->{'var_path'}."/teams/".$team) if Thruk::Base->verbose;
-        my($rc, $output) = Thruk::Utils::IO::cmd([$c->config->{'var_path'}."/teams/".$team], { timeout => 10 });
-        if($rc == 0 && $output) {
+    my $team_script = $c->config->{'var_path'}."/teams/".$team;
+    if(-x $team_script) {
+        _debug("running teams data script from: ".$team_script) if Thruk::Base->verbose;
+        my($rc, undef, $stdout, $stderr) = Thruk::Utils::IO::cmd([$team_script], { timeout => 10, env => { 'THRUK_TEAM' => $team } });
+        if($rc == 0 && $stdout) {
             my $jsonreader = Thruk::Utils::IO::json_reader();
-            $role_data = $jsonreader->decode($output);
+            $role_data = $jsonreader->decode($stdout);
+        } else {
+            _error("%s team script failed (rc:%d): %s%s", $team_script, $rc, $stdout, $stderr);
         }
         $role_data->{'scripted_team'} = 1;
         return $role_data;
@@ -813,12 +852,15 @@ sub read_team_data {
         return $role_data;
     }
 
-    if(-x $c->config->{'var_path'}."/teams/_fallback") {
-        _debug("running teams data fallback script from: ".$c->config->{'var_path'}."/teams/_fallback") if Thruk::Base->verbose;
-        my($rc, $output) = Thruk::Utils::IO::cmd([$c->config->{'var_path'}."/teams/_fallback", $team], { timeout => 10 });
-        if($rc == 0 && $output) {
+    my $fallback_script = $c->config->{'var_path'}."/teams/_fallback";
+    if(-x $fallback_script) {
+        _debug("running teams data fallback script from: ".$fallback_script) if Thruk::Base->verbose;
+        my($rc, undef, $stdout, $stderr) = Thruk::Utils::IO::cmd([$fallback_script, $team], { timeout => 10, env => { 'THRUK_TEAM' => $team } });
+        if($rc == 0 && $stdout) {
             my $jsonreader = Thruk::Utils::IO::json_reader();
-            $role_data = $jsonreader->decode($output);
+            $role_data = $jsonreader->decode($stdout);
+        } else {
+            _error("%s team script failed (rc:%d): %s%s", $fallback_script, $rc, $stdout, $stderr);
         }
         $role_data->{'scripted_team'} = 1;
         $role_data->{'real_file'}     = '_fallback';

@@ -198,7 +198,7 @@ sub create_key_by_params {
     if($params->{'roles'} && (!$params->{'restrict_only'} || $params->{'restrict'})) {
         $roles = [];
         for my $role (@{Thruk::Base::list($params->{'roles'})}) {
-            next unless $c->user->check_role_permissions($role);
+            next unless $c->user->can_choose_role($role);
             push @{$roles}, $role;
         }
     }

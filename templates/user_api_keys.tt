@@ -59,7 +59,7 @@
                 <button class="min-w-[70px]" onclick="setRoles(''); return false;">None</button>
                 <button class="min-w-[70px]" onclick="setRoles('*'); return false;">All</button>
                 <button class="min-w-[70px]" onclick="setRoles('authorized_for_read_only'); return false;">Read-Only</button>
-                <button class="min-w-[70px]" onclick="setRoles('authorized_for_admin'); return false;">Admin</button>
+                <button class="min-w-[70px]" onclick="setRoles('authorized_for_admin'); return false;"[% IF !c.user.can_choose_role('admin') %] disabled[% END %]>Admin</button>
                 <button class="min-w-[70px]" onclick="setRoles('authorized_for_all_host_commands,authorized_for_all_hosts,authorized_for_all_service_commands,authorized_for_all_services'); return false;">All-Commands</button>
                 <button class="min-w-[70px]" onclick="setRoles('authorized_for_all_hosts,authorized_for_all_services,authorized_for_read_only'); return false;">All-Read-Only</button>
               </div>
@@ -68,8 +68,8 @@
             <div style="display: none;" class="flexcol gap-px js-restricted_roles">
               [% FOREACH r = available_roles %]
               <div>
-                <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.check_role_permissions(r) %] disabled[% END %][% IF c.check_user_roles(r) %] checked[% END %]>
-                <label for="role.[% r | html %]"[% IF !c.user.check_role_permissions(r) %] class="disabled"[% ELSE %] class="clickable hoverable"[% END %]>[% r | html %]</label><br>
+                <input type="checkbox" id="role.[% r | html %]" name="roles" value="[% r | html %]"[% IF !c.user.can_choose_role(r) %] disabled[% END %][% IF c.check_user_roles(r) && c.user.can_choose_role(r) %] checked[% END %]>
+                <label for="role.[% r | html %]"[% IF !c.user.can_choose_role(r) %] class="disabled"[% ELSE %] class="clickable hoverable"[% END %]>[% r | html %]</label><br>
               </div>
               [% END %]
             </div>
