@@ -664,7 +664,7 @@ sub check_role_permissions {
     my($self, $role) = @_;
     return 1 if $role eq 'authorized_for_read_only';
     return 1 if $self->check_user_roles('admin');
-    return 1 if $self->can_choose_roles($role);
+    return 1 if $self->can_choose_role($role);
     return 0;
 }
 
