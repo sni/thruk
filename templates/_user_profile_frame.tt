@@ -32,6 +32,8 @@
       jQuery('input:checkbox[name="roles"]').prop('checked', true);
       jQuery('input:checkbox[name="roles"][value="authorized_for_read_only"]').prop('checked', false);
     }
+    // uncheck disabled checkboxes
+    jQuery('input:checkbox[name="roles"]:disabled').prop('checked', false);
     return false;
   }
   -->
