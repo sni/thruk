@@ -10,7 +10,7 @@
 
 [% BLOCK _check_type %]
   <table class="h-full w-full cellspacing striped rowhover rowhoverhighlight [% sub | html %] js-checks" style="display: none;">
-    [% IF type == "new" %]
+    [% IF ctype == "new" %]
       <thead>
         <tr>
           <td align="center" colspan="7">
@@ -18,7 +18,7 @@
           </td>
         </tr>
       </thead>
-    [% ELSIF type == "obsolete" %]
+    [% ELSIF ctype == "obsolete" %]
       <thead>
         <tr>
           <td align="center" colspan="7">
@@ -28,7 +28,7 @@
       </thead>
     [% END %]
     <tbody>
-    [% FOREACH check = checks.$type; name = check.name %]
+    [% FOREACH check = checks.$ctype; name = check.name %]
       [% IF services.exists(name); s = services.$name; END %]
       <tr>
         <th data-name="[% check.name | html %]">
@@ -41,16 +41,16 @@
         </th>
         <td class="max-w-min">
           [% state = 'PENDING' %]
-          [% IF type == "exists" || type == "obsolete" %]
+          [% IF ctype == "exists" || ctype == "obsolete" %]
             [% IF services.exists(name) %]
               [% state = servicestatetext(s) %]
             [% END %]
             <div class='text-center badge [% state %]'>[% state %]</div>
           [% END %]
-          [% IF type == "new" %]
+          [% IF ctype == "new" %]
             <div class='text-center badge PENDING'>new</div>
           [% END %]
-          [% IF type == "disabled" %]
+          [% IF ctype == "disabled" %]
             [% IF check.defined("disabled") && check.disabled %]
               <div class='text-center badge PENDING clickable' onClick="jQuery('#info_link_[% name2id(check.id) | html %]').click(); return false;">disabled</div>
             [% ELSIF check.defined("exclude_reason") %]
@@ -63,9 +63,9 @@
             [% END %]
           [% END %]
         </td>
-        [% IF type == "new" || type == "exists" || type == "obsolete" %]
+        [% IF ctype == "new" || ctype == "exists" || ctype == "obsolete" %]
         <td class="truncate max-w-xs text-left" title="additional check arguments&#013;ex.: override thresholds: warn='load > 5'">
-          [% IF type == "new" %]
+          [% IF ctype == "new" %]
             <input type="text" name="args.[% check.id | html %]" class="js-checks ml-1" placeholder="additional arguments" onkeyup="jQuery('INPUT[name=\'check.[% check.id | html %]\'][value=\'on\']').attr('checked', true); checkSaveButtonColor();" onchange="checkSaveButtonColor();">
           [% ELSE %]
             <input type="text" name="args.[% check.id | html %]" class="js-checks ml-1" value="[% IF check.defined("args") %][% check.args | html %][% END %]" onkeyup="checkSaveButtonColor();" onchange="checkSaveButtonColor();">
@@ -79,11 +79,11 @@
           [% END %]
         </td>
         [% END %]
-        <td class="[% IF type != "exists" %]w-full[% END %]">
+        <td class="[% IF ctype != "exists" %]w-full[% END %]">
           <a href="" id="info_link_[% name2id(check.id) | html %]" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'mainCls': 'modalFG min-h-[500px]', 'fixedPos': true, 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% name2id(check.id) | html %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); set_sub(1, false, 'infosub_[% name2id(check.id) | html %]'); return false;">(info)</a>
           [% PROCESS _info_popup %]
         </td>
-        [% IF type == "exists" || type == "obsolete" %]
+        [% IF ctype == "exists" || ctype == "obsolete" %]
         <td class='truncate w-1/2 max-w-xs'>
           [% IF services.exists(name) %]
             [% s.plugin_output %]
@@ -96,27 +96,27 @@
               <input
                 type="radio"
                 value="on"
-                class="js-checks js-radio-[% type %] activeENABLED"
+                class="js-checks js-radio-[% ctype %] activeENABLED"
                 id="[% name2id(check.id) | html %]_on"
-                name="check.[% check.id | html %]"[% IF type == "exists" || type == "obsolete" %]checked="checked"[% END %]
+                name="check.[% check.id | html %]"[% IF ctype == "exists" || ctype == "obsolete" %]checked="checked"[% END %]
               >
               <label for="[% name2id(check.id) | html %]_on" title="Enables monitoring of this check">On</label>
-              [% IF type == "new" %]
+              [% IF ctype == "new" %]
               <input
                 type="radio"
                 value="new"
-                class="js-checks js-radio-[% type %]"
+                class="js-checks js-radio-[% ctype %]"
                 id="[% name2id(check.id) | html %]_new"
-                name="check.[% check.id | html %]"[% IF type == "new" %]checked="checked"[% END %]
+                name="check.[% check.id | html %]"[% IF ctype == "new" %]checked="checked"[% END %]
               >
               <label for="[% name2id(check.id) | html %]_new" title="Keep check in the new section.">New</label>
               [% END %]
               <input
                 type="radio"
                 value="off"
-                class="js-checks js-radio-[% type %]"
+                class="js-checks js-radio-[% ctype %]"
                 id="[% name2id(check.id) | html %]_off"
-                name="check.[% check.id | html %]"[% IF type == "disabled" %]checked="checked"[% END %]
+                name="check.[% check.id | html %]"[% IF ctype == "disabled" %]checked="checked"[% END %]
               >
               <label for="[% name2id(check.id) | html %]_off" title="Set check into manually disabled mode">Off</label>
             </div>
@@ -125,10 +125,10 @@
       </tr>
     [% END %]
     </tbody>
-    [% IF checks.$type.size == 0 %]
+    [% IF checks.$ctype.size == 0 %]
     <tfoot>
       <tr>
-        <td class="text-center textHINT">[% IF agent.hostname != "new" %]no [% type %] checks.[% ELSE %]not yet scanned...[% END %]</td>
+        <td class="text-center textHINT">[% IF agent.hostname != "new" %]no [% ctype %] checks.[% ELSE %]not yet scanned...[% END %]</td>
       </tr>
     </tfoot>
     [% END %]
@@ -151,7 +151,7 @@
         <table class="body w-fit striped rowhover cellborder border borderDefault">
           <tbody>
             [% FOREACH row = check.disabled %]
-              [% IF type(row) == "ARRAY" %]
+              [% IF perl_ref(row) == "ARRAY" %]
                 <tr>
                   <th>[% row.0 | html %]</th>
                   <td class="pl-2">[% row.1 | html %]</td>
@@ -508,10 +508,10 @@
       </div>
       <div id="checksTable" class="h-full overflow-auto">
         <div id="checksTableContent">
-          [% PROCESS _check_type type="new" sub="sub_1" %]
-          [% PROCESS _check_type type="exists" sub="sub_2" %]
-          [% PROCESS _check_type type="obsolete" sub="sub_3" %]
-          [% PROCESS _check_type type="disabled" sub="sub_4" %]
+          [% PROCESS _check_type ctype="new" sub="sub_1" %]
+          [% PROCESS _check_type ctype="exists" sub="sub_2" %]
+          [% PROCESS _check_type ctype="obsolete" sub="sub_3" %]
+          [% PROCESS _check_type ctype="disabled" sub="sub_4" %]
         </div>
       </div>
     </form>

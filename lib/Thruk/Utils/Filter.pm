@@ -70,6 +70,7 @@ returns ref
 sub type {
     return(CORE::ref($_[0]));
 }
+*perl_ref = *type;
 
 ##############################################
 
