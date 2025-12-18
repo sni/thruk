@@ -1,17 +1,17 @@
 ﻿[% BLOCK cols %]
   <table class="sortable_col_table rowhover">
-    [% counter = 0 %]
-    [% FOR column IN columns %]
-    [% counter = counter + 1 %]
-    [% meta = column.split(':'); column = meta.0 %]
-    [% IF meta.size == 1; meta.1 = 1; END %]
+    [%- counter = 0 -%]
+    [%- FOR column IN columns -%]
+    [%- counter = counter + 1 -%]
+    [%- meta = column.split(':'); column = meta.0 -%]
+    [%- IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
       <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
       <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
     </tr>
-    [% END %]
-    [% FOREACH v IN get_exposed_custom_vars(1) %]
-      [% counter = counter + 1 %]
+    [% END -%]
+    [%- FOREACH v IN get_exposed_custom_vars(1) %]
+      [%- counter = counter + 1 -%]
       <tr class="sortable_row">
         <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
         <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>

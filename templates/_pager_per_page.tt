@@ -10,13 +10,13 @@
       [% END %]
     [% END %]
     <select name="entries" onChange="this.form.submit()" class="w-36 text-sm border-0 font-medium pager-entries">
-      [% FOR step = paging_steps %]
-        [% IF step == "all" %]
+      [% FOR step = paging_steps -%]
+        [%- IF step == "all" -%]
           <option value="all"[%  IF pager.entries == "all" %] selected[% END %]>all on one page</option>
-        [% ELSE %]
+        [%- ELSE -%]
           <option value="[% step | html %]"[% IF pager.entries == step %] selected[% END %]>[% step | html %] per page</option>
-        [% END %]
-      [% END %]
+        [%- END %]
+      [% END -%]
     </select>
   </form>
 </div>
