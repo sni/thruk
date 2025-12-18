@@ -151,10 +151,16 @@
         <table class="body w-fit striped rowhover cellborder border borderDefault">
           <tbody>
             [% FOREACH row = check.disabled %]
-              <tr>
-                <th>[% row.0 | html %]</th>
-                <td class="pl-2">[% row.1 | html %]</td>
-              </tr>
+              [% IF type(row) == "ARRAY" %]
+                <tr>
+                  <th>[% row.0 | html %]</th>
+                  <td class="pl-2">[% row.1 | html %]</td>
+                </tr>
+              [% ELSE %]
+                <tr>
+                  <td colspan="2">[% row | html %]</td>
+                </tr>
+              [% END %]
             [% END %]
           </tbody>
         </table>

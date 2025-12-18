@@ -553,6 +553,7 @@ sub to_id {
 
     scan_agent($c, $params)
 
+update inventory
 returns error if updates fails or undef on success
 
 =cut

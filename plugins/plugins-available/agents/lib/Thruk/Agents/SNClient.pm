@@ -490,13 +490,28 @@ sub get_inventory {
 
     Thruk::Utils::Agents::check_for_check_commands($c, [$cmd], $extra_templates);
 
-    _debug("scan command: %s!%s", $command, $args);
-    my $output = $c->{'obj_db'}->get_plugin_preview($c,
-                                        $command,
-                                        $args,
-                                        $hostname,
-                                        '',
-                                    );
+    my $output;
+    # override datasource command
+    my $datasource = _get_datasource_command($c, $hostname);
+    if($datasource) {
+        $datasource =~ s/%HOST%/$hostname/gmx;
+        _debug("scan datasource command: %s!%s", $command);
+        my($rc, undef, $stdout, $stderr) = Thruk::Utils::IO::cmd($datasource);
+        $output = $stdout if $rc == 0;
+        if($rc != 0 || !$output) {
+            _error("datasource command failed for host %s (rc:%d): %s%s", $hostname, $rc, $stdout//'', $stderr//'');
+        }
+    } else {
+        _debug("scan command: %s!%s", $command, $args);
+        my $out = $c->{'obj_db'}->get_plugin_preview($c,
+                                            $command,
+                                            $args,
+                                            $hostname,
+                                            '',
+                                        );
+        $output = $out;
+    }
+
     $output = Thruk::Base::trim_whitespace($output) if $output;
     if($output =~ m/^\{/mx) {
         my $data;
@@ -800,6 +815,23 @@ sub _get_extra_opts_svc {
     }
 
     return $res;
+}
+
+##########################################################
+sub _get_datasource_command {
+    my($c, $hostname) = @_;
+    my $config = &config;
+    my $opts   = Thruk::Base::list($config->{'datasource'});
+    my $res    = [];
+    for my $opt (@{$opts}) {
+        next unless Thruk::Utils::Agents::check_wildcard_match($hostname, ($opt->{'host'} // 'ANY'));
+        push @{$res}, $opt;
+    }
+
+    my $last = pop @{$res};
+    return unless $last;
+
+    return $last->{'command'} // undef;
 }
 
 ##########################################################
