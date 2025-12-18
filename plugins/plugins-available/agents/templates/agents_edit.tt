@@ -212,8 +212,12 @@
             [% IF attr == "warn"; NEXT; END %]
             [% IF attr == "crit"; NEXT; END %]
             <tr>
-              <td>[% attr | html %]</td>
-              <td>[% check.cfg.$attr | html %]</td>
+              <td class="align-baseline">[% attr | html %]</td>
+              <td class="pl-2">
+                [% FOREACH val = check.cfg.$attr.list %]
+                  [% val | html %][% IF !loop.last %]<br>[% END %]
+                [% END %]
+              </td>
             </tr>
             [% END %]
           </tbody>
