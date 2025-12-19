@@ -41,7 +41,7 @@
     // mark lines with errors or warnings
     var markings = {};
     textarea.val().split("\n").forEach(function(l, i) {
-      if(l.match(/\[(ERROR|WARNING|WARN)\]/)) {
+      if(l.match(/\[(ERROR|WARNING|WARN)\]|\s+\!\s+Conflict\s+/)) {
         markings[i+1] = true;
       }
     });
