@@ -5595,6 +5595,12 @@ function play_test_audio(btn, audio) {
  */
 function tags_input_init(div) {
     var input = jQuery(div).find("INPUT");
+
+    var testDiv = jQuery(div).find('DIV.tags-input-container');
+    if(testDiv.length > 0) {
+        // already initialized
+        return;
+    }
     var inputDiv = jQuery('<div class="tags-input-container"></div>');
     jQuery(div).prepend(inputDiv);
     jQuery(input).detach().appendTo(inputDiv);
