@@ -4,7 +4,7 @@ use Cpanel::JSON::XS ();
 use Test::More;
 use utf8;
 
-plan tests => 59;
+plan tests => 71;
 
 BEGIN {
     use lib('t');
@@ -26,6 +26,12 @@ is($query, "name = 'test'", "original string unchanged");
 _test_filter('name ~~ "test"',
              'Filter: name ~~ test',
              "name ~~ 'test'");
+_test_filter('name~~"test"', 'Filter: name ~~ test', "name ~~ 'test'");
+_test_filter('name~~"test" && name=test', "Filter: name ~~ test\nFilter: name = test\nAnd: 2", "name ~~ 'test' and name = 'test'");
+_test_filter('name~test', 'Filter: name ~~ test', "name ~~ 'test'");
+_test_filter('name="te~st"', 'Filter: name = te~st', "name = 'te~st'");
+_test_filter('name= test', 'Filter: name = test', "name = 'test'");
+_test_filter('name =test', 'Filter: name = test', "name = 'test'");
 _test_filter('groups >= "test"', 'Filter: groups >= test', "groups >= 'test'");
 _test_filter('check_interval != 5', 'Filter: check_interval != 5');
 _test_filter('host_name = "a" AND host_name = "b"',

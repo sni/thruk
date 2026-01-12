@@ -28,17 +28,20 @@ Available commands are:
   - rm     | -D   <host> ...  delete existing host(s)
   - reload | -R               reload monitoring core
 
-  -i                interactive mode       (available in edit/add/update mode)
-  --all             show all items         (available in show mode)
-  -P | --password   set password           (available in add/update mode)
-  -p | --port       set tcp port           (available in add/update mode)
-       --ip         set ip address         (available in add/update mode)
-       --section    set section            (available in add/update mode)
-  -k | --insecure   skip tls verification  (available in add/update mode)
-       --cached[=file]  use cached host inventory, optionally specify location of cache file to use.
-  -n | --dryrun     only print changes     (available in add/update mode)
-  -d | --diff       print diff of changes  (available in add/update mode)
-  -t | --tags <tag> list/add only tag      (available in add/list mode)
+  -i                       interactive mode       (available in edit/add/update mode)
+  --all                    show all items         (available in show mode)
+  -P | --password          set password           (available in add/update mode)
+  -p | --port              set tcp port           (available in add/update mode)
+       --ip                set ip address         (available in add/update mode)
+       --section           set section            (available in add/update mode)
+  -k | --insecure          skip tls verification  (available in add/update mode)
+       --cached[=file]     use cached host inventory, optionally specify location of cache file to use.
+  -n | --dryrun            only print changes     (available in add/update mode)
+  -d | --diff              print diff of changes  (available in add/update mode)
+  -t | --tags <tag>        list/add only tag      (available in add/list mode)
+  -f | --filter <filter>   generic filter         (available in add/list mode)
+                                                  e.g. tags=linux && tags != test
+                                                  available attributes: host_name, address, section, tags, site
 
 =back
 
@@ -60,6 +63,7 @@ use Thruk::Utils::Auth ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::Conf ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Status ();
 
 ##############################################
 
@@ -100,6 +104,7 @@ sub cmd {
         'tags'         => undef,
         'dryrun'       => undef,
         'diff'         => undef,
+        'filter'       => [],
     };
     $opt->{'fresh'}        = 1 if Thruk::Base::array_contains('-II',  $commandoptions);
     $opt->{'clear_manual'} = 1 if Thruk::Base::array_contains('-III', $commandoptions);
@@ -129,6 +134,7 @@ sub cmd {
        "n|dryrun"     => \$opt->{'dryrun'},
        "d|diff"       => \$opt->{'diff'},
        "always-ok"    => \$opt->{'always-ok'},
+       "f|filter=s@"  => \$opt->{'filter'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -227,24 +233,20 @@ sub _run_list {
     $versions = Thruk::Base::array2hash($versions, "host_name");
 
     for my $hst (@{$hosts}) {
+        # filter by hostname regexp
         next if($filter && $hst->{'name'} !~ m/$filter/mx);
-        my $agent = Thruk::Utils::Agents::build_agent($hst);
-        my $address = $hst->{'address'};
-        if($agent->{'port'} ne $agent->config()->{'default_port'}) {
-            $address .= ':'.$agent->{'port'};
-        }
-        my $row = {
-            'host_name' => $hst->{'name'},
-            'site'      => Thruk::Utils::Filter::peer_name($hst),
-            'section'   => $agent->{'section'},
-            'agent'     => $agent->{'type'},
-            'tags'      => $agent->{'tags'},
-            'address'   => $address,
-        };
+
+        my($row, $agent) = _build_agent_row($hst);
+
+        # filtered by tags
         if($opt->{'tags'}) {
             my $tags = Thruk::Base::array2hash($agent->{'tags'});
             next unless $tags->{$opt->{'tags'}};
         }
+
+        # filtered by filter
+        next if !_check_filter($opt->{'filter'},  $row);
+
         if($versions->{$hst->{'name'}}) {
             my $versiondata = $versions->{$hst->{'name'}};
             if($versiondata->{'state'} == 0) {
@@ -258,6 +260,7 @@ sub _run_list {
 
     if(scalar @result == 0) {
         return("no agents found matching '".$filter."'\n", 0) if $filter;
+        return("no matching agents found\n", 0) if (defined $opt->{'filter'} && scalar @{$opt->{'filter'}} > 0);
         return("no agents found\n", 0);
     }
 
@@ -350,34 +353,39 @@ sub _run_add {
     my $rc     = 3;
 
     my $hosts = $commandoptions;
+    if(scalar @{$hosts} == 0 && scalar @{$opt->{'filter'}} > 0) {
+        $hosts = ['ALL'];
+    }
     if(!$hosts || scalar @{$hosts} == 0) {
         return($output, $rc);
     }
 
     $opt->{'fresh'} = 1 if $opt->{'clear_manual'};
 
+    my $hostdata = {};
+
     # expand "ALL" hosts
     if($hosts->[0] eq 'ALL') {
         my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                 'custom_variables' => { '~' => 'AGENT .+' },
                                                 ],
-                                      columns => [qw/name/],
         );
         $hosts = [];
         for my $hst (@{$data}) {
             push @{$hosts}, $hst->{'name'};
+            $hostdata->{$hst->{'name'}} = $hst;
         }
     }
     elsif($hosts->[0] eq 'LOCAL') {
         my $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                                 'custom_variables' => { '~' => 'AGENT .+' },
                                                 ],
-                                      columns => [qw/name/],
                                       backend => $c->db->get_local_peer_keys(),
         );
         $hosts = [];
         for my $hst (@{$data}) {
             push @{$hosts}, $hst->{'name'};
+            $hostdata->{$hst->{'name'}} = $hst;
         }
     }
 
@@ -391,7 +399,8 @@ sub _run_add {
 
     $rc = 0;
     for my $hostname (@{$hosts}) {
-        my($out, $rc2) = _run_add_host($c, $hostname, $opt, $edit_only);
+        my($out, $rc2) = _run_add_host($c, $hostname, $opt, $edit_only, $hostdata->{$hostname});
+        next if $rc2 == -3; # filtered out
         print(Thruk::Base::trim_whitespace($out)."\n");
         if($rc2 > $rc) {
             $rc = $rc2;
@@ -420,7 +429,13 @@ sub _run_add {
 
 ##############################################
 sub _run_add_host {
-    my($c, $hostname, $opt, $edit_only) = @_;
+    my($c, $hostname, $opt, $edit_only, $host_conf) = @_;
+
+    # filtered by filter
+    if($opt->{'filter'} && scalar @{$opt->{'filter'}} > 0 && $host_conf) {
+        my($row, undef) = _build_agent_row($host_conf);
+        return("", -3) if !_check_filter($opt->{'filter'},  $row);
+    }
 
     my($checks, $checks_num, $hst, $hostobj, $data);
     eval {
@@ -949,6 +964,156 @@ sub _clean_error {
 }
 
 ##############################################
+sub _check_filter {
+    my($filter,  $data) = @_;
+
+    my @filter = @{Thruk::Base::list($filter)};
+
+    return 1 unless scalar @filter > 0;
+
+    our $filter_had_errors;
+    $filter_had_errors = 0;
+
+    for my $f (@filter) {
+        last if $filter_had_errors;
+        my $p = Thruk::Utils::Status::parse_lexical_filter($f, 1);
+        my $res = _check_sub_filter($p, $data);
+        if($filter_had_errors) {
+            exit 1;
+        }
+        return unless $res;
+    }
+
+    if($filter_had_errors) {
+        exit 1;
+    }
+
+    return 1;
+}
+
+##############################################
+sub _check_sub_filter {
+    my($filter, $data) = @_;
+
+    my @filter = @{Thruk::Base::list($filter)};
+    our $filter_had_errors;
+
+    for my $f (@filter) {
+        last if $filter_had_errors;
+        if(ref $f eq 'HASH') {
+            my @keys = keys %{$f};
+            if(scalar @keys != 1) {
+                $filter_had_errors = 1;
+                require Data::Dumper;
+                _error("invalid filter structure: %s", Data::Dumper::Dumper($f));
+                return;
+            }
+            my $attr = $keys[0];
+            my $f    = $f->{$attr};
+            if($attr eq '-and') {
+                for my $subf (@{$f}) {
+                    last if $filter_had_errors;
+                    my $res = _check_sub_filter($subf, $data);
+                    return unless $res;
+                }
+            } elsif($attr eq '-or') {
+                my $success = 0;
+                for my $subf (@{$f}) {
+                    last if $filter_had_errors;
+                    my $res = _check_sub_filter($subf, $data);
+                    if($res) {
+                        $success = 1;
+                    }
+                }
+                return unless $success;
+            } else {
+                # translate some keywords
+                $attr = 'host_name' if $attr eq 'name';
+                $attr = 'tags'      if $attr eq 'tag';
+
+                my $val = $data->{$attr};
+                if(!defined $val) {
+                    $filter_had_errors = 1;
+                    _error("invalid filter attribute: %s", $attr);
+                    return;
+                }
+                my $res = _check_sub_filter_val($f, $val);
+                return unless $res;
+            }
+        } elsif(ref $f eq 'ARRAY') {
+            my $res = _check_sub_filter($f, $data);
+            return unless $res;
+        }
+    }
+
+    return 1;
+}
+
+##############################################
+sub _check_sub_filter_val {
+    my($f, $val) = @_;
+
+    our $filter_had_errors;
+
+    if(ref $f ne 'HASH') {
+        $filter_had_errors = 1;
+        require Data::Dumper;
+        _error("invalid filter operator: %s", Data::Dumper::Dumper($f));
+    }
+    my @keys = keys %{$f};
+    if(scalar @keys != 1) {
+        $filter_had_errors = 1;
+        require Data::Dumper;
+        _error("invalid filter structure: %s", Data::Dumper::Dumper($f));
+        return;
+    }
+
+    my $op = $keys[0];
+    my $t  = $f->{$op};
+
+    if($op =~ m/^\!/mx) {
+        # negated operator, all must match
+        my $success = 1;
+        for my $v (@{Thruk::Base::list($val)}) {
+            my $res = Thruk::Utils::Agents::check_pattern($v, $t, 0, $op);
+            if(!$res) {
+                $success = 0;
+                last;
+            }
+        }
+        return $success;
+    }
+
+    # normal operator, first match is enough
+    for my $v (@{Thruk::Base::list($val)}) {
+        my $res = Thruk::Utils::Agents::check_pattern($v, $t, 0, $op);
+        return 1 if $res;
+    }
+
+    return;
+}
+
+##############################################
+sub _build_agent_row {
+    my($hst) = @_;
+    my $agent = Thruk::Utils::Agents::build_agent($hst);
+    my $address = $hst->{'address'};
+    if($agent->{'port'} ne $agent->config()->{'default_port'}) {
+        $address .= ':'.$agent->{'port'};
+    }
+    my $row = {
+        'host_name' => $hst->{'name'},
+        'site'      => Thruk::Utils::Filter::peer_name($hst),
+        'section'   => $agent->{'section'},
+        'agent'     => $agent->{'type'},
+        'tags'      => $agent->{'tags'},
+        'address'   => $address,
+    };
+
+    return($row, $agent);
+}
+
+##############################################
 
 =head1 EXAMPLES
 
@@ -967,6 +1132,10 @@ Add new host localhost, edit checks interactivly and reload afterwards
 Apply new config to all hosts (use LOCAL for hosts monitored by local site):
 
   %> thruk agents -II ALL
+
+Apply new config to all hosts with given tags
+
+  %> thruk agents -II ALL --filter="tags=linux && tags != test"
 
 See 'thruk agents help' for more help.
 

@@ -640,7 +640,7 @@ sub check_wildcard_match {
         $p = "$p";
         $p =~ s=^\!==mx;
         for my $s (@{$str}) {
-            return if _check_pattern($s, $p, $substringmatch);
+            return if check_pattern($s, $p, $substringmatch);
         }
     }
 
@@ -662,7 +662,7 @@ sub check_wildcard_match {
                     $res = 1;
                     $sp =~ s/^\!//mx;
                     for my $s (@{$str}) {
-                        if(_check_pattern($s, $sp, $substringmatch)) {
+                        if(check_pattern($s, $sp, $substringmatch)) {
                             $res = 0;
                             last;
                         }
@@ -673,7 +673,7 @@ sub check_wildcard_match {
                 else {
                     $res = 0;
                     for my $s (@{$str}) {
-                        if(_check_pattern($s, $sp, $substringmatch)) {
+                        if(check_pattern($s, $sp, $substringmatch)) {
                             $res = 1;
                             last;
                         }
@@ -689,7 +689,7 @@ sub check_wildcard_match {
         }
 
         for my $s (@{$str}) {
-            return $p if _check_pattern($s, $p, $substringmatch);
+            return $p if check_pattern($s, $p, $substringmatch);
         }
     }
     return(undef);
@@ -717,7 +717,7 @@ sub check_disable {
                     next if $attr eq '_LINE';
                     my $val = $data->{$attr} // '';
                     for my $pattern (@{Thruk::Base::list($co->{$attr})}) {
-                        if(_check_pattern($val, $pattern)) {
+                        if(check_pattern($val, $pattern)) {
                             return([
                                 ["disabled by",     sprintf('<disable %s>', $conf_key)],
                                 ["matching filter", sprintf('%s %s', $attr, $pattern)],
@@ -884,8 +884,16 @@ sub strip_site_path {
 }
 
 ##########################################################
-sub _check_pattern {
-    my($val, $pattern, $substringmatch) = @_;
+
+=head2 check_pattern
+
+    check_pattern($val, $pattern, [$substringmatch], [$force_op])
+
+returns true if $val matches $pattern. (pattern may have operator as prefix)
+
+=cut
+sub check_pattern {
+    my($val, $pattern, $substringmatch, $force_op) = @_;
     for my $entry (@{Thruk::Base::list($pattern)}) {
         my $f = "$entry"; # make copy
         my $op = '=';
@@ -893,6 +901,7 @@ sub _check_pattern {
             $op = $1;
             $f  = $2;
         }
+        $op = $force_op if defined $force_op;
         if($op eq '=' || $op eq '==') {
             return 1 if _check_wildcard_pattern($val, $f, $substringmatch);
         }

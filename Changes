@@ -39,6 +39,7 @@ next:
           - fix logs timezone (#1438)
           - Agents:
             - fix hostname/ip wizard
+            - add --filter to cli tool
           - Reports:
             - add date macros for name and description
             - fix outage calculation with soft recovery

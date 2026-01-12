@@ -2737,6 +2737,7 @@ sub parse_lexical_filter {
     }
     ${$string} =~ s/\s+$//gmx;
     ${$string} =~ s/\s+as\s+\w+$//mx;
+
     my $supported_operator = {
         '='      => 1,
         '=='     => 1,
@@ -2784,11 +2785,30 @@ sub parse_lexical_filter {
                     if(scalar @{$filter} == 0) { die("unexpected ".uc($key)." at ".${$string}); }
                     $combine = lc($key);
                     undef $key;
+                    next;
                 }
-                next;
+
+                # fix up operator cuddling at key
+                if($key =~ m/^(\w+)([=\!~><]+)$/mx) {
+                    $key = $1;
+                    $op  = $2;
+                    next;
+                }
+                if($key =~ m/^(\w+)([=\!~><]+)(\w+)$/mx) {
+                    $key  = $1;
+                    $op   = $2;
+                    $val  = $3;
+                }
             }
             elsif(!defined $op) {
                 $op = $token;
+                next;
+            }
+            elsif(!defined $val) {
+                $val = $token;
+            }
+
+            if(defined $val) {
                 if($op eq 'like')   { $op =  '~~'; }
                 if($op eq '~')      { $op =  '~~'; } # breaks case sensitive rest queries
                 if($op eq '!~')     { $op = '!~~'; } # this too
@@ -2796,13 +2816,9 @@ sub parse_lexical_filter {
                 if(!$supported_operator->{$op}) {
                     die("unknown operator ".$token);
                 }
-                next;
-            }
-            elsif(!defined $val) {
-                $val = $token;
+
                 if(substr($val, 0, 1) eq '"') { $val = substr($val, 1, -1); }
                 if(substr($val, 0, 1) eq "'") { $val = substr($val, 1, -1); }
-
                 if($op eq '~~' || $op eq '!~~') {
                     if(!Thruk::Utils::is_valid_regular_expression(undef, $val)) {
                         die("invalid regex in ".$val);
