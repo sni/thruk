@@ -34,6 +34,10 @@ jobs:
             timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
       - name: ./script/install_puppeteer.sh
         run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
+      - name: ./.ci/docker_clean_safe.sh
+        run: |
+            timeout -v 15m sudo bash -x ./.ci/docker_clean_safe.sh
+            df -h
       - name: cache files
         id: thruk-test-cache
         uses: actions/cache@v5
