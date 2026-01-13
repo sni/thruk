@@ -34,9 +34,12 @@ jobs:
             timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
       - name: ./script/install_puppeteer.sh
         run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
-      - name: ./.ci/docker_clean_safe.sh
+      - name: make more diskspace
         run: |
+            # remove unused images
             timeout -v 15m sudo bash -x ./.ci/docker_clean_safe.sh
+            # remove unrelated large sdk
+            sudo rm -rf /usr/local/lib/android
             df -h
       - name: cache files
         id: thruk-test-cache
