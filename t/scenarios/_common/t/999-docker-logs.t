@@ -13,10 +13,10 @@ my @logs = qw(
     /opt/omd/sites/demo/var/thruk/cron.log
 );
 my @errors = (
-    qr/\Qsyntax error near unexpected\E/mx,
-    qr/\QBEGIN failed--compilation aborted\E/mx,
-    qr/\s+at\s+[\w\/\.\-]+\s+line/mx,
-    qr/\[ERROR\]/mx,
+    qr/^(.*\Qsyntax error near unexpected\E.*)$/mx,
+    qr/^(.*\QBEGIN failed--compilation aborted\E.*)$/mx,
+    qr/^(.*\s+at\s+[\w\/\.\-]+\s+line.*)$/mx,
+    qr/^(.*\[ERROR\].*)$/mx,
 );
 
 my @exceptions = (
@@ -49,6 +49,7 @@ for my $svc (split/\n/mx, $services) {
             $log =~ s|\Q[ERROR]\E.*?\QNo backend available\E.*?\Q[ERROR]\E.*?\Qfailed to connect\E||sgmxi;
 
             for my $err (@errors) {
+                my @matches = $log =~ m/$err/g;
                 if($log =~ $err) {
                     my $ok = 0;
                     for my $ex (@exceptions) {
@@ -62,8 +63,13 @@ for my $svc (split/\n/mx, $services) {
                         if($logfiles_printed->{$logfile}) {
                             diag("* logfile already shown *");
                         } else {
+                            diag("***** logfile: $logfile *****");
                             diag($log);
                             $logfiles_printed->{$logfile} = 1;
+                            diag("-----");
+                            diag("errors found:");
+                            diag(join("\n", @matches));
+                            diag("*****");
                         }
                     }
                 }
