@@ -245,7 +245,7 @@ sub _build_app {
     &timing_breakpoint('startup() plugins loaded');
 
     ###################################################
-    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    my $c = Thruk::Context->new($self, {'PATH_INFO' => '/dummy-internal/'.__FILE__.':'.__LINE__});
     if($c->config->{'use_lmd_core'}) {
         local $Thruk::Globals::c = $c;
         require Thruk::Utils::LMD;
@@ -558,13 +558,21 @@ sub _check_exit_reason {
     }
 
     my $reason = longmess();
+    local $| = 1;
+    my $c   = $Thruk::Globals::c;
+    my $url = ($c && $c->req) ? $c->req->url : undef;
 
     ## no critic
-    if($reason =~ m|Thruk::Utils::CLI::from_local|mx && -t 0 && $sig eq 'INT') {
-    ## use critic
-        # this means someone hit ctrl+c, no need for a stacktrace then
-        printf(STDERR "\nbailing out, got signal SIG%s\n", $sig);
-        return;
+    if($sig eq 'INT' && -t 0) {
+        ## use critic
+        if(    $reason =~ m|Thruk::Utils::CLI::from_local|mx
+            || !$url
+            || $url =~ m|/dummy-internal/|mx
+        ) {
+            # this means someone hit ctrl+c, no need for a stacktrace then
+            printf(STDERR "\nbailing out, got signal SIG%s\n", $sig);
+            return;
+        }
     }
 
     if(!defined $Thruk::Globals::c) {
@@ -572,10 +580,7 @@ sub _check_exit_reason {
         return;
     }
 
-    local $| = 1;
-    my $c   = $Thruk::Globals::c;
-    my $url = $c->req ? $c->req->url : '<no url>';
-
+    $url = $url // '<no url>';
     my $params = ($c->req && $c->req->parameters && scalar keys %{$c->req->parameters} > 0) ? Thruk::Utils::dump_params($c->req->parameters) : undef;
     if($params && $params =~ m=Thruk::Utils::Cluster::pong|Thruk::Utils::Cluster::kill|Thruk::Utils::External::read_job=mx) {
         return;

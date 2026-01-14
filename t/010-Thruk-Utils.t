@@ -80,7 +80,7 @@ my $c = TestUtils::get_c();
 #########################
 my $app = $c->app;
 {
-    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal/'.__FILE__.':'.__LINE__});
     isa_ok($c, 'Thruk::Context');
     my $res1 = $c->sub_request('/r/thruk');
     is(ref $res1, 'HASH', 'got hash from sub_request');
@@ -386,7 +386,7 @@ is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunk
     local $ENV{'THRUK_CONFIG'} = 't/data/number_lists';
     my $config = Thruk::Config::set_config_env();
     $app->{config} = $config;
-    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal'.__FILE__.':'.__LINE__});
+    my $c = Thruk::Context->new($app, {'PATH_INFO' => '/dummy-internal/'.__FILE__.':'.__LINE__});
     is(Thruk::Utils::command_disabled($c, 0), 1, "0 is disabled");
     is(Thruk::Utils::command_disabled($c, 3), 1, "3 is disabled");
     is(Thruk::Utils::command_disabled($c, 5), 0, "5 is enabled");
