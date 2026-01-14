@@ -35,7 +35,7 @@
   [% PROCESS cmd_form_service %]
   [% PROCESS cmd_form_sticky_ack %]
   [% PROCESS cmd_form_send_notification %]
-  [% PROCESS cmd_form_persistent %]
+  [% PROCESS cmd_form_persistent_acks %]
   [% PROCESS cmd_form_expire_acks %]
   [% PROCESS cmd_form_author %]
   [% PROCESS cmd_form_comment %]

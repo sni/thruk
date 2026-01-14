@@ -2,7 +2,10 @@
   <div class="head justify-between">
     <h3>[% IF modal %][% request %][% ELSE %]Command Options[% END %]</h3>
     [% IF modal %]
-    <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    <div class="flexrow flex-nowrap gap-2">
+      <button class="iconOnly medium" onClick="toggleClass('.js-help', 'hidden'); return false;"><i class="uil uil-question-circle"></i></button>
+      <button class="iconOnly medium" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
+    </div>
     [% END %]
   </div>
   <div class="body">
@@ -16,6 +19,13 @@
         <input type="hidden" name="backend" value="[% backends.0 | html %]">
       [% END %]
       <table class="cellspacing">
+        [% IF modal %]
+        <tr class="js-help clickable hidden" onClick="toggleClass(this, 'hidden'); return false;">
+          <th class="align-top">Help</th>
+          <td class="whitespace-normal max-w-80 clickable">[% description %]
+          </td>
+        </tr>
+        [% END %]
         [% content %]
         [% IF content.trim() == "" %]
           <tr>

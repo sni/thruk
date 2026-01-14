@@ -24,7 +24,7 @@
 [% PROCESS _cmd_parts.tt %]
   [% PROCESS cmd_form_host %]
   [% PROCESS cmd_form_service %]
-  [% PROCESS cmd_form_persistent %]
+  [% PROCESS cmd_form_persistent_comment %]
   [% PROCESS cmd_form_author %]
   [% PROCESS cmd_form_comment %]
 

@@ -290,10 +290,17 @@
 </tr>
 [% END %]
 
-[% BLOCK cmd_form_persistent %]
-<tr>
+[% BLOCK cmd_form_persistent_comment %]
+<tr title="'Persistent Comment' toggles whether the comment remains after restarting the monitoring core.">
   <th class="w-1/4 clickable" onclick="jQuery('[name=persistent]').click()">Persistent Comment</th>
-  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_comments %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td>
+  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_comments || force_persistent_comments %] checked[% END %][% IF force_persistent_comments %] disabled[% END %]></td>
+</tr>
+[% END %]
+
+[% BLOCK cmd_form_persistent_acks %]
+<tr title="'Persistent Comment' toggles whether the comment remains once the acknowledgement is removed.">
+  <th class="w-1/4 clickable" onclick="jQuery('[name=persistent]').click()">Persistent Comment</th>
+  <td><input type='checkbox' name='persistent'[% IF c.config.cmd_defaults.persistent_ack || force_persistent_ack %] checked[% END %][% IF force_persistent_ack %] disabled[% END %]></td>
 </tr>
 [% END %]
 
