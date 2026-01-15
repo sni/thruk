@@ -394,7 +394,7 @@ END
   [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
     <tr>
       <th class="align-top">Contacts</th>
-      <td class='whitespace-normal'><span class='mightOverflowBlock clickable' style="width: 480px;" onClick="toggleClass(this, 'mightOverflowBlock');">[% obj.contacts.join(', ') %]</span></td>
+      <td class='whitespace-normal'><div class='mightOverflowBlock max-w-[600px] clickable' onClick="toggleClass(this, 'mightOverflowBlock');">[% obj.contacts.join(', ') %]</div></td>
     </tr>
   [% END %]
   [% IF show_modified_attributes %]
