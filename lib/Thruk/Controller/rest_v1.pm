@@ -1417,7 +1417,7 @@ sub _livestatus_options {
                 $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
             }
             elsif($type eq 'services') {
-                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+                $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::ref_service_columns}]);
             }
             elsif($type eq 'contacts') {
                 $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
@@ -1520,7 +1520,7 @@ sub _livestatus_filter {
             $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
         }
         elsif($ref_columns eq 'services') {
-            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::ref_service_columns}]);
         }
         elsif($ref_columns eq 'contacts') {
             $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
@@ -1627,7 +1627,7 @@ sub _expand_perfdata_and_custom_vars {
             $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
         }
         elsif($type eq 'services') {
-            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns}]);
+            $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::ref_service_columns}]);
         }
         elsif($type eq 'contacts') {
             $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
