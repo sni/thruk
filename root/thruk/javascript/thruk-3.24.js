@@ -5594,7 +5594,8 @@ function play_test_audio(btn, audio) {
  *    |_/_/    \_\_____|_____/
  */
 function tags_input_init(div) {
-    var input = jQuery(div).find("INPUT");
+    var input    = jQuery(div).find("INPUT");
+    var disabled = jQuery(input).prop('disabled');
 
     var testDiv = jQuery(div).find('DIV.tags-input-container');
     if(testDiv.length > 0) {
@@ -5606,13 +5607,18 @@ function tags_input_init(div) {
     jQuery(input).detach().appendTo(inputDiv);
     var tagsListDiv = jQuery('<div class="tags-list"></div>');
     jQuery(div).prepend(tagsListDiv);
-    jQuery(inputDiv).off("click").on("click", function(evt) {
-        if(evt.target.tagName == "INPUT") {
-            return;
-        }
-        evt.stopPropagation();
-        input.click();
-    });
+    if(disabled) {
+        jQuery(div).addClass("tags-disabled");
+        jQuery(inputDiv).addClass("hidden");
+    } else {
+        jQuery(inputDiv).off("click").on("click", function(evt) {
+            if(evt.target.tagName == "INPUT") {
+                return;
+            }
+            evt.stopPropagation();
+            input.click();
+        });
+    }
 
     var tags = jQuery(input).val();
     tags = tags.split(/\s*,\s*/);
@@ -5620,18 +5626,20 @@ function tags_input_init(div) {
         tags = tags.sort();
     }
 
-    tags_input_recreate_badges(div, tags);
+    tags_input_recreate_badges(div, tags, disabled);
 
     jQuery(input).val("");
     jQuery(div).prepend('<input type="hidden" name="'+jQuery(input).attr("name")+'">');
     jQuery(input).attr("name", "");
-    jQuery(input).on("keydown", function(evt) {
-        if(evt.key === 'Enter' && ajax_search.cur_select === -1) {
-            tags_input_cb(evt.target);
-        }
-    });
+    if(!disabled) {
+        jQuery(input).on("keydown", function(evt) {
+            if(evt.key === 'Enter' && ajax_search.cur_select === -1) {
+                tags_input_cb(evt.target);
+            }
+        });
+    }
 
-    if(!jQuery(div).hasClass("tags-sorted")) {
+    if(!jQuery(div).hasClass("tags-sorted") && !disabled) {
         // enable drag/drop of tags if not sorted already
         jQuery(tagsListDiv).sortable({
             items                : 'SPAN',
@@ -5670,20 +5678,26 @@ function tags_input_remove(evt) {
 }
 
 // (re)create the badge spans
-function tags_input_recreate_badges(div, tags) {
+function tags_input_recreate_badges(div, tags, disabled) {
     jQuery(div).find(".tags-list SPAN").remove();
     var tagsContainer = jQuery(div).find(".tags-list");
     jQuery(tags).each(function(i, t) {
         if(t !== "") {
-            jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
+            if(disabled) {
+                jQuery(tagsContainer).append('<span>'+t+'</span>');
+            } else {
+                jQuery(tagsContainer).append('<span>'+t+'<i class="uil uil-times"></i></span>');
+            }
         }
     });
-    if(jQuery(div).hasClass("tags-sorted")) {
-        // remove by clicking anywhere on the badge
-        jQuery(div).find("SPAN").off("click").on("click", tags_input_remove);
-    } else {
-        // remove only from clicking the icon
-        jQuery(div).find("I").off("click").on("click", tags_input_remove);
+    if(!disabled) {
+        if(jQuery(div).hasClass("tags-sorted")) {
+            // remove by clicking anywhere on the badge
+            jQuery(div).find("SPAN").off("click").on("click", tags_input_remove);
+        } else {
+            // remove only from clicking the icon
+            jQuery(div).find("I").off("click").on("click", tags_input_remove);
+        }
     }
 }
 

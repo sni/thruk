@@ -45,7 +45,7 @@
               <tr>
                 <th class="min-w-32">Name</th>
                 <td class="w-full">
-                  <div><input type="text" name="new_name" value="[% team.name | html %]" class="w-full" required></div>
+                  <div><input type="text" name="new_name" value="[% team.name | html %]" class="w-full" [% IF scripted %]disabled[% ELSE %]required[% END %]></div>
                 </td>
               </tr>
               <tr>
@@ -56,9 +56,13 @@
                       type="text"
                       name="cgi_roles"
                       value="[% team.cgi_roles.join(', ') | html %]"
-                      placeholder="set global cgi roles"
-                      onfocus="this.click()"
-                      onclick="ajax_search.init(this, 'cgi_role', { url: 'conf.cgi?action=json&type=cgi_roles', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
+                      [% IF scripted %]
+                        disabled
+                      [% ELSE %]
+                        placeholder="set global cgi roles"
+                        onfocus="this.click()"
+                        onclick="ajax_search.init(this, 'cgi_role', { url: 'conf.cgi?action=json&type=cgi_roles', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
+                      [% END %]
                     >
                   </div>
                 </td>
@@ -71,9 +75,13 @@
                       type="text"
                       name="includes"
                       value="[% team.includes.join(', ') | html %]"
-                      placeholder="include additional teams"
-                      onfocus="this.click()"
-                      onclick="ajax_search.init(this, 'team', { url: 'conf.cgi?action=json&type=teams', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: [ filter_own_team, tags_input_filter_duplicates ] })"
+                      [% IF scripted %]
+                        disabled
+                      [% ELSE %]
+                        placeholder="include additional teams"
+                        onfocus="this.click()"
+                        onclick="ajax_search.init(this, 'team', { url: 'conf.cgi?action=json&type=teams', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: [ filter_own_team, tags_input_filter_duplicates ] })"
+                      [% END %]
                     >
                   </div>
                 </td>
@@ -85,8 +93,12 @@
                     name="notes"
                     class="w-full"
                     rows="[% rows = team.notes.split('\n').size; IF rows > 3; rows = 3; END; IF rows <= 0; rows = 1; END; rows %]"
-                    placeholder="add notes or description"
-                    onkeyup="this.style.height = ''; this.style.height = (Math.min(this.scrollHeight+2, 54)) + 'px';"
+                    [% IF scripted %]
+                      disabled
+                    [% ELSE %]
+                      placeholder="add notes or description"
+                      onkeyup="this.style.height = ''; this.style.height = (Math.min(this.scrollHeight+2, 54)) + 'px';"
+                    [% END %]
                   >[% team.notes | html %]</textarea>
                 </td>
               </tr>
@@ -159,7 +171,7 @@
                         <th class="pl-3 min-w-[120px]">Hostgroups</th>
                         <td colspan="2" class="w-full">
                           <div class="flexrow flex-nowrap gap-1">
-                            <select name="hostgroups_op" class="w-12">
+                            <select name="hostgroups_op" class="w-12" [% IF scripted %]disabled[% END %]>
                               <option value="="[% IF  p.hostgroups_op == '='  %] selected[% END %]>=</option>
                               <option value="~"[% IF  p.hostgroups_op == '~'  %] selected[% END %]>~</option>
                             </select>
@@ -167,10 +179,14 @@
                               type="text"
                               name="hostgroups"
                               value="[% p.hostgroups.join(', ') | html %]"
-                              placeholder="permit hostgroups"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'hostgroup', { list: '\\s*,\\s*' } )"
                               class="w-auto flex-grow"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="permit hostgroups"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'hostgroup', { list: '\\s*,\\s*' } )"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -184,7 +200,7 @@
                         <th class="pl-3">Hosts</th>
                         <td colspan="2">
                           <div class="flexrow flex-nowrap gap-1">
-                            <select name="hosts_op" class="w-12">
+                            <select name="hosts_op" class="w-12" [% IF scripted %]disabled[% END %]>
                               <option value="="[% IF  p.hosts_op == '='  %] selected[% END %]>=</option>
                               <option value="~"[% IF  p.hosts_op == '~'  %] selected[% END %]>~</option>
                             </select>
@@ -192,10 +208,14 @@
                               type="text"
                               name="hosts"
                               value="[% p.hosts.join(', ') | html %]"
-                              placeholder="permit hosts"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'hosts', { list: '\\s*,\\s*' } )"
                               class="w-auto flex-grow"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="permit hosts"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'hosts', { list: '\\s*,\\s*' } )"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -205,7 +225,7 @@
                         <th class="pl-3">Host Cust. Var.</th>
                         <td colspan="2">
                           <div class="flexrow flex-nowrap gap-1">
-                            <select name="hst_custom_op" class="w-12">
+                            <select name="hst_custom_op" class="w-12" [% IF scripted %]disabled[% END %]>
                               <option value="="[% IF  p.hst_custom_op == '='  %] selected[% END %]>=</option>
                               <option value="~"[% IF  p.hst_custom_op == '~'  %] selected[% END %]>~</option>
                             </select>
@@ -213,19 +233,27 @@
                               type="text"
                               name="hst_custom_var"
                               value="[% p.hst_custom_var | html %]"
-                              placeholder="custom"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'custom variable')"
                               class="w-28"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="custom"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'custom variable')"
+                              [% END %]
                             >
                             <input
                               type="text"
                               name="hst_custom_val"
-                              placeholder="variable"
                               value="[% p.hst_custom_val | html %]"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'custom value')"
                               class="w-auto flex-grow"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="variable"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'custom value')"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -235,7 +263,7 @@
                       <tr>
                         <th class="pl-3"></th>
                         <td colspan="2">
-                          <select name="with_services" class="w-[164px] js-check-service-visibility" onchange="check_services_visibility(this)">
+                          <select name="with_services" class="w-[164px] js-check-service-visibility" onchange="check_services_visibility(this)" [% IF scripted %]disabled[% END %]>
                             <option value="1"[% IF  p.with_services == '1' %] selected[% END %]>including all services</option>
                             <option value="2"[% IF  p.with_services == '2' %] selected[% END %]>with specific services</option>
                             <option value="0"[% IF !p.with_services        %] selected[% END %]>without services</option>
@@ -248,7 +276,7 @@
                         <th class="pl-3">Services</th>
                         <td colspan="2">
                           <div class="flexrow flex-nowrap gap-1">
-                            <select name="services_op" class="w-12">
+                            <select name="services_op" class="w-12" [% IF scripted %]disabled[% END %]>
                               <option value="="[% IF  p.services_op == '='  %] selected[% END %]>=</option>
                               <option value="~"[% IF  p.services_op == '~'  %] selected[% END %]>~</option>
                             </select>
@@ -256,10 +284,14 @@
                               type="text"
                               name="services"
                               value="[% p.services.join(', ') | html %]"
-                              placeholder="restrict to certain services"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'services', { list: '\\s*,\\s*' } )"
                               class="w-auto flex-grow"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="restrict to certain services"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'services', { list: '\\s*,\\s*' } )"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -269,7 +301,7 @@
                         <th class="pl-3">Service Cust. Var.</th>
                         <td colspan="2">
                           <div class="flexrow flex-nowrap gap-1">
-                            <select name="svc_custom_op" class="w-12">
+                            <select name="svc_custom_op" class="w-12" [% IF scripted %]disabled[% END %]>
                               <option value="="[% IF  p.svc_custom_op == '='  %] selected[% END %]>=</option>
                               <option value="~"[% IF  p.svc_custom_op == '~'  %] selected[% END %]>~</option>
                             </select>
@@ -277,19 +309,27 @@
                               type="text"
                               name="svc_custom_var"
                               value="[% p.svc_custom_var | html %]"
-                              placeholder="custom"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'custom variable')"
                               class="w-28"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="custom"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'custom variable')"
+                              [% END %]
                             >
                             <input
                               type="text"
                               name="svc_custom_val"
-                              placeholder="variable"
                               value="[% p.svc_custom_val | html %]"
-                              onfocus="this.click()"
-                              onclick="ajax_search.init(this, 'custom value')"
                               class="w-auto flex-grow"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="variable"
+                                onfocus="this.click()"
+                                onclick="ajax_search.init(this, 'custom value')"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -300,15 +340,19 @@
                         <td colspan="2">
                           <div class="flexrow flex-nowrap gap-1">
                             <div class="flexrow flex-nowrap gap-1 items-center w-[164px]">
-                              <input type="checkbox" name="hst_commands" id="hst_commands" [% IF p.hst_commands %] checked[% END %]><label for="hst_commands" class="ml-0 mr-2">hosts</label>
-                              <input type="checkbox" name="svc_commands" id="svc_commands"[% IF p.svc_commands %] checked[% END %] class="js-services-disable"><label for="svc_commands" class="ml-0 js-services-disable">services</label>
+                              <input type="checkbox" name="hst_commands" id="hst_commands" [% IF p.hst_commands %] checked[% END %] [% IF scripted %] disabled[% END %]><label for="hst_commands" class="ml-0 mr-2">hosts</label>
+                              <input type="checkbox" name="svc_commands" id="svc_commands"[% IF p.svc_commands %] checked[% END %] class="js-services-disable" [% IF scripted %] disabled[% END %]><label for="svc_commands" class="ml-0 js-services-disable">services</label>
                             </div>
                             <input
                               type="text"
                               name="allowed_commands"
                               value="[% p.allowed_commands | html %]"
-                              placeholder="restrict commands, ex.: 17-34,50-65"
                               class="w-auto flex-grow hidden"
+                              [% IF scripted %]
+                                disabled
+                              [% ELSE %]
+                                placeholder="restrict commands, ex.: 17-34,50-65"
+                              [% END %]
                             >
                           </div>
                         </td>
@@ -355,13 +399,13 @@
         </div>
         [% IF show_team %]
           <hr class="mt-0.5 pt-0.5">
-          <div class="hover-red-text">
+          <div class="[% IF scripted%]disabled[% ELSE %]hover-red-text[% END %]">
             <form action='conf.cgi' method='POST'>
               <input type='hidden' name='sub' value='teams'>
               <input type='hidden' name='action' value='delete'>
               <input type='hidden' name='team' value="[% team.name | html %]">
               <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-              <a href="conf.cgi?sub=teams&amp;name=[% team.name | uri %]" onClick="if(confirm('really delete this team?')) { jQuery(this).closest('FORM').submit(); }; return false;">
+              <a href="conf.cgi?sub=teams" [% IF scripted%]onClick="return false;" class="not-clickable"[% ELSE %]onClick="if(confirm('really delete this team?')) { jQuery(this).closest('FORM').submit(); }; return false;"[% END %]>
                 <i class="fa-solid fa-trash"></i>
                 Delete this team
               </a>
@@ -420,12 +464,14 @@ function check_services_visibility(select) {
   });
 }
 
-jQuery(document).ready(function() {
-  // update initial visibility
-  jQuery(".js-check-service-visibility").each(function(i, el) {
-    check_services_visibility(el);
+[% IF !scripted %]
+  jQuery(document).ready(function() {
+    // update initial visibility
+    jQuery(".js-check-service-visibility").each(function(i, el) {
+      check_services_visibility(el);
+    });
   });
-});
+[% END %]
 
 -->
 </script>

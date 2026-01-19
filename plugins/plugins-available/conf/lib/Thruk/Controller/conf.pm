@@ -761,6 +761,7 @@ sub _process_teams_page {
     my( $c ) = @_;
     $c->stash->{'team'}      = { 'name' => '' };
     $c->stash->{'show_team'} = 0;
+    $c->stash->{'scripted'}  = 0;
 
     my $teamname = $c->req->parameters->{'team'} // '';
     if($teamname && Thruk::Base::check_for_nasty_filename($teamname)) {
@@ -771,7 +772,10 @@ sub _process_teams_page {
     my $action = $c->req->parameters->{'action'} || 'list';
     if($action eq 'edit') {
         my $team = Thruk::Authentication::User::read_team_data($c, $teamname, 0);
-        $c->stash->{'new_file'}  = defined $team ? 0 : 1;
+        $c->stash->{'new_file'} = defined $team ? 0 : 1;
+        if(!defined $team) {
+            $team = Thruk::Authentication::User::read_team_data($c, $teamname, 1);
+        }
         $c->stash->{'team'} = {
             'name'        => $teamname,
             'cgi_roles'   => $team->{'roles'}       // [],

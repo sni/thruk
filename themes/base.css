@@ -1326,7 +1326,7 @@ OPTION:checked {
 SELECT:focus OPTION {
   @apply opacity-100;
 }
-INPUT:disabled,BUTTON:disabled {
+INPUT:disabled,BUTTON:disabled,TEXTAREA:disabled,SELECT:disabled {
   @apply !bg-[color:var(--button-disabled-bg)] !cursor-auto hover:bg-[color:var(--button-disabled-bg)] text-[color:var(--button-disabled-fg)] hover:text-[color:var(--button-disabled-fg)];
 }
 INPUT:disabled + label {
@@ -1893,6 +1893,15 @@ DIV.tags-input {
   &.tags-sorted {
     SPAN {
       @apply hover-red;
+    }
+  }
+  &.tags-disabled {
+    @apply min-h-[26px] bg-[color:var(--button-disabled-bg)];
+    SPAN {
+      @apply pr-1;
+    }
+    SPAN:hover {
+      @apply !bg-[color:var(--button-bg)] !text-[color:var(--button-fg)] !cursor-default;
     }
   }
 }
