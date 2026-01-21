@@ -843,6 +843,15 @@ sub get_custom_vars {
 
     my %hash;
     if($data->{'custom_variables'}) {
+        if(ref $data->{'custom_variables'} eq 'ARRAY') {
+            my $normalized = {};
+            for my $cv (@{$data->{'custom_variables'}}) {
+                if(ref $cv eq 'ARRAY' && scalar @{$cv} == 2) {
+                    $normalized->{$cv->[0]} = $cv->[1];
+                }
+            }
+            $data->{'custom_variables'} = $normalized;
+        }
         for my $key (keys %{$data->{'custom_variables'}}) {
             $hash{$key} = $data->{'custom_variables'}->{$key};
         }
