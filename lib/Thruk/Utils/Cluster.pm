@@ -633,6 +633,9 @@ sub node_name {
     if($self->{'nodes_by_id'}->{$id}) {
         return($self->{'nodes_by_id'}->{$id}->{'node_url'});
     }
+    if($id eq $Thruk::Globals::NODE_ID) {
+        return($Thruk::Globals::HOSTNAME);
+    }
     return($id);
 }
 
