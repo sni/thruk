@@ -488,10 +488,10 @@ sub generate_report {
     set_waiting($c, $nr, 0);
 
     # don't run report twice per minute
-    if($ENV{'THRUK_CRON'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
+    if($ENV{'THRUK_CRON'} && $options->{'var'}->{'is_running'} && !($options->{'var'}->{'is_running'} == $$ && $options->{'var'}->{'running_node'} eq $Thruk::Globals::NODE_ID)) {
         if($options->{'var'}->{'start_time'}) {
-            if(POSIX::strftime("%Y-%m-%d %H:%M", localtime($options->{'var'}->{'start_time'})) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
-                $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report has been calculated on '.$c->cluster->node_name($options->{'var'}->{'running_node'}).' already';
+            if(POSIX::strftime("%Y-%m-%d %H:%M", localtime(int($options->{'var'}->{'start_time'}))) eq POSIX::strftime("%Y-%m-%d %H:%M", localtime())) {
+                $Thruk::Utils::Reports::error = sprintf("[%s.rpt] report has been calculated on %s already (PID: %d)", $nr, $c->cluster->node_name($options->{'var'}->{'running_node'}), $options->{'var'}->{'is_running'});
                 return -2;
             }
         }
@@ -503,7 +503,7 @@ sub generate_report {
     if($options->{'var'}->{'is_running'} > 0 && ($options->{'var'}->{'is_running'} != $$ || $options->{'var'}->{'running_node'} ne $Thruk::Globals::NODE_ID)) {
         # if started by cron, just exit, some other node is doing the report already
         if($ENV{'THRUK_CRON'}) {
-            $Thruk::Utils::Reports::error = '['.$nr.'.rpt] report is running on '.$c->cluster->node_name($options->{'var'}->{'running_node'}).' already';
+            $Thruk::Utils::Reports::error = sprintf("[%s.rpt] report has been calculated on %s already (PID: %d)", $nr, $c->cluster->node_name($options->{'var'}->{'running_node'}), $options->{'var'}->{'is_running'});
             return -2;
         }
 
