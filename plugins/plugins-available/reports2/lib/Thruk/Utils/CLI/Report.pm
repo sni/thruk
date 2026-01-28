@@ -60,7 +60,7 @@ sub cmd {
         shift @{$commandoptions};
     }
 
-    if(scalar @{$commandoptions} >= 1 && $commandoptions->[0] eq 'list') {
+    if(scalar @{$commandoptions} >= 1 && ($commandoptions->[0] eq 'list' || $commandoptions->[0] eq '-l')) {
         require Thruk::Utils;
         require Thruk::Utils::Reports;
         my $reports = Thruk::Utils::Reports::get_report_list($c);
