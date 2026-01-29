@@ -3078,6 +3078,7 @@ t/scenarios/reports/omd/playbook.yml
 t/scenarios/reports/omd/test.cfg
 t/scenarios/reports/t/100-reports.t
 t/scenarios/reports/t/local/100-report_mail.t
+t/scenarios/reports/t/local/101-report_cron_multi.t
 t/scenarios/reports/t/local/200-mailspool.troot
 t/scenarios/rest_api/docker-compose.yml
 t/scenarios/rest_api/Makefile

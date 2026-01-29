@@ -57,7 +57,7 @@ sub cmd {
     }
 
     # set additional environment variables but keep local env
-    local %ENV = (%{$conf->{'env'}}, %ENV) if $conf->{'env'};
+    local %ENV = (%ENV, %{$conf->{'env'}}) if $conf->{'env'};
 
     if(   $c->config->{'no_external_job_forks'}
        or $conf->{'nofork'}

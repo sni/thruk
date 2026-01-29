@@ -24,7 +24,7 @@ use Thruk::Utils::Encode ();
 use base 'Exporter';
 our @EXPORT_OK = qw(_fatal _error _cronerror _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
-                    _debug_http_response _strip_line
+                    _debug_http_response _strip_line _debug_file_cond
                     );
 our %EXPORT_TAGS = ( all => \@EXPORT_OK );
 
@@ -161,6 +161,32 @@ sub _strip_line {
     }
 
     return($error);
+}
+
+##############################################
+# logs something to /tmp/thruk_debug.log if this file already exists
+sub _debug_file_cond {
+    my(@data) = @_;
+    my $debugfile = '/tmp/thruk_debug.log';
+    return unless -f $debugfile;
+
+    require Thruk::Utils;
+    open(my $fh, '>>', $debugfile) || return;
+    my $caller = _striped_caller_information(undef, undef, undef, undef, 1);
+    my $thr    = _thread_id();
+    my $time   = time_prefix();
+    for my $line (@data) {
+        my $lines = [Thruk::Utils::dump_params($line, 0, 0)];
+        for my $l (@{$lines}) {
+            chomp($l);
+            for my $l2 (split/\n/mx, $l) {
+                printf($fh "%s[%d][%s]%s %s\n", $time, $$, $caller, $thr, $l2);
+            }
+        }
+    }
+    CORE::close($fh);
+
+    return;
 }
 
 ##############################################

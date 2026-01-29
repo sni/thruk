@@ -892,7 +892,7 @@ sub cmd {
     local $ENV{THRUK_REQ_URL}     = "".$c->req->uri if $c;
 
     # set additional environment variables but keep local env
-    local %ENV = (%{$options->{'env'}}, %ENV) if $options->{'env'};
+    local %ENV = (%ENV, %{$options->{'env'}}) if $options->{'env'};
 
     if($options->{'detached'}) {
         confess("stdin not supported for detached commands") if $options->{'stdin'};

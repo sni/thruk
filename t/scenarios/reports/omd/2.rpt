@@ -24,6 +24,6 @@
    },
    "send_types" : [],
    "template" : "sla_host.tt",
-   "to" : "test@localhost",
+   "to" : "demo@localhost",
    "user" : "test_contact"
 }
