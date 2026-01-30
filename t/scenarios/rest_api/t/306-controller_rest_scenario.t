@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set,\nex.: THRUK_TEST_AUTH=omdadmin:omd PLACK_TEST_EXTERNALSERVER_URI=http://localhost:60080/demo perl t/scenarios/rest_api/t/301-controller_rest_scenario.t") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 494;
+    plan tests => 515;
 
     use lib('t');
     require TestUtils;
@@ -180,6 +180,16 @@ for my $test (@{$pages}) {
     is(scalar keys %{$tstdata}, 5, "got result");
     is($tstdata->{'min(state)'}, 0, "got min state");
     is($tstdata->{'count(state)'}, 3, "got count state");
+
+
+    $page = TestUtils::test_page(
+        url  => '/thruk/r/hosts?columns=min(state),max(state),avg(state),count(state),sum(state)&host_name_non_ex=test',
+        fail => 1,
+    );
+    $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
+    is(ref $tstdata, 'HASH', "got error result") or TestUtils::bail_out_req("expected HASH result", $page->{'response'}, 1);
+    is($tstdata->{'failed'}, Cpanel::JSON::XS::true, "query should fail");
+    like($tstdata->{'description'}, qr(no data row has attribute), "query should fail");
 };
 
 ################################################################################
@@ -187,12 +197,16 @@ for my $test (@{$pages}) {
 {
     my $page = TestUtils::test_page(
         url  => '/thruk/r/services?columns=count(*):total,state&sort=total&host_name='.$host.'&total[gte]=0',
-        fail => 1,
+        like => ['"total" : '],
     );
-    my $tstdata = Cpanel::JSON::XS::decode_json($page->{'content'});
-    is(ref $tstdata, 'HASH', "got error result") or TestUtils::bail_out_req("expected HASH result", $page->{'response'}, 1);
-    is($tstdata->{'failed'}, Cpanel::JSON::XS::true, "query should fail");
-    like($tstdata->{'description'}, qr(alias column names cannot be used in filter), "query should fail");
+    $page = TestUtils::test_page(
+        url  => '/thruk/r/services?columns=count(*):total,state&sort=total&host_name='.$host.'&total[gte]=20',
+        like => ['\[\]'],
+    );
+    $page = TestUtils::test_page(
+        url  => '/thruk/r/services?columns=count(*):total,state&sort=total&host_name='.$host.'&count(*)[gte]=0',
+        like => ['"total" : '],
+    );
 };
 
 ################################################################################
