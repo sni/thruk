@@ -431,7 +431,7 @@ sub _rest_query_time_filter {
     }
 
     # combine remaining filter again
-    $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($c, undef, $filter);
+    $c->req->parameters->{'q'} = Thruk::Utils::Status::filter2text($filter);
 
     return;
 }

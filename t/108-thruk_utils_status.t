@@ -98,7 +98,7 @@ sub _test_filter {
 
     is($s, $exp, 'got correct statement');
 
-    my $txt = Thruk::Utils::Status::filter2text($c, "service", $f);
+    my $txt = Thruk::Utils::Status::filter2text($f);
     is($txt, $exp_ftext//$filter, "filter text is fine") if $filter !~ m/last_check/mx;
 }
 
@@ -221,7 +221,7 @@ sub _round_timestamps {
     my $filter = [
           { '-or' => { 'host_groups' => { '>=' => [ 'test' ] } } }
     ];
-    my $txt = Thruk::Utils::Status::filter2text($c, "service", $filter);
+    my $txt = Thruk::Utils::Status::filter2text($filter);
     my $ext_text = "host_groups >= 'test'";
     is($txt, $ext_text, "search2text worked")
 };
@@ -231,7 +231,7 @@ sub _round_timestamps {
     my $filter = [
           { 'name' => ["a", "b", "c"] }
     ];
-    my $txt = Thruk::Utils::Status::filter2text($c, "service", $filter);
+    my $txt = Thruk::Utils::Status::filter2text($filter);
     my $ext_text = "name = 'a' and name = 'b' and name = 'c'";
     is($txt, $ext_text, "search2text worked")
 };

@@ -3027,13 +3027,13 @@ sub search2text {
 
 =head2 filter2text
 
-  filter2text($c, $type, $filter)
+  filter2text($filter, [$intend])
 
-returns text/lexical filter for structured filter
+returns text/lexical filter as string for structured filter
 
 =cut
 sub filter2text {
-    my($c, $type, $filter, $intend) = @_;
+    my($filter, $intend) = @_;
 
     my $txt;
     eval {
