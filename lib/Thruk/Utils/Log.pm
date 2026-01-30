@@ -12,7 +12,7 @@ Utilities Collection for CLI logging
 
 use warnings;
 use strict;
-use Carp;
+use Carp ();
 use Cwd qw/abs_path/;
 use POSIX ();
 use Time::HiRes ();
@@ -22,7 +22,7 @@ use Thruk::Base ();
 use Thruk::Utils::Encode ();
 
 use base 'Exporter';
-our @EXPORT_OK = qw(_fatal _error _cronerror _warn _info _infos _infoc
+our @EXPORT_OK = qw(_fatal _panic _error _cronerror _warn _info _infos _infoc
                     _debug _debug2 _debugs _debugc _trace _audit_log
                     _debug_http_response _strip_line _debug_file_cond
                     );
@@ -58,9 +58,17 @@ sub log {
 }
 
 ##############################################
+# _fatal exits uncatchable with rc 3
 sub _fatal {
     &_log(ERROR, \@_);
     exit(3);
+}
+
+##############################################
+# like _fatal but including stacktrace
+sub _panic {
+    &_log(ERROR, \@_);
+    Carp::confess("fatal panic");
 }
 
 ##############################################
@@ -221,7 +229,7 @@ sub _log {
     our $last_was_plain;
     my $thread_str = _thread_id();
     if(defined $options->{'newline'} && !$options->{'newline'}) {
-        # progess log output does not work with threads, store and output all at once
+        # processing log output does not work with threads, store and output all at once
         if($thread_str) {
             $log->{'_thr'}->{$thread_str} = $line;
             return;
