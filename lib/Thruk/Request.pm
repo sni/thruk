@@ -17,12 +17,22 @@ sub encoding {
 
 sub body_parameters {
     my $self = shift;
-    return($self->env->{KEY_BASE_NAME.'.body'} ||= $self->_decode_parameters($self->SUPER::body_parameters)->mixed);
+    return($self->env->{KEY_BASE_NAME.'.body'} ||= $self->body_parameters_hash_multi()->mixed);
+}
+
+sub body_parameters_hash_multi {
+    my $self = shift;
+    return($self->env->{KEY_BASE_NAME.'.body_hash_multi'} ||= $self->_decode_parameters($self->SUPER::body_parameters));
 }
 
 sub query_parameters {
     my $self = shift;
-    return($self->env->{KEY_BASE_NAME.'.query'} ||= $self->_decode_parameters($self->SUPER::query_parameters)->mixed);
+    return($self->env->{KEY_BASE_NAME.'.query'} ||= $self->query_parameters_hash_multi()->mixed);
+}
+
+sub query_parameters_hash_multi {
+    my $self = shift;
+    return($self->env->{KEY_BASE_NAME.'.query_hash_multi'} ||= $self->_decode_parameters($self->SUPER::query_parameters));
 }
 
 sub parameters {
@@ -32,10 +42,30 @@ sub parameters {
         return($val);
     }
     return($self->env->{KEY_BASE_NAME.'.merged'} ||= do {
-        my $query = Hash::MultiValue->from_mixed($self->query_parameters);
-        my $body  = Hash::MultiValue->from_mixed($self->body_parameters);
+        my $query = $self->query_parameters_hash_multi();
+        my $body  = $self->body_parameters_hash_multi();
         Hash::MultiValue->new($query->flatten, $body->flatten)->mixed;
     });
+}
+
+# return parameters as Hash::MultiValue
+sub parameters_hash_multi {
+    my($self, $val) = @_;
+    if(defined $val) {
+        $self->env->{KEY_BASE_NAME.'.hash_multi'} = $val;
+        return($val);
+    }
+    return($self->env->{KEY_BASE_NAME.'.hash_multi'} ||= do {
+        my $query = $self->query_parameters_hash_multi();
+        my $body  = $self->body_parameters_hash_multi();
+        Hash::MultiValue->new($query->flatten, $body->flatten);
+    });
+}
+
+# return parameter keys in original order
+sub parameter_keys {
+    my($self, $val) = @_;
+    return($self->parameters_hash_multi()->keys());
 }
 
 sub _decode_parameters {
