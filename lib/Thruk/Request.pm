@@ -1,6 +1,7 @@
 package Thruk::Request;
 use warnings;
 use strict;
+use Carp ();
 use Encode ();
 use Hash::MultiValue;
 use Plack 1.0046;
@@ -37,9 +38,16 @@ sub query_parameters_hash_multi {
 
 sub parameters {
     my($self, $val) = @_;
-    if(defined $val) {
-        $self->env->{KEY_BASE_NAME.'.merged'} = $val;
-        return($val);
+    if($val) {
+        delete $self->env->{KEY_BASE_NAME.'.merged'};
+        delete $self->env->{KEY_BASE_NAME.'.query'};
+        delete $self->env->{KEY_BASE_NAME.'.query_hash_multi'};
+        delete $self->env->{KEY_BASE_NAME.'.body'};
+        delete $self->env->{KEY_BASE_NAME.'.body_hash_multi'};
+        delete $self->env->{KEY_BASE_NAME.'.hash_multi'};
+
+        $self->env->{KEY_BASE_NAME.'.merged'}     = $val;
+        $self->env->{KEY_BASE_NAME.'.hash_multi'} = Hash::MultiValue->from_mixed($val);
     }
     return($self->env->{KEY_BASE_NAME.'.merged'} ||= do {
         my $query = $self->query_parameters_hash_multi();
@@ -50,11 +58,7 @@ sub parameters {
 
 # return parameters as Hash::MultiValue
 sub parameters_hash_multi {
-    my($self, $val) = @_;
-    if(defined $val) {
-        $self->env->{KEY_BASE_NAME.'.hash_multi'} = $val;
-        return($val);
-    }
+    my($self) = @_;
     return($self->env->{KEY_BASE_NAME.'.hash_multi'} ||= do {
         my $query = $self->query_parameters_hash_multi();
         my $body  = $self->body_parameters_hash_multi();

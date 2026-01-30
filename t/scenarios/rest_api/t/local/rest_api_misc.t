@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 99;
+plan tests => 111;
 
 ###########################################################
 # test thruks script path
@@ -68,6 +68,16 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r \'/hosts?columns=name,upper(to_rows(services)) as svc&headers=wrapped_json\'',
         like => ['/"USERS"/', '/"svc"/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env thruk r \'/hosts?columns=name,to_rows(services):svc&svc[like]=^U\'',
+        like   => ['/"Users"/', '/"svc"/'],
+        unlike => ['/Ping/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env thruk r \'/hosts?columns=name,upper(to_rows(services)):svc&svc[like]=^U\'',
+        like   => ['/"USERS"/', '/"svc"/'],
+        unlike => ['/PING/'],
     });
 };
 

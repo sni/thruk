@@ -355,11 +355,7 @@ TestUtils::test_page(
 ################################################################################
 sub _set_params {
     my($c, $params) = @_;
-    for my $key (keys %{$c->req->parameters}) {
-        delete $c->req->parameters->{$key};
-    }
-    for my $key (keys %{$params}) {
-        $c->req->parameters->{$key} = $params->{$key};
-    }
+    $c->req->parameters({}); # reset parameters
+    $c->req->parameters($params);
 }
 ################################################################################

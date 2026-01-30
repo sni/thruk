@@ -36,11 +36,11 @@ Thruk Controller
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters  = [qw/limit offset sort columns headers backend backends q CSRFtoken background/];
-my $aggregation_function_names = [qw/count sum avg min max uniq/];
+my $reserved_query_parameters      = [qw/limit offset sort columns headers backend backends q CSRFtoken background/];
+my $aggregation_function_names     = [qw/count sum avg min max uniq/];
 my $disaggregation_function_names  = [qw/as_rows to_rows/];
-my $aggregation_functions      = Thruk::Base::array2hash($aggregation_function_names);
-my $disaggregation_functions   = Thruk::Base::array2hash($disaggregation_function_names);
+my $aggregation_functions          = Thruk::Base::array2hash($aggregation_function_names);
+my $disaggregation_functions       = Thruk::Base::array2hash($disaggregation_function_names);
 
 my $op_translation_words       = {
     'eq'      => '=',
@@ -60,7 +60,8 @@ my $op_translation_words       = {
 
 use constant {
     PRE_STATS    =>  1,
-    POST_STATS   =>  2,
+    POST_STATS1  =>  2,
+    POST_STATS2  =>  3,
 
     ALIAS        =>  1,
     RAW          =>  2,
@@ -605,9 +606,10 @@ sub _get_filter {
     my($c, $stage) = @_;
     my $filter = [];
 
-    my $reserved = Thruk::Base::array2hash($reserved_query_parameters);
+    my $reserved      = Thruk::Base::array2hash($reserved_query_parameters);
+    my $alias_columns = get_aliased_columns($c);
 
-    for my $key (keys %{$c->req->parameters}) {
+    for my $key ($c->req->parameter_keys()) {
         next if $reserved->{$key};
         next if $key =~ m/^\s*$/mx; # skip empty keys
         my $op   = '=';
@@ -616,10 +618,37 @@ sub _get_filter {
             $key = $1;
             $op  = lc($2);
         }
+
+        my $post_pone_filter = 0;
+        if(defined $alias_columns->{$key}) {
+            for my $f (@{$alias_columns->{$key}->{'func'}}) {
+                if($disaggregation_functions->{$f->[0]}) {
+                    $post_pone_filter = 1;
+                    last;
+                }
+                if($stage eq POST_STATS1) {
+                    if($aggregation_functions->{$f->[0]}) {
+                        $post_pone_filter = 1;
+                        last;
+                    }
+                }
+            }
+            if($alias_columns->{$key}->{'column'} eq '*') {
+                $post_pone_filter = 1;
+            }
+        }
+        if($key =~ m/\)$/mx) {
+            $post_pone_filter = 1;
+        }
+
         if($stage == PRE_STATS) {
-            next if $key =~ m/\([^)]+\)$/mx;
-        } elsif($stage == POST_STATS) {
-            next if $key !~ m/\([^)]+\)$/mx;
+            # skip calculated columns in pre-stats filter
+            next if $post_pone_filter;
+            $key = $alias_columns->{$key}->{'column'} if(defined $alias_columns->{$key} && $alias_columns->{$key}->{'column'});
+        } else {
+            # skip none-calculated columns in post-stats filter
+            next unless $post_pone_filter;
+            $key = $alias_columns->{$key}->{'alias'} if(defined $alias_columns->{$key} && $alias_columns->{$key}->{'alias'});
         }
         $op = $op_translation_words->{$op} if $op_translation_words->{$op};
         for my $val (@vals) {
@@ -629,6 +658,7 @@ sub _get_filter {
         }
     }
 
+# TODO: check
     if($stage == PRE_STATS) {
         _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
     }
@@ -649,22 +679,23 @@ sub _apply_filter {
     my($c, $data, $stage) = @_;
 
     my @filtered;
-    my $filter = _get_filter($c, $stage);
+    my($filter)       = _get_filter($c, $stage);
+    my $alias_columns = get_aliased_columns($c);
     if(scalar @{$filter} == 0) {
-        _debug("skipping empty %s filter", $stage == POST_STATS ? 'post-stats' : 'data');
+        _debug("skipping empty %s filter", $stage != PRE_STATS ? 'post-stats' : 'data');
         return($data);
     }
     my $nr     = 1;
     my $missed = {};
     for my $d (@{$data}) {
-        if(_match_complex_filter($d, $filter, $missed, $nr)) {
+        if(_match_complex_filter($d, $filter, $missed, $nr, $alias_columns)) {
             push @filtered, $d;
         }
         $nr++;
     }
     if(Thruk::Base->debug) {
         if(scalar @{$filter} > 0) {
-            _debug("applying %s filter", $stage == POST_STATS ? 'post-stats' : 'data');
+            _debug("applying %s filter", $stage != PRE_STATS ? 'post-stats' : 'data');
             _debug($filter);
         }
     }
@@ -678,20 +709,9 @@ sub _apply_filter {
         }
     }
     if(scalar @{$missing_keys} > 0) {
-        my $alias_columns = get_aliased_columns($c);
-        for my $missing (@{$missing_keys}) {
-            if(defined $alias_columns->{$missing}) {
-                return({
-                    'message'     => 'alias column name used in filter',
-                    'description' => sprintf("alias column names cannot be used in filter, use '%s' instead of '%s'", $alias_columns->{$missing}, $missing),
-                    'code'        => 400,
-                    'failed'      => Cpanel::JSON::XS::true,
-                });
-            }
-        }
         return({
             'message'     => 'possible typo in filter',
-            'description' => "no datarow has attribute(s) named: ".join(", ", @{$missing_keys}),
+            'description' => "no data row has attribute(s) named: ".join(", ", @{$missing_keys}),
             'code'        => 400,
             'failed'      => Cpanel::JSON::XS::true,
         });
@@ -700,6 +720,7 @@ sub _apply_filter {
         _trace("filtered data:");
         _trace(\@filtered);
     }
+
     return \@filtered;
 }
 
@@ -731,7 +752,10 @@ sub _apply_stats {
         push @{$group_columns}, $col;
     }
 
-    return($data) unless scalar @{$stats_columns} > 0;
+    if(scalar @{$stats_columns} == 0) {
+        $data = _apply_filter($c, $data, POST_STATS1);
+        return $data;
+    }
 
     my $result = {};
     my $num_stats = scalar @{$stats_columns};
@@ -831,11 +855,12 @@ sub _apply_stats {
         push @{$data}, \%row;
     }
 
-    $data = _apply_filter($c, $data, POST_STATS);
+    $data = _apply_filter($c, $data, POST_STATS2);
 
     if(scalar @{$group_columns} == 0) {
         $data = $data->[0];
     }
+
     return($data);
 }
 
@@ -938,7 +963,7 @@ sub get_aliased_columns {
     my $columns = get_request_columns($c, STRUCT);
     if($columns) {
         for my $col (@{$columns}) {
-            $alias_columns->{$col->{'alias'}} = $col->{'orig'};
+            $alias_columns->{$col->{'alias'}} = $col;
         }
     }
     return($alias_columns);
@@ -957,7 +982,7 @@ sub get_filter_columns {
     my($c) = @_;
 
     my $columns = {};
-    my $filter = _get_filter($c, PRE_STATS);
+    my($filter) = _get_filter($c, PRE_STATS);
     _set_filter_keys($filter, $columns);
 
     return([sort keys %{$columns}]);
@@ -980,8 +1005,8 @@ sub _set_filter_keys {
             }
         }
     } else {
-        require Data::Dumper;
-        confess("unsupported _set_filter_keys: ".Data::Dumper::Dumper($f));
+        _error("unsupported _set_filter_keys:");
+        _panic($f);
     }
     return;
 }
@@ -1331,7 +1356,7 @@ sub _apply_sort {
             $key =~ s/^\+//mx;
         }
 
-        $key = $alias_columns->{$key} if defined $alias_columns->{$key};
+        $key = $alias_columns->{$key}->{'orig'} if defined $alias_columns->{$key};
 
         # check for nasty chars
         die("sort key contains invalid characters") if($key =~ m/[`\$>'"]/mx);
@@ -1533,7 +1558,7 @@ sub _livestatus_filter {
             confess("unsupported type: ".$ref_columns);
         }
     }
-    my $filter = _get_filter($c, PRE_STATS);
+    my($filter) = _get_filter($c, PRE_STATS);
     $c->stash->{'filter_fixed_up'} = 0;
     _fixup_livestatus_filter($c, $filter, $ref_columns);
     return $filter;
@@ -1565,8 +1590,8 @@ sub _fixup_livestatus_filter {
                     }
                     my @ops = keys %{$filter->{$f}};
                     if(scalar @ops != 1) {
-                        require Data::Dumper;
-                        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper::Dumper([$filter, $f]));
+                        _error("unsupported _fixup_livestatus_filter:");
+                        _panic([$filter, $f]);
                     }
                     my $op  = $ops[0];
                     my $val = $filter->{$f}->{$op};
@@ -1602,8 +1627,8 @@ sub _fixup_livestatus_filter {
             }
         }
     } else {
-        require Data::Dumper;
-        confess("unsupported _fixup_livestatus_filter: ".Data::Dumper::Dumper($filter));
+        _error("unsupported _fixup_livestatus_filter:");
+        _panic($filter);
     }
 
     return;
@@ -1747,9 +1772,9 @@ sub _get_columns_meta_for_path {
 
     my $meta = [];
     for my $d (@{$req_columns}) {
-        my $col = $columns->{$alias_columns->{$d} // $d} // {};
+        my $col = $columns->{$alias_columns->{$d}-> {'orig'} // $d} // {};
         $col->{'name'} = $d;
-        my $hint = $c->stash->{'meta_column_info'}->{$alias_columns->{$d} // $d} // $c->stash->{'meta_column_info'}->{$d};
+        my $hint = $c->stash->{'meta_column_info'}->{$alias_columns->{$d}-> {'orig'} // $d} // $c->stash->{'meta_column_info'}->{$d};
         if((!defined $col->{'config'} || !defined $col->{'config'}->{'unit'}) && $hint) {
             if(defined $hint->{'unit'}) {
                 $col->{'config'}->{'unit'} = $hint->{'unit'};
@@ -2856,11 +2881,12 @@ sub _rest_get_lmd_sites {
 
 ##########################################################
 sub _match_complex_filter {
-    my($data, $filter, $missed, $nr) = @_;
+    my($data, $filter, $missed, $nr, $alias_columns) = @_;
+
     if(ref $filter eq 'ARRAY') {
         # simple and filter from list
         for my $f (@{$filter}) {
-            return unless _match_complex_filter($data, $f, $missed, $nr);
+            return unless _match_complex_filter($data, $f, $missed, $nr, $alias_columns);
         }
         return 1;
     }
@@ -2869,18 +2895,27 @@ sub _match_complex_filter {
             # or filter from hash: { -or => [...] }
             if($key eq '-or') {
                 for my $f (@{$filter->{$key}}) {
-                    return 1 if _match_complex_filter($data, $f, $missed, $nr);
+                    return 1 if _match_complex_filter($data, $f, $missed, $nr, $alias_columns);
                 }
                 return;
             }
             # and filter from hash: { and => [...] }
             if($key eq '-and') {
-                return _match_complex_filter($data, $filter->{$key}, $missed, $nr);
+                return _match_complex_filter($data, $filter->{$key}, $missed, $nr, $alias_columns);
             }
             my $val = $filter->{$key};
             if(ref $val eq 'HASH') {
                 for my $op (%{$val}) {
                     my $localkey = $key;
+                    if(!defined $data->{$localkey}) {
+                        if($alias_columns && defined $alias_columns->{$localkey}) {
+                            if(defined $data->{$alias_columns->{$localkey}->{'orig'}}) {
+                                $localkey = $alias_columns->{$localkey}->{'orig'};
+                            } elsif(defined $data->{$alias_columns->{$localkey}->{'column'}}) {
+                                $localkey = $alias_columns->{$localkey}->{'column'};
+                            }
+                        }
+                    }
                     if(!defined $data->{$localkey}) {
                         # translate some keys back (set from Utils::Status::parse_lexical_filter)
                         if($localkey eq 'host_name' && defined $data->{'host'}) {
@@ -2897,8 +2932,9 @@ sub _match_complex_filter {
             }
         }
     }
-    require Data::Dumper;
-    confess("unknown filter: ".Data::Dumper::Dumper($filter));
+
+    _error("unknown filter:");
+    _panic($filter);
 }
 
 ##########################################################
