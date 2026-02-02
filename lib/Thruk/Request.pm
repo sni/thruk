@@ -64,7 +64,7 @@ sub parameters_hash_multi {
 
 # return parameter keys in original order
 sub parameter_keys {
-    my($self, $val) = @_;
+    my($self) = @_;
     return($self->parameters_hash_multi()->keys());
 }
 
