@@ -198,15 +198,31 @@ Returns a encoding method to use to decode parameters.
 Returns a reference to a hash containing B<decoded> query string (GET)
 parameters.
 
+=head2 query_parameters_hash_multi
+
+Same as C<query_parameters> but returns a Hash::MultiValue object.
+
 =head2 body_parameters
 
 Returns a reference to a hash containing B<decoded> posted parameters in the
 request body (POST). As with C<query_parameters>.
 
+=head2 body_parameters_hash_multi
+
+Same as C<body_parameters> but returns a Hash::MultiValue object.
+
 =head2 parameters
 
 Returns a hash reference containing B<decoded> (and merged) GET
 and POST parameters.
+
+=head2 parameters_hash_multi
+
+Same as C<parameters> but returns a Hash::MultiValue object.
+
+=head2 parameter_keys
+
+Returns parameter keys in original order as array.
 
 =head2 param
 
