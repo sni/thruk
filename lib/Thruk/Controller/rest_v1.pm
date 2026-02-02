@@ -612,6 +612,7 @@ sub _get_filter {
     for my $key ($c->req->parameter_keys()) {
         next if $reserved->{$key};
         next if $key =~ m/^\s*$/mx; # skip empty keys
+
         my $op   = '=';
         my @vals = @{Thruk::Base::list($c->req->parameters->{$key})};
         if($key =~ m/^(.+)\[(.*?)\]$/mx) {
@@ -619,28 +620,7 @@ sub _get_filter {
             $op  = lc($2);
         }
 
-        my $post_pone_filter = 0;
-        if(defined $alias_columns->{$key}) {
-            for my $f (@{$alias_columns->{$key}->{'func'}}) {
-                if($disaggregation_functions->{$f->[0]}) {
-                    $post_pone_filter = 1;
-                    last;
-                }
-                if($stage eq POST_STATS1) {
-                    if($aggregation_functions->{$f->[0]}) {
-                        $post_pone_filter = 1;
-                        last;
-                    }
-                }
-            }
-            if($alias_columns->{$key}->{'column'} eq '*') {
-                $post_pone_filter = 1;
-            }
-        }
-        if($key =~ m/\)$/mx) {
-            $post_pone_filter = 1;
-        }
-
+        my $post_pone_filter = _post_pone_filter($key, $stage, $alias_columns);
         if($stage == PRE_STATS) {
             # skip calculated columns in pre-stats filter
             next if $post_pone_filter;
@@ -658,20 +638,92 @@ sub _get_filter {
         }
     }
 
-# TODO: check
-    if($stage == PRE_STATS) {
-        _append_lexical_filter($filter, $c->req->parameters->{'q'}) if $c->req->parameters->{'q'};
-    }
+    _append_lexical_filter($filter, $c->req->parameters->{'q'}, $stage, $alias_columns) if $c->req->parameters->{'q'};
 
     return $filter;
 }
 
 ##########################################################
+sub _post_pone_filter {
+    my($key, $stage, $alias_columns) = @_;
+
+    my $post_pone_filter = 0;
+    if(defined $alias_columns->{$key}) {
+        for my $f (@{$alias_columns->{$key}->{'func'}}) {
+            if($disaggregation_functions->{$f->[0]}) {
+                $post_pone_filter = 1;
+                last;
+            }
+            if($stage eq POST_STATS1) {
+                if($aggregation_functions->{$f->[0]}) {
+                    $post_pone_filter = 1;
+                    last;
+                }
+            }
+        }
+        if($alias_columns->{$key}->{'column'} eq '*') {
+            $post_pone_filter = 1;
+        }
+    }
+    if($key =~ m/\)$/mx) {
+        $post_pone_filter = 1;
+    }
+
+    return $post_pone_filter;
+}
+
+##########################################################
 sub _append_lexical_filter {
-    my($filter, $string) = @_;
+    my($filter, $string, $stage, $alias_columns) = @_;
     return unless $string;
-    push @{$filter}, Thruk::Utils::Status::parse_lexical_filter($string, 1);
+    my $lex_filter = Thruk::Utils::Status::parse_lexical_filter($string, 1);
+    $lex_filter = _filter_postponed_recursive($lex_filter, $stage, $alias_columns);
+    push @{$filter}, $lex_filter if defined $lex_filter;
     return;
+}
+
+##########################################################
+sub _filter_postponed_recursive {
+    my($filter, $stage, $alias_columns) = @_;
+
+    if(ref $filter eq 'ARRAY') {
+        my @filtered;
+        for my $f (@{$filter}) {
+            $f = _filter_postponed_recursive($f, $stage, $alias_columns);
+            push @filtered, $f if $f;
+        }
+        return \@filtered;
+    }
+    elsif(ref $filter eq 'HASH') {
+        for my $key (sort keys %{$filter}) {
+            if($key eq '-and' || $key eq '-or') {
+                $filter->{$key} = _filter_postponed_recursive($filter->{$key}, $stage, $alias_columns);
+            } else {
+                my $post_pone_filter = _post_pone_filter($key, $stage, $alias_columns);
+                my $original_key = $key;
+                if($stage == PRE_STATS) {
+                    # skip calculated columns in pre-stats filter
+                    if($post_pone_filter) {
+                        delete $filter->{$key};
+                        next;
+                    }
+                    $key = $alias_columns->{$key}->{'column'} if(defined $alias_columns->{$key} && $alias_columns->{$key}->{'column'});
+                } else {
+                    # skip none-calculated columns in post-stats filter
+                    unless($post_pone_filter) {
+                        delete $filter->{$key};
+                        next;
+                    }
+                    $key = $alias_columns->{$key}->{'alias'} if(defined $alias_columns->{$key} && $alias_columns->{$key}->{'alias'});
+                }
+                $filter->{$key} = delete $filter->{$original_key};
+            }
+        }
+        return $filter;
+    }
+
+    _error("unsupported _filter_postponed_recursive:");
+    _panic($filter);
 }
 
 ##########################################################

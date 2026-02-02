@@ -2,7 +2,7 @@ use warnings;
 use strict;
 use Test::More;
 
-plan tests => 28;
+plan tests => 34;
 
 BEGIN {
     use lib('t');
@@ -107,4 +107,28 @@ sub _test_get_filter {
     $filter = Thruk::Controller::rest_v1::_get_filter($c, Thruk::Controller::rest_v1::POST_STATS2);
     $txt    = Thruk::Utils::Status::filter2text($filter);
     is($txt, "total >= 0", "post stats: active filter text 4");
+
+    ###############
+    $url = "/?columns=host_name,description,groups&q=***groups != '' and host_name like ^l***";
+    ok(1, $url);
+    $c      = TestUtils::ctx_request($url);
+    $filter = Thruk::Controller::rest_v1::_get_filter($c, Thruk::Controller::rest_v1::PRE_STATS);
+    $txt    = Thruk::Utils::Status::filter2text($filter);
+    is($txt, "groups != '' and host_name ~~ '^l'", "pre stats: active filter text 5");
+
+    $filter = Thruk::Controller::rest_v1::_get_filter($c, Thruk::Controller::rest_v1::POST_STATS2);
+    $txt    = Thruk::Utils::Status::filter2text($filter);
+    is($txt, undef, "post stats: active filter text 5");
+
+    ###############
+    $url = "/?columns=count(*):total,host_name,description,groups&q=***groups != '' and host_name like ^l and total > 0***";
+    ok(1, $url);
+    $c      = TestUtils::ctx_request($url);
+    $filter = Thruk::Controller::rest_v1::_get_filter($c, Thruk::Controller::rest_v1::PRE_STATS);
+    $txt    = Thruk::Utils::Status::filter2text($filter);
+    is($txt, "groups != '' and host_name ~~ '^l'", "pre stats: active filter text 6");
+
+    $filter = Thruk::Controller::rest_v1::_get_filter($c, Thruk::Controller::rest_v1::POST_STATS2);
+    $txt    = Thruk::Utils::Status::filter2text($filter);
+    is($txt, "total > 0", "post stats: active filter text 6");
 }
