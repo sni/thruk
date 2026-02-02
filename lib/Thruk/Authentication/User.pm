@@ -85,6 +85,7 @@ sub new {
     }
 
     # expand teams recursively
+    local $ENV{THRUK_LOGIN_FORM_USER} = $username; # user is not fully logged in, but make username available for scripts
     $self->_expand_teams($c, $self->{'teams'});
 
     $self->{'permissions'} = Thruk::Base::array_uniq_obj($self->{'permissions'});

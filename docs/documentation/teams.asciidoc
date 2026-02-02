@@ -1,0 +1,63 @@
+---
+layout: docs
+title: Teams - Authorization via OAuth Groups
+---
+
+== Teams
+{% include new_since.ad version="3.24" %}
+
+The Teams feature in Thruk enables administrators to manage roles and
+permissions based on group information supplied by OAuth providers. This allows
+for flexible and dynamic access control, aligning user permissions with
+organizational structures defined externally.
+
+=== Terms
+
+  - *team*  : represents a collection of roles, groups and permissions supplied by
+              an external OAuth provider.
+  - *role*  : cgi.cfg role, like authorized_for_all_hosts, etc.
+  - *group* : naemon contact group
+
+=== How It Works
+
+When a user authenticates via OAuth, Thruk retrieves the user's group
+memberships from the OAuth provider. These groups are then mapped to roles and
+permissions within Thruk, allowing for fine-grained access control without
+manual user management.
+
+=== Configuration
+
+Teams and their associated roles/permissions are defined in data files. These
+files can be managed manually or generated programmatically, providing
+flexibility for integration with external systems or custom workflows.
+
+These files typically reside in the `var/thruk/teams/` directory and must have
+the same name as the OAuth group they represent, with a `.json` extension.
+
+The files are best managed from the config tool ui.
+
+=== Fallback Mechanism
+
+Thruk supports a _fallback mechanism for teams. If a user's group is not
+explicitly mapped in the teams configuration, the system can fall back to a
+default set of roles or permissions. The file name is `_fallback.json` in the
+same directory as the other team files.
+
+=== Scripting Data Files
+
+Instead of static json files, teams can also be defined via scripts. These
+scripts must be executable and return valid json data. This allows for dynamic
+generation of team configurations based on external data sources or logic.
+The scripts should be placed in the same `var/thruk/teams/` directory and have
+the appropriate executable permissions without a extension, ex.:
+`var/thruk/teams/team_name`
+
+There is a generic fallback script possible as well, named `_fallback` in the
+same directory:
+`var/thruk/teams/_fallback`
+
+All scripts will receive the following environment variables:
+
+  - `THRUK_LOGIN_FORM_USER` : the username of the logging in user
+
+The first argument is the group name itself.
