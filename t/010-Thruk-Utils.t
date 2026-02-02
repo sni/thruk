@@ -14,7 +14,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 116;
+    plan tests => 122;
 
     use lib('t');
     require TestUtils;
@@ -93,6 +93,22 @@ my $app = $c->app;
     is(ref $res3, 'ARRAY', 'got array from sub_request');
     is(scalar @{$res3}, 1, 'sending url parameters worked');
     is(scalar keys %{$res3->[0]}, 1, 'sending url parameters worked') || diag(Dumper($res3));
+};
+
+#########################
+{
+    $c->req->parameters({}); # reset parameters
+    is_deeply($c->req->parameters, {}, 'no parameters initially');
+    is_deeply([$c->req->parameter_keys()], [], 'no parameters initially');
+
+    $c->req->parameters(['a' => '1', 'b' => '2', 'c' => '3']); # reset parameters
+    is_deeply($c->req->parameters, {'a' => '1', 'b' => '2', 'c' => '3'}, 'parameters ok');
+    is_deeply([$c->req->parameter_keys()], ['a', 'b', 'c'], 'parameter keys ok');
+    $c->req->parameters->{'d'} = '4';
+    delete $c->req->parameters->{'a'};
+    $c->req->parameters->{'b'} = '';
+    is_deeply($c->req->parameters, {'b' => '', 'c' => '3', 'd' => '4'}, 'parameters ok');
+    is_deeply([$c->req->parameter_keys()], ['b', 'c', 'd'], 'parameter keys ok');
 };
 
 #########################

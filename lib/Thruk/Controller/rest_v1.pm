@@ -2935,6 +2935,7 @@ sub _match_complex_filter {
 
     _error("unknown filter:");
     _panic($filter);
+    return;
 }
 
 ##########################################################

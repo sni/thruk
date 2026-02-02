@@ -1,11 +1,12 @@
 package Thruk::Request;
 use warnings;
 use strict;
-use Carp ();
 use Encode ();
 use Hash::MultiValue;
 use Plack 1.0046;
 use URI::Escape qw/uri_unescape/;
+
+use Thruk::Base ();
 
 use parent qw/Plack::Request/;
 
@@ -18,20 +19,20 @@ sub encoding {
 
 sub body_parameters {
     my $self = shift;
-    return($self->env->{KEY_BASE_NAME.'.body'} ||= $self->body_parameters_hash_multi()->mixed);
+    return($self->env->{KEY_BASE_NAME.'.body'} ||= $self->_body_parameters_hash_multi()->mixed);
 }
 
-sub body_parameters_hash_multi {
+sub _body_parameters_hash_multi {
     my $self = shift;
     return($self->env->{KEY_BASE_NAME.'.body_hash_multi'} ||= $self->_decode_parameters($self->SUPER::body_parameters));
 }
 
 sub query_parameters {
     my $self = shift;
-    return($self->env->{KEY_BASE_NAME.'.query'} ||= $self->query_parameters_hash_multi()->mixed);
+    return($self->env->{KEY_BASE_NAME.'.query'} ||= $self->_query_parameters_hash_multi()->mixed);
 }
 
-sub query_parameters_hash_multi {
+sub _query_parameters_hash_multi {
     my $self = shift;
     return($self->env->{KEY_BASE_NAME.'.query_hash_multi'} ||= $self->_decode_parameters($self->SUPER::query_parameters));
 }
@@ -39,6 +40,8 @@ sub query_parameters_hash_multi {
 sub parameters {
     my($self, $val) = @_;
     if($val) {
+
+        # reset parameters
         delete $self->env->{KEY_BASE_NAME.'.merged'};
         delete $self->env->{KEY_BASE_NAME.'.query'};
         delete $self->env->{KEY_BASE_NAME.'.query_hash_multi'};
@@ -46,22 +49,21 @@ sub parameters {
         delete $self->env->{KEY_BASE_NAME.'.body_hash_multi'};
         delete $self->env->{KEY_BASE_NAME.'.hash_multi'};
 
-        $self->env->{KEY_BASE_NAME.'.merged'}     = $val;
-        $self->env->{KEY_BASE_NAME.'.hash_multi'} = Hash::MultiValue->from_mixed($val);
+        if(ref $val eq 'ARRAY') {
+            $self->env->{KEY_BASE_NAME.'.hash_multi'} = Hash::MultiValue->new(@{$val});
+        } else {
+            $self->env->{KEY_BASE_NAME.'.hash_multi'} = Hash::MultiValue->from_mixed($val);
+        }
     }
-    return($self->env->{KEY_BASE_NAME.'.merged'} ||= do {
-        my $query = $self->query_parameters_hash_multi();
-        my $body  = $self->body_parameters_hash_multi();
-        Hash::MultiValue->new($query->flatten, $body->flatten)->mixed;
-    });
+    return($self->env->{KEY_BASE_NAME.'.merged'} ||= $self->_parameters_hash_multi()->mixed());
 }
 
 # return parameters as Hash::MultiValue
-sub parameters_hash_multi {
+sub _parameters_hash_multi {
     my($self) = @_;
     return($self->env->{KEY_BASE_NAME.'.hash_multi'} ||= do {
-        my $query = $self->query_parameters_hash_multi();
-        my $body  = $self->body_parameters_hash_multi();
+        my $query = $self->_query_parameters_hash_multi();
+        my $body  = $self->_body_parameters_hash_multi();
         Hash::MultiValue->new($query->flatten, $body->flatten);
     });
 }
@@ -69,7 +71,24 @@ sub parameters_hash_multi {
 # return parameter keys in original order
 sub parameter_keys {
     my($self) = @_;
-    return($self->parameters_hash_multi()->keys());
+
+    my @keys = $self->_parameters_hash_multi()->keys();
+
+    # merge with new keys
+    push(@keys, keys %{$self->parameters()});
+
+    my $uniq = Thruk::Base::array_uniq(\@keys);
+
+    # remove all keys which do not exist anymore
+    my @list;
+    my $params = $self->parameters();
+    for my $k (@{$uniq}) {
+        if(exists $params->{$k}) {
+            push @list, $k;
+        }
+    }
+
+    return(@list);
 }
 
 sub _decode_parameters {
@@ -202,27 +221,15 @@ Returns a encoding method to use to decode parameters.
 Returns a reference to a hash containing B<decoded> query string (GET)
 parameters.
 
-=head2 query_parameters_hash_multi
-
-Same as C<query_parameters> but returns a Hash::MultiValue object.
-
 =head2 body_parameters
 
 Returns a reference to a hash containing B<decoded> posted parameters in the
 request body (POST). As with C<query_parameters>.
 
-=head2 body_parameters_hash_multi
-
-Same as C<body_parameters> but returns a Hash::MultiValue object.
-
 =head2 parameters
 
 Returns a hash reference containing B<decoded> (and merged) GET
 and POST parameters.
-
-=head2 parameters_hash_multi
-
-Same as C<parameters> but returns a Hash::MultiValue object.
 
 =head2 parameter_keys
 
