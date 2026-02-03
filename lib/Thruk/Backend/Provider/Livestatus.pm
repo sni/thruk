@@ -2198,9 +2198,14 @@ sub _clean_columns {
         $columns = Thruk::Base::array_remove($columns, "last_update");
     }
 
-    if($table eq 'contacts') {
+    if(!$self->{'lmd_optimizations'} && !$self->{'naemon_optimizations'}) {
         # icinga 2 does not know about those columns
-        if(!$self->{'lmd_optimizations'} && !$self->{'naemon_optimizations'}) {
+        if($table eq 'services') {
+            $columns = Thruk::Base::array_remove($columns, "depends_exec");
+            $columns = Thruk::Base::array_remove($columns, "depends_notify");
+            $columns = Thruk::Base::array_remove($columns, "parents");
+        }
+        if($table eq 'contacts') {
             $columns = Thruk::Base::array_remove($columns, "id");
             $columns = Thruk::Base::array_remove($columns, "groups");
             $columns = Thruk::Base::array_remove($columns, "custom_variable_names");
