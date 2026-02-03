@@ -107,6 +107,7 @@ $Thruk::Backend::Provider::Livestatus::default_service_columns = [
 $Thruk::Backend::Provider::Livestatus::extra_service_columns = [qw/
     contacts contact_groups long_plugin_output comments_with_info downtimes_with_info host_contacts host_contact_groups last_update
     last_hard_state last_hard_state_change last_state
+    depends_exec depends_notify parents
 /];
 $Thruk::Backend::Provider::Livestatus::ref_service_columns = [ @{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_service_columns} ];
 push @{$Thruk::Backend::Provider::Livestatus::ref_service_columns}, map { "host_".$_ } @{$Thruk::Backend::Provider::Livestatus::default_host_columns};
