@@ -34,21 +34,41 @@
           [% IF has_sections %]
             <th class="w-20">Section</th>
           [% END %]
-          <th class="">Hostname</th>
+          <th class="">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="hostname">Hostname</a>
+          </th>
           [% IF has_tags %]
-            <th class="w-10">Tags</th>
+            <th class="w-10">
+              <a class="sort-by" href='#' data-sort-type="1" data-sort-option="tags">Tags</a>
+            </th>
           [% END %]
-          <th class="w-20 text-center">Status</th>
+          <th class="w-20 text-center">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="status">Status</a>
+          </th>
           [% IF num_backends > 1 %]
             <th class="w-20">Site</th>
           [% END %]
-          <th class="w-24">Version</th>
-          <th class="">OS</th>
-          <th class="w-10">Arch</th>
-          <th class="w-20">CPU</th>
-          <th class="w-20">Memory</th>
-          <th class="w-20">Disk</th>
-          <th class="w-24">Checks</th>
+          <th class="w-24">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="version">Version</a>
+          </th>
+          <th class="">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="os">OS</a>
+          </th>
+          <th class="w-10">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="arch">Arch</a>
+          </th>
+          <th class="w-20">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="cpu">CPU</a>
+          </th>
+          <th class="w-20">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="mem">Memory</a>
+          </th>
+          <th class="w-20">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="disk">Disk</a>
+          </th>
+          <th class="w-24">
+            <a class="sort-by" href='#' data-sort-type="1" data-sort-option="checks">Checks</a>
+          </th>
           <th class="w-20">
             <div class="flexrow flex-nowrap gap-x-1 justify-between">
               <div class="flexrow flex-nowrap gap-x-1 h-5">

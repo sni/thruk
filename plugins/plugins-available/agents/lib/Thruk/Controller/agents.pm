@@ -105,12 +105,17 @@ sub _process_show {
 
     $c->stash->{has_sections} = 0;
     $c->stash->{has_tags}     = 0;
+
+    my $sorttype   = $c->req->parameters->{'sorttype'}   || 1;
+    my $sortoption = $c->req->parameters->{'sortoption'} || "hostname";
+
     my $info = {};
     my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                               'custom_variables' => { '=' => 'AGENT snclient' },
                                             ],
-                                  pager => 1,
+                                  pager => $sortoption eq "hostname" ? 1 : 0,
                                  );
+
     for my $hst (@{$hosts}) {
         Thruk::Utils::set_allowed_rows_data($hst, 1);
         $info->{$hst->{'name'}} = {
@@ -139,11 +144,11 @@ sub _process_show {
             'os_version_full'  => '',
             'os_version'       => '',
             'os_arch'          => '',
+            '_hst'            => $hst,
         };
         if($hst->{'_AGENT_SECTION'}) { $c->stash->{has_sections} = 1; }
         if($hst->{'_AGENT_TAGS'})    { $c->stash->{has_tags}     = 1; }
     }
-    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, ['_AGENT_SECTION', 'name', 'peer_name']);
 
     my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ),
                                          'host_custom_variables' => { '=' => 'AGENT snclient' },
@@ -227,8 +232,33 @@ sub _process_show {
             $extra->{'os_version'} =~ s/^darwin\ /mac osx /gmx;
         }
         $info->{$svc->{'host_name'}} = $extra;
+
+        # add sort fields to hosts
+        my $hst = $extra->{'_hst'};
+        if($hst) {
+            $hst->{'sort_version'} = $extra->{'version'};
+            $hst->{'sort_arch'}    = $extra->{'os_arch'};
+            $hst->{'sort_tags'}    = $extra->{'tags'};
+            $hst->{'sort_os'}      = $extra->{'os_version_full'};
+            $hst->{'sort_mem'}     = $extra->{'memtotal'};
+            $hst->{'sort_disk'}    = $extra->{'disk_total'};
+            $hst->{'sort_checks'}  = $extra->{'inv_new'};
+        }
     }
     $c->stash->{info} = $info;
+
+    my $sortby = ['_AGENT_SECTION', 'name', 'peer_name'];
+    if($sortoption eq 'tags')    { $sortby = ['_AGENT_TAGS',  @{$sortby}]; }
+    if($sortoption eq 'status')  { $sortby = ['state',        @{$sortby}]; }
+    if($sortoption eq 'version') { $sortby = ['sort_version', @{$sortby}]; }
+    if($sortoption eq 'os')      { $sortby = ['sort_os',      @{$sortby}]; }
+    if($sortoption eq 'arch')    { $sortby = ['sort_arch',    @{$sortby}]; }
+    if($sortoption eq 'mem')     { $sortby = ['sort_mem',     @{$sortby}]; }
+    if($sortoption eq 'disk')    { $sortby = ['sort_disk',    @{$sortby}]; }
+    if($sortoption eq 'checks')  { $sortby = ['sort_checks',  @{$sortby}]; }
+
+    my $sortorder = $sorttype == 1 ? 'ASC' : 'DESC';
+    $c->stash->{data} = Thruk::Backend::Manager::sort_result({}, $hosts, { $sortorder => $sortby });
 
     # set fallback backend for start page so the apply button can be shown
     if(!$c->req->parameters->{'backend'} && !$c->stash->{'param_backend'}) {
