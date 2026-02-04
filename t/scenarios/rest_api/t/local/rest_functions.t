@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 84;
+plan tests => 140;
 
 ###########################################################
 # test thruks script path
@@ -16,6 +16,11 @@ TestUtils::test_command({
     cmd  => '/bin/bash -c "type thruk"',
     like => ['/\/thruk\/script\/thruk/'],
 }) or BAIL_OUT("wrong thruk path");
+
+###########################################################
+# transformation functions in the order of:
+# https://thruk.org/documentation/rest.html#_transformation-functions
+###########################################################
 
 ###########################################################
 # age
@@ -30,34 +35,12 @@ TestUtils::test_command({
 # calc
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=calc(last_check, \"/\", 2) as calc"',
-        like => [qr/^#calc$/smx, qr/^\d+\.5+$/smx],
-    });
-};
-
-###########################################################
-# upper
-{
-    TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=uc(name) as host"',
-        like => [qr/^#host$/smx, qr/^LOCALHOST$/smx],
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=calc(last_check, \"/\", 7) as calc"',
+        like => [qr/^#calc$/smx, qr/^\d+\.\d+$/smx],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=upper(name) as host"',
-        like => [qr/^#host$/smx, qr/^LOCALHOST$/smx],
-    });
-};
-
-###########################################################
-# lower
-{
-    TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=lc(name) as host"',
-        like => [qr/^#host$/smx, qr/^uppercase$/smx],
-    });
-    TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=lower(name) as host"',
-        like => [qr/^#host$/smx, qr/^uppercase$/smx],
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=calc(last_check, \"*\", 1.11) as calc"',
+        like => [qr/^#calc$/smx, qr/^\d+\.\d+$/smx],
     });
 };
 
@@ -80,6 +63,32 @@ TestUtils::test_command({
 };
 
 ###########################################################
+# fmt
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%.3f\", state) as test"',
+        like => [qr/^#test$/smx, qr/^\d\.000$/smx],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%s:%.3f\", name, state) as test"',
+        like => [qr/^#test$/smx, qr/^localhost:\d\.000$/smx],
+    });
+};
+
+###########################################################
+# lc / lower
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=lc(name) as host"',
+        like => [qr/^#host$/smx, qr/^uppercase$/smx],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=lower(name) as host"',
+        like => [qr/^#host$/smx, qr/^uppercase$/smx],
+    });
+};
+
+###########################################################
 # s
 {
     TestUtils::test_command({
@@ -94,6 +103,32 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=substr(name, 2, 3) as test"',
         like => [qr/^#test$/smx, qr/^cal$/smx],
+    });
+};
+
+###########################################################
+# unit
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/wrapped_json/hosts?columns=rta&name=localhost"',
+        like => [qr/^#rta$/smx, qr/"unit"\ :\ "ms"/mx],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/wrapped_json/hosts?columns=unit(calc(rta, \"*\", 1000), \"s\") as rta_seconds&name=localhost"',
+        like => [qr/^#rta_seconds$/smx, qr/"unit"\ :\ "s"/mx],
+    });
+};
+
+###########################################################
+# uc / upper
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=uc(name) as host"',
+        like => [qr/^#host$/smx, qr/^LOCALHOST$/smx],
+    });
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=upper(name) as host"',
+        like => [qr/^#host$/smx, qr/^LOCALHOST$/smx],
     });
 };
 
@@ -134,15 +169,80 @@ TestUtils::test_command({
 };
 
 ###########################################################
-# fmt
+# aggregation functions in the order of:
+# https://thruk.org/documentation/rest.html#_aggregation-functions
+###########################################################
+
+###########################################################
+# count
 {
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%.3f\", state) as test"',
-        like => [qr/^#test$/smx, qr/^\d\.000$/smx],
+        cmd  => '/usr/bin/env thruk r "/csv/services?columns=count(*) as test"',
+        like => [qr/^#test$/smx, qr/^test;12$/smx],
+    });
+};
+
+###########################################################
+# avg
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/services?columns=avg(execution_time) as test"',
+        like => [qr/^#test$/smx, qr/^test;\d+\.\d+$/smx],
+    });
+};
+
+###########################################################
+# sum
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/services?columns=sum(state) as test"',
+        like => [qr/^#test$/smx, qr/^test;\d+$/smx],
+    });
+};
+
+###########################################################
+# min
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/services?columns=min(state) as test"',
+        like => [qr/^#test$/smx, qr/^test;\d+$/smx],
+    });
+};
+
+###########################################################
+# max
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/services?columns=max(state) as test"',
+        like => [qr/^#test$/smx, qr/^test;\d+$/smx],
+    });
+};
+
+###########################################################
+# uniq
+{
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env thruk r "/csv/services?columns=uniq(),host_name"',
+        like   => [qr/^#host_name$/smx, qr/^localhost$/smx],
+        unlike => [qr/uniq/smx],
+    });
+};
+
+###########################################################
+# disaggregation functions in the order of:
+# https://thruk.org/documentation/rest.html#_disaggregation-functions
+###########################################################
+
+###########################################################
+# to_rows / as_rows
+{
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=host_name,to_rows(services):svc"',
+        like => [qr/^#host_name;svc$/smx, qr/^localhost;Http$/smx],
     });
     TestUtils::test_command({
-        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%s:%.3f\", name, state) as test"',
-        like => [qr/^#test$/smx, qr/^localhost:\d\.000$/smx],
+        cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=host_name,as_rows(services):svc"',
+        like => [qr/^#host_name;svc$/smx, qr/^localhost;Http$/smx],
     });
 };
 

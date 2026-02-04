@@ -96,7 +96,7 @@ sub index {
     my $format   = 'json';
     my $backends = [];
     # strip known path prefixes
-    while($path_info =~ m%^/(csv|text|human|xls|sites?|backends?)(/.*)$%mx) {
+    while($path_info =~ m%^/(csv|text|json|wrapped_json|human|xls|sites?|backends?)(/.*)$%mx) {
         my $prefix = $1;
         $path_info = $2;
         if($prefix eq 'csv') {
@@ -104,6 +104,13 @@ sub index {
         }
         elsif($prefix eq 'xls') {
             $format = 'xls';
+        }
+        elsif($prefix eq 'json') {
+            $format = 'json';
+        }
+        elsif($prefix eq 'wrapped_json') {
+            $c->req->parameters->{'headers'} = 'wrapped_json';
+            $format = 'json';
         }
         elsif($prefix eq 'human' || $prefix eq 'text') {
             $format = 'human';
@@ -349,6 +356,7 @@ sub _format_csv_output {
     my $output = "";
     if(ref $data eq 'ARRAY') {
         my $columns = $hash_columns || get_request_columns($c, ALIAS) || ($data->[0] ? [sort keys %{$data->[0]}] : []);
+        $columns = [grep { $_ ne '_uniq_placeholder' } @{$columns}];
         if(!defined $c->req->parameters->{'headers'} || $c->req->parameters->{'headers'}) {
             $output = '#'.join(';', @{$columns})."\n";
         }
@@ -1070,7 +1078,7 @@ sub _set_filter_keys {
 
     column_required($c, $column_name)
 
-Can be used to exclude expensive columns from beeing generated.
+Can be used to exclude expensive columns from being generated.
 
 returns true if column is required, ex. for sorting, filtering, etc...
 
@@ -3297,7 +3305,7 @@ sub _split_columns {
     for (@{$columns}) {
         $_ =~ s/^\s+//gmx;
         $_ =~ s/\s+$//gmx;
-        $_ =~ s/uniq\(\)/count(*):_uniq_placeholder/gmx; # uniq is just like count(*) just without having the number in the output
+        $_ =~ s/uniq\(.*?\)/count(*):_uniq_placeholder/gmx; # uniq is just like count(*) but without having the number in the output
     }
     return($columns);
 }

@@ -427,7 +427,7 @@ Available transformations functions are:
 |`lower(<column>)`                          |`lower(host_name)`                         |Make column lower case.
 |`s(<column>, <regex>, <replacement>)`      |`s(host_name, '/\..*$/', '')`              |Apply regex replacement. Note: you cannot use backreferences like `$1` in the replacement string for security reasons.
 |`substr(<column>, <offset> [, <length>])`  |`substr(name, 0, 3)`                       |Extract substring.
-|`unit(<column>, <unit>)`                   |`unit(calc(rta, '*', 1000), 's')`          |Set the unit for this column.
+|`unit(<column>, <unit>)`                   |`unit(calc(rta, '*', 1000), 's')`          |Set the unit for this column. (used by grafana with the thruk datasource)
 |`uc(<column>)`                             |`uc(host_name)`                            |Make column upper case.
 |`upper(<column>)`                          |`upper(host_name)`                         |Make column upper case.
 |`utc(<column>, [<format>])`                |`utc(last_check, '%Y-%m-%d %H:%M:%S %Z')`  |Convert unix timestamp to UTC date.
@@ -586,6 +586,32 @@ Failed rest requests return a hash result along with a HTTP error code:
 === JSON
 
 JSON is the default output format.
+
+=== Wrapped JSON
+
+Wrapped JSON wraps the result into a hash containing additional metadata.
+
+------
+  %> thruk r /wrapped_json/hosts?columns=name,last_check
+------
+
+Will return something like:
+
+------
+{
+   "data" : [...], # data as returned by the json format
+   "meta" : {
+      "columns" : [{
+            "name" : "last_check"
+            "type" : "time"
+         },
+         ...
+      ]
+   }
+}
+------
+
+In case the unit is known (ex.: in perf_data) , it will be added to the column meta information as config hash.
 
 === CSV
 
