@@ -238,11 +238,13 @@ sub _process_show {
         if($hst) {
             $hst->{'sort_version'} = $extra->{'version'};
             $hst->{'sort_arch'}    = $extra->{'os_arch'};
+            $hst->{'sort_cpu'}     = $extra->{'cpu_cores'};
             $hst->{'sort_tags'}    = $extra->{'tags'};
             $hst->{'sort_os'}      = $extra->{'os_version_full'};
             $hst->{'sort_mem'}     = $extra->{'memtotal'};
             $hst->{'sort_disk'}    = $extra->{'disk_total'};
             $hst->{'sort_checks'}  = $extra->{'inv_new'};
+            $hst->{'peer_name'}    = Thruk::Utils::Filter::peer_name($hst) unless defined $hst->{'peer_name'};
         }
     }
     $c->stash->{info} = $info;
@@ -250,9 +252,11 @@ sub _process_show {
     my $sortby = ['_AGENT_SECTION', 'name', 'peer_name'];
     if($sortoption eq 'tags')    { $sortby = ['_AGENT_TAGS',  @{$sortby}]; }
     if($sortoption eq 'status')  { $sortby = ['state',        @{$sortby}]; }
+    if($sortoption eq 'site')    { $sortby = ['peer_name',    @{$sortby}]; }
     if($sortoption eq 'version') { $sortby = ['sort_version', @{$sortby}]; }
     if($sortoption eq 'os')      { $sortby = ['sort_os',      @{$sortby}]; }
     if($sortoption eq 'arch')    { $sortby = ['sort_arch',    @{$sortby}]; }
+    if($sortoption eq 'cpu')     { $sortby = ['sort_cpu',     @{$sortby}]; }
     if($sortoption eq 'mem')     { $sortby = ['sort_mem',     @{$sortby}]; }
     if($sortoption eq 'disk')    { $sortby = ['sort_disk',    @{$sortby}]; }
     if($sortoption eq 'checks')  { $sortby = ['sort_checks',  @{$sortby}]; }

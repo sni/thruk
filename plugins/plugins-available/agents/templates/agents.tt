@@ -46,7 +46,9 @@
             <a class="sort-by" href='#' data-sort-type="1" data-sort-option="status">Status</a>
           </th>
           [% IF num_backends > 1 %]
-            <th class="w-20">Site</th>
+            <th class="w-20">
+              <a class="sort-by" href='#' data-sort-type="1" data-sort-option="site">Site</a>
+            </th>
           [% END %]
           <th class="w-24">
             <a class="sort-by" href='#' data-sort-type="1" data-sort-option="version">Version</a>
