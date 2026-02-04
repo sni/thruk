@@ -136,6 +136,8 @@ sub set_dynamic_attributes {
     if($skip_db_access) {
         $use_cached = 1;
     } else {
+        my($prev_backends) = $c->db->select_backends('get_services');
+
         _debug("fetching user data from livestatus") if Thruk::Base->verbose;
         eval {
             local $c->stash->{backend_errors_handling} = DIE;
@@ -153,6 +155,9 @@ sub set_dynamic_attributes {
             _debug("failed to fetch user data from livestatus: %s", $err);
             $use_cached = 1;
         }
+
+        # restore original selected backends
+        Thruk::Action::AddDefaults::set_enabled_backends($c, $prev_backends);
     }
 
     if($use_cached) {
