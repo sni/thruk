@@ -1752,7 +1752,6 @@ alias for /services/stats?service_groups[gte]=<name>
 
 lists livestatus services.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#services for details.
-there is an alias /services.
 
 === GET /services/<host>/<service>
 
@@ -2729,3 +2728,4 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
+

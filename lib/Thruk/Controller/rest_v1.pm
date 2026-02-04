@@ -2584,7 +2584,6 @@ sub _rest_get_livestatus_hostgroup_stats {
 # REST PATH: GET /services
 # lists livestatus services.
 # see https://www.naemon.io/documentation/usersguide/livestatus.html#services for details.
-# there is an alias /services.
 register_rest_path_v1('GET', qr%^/services?$%mx, \&_rest_get_livestatus_services);
 sub _rest_get_livestatus_services {
     my($c) = @_;

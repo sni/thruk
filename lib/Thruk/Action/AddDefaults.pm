@@ -750,12 +750,12 @@ sub set_configs_stash {
     4 = disabled by missing group auth      DISABLED_AUTH
 
    override by the config tool
-    5 = disabled (overide by config tool)   DISABLED_CONF
-    6 = hidden   (overide by config tool)   HIDDEN_CONF
-    7 = up       (overide by config tool)   UP_CONF
+    5 = disabled (override by config tool)  DISABLED_CONF
+    6 = hidden   (override by config tool)  HIDDEN_CONF
+    7 = up       (override by config tool)  UP_CONF
 
    override by LMD clients
-    8 = disabled (overide by lmd)           HIDDEN_LMD_PARENT
+    8 = disabled (override by lmd)          HIDDEN_LMD_PARENT
 
 =cut
 sub set_possible_backends {
