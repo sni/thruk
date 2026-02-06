@@ -23,7 +23,7 @@
       <th class="js-perf-bar-header[% IF !show_perf_column %] hidden[% END %]"></th>
     </tr>
     [% FOREACH p = splited %]
-    <tr>
+    <tr[% IF splited.size >= 10 && loop.index >= 5 %] class="js-perfdata-table-row hidden "[% END %]>
       [% IF !has_parents || last_parent != p.parent %]
       [% END %]
       [% IF has_parents %]
@@ -41,6 +41,14 @@
         [% PROCESS _perfdata_table add_link="1" perfdata=p.orig state=4 show_placeholder=show_placeholder %]
       </td>
     </tr>
+    [% END %]
+    [% IF splited.size >= 10 %]
+      <tr>
+        <td colspan="[% IF has_parents %]7[% ELSE %]6[% END %]" class="text-center">
+          <div id="perf_show_more" class="link hoverable rounded clickable font-normal" onclick="jQuery('.js-perfdata-table-row').removeClass('hidden'); jQuery('#perf_show_more').addClass('hidden'); jQuery('#perf_show_less').removeClass('hidden');"> show more...</div>
+          <div id="perf_show_less" class="link hoverable rounded clickable font-normal hidden" onclick="jQuery('.js-perfdata-table-row').addClass('hidden'); jQuery('#perf_show_more').removeClass('hidden'); jQuery('#perf_show_less').addClass('hidden'); scrollToEl('perfdata_human');"> show less...</div>
+        </td>
+      </tr>
     [% END %]
   </table>
   </div>

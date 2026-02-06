@@ -384,6 +384,15 @@ function applyScroll(scrollTo) {
     }
 }
 
+function scrollToEl(id) {
+    var el = document.getElementById(id);
+    if(!el) {
+        return;
+    }
+    el.scrollIntoView({behavior: "smooth", block: "center"});
+}
+
+
 function getBrowserTimezone() {
     var timezone;
     try {
