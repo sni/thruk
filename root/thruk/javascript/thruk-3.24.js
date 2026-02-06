@@ -113,9 +113,7 @@ function init_page() {
             return false;
         });
 
-    jQuery("DIV.js-perf-bar").each(function(i, el) {
-        perf_table(el);
-    });
+    init_perf_data_bars();
 
     jQuery(".fittext").each(function(i, el) {
         fitText(el);
@@ -934,6 +932,31 @@ function closeModalWindowOnEscape(evt) {
         return false;
     }
     return(true);
+}
+
+function init_perf_data_bars() {
+    jQuery("DIV.js-perf-bar").each(function(i, el) {
+        perf_table(el);
+    });
+
+    // hide header and columns if there is no data
+    if(jQuery(".js-perf-bar-header").length == 0) {
+        return;
+    }
+
+    var foundSome = false;
+    jQuery(".js-perf-bar-container").each(function(i, el) {
+        if(el.innerHTML.trim() !== "") {
+            foundSome = true;
+        }
+    });
+    if(!foundSome) {
+        jQuery(".js-perf-bar-container").hide();
+        jQuery(".js-perf-bar-header").hide();
+    } else {
+        jQuery(".js-perf-bar-container").removeClass("hidden");
+        jQuery(".js-perf-bar-header").removeClass("hidden");
+    }
 }
 
 // activate current page in navigation
@@ -6744,7 +6767,7 @@ function parse_perf_data(perfdata) {
 
 /* return table with performance data */
 function perf_table(container) {
-    if(container.firstChild) { return; } // already set
+    if(container.firstChild && container.firstChild.innerHTML && jQuery(container).find('.js-placeholder').length == 0) { return; } // already set
     var result = perf_table_data(container.dataset);
     if(result) {
         jQuery(container).html(result);

@@ -5,6 +5,10 @@
 [% tmp = split_perfdata(perfdata) %]
 [% IF tmp.size > 0 && tmp.0.size > 0 %]
   [% splited = tmp.0; has_parents = tmp.1; has_warn = tmp.2; has_crit = tmp.3; has_min = tmp.4; has_max = tmp.5; %]
+  [% show_perf_column = 0 %]
+  [% FOREACH p = splited %]
+    [% IF p.warn || p.crit || p.min || p.max %][% show_perf_column = 1; LAST; %][% END %]
+  [% END %]
   [% last_parent = '' %]
   <div class="w-min">
   <table id="perfdata_human" class="cellborder cellspacing rowhover">
@@ -16,7 +20,7 @@
       [% IF has_crit %]<th>Critical</th>[% END %]
       [% IF has_min  %]<th>Minimum</th>[% END %]
       [% IF has_max  %]<th>Maximum</th>[% END %]
-      <th></th>
+      <th class="js-perf-bar-header[% IF !show_perf_column %] hidden[% END %]"></th>
     </tr>
     [% FOREACH p = splited %]
     <tr>
@@ -31,8 +35,10 @@
       [% IF has_crit %]<td>[% format_perf_number(p.crit, p.unit) %]</td>[% END %]
       [% IF has_min  %]<td>[% format_perf_number(p.min, p.unit) %]</td>[% END %]
       [% IF has_max  %]<td>[% format_perf_number(p.max, p.unit) %]</td>[% END %]
-      <td class="py-0">
-        [% PROCESS _perfdata_table add_link="1" perfdata=p.orig state=4 %]
+      <td class="py-0 js-perf-bar-container[% IF !show_perf_column %] hidden[% END %]">
+        [% show_placeholder = 0 %]
+        [% IF p.warn || p.crit || p.min || p.max %][% show_placeholder = 1 %][% END %]
+        [% PROCESS _perfdata_table add_link="1" perfdata=p.orig state=4 show_placeholder=show_placeholder %]
       </td>
     </tr>
     [% END %]

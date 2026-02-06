@@ -134,6 +134,7 @@
 
 
 [%- BLOCK _perfdata_table -%]
+  [% DEFAULT show_placeholder = 0 %]
   [% IF perf_bar_mode != 'off' %]
     <div
       class="js-perf-bar w-[75px] h-5 relative"
@@ -144,7 +145,13 @@
       data-check-command="[% check_command | strip_command_args | html %]"
       data-pnp-url="[% IF pnp_url; pnp_url | html %]/graph?host=[% hst | html %]&srv=[% svc | html; END %]"
       data-is-host=[% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]
-    ></div>
+    >
+      [% IF show_placeholder %]
+        <span class="perf-bar-container js-placeholder" style="width:75px;">
+          <span class="bg"></span>
+        </span>
+      [% END %]
+    </div>
   [% END %]
 [%- END -%]
 
