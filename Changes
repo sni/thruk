@@ -1,6 +1,6 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
-next:
+3.26     Fri Feb  6 14:36:22 CET 2026
           - add option to set default comment in commands
           - improve listing performance data
           - add support for icinga2 custom variables (fixes #1482)
