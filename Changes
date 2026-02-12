@@ -1,5 +1,10 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
+next:
+          - add pre tags to long plugin output if useful
+          - Agents:
+            - show top n processes for cpu/memory check
+
 3.26     Fri Feb  6 14:36:22 CET 2026
           - add option to set default comment in commands
           - improve listing performance data
