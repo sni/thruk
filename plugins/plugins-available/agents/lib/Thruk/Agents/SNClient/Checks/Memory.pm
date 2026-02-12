@@ -29,9 +29,8 @@ sub get_checks {
     return unless $inventory->{'memory'};
 
     my $mem_args = ["type=physical"];
-    if(Thruk::Agents::SNClient::has_agent_min_version($inventory, 'v0.41.0044')) {
-        push @{$mem_args}, '-n', '5';
-        push @{$mem_args}, '--hide-args';
+    if(Thruk::Agents::SNClient::has_agent_min_version($inventory, 'v0.41.0051')) {
+        push @{$mem_args}, '-n', '6';
     }
 
     for my $mem (@{$inventory->{'memory'}}) {

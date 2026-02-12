@@ -27,9 +27,8 @@ sub get_checks {
     my $checks = [];
 
     my $args = [];
-    if(Thruk::Agents::SNClient::has_agent_min_version($inventory, 'v0.41.0044')) {
-        push @{$args}, '-n', '5';
-        push @{$args}, '--hide-args';
+    if(Thruk::Agents::SNClient::has_agent_min_version($inventory, 'v0.41.0051')) {
+        push @{$args}, '-n', '6';
     }
 
     if($inventory->{'cpu'}) {
