@@ -12,9 +12,10 @@ services:
     environment:
         - PREFIX=tier1a
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     # required for strace
     #cap_add:
     #    - SYS_PTRACE
@@ -39,8 +40,10 @@ services:
         - PREFIX=tier1b
         - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier1.test.local:
         aliases:
@@ -65,8 +68,10 @@ services:
         - PREFIX=tier1c
         - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier1.test.local:
         aliases:
@@ -90,8 +95,10 @@ services:
     environment:
         - PREFIX=tier1d
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier2.test.local:
       tier1.test.local:
@@ -110,8 +117,10 @@ services:
     environment:
         - PREFIX=tier2a
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier3.test.local:
       tier2.test.local:
@@ -130,8 +139,10 @@ services:
         - PREFIX=tier2b
         - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier2.test.local:
         aliases:
@@ -152,8 +163,10 @@ services:
     environment:
         - PREFIX=tier2c
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier2.test.local:
         aliases:
@@ -171,8 +184,10 @@ services:
         - PREFIX=tier2d
         - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier2.test.local:
         aliases:
@@ -194,8 +209,10 @@ services:
         - PREFIX=tier2e
         - ANSIBLE_GATHER_TIMEOUT=60
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier2.test.local:
         aliases:
@@ -216,8 +233,10 @@ services:
     environment:
         - PREFIX=tier3a
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier3.test.local:
         aliases:
@@ -234,8 +253,10 @@ services:
     environment:
         - PREFIX=tier3b
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier3.test.local:
         aliases:
@@ -252,8 +273,10 @@ services:
     environment:
         - PREFIX=tier3c
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       tier3.test.local:
         aliases:

@@ -9,7 +9,9 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
 
   backend1:
     build: backend1/
@@ -17,3 +19,6 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw

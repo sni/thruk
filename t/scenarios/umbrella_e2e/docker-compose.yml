@@ -50,7 +50,9 @@ services:
         - "443"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared:/mnt/shared
     labels:
         - "traefik.enable=true"
@@ -84,7 +86,9 @@ services:
         - "443"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared:/mnt/shared
     labels:
         - "traefik.enable=true"
@@ -114,7 +118,9 @@ services:
     domainname: test.local
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
 
   subumbrella:
     build: sub_umbrella/
@@ -128,6 +134,9 @@ services:
     domainname: test.sub.local
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
 
   subomd:
     build: sub_omd/
@@ -141,6 +150,9 @@ services:
     domainname: test.sub.local
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
 
 volumes:
   shared:

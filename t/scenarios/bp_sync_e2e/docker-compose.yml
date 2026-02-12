@@ -8,6 +8,9 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared:/mnt/shared
 
   backend:
@@ -16,6 +19,9 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared:/mnt/shared
 
 volumes:

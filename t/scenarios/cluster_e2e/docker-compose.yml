@@ -28,6 +28,9 @@ services:
         - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
   thruk:
@@ -48,7 +51,9 @@ services:
         - "traefik.http.services.thruk.loadbalancer.healthcheck.interval=3s"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - shared_var:/mnt/var
         - shared_etc:/mnt/etc
 

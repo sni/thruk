@@ -8,4 +8,6 @@ services:
         - "127.0.0.3:60557:6557"
     volumes:
         - ../../../:/thruk:ro
-        - ./:/test:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw

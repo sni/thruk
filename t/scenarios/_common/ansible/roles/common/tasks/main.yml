@@ -72,7 +72,7 @@
       ip a | grep inet | grep -v inet6 | grep -v 127.0. | awk '{ print $2 }' | sed -e 's/\/.*/\/demo\//'
       echo "**************************"
 
-      su - demo
+      su - {{ site }}
 
 - name: "pimp root bashrc"
   lineinfile:
@@ -85,3 +85,23 @@
     - 'alias l="ls -la"'
     - 'alias vi="vim"'
     - 'alias psg="ps -efl | grep"'
+    - 'export HISTCONTROL="ignoredups:ignorespace:erasedups"'
+    - 'export HISTSIZE=100000'
+    - 'shopt -s histappend'
+    - 'PROMPT_COMMAND="history -a"'
+    - 'export HISTFILE=/var/tmp/.bash_history.$UID'
+    - 'chmod 777 /var/tmp/.'
+
+- name: "pimp {{ site }} user bashrc"
+  lineinfile:
+    dest: /omd/sites/{{ site }}/.bashrc
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - 'alias vi="vim"'
+    - 'alias psg="ps -efl | grep"'
+    - 'export HISTCONTROL="ignoredups:ignorespace:erasedups"'
+    - 'export HISTSIZE=100000'
+    - 'shopt -s histappend'
+    - 'PROMPT_COMMAND="history -a"'
+    - 'export HISTFILE=/var/tmp/.bash_history.$UID'

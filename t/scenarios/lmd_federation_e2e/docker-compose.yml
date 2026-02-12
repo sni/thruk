@@ -12,6 +12,8 @@ services:
     volumes:
         - ../../../:/thruk:ro
         - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
 #  slow:
 #    build: omd/
 #    ports:
@@ -25,3 +27,5 @@ services:
 #    volumes:
 #        - ../../../:/thruk:ro
 #        - .:/scenario:ro
+#        - .:/test:ro
+#        - ../../../var/tmp:/var/tmp:rw

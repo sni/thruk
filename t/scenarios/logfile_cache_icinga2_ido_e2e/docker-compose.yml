@@ -8,6 +8,9 @@ services:
         - "127.0.0.3:60306:3306"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
   mariadb:
      image: mariadb:12
      restart: always

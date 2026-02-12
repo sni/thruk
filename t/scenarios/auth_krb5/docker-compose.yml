@@ -7,9 +7,10 @@ services:
     ports:
         - "127.0.0.3:60080:80"
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       test.local:
         aliases:
@@ -20,8 +21,10 @@ services:
   remote:
     build: remote/
     volumes:
-        - .:/scenario:ro
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       test.local:
         aliases:
@@ -51,4 +54,3 @@ services:
           - vnc.test.local
     hostname: vnc
     domainname: test.local
-

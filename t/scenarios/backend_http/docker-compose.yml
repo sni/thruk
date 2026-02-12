@@ -6,3 +6,6 @@ services:
         - "127.0.0.3:60443:443"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw

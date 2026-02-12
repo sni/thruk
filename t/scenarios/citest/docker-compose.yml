@@ -2,7 +2,10 @@ services:
   site:
     build: citest/
     volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
         - "/etc/timezone:/etc/timezone:ro"
         - "/etc/localtime:/etc/localtime:ro"
-        - "../../../:/thruk:ro"
         - "../../../.ci:/.ci:ro"

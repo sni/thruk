@@ -15,6 +15,8 @@ services:
     volumes:
         - ../../../:/thruk:ro
         - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     networks:
       default:
         ipv4_address: 192.168.105.2

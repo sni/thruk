@@ -7,7 +7,9 @@ services:
         - "127.0.0.3:60557:6557"
     volumes:
         - ../../../:/thruk:ro
+        - .:/scenario:ro
         - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
     # required for strace
     #cap_add:
     #    - SYS_PTRACE
