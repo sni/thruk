@@ -183,6 +183,7 @@ plugins/plugins-available/agents/lib/Thruk/Agents/SNClient.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Base.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Connections.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/CPU.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/DriveIO.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Drivesize.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Kernelstats.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Mailq.pm
@@ -195,6 +196,7 @@ plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/OSUpdates.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Pagefile.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Process.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Service.pm
+plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/SwapIO.pm
 plugins/plugins-available/agents/lib/Thruk/Agents/SNClient/Checks/Temperature.pm
 plugins/plugins-available/agents/lib/Thruk/Controller/agents.pm
 plugins/plugins-available/agents/lib/Thruk/Utils/Agents.pm
