@@ -3,6 +3,8 @@ package Thruk::Agents::SNClient::Checks::Memory;
 use warnings;
 use strict;
 
+use Thruk::Agents::SNClient ();
+
 =head1 NAME
 
 Thruk::Agents::SNClient::Checks::Memory - returns memory checks for snclient
@@ -26,13 +28,19 @@ sub get_checks {
 
     return unless $inventory->{'memory'};
 
+    my $mem_args = ["type=physical"];
+    if(Thruk::Agents::SNClient::has_agent_min_version($inventory, 'v0.41.0044')) {
+        push @{$mem_args}, '-n', '5';
+        push @{$mem_args}, '--hide-args';
+    }
+
     for my $mem (@{$inventory->{'memory'}}) {
         if($mem->{'type'} eq 'physical') {
             push @{$checks}, {
                 'id'     => 'mem',
                 'name'   => 'memory',
                 'check'  => 'check_memory',
-                'args'   => { "type" => "physical" },
+                'args'   => $mem_args,
                 'parent' => 'agent version',
                 'info'   => $mem,
             };

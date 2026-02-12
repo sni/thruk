@@ -423,17 +423,20 @@ sub get_services_checks {
     if($hostobj && $hostobj->{'conf'}->{'_AGENT_CONFIG'}) {
         $settings = decode_json($hostobj->{'conf'}->{'_AGENT_CONFIG'});
     }
-    $checks = _extract_checks(
-                    $c,
-                    $data->{'inventory'},
-                    $hostname,
-                    $password,
-                    $cli_opts,
-                    $section,
-                    $mode,
-                    $options // $settings->{'options'} // {},
-                    $tags,
-                ) if $data->{'inventory'};
+    if($data->{'inventory'}) {
+        $data->{'inventory'}->{'_snclient'} = $data->{'snclient'} if $data->{'snclient'};
+        $checks = _extract_checks(
+                        $c,
+                        $data->{'inventory'},
+                        $hostname,
+                        $password,
+                        $cli_opts,
+                        $section,
+                        $mode,
+                        $options // $settings->{'options'} // {},
+                        $tags,
+                    );
+    }
 
     return($checks);
 }
@@ -525,6 +528,24 @@ sub get_inventory {
         return $data;
     }
     die($output || 'no output from inventory scan command');
+}
+
+##########################################################
+
+=head2 has_agent_min_version
+
+    has_agent_min_version($inventory, $version)
+
+returns true if inventory contains snclient with version greater or equal to the supplied version
+
+=cut
+sub has_agent_min_version {
+    my($inventory, $min_version) = @_;
+    return unless $inventory;
+    return unless $inventory->{'_snclient'};
+    return unless $inventory->{'_snclient'}->{'version'};
+
+    return(Thruk::Utils::version_compare($inventory->{'_snclient'}->{'version'}, $min_version));
 }
 
 ##########################################################

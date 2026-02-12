@@ -687,6 +687,9 @@ sub version_compare {
     confess("version_compare() needs two params") unless defined $v1;
     confess("version_compare() needs two params") unless defined $v2;
 
+    $v1 =~ s/^v//gmx;
+    $v2 =~ s/^v//gmx;
+
     # replace non-numerical characters
     $v1 =~ s/[^\d\.]/./gmx;
     $v2 =~ s/[^\d\.]/./gmx;
