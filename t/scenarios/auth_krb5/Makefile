@@ -19,5 +19,8 @@ extra_test:
 extra_test_verbose:
 	docker compose exec $(DOCKER_COMPOSE_TTY) --user root omd sudo -iu demo /usr/local/bin/local_test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
+extra_clean:
+	rm -f ../../../var/tmp/krb5_*
+
 webvnc:
 	@python3 -m webbrowser http://127.0.0.3:6901/?password=vncpassword

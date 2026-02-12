@@ -158,6 +158,7 @@ prepare: base_images
 	$(MAKE) pre_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(TIMEOUT_CMD) docker compose build
+	mkdir -p ../../../var/tmp && chmod 777 ../../../var/tmp
 	docker compose up --remove-orphans -d
 	docker ps
 	@docker compose logs -t $(DOCKER_COMPOSE_LOGS) -f | while read LOGLINE; do \
