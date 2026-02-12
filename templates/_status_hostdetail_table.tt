@@ -130,7 +130,7 @@
                   onclick="return(show_plugin_output_popup(this, '[% escape_js(h.name) %]', '', '[% escape_js(h.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
                 [% ELSE %]
                   onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_host(h))) %]', 'width': 600 }));"
-                  abbr="[% plugin_output | replace_links | replace_copy_paste | escape_html %]&lt;br&gt;[% long_plugin_output | nl2br | replace_links | replace_copy_paste | escape_html %]"
+                  abbr="[% plugin_output | replace_links | replace_copy_paste | escape_html %]&lt;br&gt;[% maybe_pre(long_plugin_output) | nl2br | replace_links | replace_copy_paste | escape_html %]"
                 [% END %]
               [% END %]
             >
@@ -143,7 +143,7 @@
                   </div>
                 [% END %]
                 [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-                  <br>[% nl2br(long_plugin_output) | replace_links | replace_copy_paste %]
+                  <br>[% nl2br(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste %]
                 [% END %]
                 <div>
                   [% PROCESS _perfdata_table add_link="1" state=h.state plugin_output=orig_plugin_output perfdata=h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" pnp_url=get_pnp_url(c, h, 1) %]

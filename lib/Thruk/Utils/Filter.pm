@@ -2258,4 +2258,29 @@ sub sort_by {
 
 ########################################
 
+=head2 maybe_pre
+
+  maybe_pre($txt)
+
+returns plugin output text wrapped in <pre> if possible
+
+=cut
+sub maybe_pre {
+    my($txt) = @_;
+
+    # already contains html tags
+    return $txt if $txt =~ m/<[^>+]>/mx;
+
+    # must contain multiple newlines
+    my @lines = split(/\n|\\n/mx, $txt);
+    return $txt unless scalar @lines > 1;
+
+    # must contain multiple spaces or tabs
+    return $txt unless $txt =~ m/[\ \t]{2,}/mx;
+
+    return("<pre>".$txt."</pre>");
+}
+
+########################################
+
 1;
