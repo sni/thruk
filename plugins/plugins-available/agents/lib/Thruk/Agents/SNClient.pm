@@ -636,6 +636,9 @@ sub _extract_checks {
 
         $chk->{'name'} =~ s|[`~!\$%^&*\|'"<>?,()=]*||gmx; # remove nasty chars from object name
         $chk->{'name'} =~ s|\\$||gmx; # remove trailing slashes from service names, ex.: in windows drives
+
+        $command               = Thruk::Base::trim_whitespace($command);
+        $current_args          = Thruk::Base::trim_whitespace($current_args);
         $chk->{'current_args'} = $current_args;
 
         $chk->{'svc_conf'} = {
