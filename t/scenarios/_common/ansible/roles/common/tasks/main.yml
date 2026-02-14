@@ -77,8 +77,10 @@
 - name: "pimp root bashrc"
   lineinfile:
     dest: /root/.bashrc
-    line: "{{ item }}"
+    line: "{{ bashrc_line }}"
     state: present
+  loop_control:
+    loop_var: bashrc_line
   with_items:
     - 'alias d="/usr/local/bin/demo"'
     - 'alias la="ls -la"'
@@ -95,8 +97,10 @@
 - name: "pimp {{ site }} user bashrc"
   lineinfile:
     dest: /omd/sites/{{ site }}/.bashrc
-    line: "{{ item }}"
+    line: "{{ bashrc_line }}"
     state: present
+  loop_control:
+    loop_var: bashrc_line
   with_items:
     - 'alias vi="vim"'
     - 'alias psg="ps -efl | grep"'
