@@ -1024,7 +1024,10 @@ sub build_checks_config {
             $chk->{'_type'} = $t;
             $chk->{'type'} = "new"  if $t eq 'new';
             if($t eq 'obsolete') {
-                $chk->{'type'} = $start_fresh ? "off" : "keep";
+                $chk->{'type'} = "keep";
+                if(($start_fresh && $chk->{'exclude_reason'}) || $clear_manual) {
+                    $chk->{'type'} = "off";
+                }
             }
             $chk->{'type'} = "keep" if $t eq 'exists';
             $chk->{'type'} = "off"  if $t eq 'disabled';
