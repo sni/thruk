@@ -38,6 +38,7 @@ Available commands are:
        --cached[=file]     use cached host inventory, optionally specify location of cache file to use.
   -n | --dryrun            only print changes     (available in add/update mode)
   -d | --diff              print diff of changes  (available in add/update mode)
+       --prune             remove obsolete checks in -II mode
   -t | --tags <tag>        list/add only tag      (available in add/list mode)
   -f | --filter <filter>   generic filter         (available in add/list mode)
                                                   e.g. tags=linux && tags != test
@@ -98,6 +99,7 @@ sub cmd {
         'remove'       => undef,
         'fresh'        => undef,
         'clear_manual' => undef,
+        'prune'        => undef,
         'section'      => undef,
         'insecure'     => undef,
         'cached'       => undef,
@@ -135,6 +137,7 @@ sub cmd {
        "d|diff"       => \$opt->{'diff'},
        "always-ok"    => \$opt->{'always-ok'},
        "f|filter=s@"  => \$opt->{'filter'},
+       "prune"        => \$opt->{'prune'},
     ) or do {
         return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__));
     };
@@ -361,6 +364,7 @@ sub _run_add {
     }
 
     $opt->{'fresh'} = 1 if $opt->{'clear_manual'};
+    $opt->{'prune'} = 1 if $opt->{'clear_manual'};
 
     my $hostdata = {};
 
@@ -463,7 +467,7 @@ sub _run_add_host {
     }
 
     my $orig_checks   = Thruk::Utils::Agents::build_checks_config($checks);
-    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'});
+    my $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'}, $opt->{'prune'});
     if($opt->{'interactive'}) {
         my @lines = (
             "# edit host: ".$hostname,
@@ -499,7 +503,7 @@ sub _run_add_host {
         # start default editor for this file
         my $editor = $ENV{'editor'} // "vim";
         system("$editor $filename");
-        $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'});
+        $checks_config = Thruk::Utils::Agents::build_checks_config($checks, $opt->{'fresh'}, $opt->{'clear_manual'}, $opt->{'prune'});
         for my $line (Thruk::Utils::IO::read_as_list($filename)) {
             next if $line =~ m/^\#/mx;
             $line =~ s/\#.*$//gmx;

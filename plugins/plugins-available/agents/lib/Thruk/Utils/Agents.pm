@@ -1010,13 +1010,13 @@ sub _is_excluded {
 
 =head2 build_checks_config
 
-    build_checks_config($checks, $fresh, $clear_manual)
+    build_checks_config($checks, $fresh, $clear_manual, $prune)
 
 returns checks config used to build service objects
 
 =cut
 sub build_checks_config {
-    my($checks, $start_fresh, $clear_manual) = @_;
+    my($checks, $start_fresh, $clear_manual, $prune) = @_;
     my $checks_config = {};
 
     for my $t (qw/new exists obsolete disabled/) {
@@ -1025,7 +1025,7 @@ sub build_checks_config {
             $chk->{'type'} = "new"  if $t eq 'new';
             if($t eq 'obsolete') {
                 $chk->{'type'} = "keep";
-                if(($start_fresh && $chk->{'exclude_reason'}) || $clear_manual) {
+                if(($start_fresh && $chk->{'exclude_reason'}) || $clear_manual || $prune) {
                     $chk->{'type'} = "off";
                 }
             }
