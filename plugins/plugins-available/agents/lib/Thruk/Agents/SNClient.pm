@@ -339,7 +339,8 @@ sub get_config_objects {
         @list = @cloned;
     }
 
-    return(\@list, \@remove);
+    my $sorted = [(sort { $a->{'type'} cmp $b->{'type'} || ($a->{'conf'}->{'service_description'}//'') cmp ($b->{'conf'}->{'service_description'}//'') } @list)];
+    return($sorted, \@remove);
 }
 
 ##########################################################
