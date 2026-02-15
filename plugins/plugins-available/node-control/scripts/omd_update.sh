@@ -25,6 +25,7 @@ echo "*** Site will be stopped during the update, so no progress can be displaye
 echo "*** this may take a couple of minutes...";
 
 SITE_STARTED=0
+SITE_MOUNTED=0
 THRUK_MAINT=0
 omd status -b > /dev/null 2>&1
 if [ $? -ne 1 ]; then
@@ -45,6 +46,10 @@ if [ $? -ne 1 ]; then
     if [ $? -ne 1 ]; then
         omd stop
     fi
+fi
+
+if [ $(mount 2>/dev/null | grep -c /omd/sites/mon/tmp) -gt 0 ]; then
+    SITE_MOUNTED=1
 fi
 
 CMD="omd -f -V $OMD_UPDATE update --conflict=ask"
@@ -108,7 +113,7 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
         tmux -f /dev/null send-keys -t $session:$window "exit" C-m
     fi
 
-    if [ $SITE_STARTED = 1 ]; then
+    if [ "$SITE_STARTED" = "1" ]; then
         echo "%> omd start"
         omd start
         if [ "$THRUK_MAINT" = "1" ]; then
@@ -124,6 +129,11 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
 
     echo "%> omd version"
     omd version
+
+    if [ "$SITE_MOUNTED" = "0" ]; then
+        echo "%> omd umount"
+        omd umount
+    fi
 
     echo "*** update finished: $(omd version -b)"
     exit 0
