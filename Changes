@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - add pre tags to long plugin output if useful
+          - add contacts to exportable columns in excel exports
           - Agents:
             - show top n processes for cpu/memory check
 

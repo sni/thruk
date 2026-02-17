@@ -30,6 +30,7 @@
         [% ELSIF col == "Flapping"                 %]<cell width='9'>Flapping</cell>
         [% ELSIF col == "Status Information"       %]<cell width='80'>Status Information</cell>
         [% ELSIF col == "Extra Status Information" %]<cell width='80'>Extra Status Information</cell>
+        [% ELSIF col == "Contacts"                 %]<cell width='80'>Contacts</cell>
         [% ELSIF col == "Comments"                 %]<cell width='80'>Comments</cell>
         [% ELSE %]<cell width='30'>[% escape_xml(col) %]</cell>
         [% END %]
@@ -83,6 +84,7 @@
         [% ELSIF col == "Flapping"                 %]<cell>[% IF s.is_flapping              %]Yes[% ELSE %]No[% END %]</cell>
         [% ELSIF col == "Status Information"       %]<cell>[% IF s.has_been_checked == 0 %]Service check scheduled for [% format_date(s.next_check, datetime_format_long) %][% ELSE %][% escape_xml(s.plugin_output) %][% END %]</cell>
         [% ELSIF col == "Extra Status Information" %]<cell>[% IF s.has_been_checked == 1 %][% escape_xml(s.long_plugin_output) %][% END %]</cell>
+        [% ELSIF col == "Contacts"                 %]<cell>[% escape_xml(s.contacts.join(', ')) %]</cell>
         [% ELSIF col == "Comments"      %]
           <cell>
             [%- host_name = s.host_name; first = 1; -%]

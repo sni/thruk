@@ -391,7 +391,7 @@ END
       <td>[% date_format(c, date.now) %]( 0s ago )</td>
     [% END %]
   </tr>
-  [% IF show_contacts && c.check_user_roles('authorized_for_configuration_information') %]
+  [% IF show_contacts %]
     <tr>
       <th class="align-top">Contacts</th>
       <td class='whitespace-normal'><div class='mightOverflowBlock max-w-[600px] clickable' onClick="toggleClass(this, 'mightOverflowBlock');">[% obj.contacts.join(', ') %]</div></td>

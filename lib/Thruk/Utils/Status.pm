@@ -2496,13 +2496,13 @@ sub get_service_columns {
         { title => $var,                   "field" => "cust_".$var,           "checked" => 0 };
     }
 
-
     my @selected;
     for my $col (@{$columns}) {
         if($col->{'checked'}) {
             push @selected, $col->{'field'};
         }
     }
+
     $c->stash->{'default_service_columns'} = $c->config->{'default_service_columns'} || join(",", @selected);
     $c->stash->{'default_service_columns'} =~ s/\s+//gmx;
     return($columns);

@@ -22,6 +22,7 @@
         [% ELSIF col == "Duration"      %]<cell width='15'>Duration</cell>
         [% ELSIF col == "Status Information"       %]<cell width='80'>Status Information</cell>
         [% ELSIF col == "Extra Status Information" %]<cell width='80'>Extra Status Information</cell>
+        [% ELSIF col == "Contacts"      %]<cell width='80'>Contacts</cell>
         [% ELSIF col == "Comments"      %]<cell width='80'>Comments</cell>
         [% ELSE %]<cell width='30'>[% escape_xml(col) %]</cell>
         [% END %]
@@ -64,6 +65,7 @@
         [% ELSIF col == "Duration"                 %]<cell>[% IF h.last_state_change %][% duration(date.now - h.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %]</cell>
         [% ELSIF col == "Status Information"       %]<cell>[% IF h.has_been_checked == 0 %]Service check scheduled for [% format_date(h.next_check, datetime_format_long) %][% ELSE %][% escape_xml(h.plugin_output) %][% END %]</cell>
         [% ELSIF col == "Extra Status Information" %]<cell>[% IF h.has_been_checked == 1 %][% escape_xml(h.long_plugin_output) %][% END %]</cell>
+        [% ELSIF col == "Contacts"                 %]<cell>[% escape_xml(s.contacts.join(', ')) %]</cell>
         [% ELSIF col == "Comments"      %]
           <cell>
             [%- IF comments_by_host.defined(peer_key) && comments_by_host.$peer_key.defined(h.name) -%]

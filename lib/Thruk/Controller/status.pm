@@ -452,7 +452,7 @@ sub _process_details_page {
 
     my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
-    my $selected_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
+    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} || $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'})});
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
@@ -601,7 +601,7 @@ sub _process_hostdetails_page {
     $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $user_data = Thruk::Utils::get_user_data($c);
-    my $selected_columns = $c->req->parameters->{'dfl_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
+    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} ||  $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'})});
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
@@ -667,7 +667,13 @@ sub _process_hostdetails_page {
     push @{$extra_columns}, 'contacts' if ($selected_columns && $selected_columns =~ m/contacts/imx);
 
     # get hosts
-    my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ], sort => { $backend_order => $sortoptions->{$sortoption}->[0] }, pager => 1, columns => $columns, extra_columns => $extra_columns );
+    my $hosts = $c->db->get_hosts(
+                                filter        => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
+                                sort          => { $backend_order => $sortoptions->{$sortoption}->[0] },
+                                pager         => 1,
+                                columns       => $columns,
+                                extra_columns => $extra_columns,
+                        );
 
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
