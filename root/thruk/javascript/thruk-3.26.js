@@ -8410,6 +8410,9 @@ function verify_op(event) {
   // do we have to display the datepicker?
   var calElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'cal');
   var inpElem = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
+  if(!inpElem.onclickOrig) {
+    inpElem.onclickOrig = inpElem.onclick;
+  }
   if(selValue == 'next check' || selValue == 'last check' ) {
     showElement(calElem);
     inpElem.onclick = show_cal;
@@ -8417,7 +8420,9 @@ function verify_op(event) {
     hideElement(calElem);
     jQuery(inpElem).off(); // remove all previous events
     inpElem.picker = false;
-    inpElem.onclick = function() { ajax_search.init(this, undefined, {striped: false}); };
+    if(inpElem.onclickOrig) {
+        inpElem.onclick = inpElem.onclickOrig;
+    }
   }
 
   var input  = document.getElementById(selElem.id.substring(0, selElem.id.length - 2) + 'value');
@@ -9998,7 +10003,7 @@ var ajax_search = {
             value = values[0];
         }
 
-        var input   = document.getElementById(ajax_search.input_field);
+        var input = document.getElementById(ajax_search.input_field);
 
         var cursorpos = undefined;
         if(ajax_search.list) {
@@ -10181,6 +10186,14 @@ var ajax_search = {
     }
 };
 
+function check_filter_op(input, value) {
+    var opSel = jQuery(input).parents("DIV.js-filter-row").first().find(".filter_op_select");
+    var op = jQuery(opSel).val();
+    if(op == "~") {
+        jQuery(opSel).val("=");
+    }
+    return;
+}
 
 /*******************************************************************************
 GRAPHITE

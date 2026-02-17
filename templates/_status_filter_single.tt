@@ -281,7 +281,7 @@
       [% END %]
       <tr[% IF index == "template" %] class="template" style="display: none;"[% END %]>
         <td colspan=2>
-          <div class="flexrow flex-nowrap gap-1">
+          <div class="flexrow flex-nowrap gap-1 js-filter-row">
             <select name="[% filterprefix %]_type" class="js-type-filter" id="[% filterprefix %]_[% index %]_ts" onchange="verify_op(this.id);[% onchange %]">
               <option value="search">Search</option>
               <option value="host"[% IF s_row_data.type == 'host' %] selected[% END %]>Host</option>
@@ -314,7 +314,15 @@
               <option value="parent"[% IF s_row_data.type == 'parent' %] selected[% END %]>Parent</option>
               <option value="plugin output"[% IF s_row_data.type == 'plugin output' %] selected[% END %]>Plugin Output</option>
             </select>
-            <input type="text" name="[% filterprefix %]_val_pre" class="filter_pre_value" id="[% filterprefix %]_[% index %]_val_pre" value="[% s_row_data.val_pre | html %]" onclick="ajax_search.init(this, 'custom variable')" style="[% IF s_row_data.type == 'priority' %]display: none;[% END %]">
+            <input
+              type="text"
+              name="[% filterprefix %]_val_pre"
+              class="filter_pre_value"
+              id="[% filterprefix %]_[% index %]_val_pre"
+              value="[% s_row_data.val_pre | html %]"
+              onclick="ajax_search.init(this, 'custom variable')"
+              style="[% IF s_row_data.type == 'priority' %]display: none;[% END %]"
+            >
             <select name="[% filterprefix %]_op" id="[% filterprefix %]_[% index %]_to"  onchange="[% onchange %]" class="filter_op_select">
               <option value="~"[% IF  s_row_data.op == '~'  %] selected[% END %]>~</option>
               <option value="!~"[% IF s_row_data.op == '!~' %] selected[% END %]>!~</option>
@@ -323,7 +331,14 @@
               <option value="<="[% IF s_row_data.op == '<=' %] selected[% END %]>&lt;=</option>
               <option value=">="[% IF s_row_data.op == '>=' %] selected[% END %]>&gt;=</option>
             </select>
-            <input type="text" name="[% filterprefix %]_value" id="[% filterprefix %]_[% index %]_value" value="[% s_row_data.value | html %]" onclick="ajax_search.init(this, undefined, {striped: false })" style="[% IF s_row_data.type == 'priority' %]display: none;[% END %]">
+            <input
+              type="text"
+              name="[% filterprefix %]_value"
+              id="[% filterprefix %]_[% index %]_value"
+              value="[% s_row_data.value | html %]"
+              onclick="ajax_search.init(this, undefined, {striped: false, onselect:check_filter_op })"
+              style="[% IF s_row_data.type == 'priority' %]display: none;[% END %]"
+            >
             <div id="[% filterprefix %]_[% index %]_cal" title="pick date" [% IF s_row_data.type != 'last check' && s_row_data.type != 'next check' %] style="display:none;"[% END %]><i class="uil uil-schedule text-lg cal_icon cal_popup for_[% filterprefix %]_[% index %]_value"></i></div>
             [% IF enable_shinken_features %]
             <select name="[% filterprefix %]_value_sel" id="[% filterprefix %]_[% index %]_value_sel" style="[% IF s_row_data.type != 'priority' %]display: none;[% END %]" onchange="[% onchange %]">
