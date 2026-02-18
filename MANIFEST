@@ -2543,6 +2543,10 @@ t/data/blank.html
 t/data/broken_config/a.conf
 t/data/broken_config/b.conf
 t/data/broken_config2/a.conf
+t/data/cgi_cfg_configs/cgi.cfg
+t/data/cgi_cfg_configs/thruk.conf
+t/data/cgi_cfg_configs/thruk_local.conf
+t/data/cgi_cfg_configs/thruk_local.d/local.conf
 t/data/check_thruk_rest/kibana.json
 t/data/check_thruk_rest/nested.json
 t/data/editor_config/thruk.conf

@@ -1340,7 +1340,7 @@ sub read_cgi_cfg {
     $config = $app->config unless defined $config;
 
     # read only if its changed
-    my $file = $config->{'cgi.cfg'};
+    my $file = $config->{'cgi.cfg'} // 'cgi.cfg';
     if(!defined $file || $file eq '') {
         $app->{'cgi_cfg'} = 'undef';
         $app->log->debug("no cgi.cfg found");
@@ -1386,14 +1386,22 @@ merge entries from cgi.cfg into $c->config
 sub merge_cgi_cfg {
     my($c) = @_;
     my $cfg = read_cgi_cfg($c->app);
+
     for my $key (sort keys %{$cfg}) {
+        # safe backup of non-cgi.cfg value, if not already done
         if(!exists $c->config->{"_".$key}) {
             $c->config->{"_".$key} = $c->config->{$key};
         }
         if($key =~ m/^(authorized_for|authorized_contactgroup_for_)/mx) {
-            $c->config->{$key} = [@{Thruk::Base::comma_separated_list($cfg->{$key})}, @{Thruk::Base::comma_separated_list($c->config->{"_".$key})}];
+            my $cgi_list    = Thruk::Base::comma_separated_list($cfg->{$key});
+            my $tlocal_list = Thruk::Base::comma_separated_list($c->config->{"_".$key});
+            $c->config->{$key} = _merge_list($cgi_list, $tlocal_list);
+            # reset to empy by thruk_load.d
+            if(defined $c->config->{"_".$key} && scalar @{$tlocal_list} == 0) {
+                $c->config->{$key} = [];
+            }
         } else {
-            $c->config->{$key} = $cfg->{$key};
+            $c->config->{$key} = $c->config->{"_".$key} // $cfg->{$key};
         }
     }
 
@@ -1557,6 +1565,30 @@ sub _merge_all {
     }
 
     return $conf;
+}
+
+########################################
+# add list to another list, but resets the list if there is an empty entry
+sub _merge_list {
+    my($conf, $add) = @_;
+
+    my $list = [];
+    push @{$list}, @{Thruk::Base::list($conf)} if defined $conf;
+    push @{$list}, @{Thruk::Base::list($add)}  if defined $add;
+
+    my $x = 0;
+    my $idx = -1;
+    for my $entry (@{$list}) {
+        if($entry eq '') {
+            $idx = $x;
+        }
+        $x++;
+    }
+    if($idx > 0) {
+        $list = [ @{$list}[$idx+1 .. $#{$list}] ];
+    }
+
+    return $list;
 }
 
 ########################################

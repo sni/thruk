@@ -218,6 +218,40 @@ if(!$@) {
 };
 
 ####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/cgi_cfg_configs';
+    my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
+    $config->{'cgi.cfg'}  = $config->{'etc_path'}.'/cgi.cfg';
+
+    my $c = TestUtils::get_c();
+    local $c->{'config'} = $config;
+    Thruk::Action::AddDefaults::begin($c);
+    Thruk::Action::AddDefaults::add_safe_defaults($c);
+
+    # only in cgi.cfg -> unchanged
+    is($c->config->{'default_user_name'}, 'thrukadmin', "parsing cgi.cfg from thruk_local.d I");
+
+    # set in cgi.cfg, reset in thruk_local.d -> only the one from thruk_local.d remains
+    is_deeply($c->config->{'authorized_for_admin'}, ['localadmin', 'otheradmin'], "parsing cgi.cfg from thruk_local.d II");
+
+    # set in cgi.cfg, reset in thruk_local.d -> only the one from thruk_local.d remains
+    is_deeply($c->config->{'authorized_contactgroup_for_admin'}, ['adm_grp', 'admin_group'], "parsing cgi.cfg from thruk_local.d III");
+
+    # set in both cgi.cfg and thruk_local.d -> merged
+    is_deeply($c->config->{'authorized_for_system_information'}, ['sysinfouser'], "parsing cgi.cfg from thruk_local.d IV");
+
+    # reset in thruk_local.d -> empty
+    is_deeply($c->config->{'authorized_contactgroup_for_system_information'}, [], "parsing cgi.cfg from thruk_local.d V");
+
+    # only in cgi.cfg -> unchanged
+    is_deeply($c->config->{'authorized_for_configuration_information'}, ['confinfouser'], "parsing cgi.cfg from thruk_local.d VI");
+
+    # only in cgi.cfg and empty -> unchanged
+    is_deeply($c->config->{'authorized_contactgroup_for_configuration_information'}, [], "parsing cgi.cfg from thruk_local.d VII");
+};
+
+####################################################
 
 done_testing();
 

@@ -14,6 +14,8 @@ values are used. Find a list of used parameters in the following list.
 All config values here, except the roles and authentication related can be
 set in the thruk_local.conf as well.
 
+{% include new_since.ad version="3.28" %}
+Starting with v3.28 it is possible to set cgi.cfg values from the thruk_local.d folder as well.
 
 == show_context_help
 **DEPRECATED:** setting this has no effect with Thruk 3.x or later.
