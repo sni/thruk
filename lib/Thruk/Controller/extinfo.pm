@@ -536,12 +536,9 @@ sub _process_host_page {
     }
 
     # generate command line
-    if($c->stash->{'show_full_commandline'} == 2 ||
-       $c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ) ) {
-        if(defined $host) {
-            my $command            = $c->db->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
-            $c->stash->{'command'} = $command;
-        }
+    if(defined $host && $c->check_show_command_line_permissions("host", $host->{'name'})) {
+        my $command            = $c->db->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
+        $c->stash->{'command'} = $command;
     }
 
     # object source
@@ -684,8 +681,7 @@ sub _process_service_page {
     }
 
     # generate command line
-    if($c->stash->{'show_full_commandline'} == 2 ||
-       ($c->stash->{'show_full_commandline'} == 1 && $c->check_user_roles( "authorized_for_configuration_information" ))) {
+    if(defined $service && $c->check_show_command_line_permissions("service", $service->{'description'}, $service->{'host_name'})) {
         $c->stash->{'command'} = $c->db->expand_command('host' => $service, 'service' => $service, 'source' => $c->config->{'show_full_commandline_source'} );
     }
 

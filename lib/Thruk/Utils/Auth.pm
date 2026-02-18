@@ -33,7 +33,7 @@ returns a filter which can be used for authorization
 
 =cut
 sub get_auth_filter {
-    my($c, $type, $strict, $cmd_permissions) = @_;
+    my($c, $type, $strict, $cmd_permissions, $show_cmdline_permissions) = @_;
     $strict = 0 unless defined $strict;
 
     return if $type eq 'status';
@@ -54,15 +54,26 @@ sub get_auth_filter {
         croak("strict authorization not implemented for: ".$type);
     }
 
+    my $can_submit_commands = $c->user->get('can_submit_commands');
+    my $user_name           = $c->user->get('username');
+
     # host authorization
     if($type eq 'hosts') {
-        if(!$strict && $c->check_user_roles('authorized_for_all_hosts')) {
+        if(!$cmd_permissions && !$show_cmdline_permissions && !$strict && $c->check_user_roles('authorized_for_all_hosts')) {
             return();
+        }
+        if($show_cmdline_permissions) {
+            return(Thruk::Utils::combine_filter(
+                '-or', [
+                    {'name' => '' }, # match nothing
+                    @{_permission_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
+                ],
+            ));
         }
         return(Thruk::Utils::combine_filter(
             '-or', [
-                {'contacts' => { '>=' => $c->user->get('username') }},
-                @{_permission_filter($c, 'hosts', $cmd_permissions)},
+                $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
+                @{_permission_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
             ],
         ));
     }
@@ -74,22 +85,23 @@ sub get_auth_filter {
 
     # service authorization
     elsif($type eq 'services') {
-        if(!$strict && $c->check_user_roles('authorized_for_all_services')) {
+        if(!$cmd_permissions && !$show_cmdline_permissions && !$strict && $c->check_user_roles('authorized_for_all_services')) {
             return();
         }
         if($c->config->{'use_strict_host_authorization'}) {
             return(Thruk::Utils::combine_filter(
                 '-or', [
-                    {'contacts' => { '>=' => $c->user->get('username') }},
-                    @{_permission_filter($c, 'services', $cmd_permissions)},
+                    {'contacts' => { '>=' => $user_name }},
+                    $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
+                    @{_permission_filter($c, 'services', $cmd_permissions, $show_cmdline_permissions)},
                 ],
             ));
         } else {
             return(Thruk::Utils::combine_filter(
                 '-or', [
-                    {'contacts' => { '>=' => $c->user->get('username') }},
-                    {'host_contacts' => { '>=' => $c->user->get('username') } },
-                    @{_permission_filter($c, 'services', $cmd_permissions)},
+                    $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
+                    $can_submit_commands ? {'host_contacts' => { '>=' => $user_name }} : {'name' => '' },
+                    @{_permission_filter($c, 'services', $cmd_permissions, $show_cmdline_permissions)},
                 ],
             ));
         }
@@ -232,7 +244,7 @@ sub get_auth_filter {
 
 ##############################################
 sub _permission_filter {
-    my($c, $type, $cmd_permissions) = @_;
+    my($c, $type, $cmd_permissions, $show_cmdline_permissions) = @_;
 
     die("unknown type") if($type ne 'hosts' && $type ne 'services');
 
@@ -242,6 +254,7 @@ sub _permission_filter {
     my @matched;
     for my $p (@{$permissions}) {
         next if $type eq 'services' && !$p->{'with_services'};
+        next if ($show_cmdline_permissions && !$p->{'show_command_line'});
         if($type eq 'hosts') {
             next if ($cmd_permissions && !$p->{'hst_commands'});
         } else {

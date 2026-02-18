@@ -525,7 +525,7 @@ sub check_permissions {
         return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_service_commands' : 'authorized_for_all_services');
         # does the user have permissions for all services of the host?
         my $services1 = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value2, $cmd_permissions), host_name => $value ]);
-        my $services2 = $c->db->get_service_names(filter => [                                                                                 host_name => $value ]);
+        my $services2 = $c->db->get_service_names(filter => [                                                                                host_name => $value ]);
         # authorization permitted when the amount of services is the same number as services with authorization
         $count = 1 if defined $services1 && defined $services2 && scalar @{$services1} == scalar @{$services2};
     }
@@ -653,6 +653,67 @@ sub _check_cmd_permissions {
         $c->error("unknown cmd auth role check: ".$type);
         return 0;
     }
+    return 0;
+}
+
+########################################
+
+=head2 check_show_command_line_permissions
+
+ check_show_command_line_permissions('host', $hostname)
+ check_show_command_line_permissions('service', $servicename, $hostname)
+
+ for example:
+ $c->check_show_command_line_permissions('service', $service, $host)
+
+returns true if users has permissions to see the expanded command.
+
+=cut
+
+sub check_show_command_line_permissions {
+    my($self, $c, $type, $value, $value2) = @_;
+
+    $type   = '' unless defined $type;
+    $value  = '' unless defined $value;
+    $value2 = '' unless defined $value2;
+
+    if($c->config->{'show_full_commandline'} == 2) {
+        return 1;
+    }
+
+    if($c->config->{'show_full_commandline'} == 1 && $self->check_user_roles('authorized_for_configuration_information')) {
+        return 1;
+    }
+
+    # cache permissions for this request
+    my $cache_key = join(';', $type, $value, $value2);
+    return($c->stash->{'_cmdline_perm_cache'}->{$cache_key} //= $self->_check_cmd_line_permissions($c, $type, $value, $value2));
+}
+
+# command line permissions from teams
+sub _check_cmd_line_permissions {
+    my($self, $c, $type, $value, $value2) = @_;
+
+    my $count = 0;
+    if($type eq 'host') {
+        my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', 1, undef, 1), name => $value ]);
+        $count = 1 if defined $hosts && scalar @{$hosts} > 0;
+    }
+    elsif($type eq 'service') {
+        my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', 1, undef, 1), description => $value, host_name => $value2 ]);
+        $count = 1 if defined $services && scalar @{$services} > 0;
+    }
+    else {
+        $c->error("unknown auth role check: ".$type);
+        return 0;
+    }
+    $count = 0 unless defined $count;
+    _debug("count: ".$count);
+    if($count > 0) {
+        _debug("_check_cmd_line_permissions('".$type."', '".$value."', '".$value2."') -> access granted");
+        return 1;
+    }
+    _debug("_check_cmd_line_permissions('".$type."', '".$value."', '".$value2."') -> access denied");
     return 0;
 }
 

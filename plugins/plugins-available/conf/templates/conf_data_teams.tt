@@ -343,6 +343,9 @@
                               <input type="checkbox" name="hst_commands" id="hst_commands" [% IF p.hst_commands %] checked[% END %] [% IF scripted %] disabled[% END %]><label for="hst_commands" class="ml-0 mr-2">hosts</label>
                               <input type="checkbox" name="svc_commands" id="svc_commands"[% IF p.svc_commands %] checked[% END %] class="js-services-disable" [% IF scripted %] disabled[% END %]><label for="svc_commands" class="ml-0 js-services-disable">services</label>
                             </div>
+                            <div title="user can see the expanded command line on the host/service ext details page.">
+                              <input type="checkbox" name="show_command_line" id="show_command_line"[% IF p.exists("show_command_line") && p.show_command_line %] checked[% END %] [% IF scripted %] disabled[% END %]><label for="show_command_line" class="ml-1">show command line</label>
+                            </div>
                             <input
                               type="text"
                               name="allowed_commands"

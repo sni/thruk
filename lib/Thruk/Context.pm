@@ -549,6 +549,15 @@ sub check_cmd_permissions {
     return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_cmd_permissions(@_));
 }
 
+=head2 check_show_command_line_permissions
+
+$c->check_show_command_line_permissions(<type>, ...)
+
+=cut
+sub check_show_command_line_permissions {
+    return(defined $_[0]->{'user'} && $_[0]->{'user'}->check_show_command_line_permissions(@_));
+}
+
 =head2 cache
 
 $c->cache()

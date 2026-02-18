@@ -220,7 +220,7 @@
   </div>
 </div>
 
-[% IF show_full_commandline == 2 || ( show_full_commandline == 1 && c.check_user_roles('authorized_for_configuration_information') ) %]
+[% IF c.check_show_command_line_permissions("service", service.description, service.host_name) %]
   <div class="card mt-5 w-full">
     <div class="head justify-between">
       <h3>Configuration Information</h3>

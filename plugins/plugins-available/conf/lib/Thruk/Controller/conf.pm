@@ -826,7 +826,7 @@ sub _process_teams_page {
             return $c->redirect_to('conf.cgi?sub=teams&action=edit&team='.$old_name);
         }
 
-        Thruk::Utils::IO::json_lock_store($new_file, $team);
+        Thruk::Utils::IO::json_lock_store($new_file, $team, { pretty => 1 });
 
         Thruk::Utils::set_message( $c, 'success_message', 'Team saved successfully.' );
         return $c->redirect_to('conf.cgi?sub=teams&action=edit&team='.$new_name);
@@ -873,6 +873,7 @@ sub _parse_teams_permission {
         hst_commands
         svc_commands
         allowed_commands
+        show_command_line
     /;
 
     for my $attr (@attributes) {
