@@ -66,14 +66,14 @@ sub get_auth_filter {
             return(Thruk::Utils::combine_filter(
                 '-or', [
                     {'name' => '' }, # match nothing
-                    @{_permission_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
+                    @{permissions_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
                 ],
             ));
         }
         return(Thruk::Utils::combine_filter(
             '-or', [
                 $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
-                @{_permission_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
+                @{permissions_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
             ],
         ));
     }
@@ -88,20 +88,27 @@ sub get_auth_filter {
         if(!$cmd_permissions && !$show_cmdline_permissions && !$strict && $c->check_user_roles('authorized_for_all_services')) {
             return();
         }
+        if($show_cmdline_permissions) {
+            return(Thruk::Utils::combine_filter(
+                '-or', [
+                    {'description' => '' }, # match nothing
+                    @{permissions_filter($c, 'services', undef, $show_cmdline_permissions)},
+                ],
+            ));
+        }
         if($c->config->{'use_strict_host_authorization'}) {
             return(Thruk::Utils::combine_filter(
                 '-or', [
-                    {'contacts' => { '>=' => $user_name }},
-                    $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
-                    @{_permission_filter($c, 'services', $cmd_permissions, $show_cmdline_permissions)},
+                    (!$cmd_permissions || $can_submit_commands) ? {'contacts' => { '>=' => $user_name }} : {'description' => '' },
+                    @{permissions_filter($c, 'services', $cmd_permissions)},
                 ],
             ));
         } else {
             return(Thruk::Utils::combine_filter(
                 '-or', [
-                    $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
-                    $can_submit_commands ? {'host_contacts' => { '>=' => $user_name }} : {'name' => '' },
-                    @{_permission_filter($c, 'services', $cmd_permissions, $show_cmdline_permissions)},
+                    (!$cmd_permissions || $can_submit_commands) ? {'contacts' => { '>=' => $user_name }} : {'description' => '' },
+                    (!$cmd_permissions || $can_submit_commands) ? {'host_contacts' => { '>=' => $user_name }} : {'description' => '' },
+                    @{permissions_filter($c, 'services', $cmd_permissions)},
                 ],
             ));
         }
@@ -243,7 +250,15 @@ sub get_auth_filter {
 }
 
 ##############################################
-sub _permission_filter {
+
+=head2 permissions_filter
+
+  my $filter = permissions_filter($c, $type, $cmd_permissions, $show_cmdline_permissions);
+
+returns filter for permissions from teams permissions
+
+=cut
+sub permissions_filter {
     my($c, $type, $cmd_permissions, $show_cmdline_permissions) = @_;
 
     die("unknown type") if($type ne 'hosts' && $type ne 'services');

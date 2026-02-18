@@ -750,6 +750,20 @@ sub combine_filter {
         }
     }
 
+    # strip of non-matching filter placeholders from -or
+    if($operator eq '-or' && scalar @{$filter} > 1) {
+        #  { 'description' => '' },
+        if(ref $filter->[0] eq 'HASH' && scalar keys %{$filter->[0]} == 1) {
+            my $key = (keys %{$filter->[0]})[0];
+            if($key eq 'name' || $key eq 'description') {
+                if($filter->[0]->{$key} eq '') {
+                    shift @{$filter};
+                    return combine_filter($operator, $filter);
+                }
+            }
+        }
+    }
+
     return { $operator => $filter };
 }
 

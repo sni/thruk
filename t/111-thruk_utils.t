@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 12;
+plan tests => 14;
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Filter');
@@ -51,3 +51,26 @@ is($res, "0s", "duration is ok");
 
 $res = Thruk::Utils::Filter::duration(-0.212, 4);
 is($res, "0s", "duration is ok");
+
+################################################################################
+{
+    # -or combined
+    my $f = (Thruk::Utils::combine_filter(
+        '-or', [
+            {'description' => 'h1' },
+            {'description' => 'h2' },
+        ],
+    ));
+    is_deeply($f,  { '-or' => [ { 'description' => 'h1' }, { 'description' => 'h2' } ] }, "got expected filter");
+
+    # strip unused filter from -or
+    my $f = (Thruk::Utils::combine_filter(
+        '-or', [
+            {'description' => '' }, # match nothing
+            {'description' => 'test' },
+        ],
+    ));
+    is_deeply($f, {'description' => 'test'}, "got expected filter");
+};
+
+################################################################################

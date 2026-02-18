@@ -513,11 +513,25 @@ sub check_permissions {
     my $count = 0;
     if($type eq 'host') {
         return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_host_commands' : 'authorized_for_all_hosts');
+        if($cmd_permissions && !$self->get('can_submit_commands')) {
+            my $tst_filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts', 1);
+            if(!defined $tst_filter || scalar @{$tst_filter} == 0) {
+                # no filter means no permissions, so simply return instead of a useless db query
+                return 0;
+            }
+        }
         my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', $value2, $cmd_permissions), name => $value ]);
         $count = 1 if defined $hosts && scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
         return 1 if $self->check_user_roles($cmd_permissions ? 'authorized_for_all_service_commands' : 'authorized_for_all_services');
+        if($cmd_permissions && !$self->get('can_submit_commands')) {
+            my $tst_filter = Thruk::Utils::Auth::permissions_filter($c, 'services', 1);
+            if(!defined $tst_filter || scalar @{$tst_filter} == 0) {
+                # no filter means no permissions, so simply return instead of a useless db query
+                return 0;
+            }
+        }
         my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', $value3, $cmd_permissions), description => $value, host_name => $value2 ]);
         $count = 1 if defined $services && scalar @{$services} > 0;
     }
@@ -696,10 +710,20 @@ sub _check_cmd_line_permissions {
 
     my $count = 0;
     if($type eq 'host') {
+        my $tst_filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts', undef, 1);
+        if(!defined $tst_filter || scalar @{$tst_filter} == 0) {
+            # no filter means no permissions, so simply return instead of a useless db query
+            return 0;
+        }
         my $hosts = $c->db->get_host_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts', 1, undef, 1), name => $value ]);
         $count = 1 if defined $hosts && scalar @{$hosts} > 0;
     }
     elsif($type eq 'service') {
+        my $tst_filter = Thruk::Utils::Auth::permissions_filter($c, 'services', undef, 1);
+        if(!defined $tst_filter || scalar @{$tst_filter} == 0) {
+            # no filter means no permissions, so simply return instead of a useless db query
+            return 0;
+        }
         my $services = $c->db->get_service_names(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services', 1, undef, 1), description => $value, host_name => $value2 ]);
         $count = 1 if defined $services && scalar @{$services} > 0;
     }
