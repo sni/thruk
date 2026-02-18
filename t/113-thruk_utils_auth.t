@@ -32,11 +32,11 @@ ok($c->user, "user object exists");
     }];
     my $expected_hst_filter = [{ 'name' => { '!=' => '' } }];
     $c->user->{'permissions'} = $permissions;
-    my $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts');
+    my $filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts');
     is_deeply($filter, $expected_hst_filter, "hosts filter is correct");
 
     # host cmd filter
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts', 1);
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts', 1);
     is_deeply($filter, [], "hosts cmd filter is correct");
 
     my $expected_svc_filter = [{
@@ -50,11 +50,11 @@ ok($c->user, "user object exists");
                     }
                 ]
     }];
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'services');
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'services');
     is_deeply($filter, $expected_svc_filter, "hosts filter is correct");
 
     # service cmd filter
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'services', 1);
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'services', 1);
     is_deeply($filter, [], "service filter is correct");
 };
 
@@ -72,22 +72,22 @@ ok($c->user, "user object exists");
     }];
     my $expected_hst_filter = [ { 'custom_variables' => { '=' => 'TEST 1' } } ];
     $c->user->{'permissions'} = $permissions;
-    my $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts');
+    my $filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts');
     is_deeply($filter, $expected_hst_filter, "hosts filter is correct");
 
     # host cmd filter
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'hosts', 1);
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'hosts', 1);
     is_deeply($filter, [], "hosts cmd filter is correct");
 
     my $expected_svc_filter = [{
         '-and' => [{ 'host_custom_variables' => { '=' => 'TEST 1' } },
                    { 'custom_variables'      => { '=' => 'TEST 2' } } ],
     }];
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'services');
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'services');
     is_deeply($filter, $expected_svc_filter, "hosts filter is correct");
 
     # service cmd filter
-    $filter = Thruk::Utils::Auth::_permission_filter($c, 'services', 1);
+    $filter = Thruk::Utils::Auth::permissions_filter($c, 'services', 1);
     is_deeply($filter, [], "service filter is correct");
 };
 

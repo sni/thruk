@@ -64,7 +64,7 @@ is($res, "0s", "duration is ok");
     is_deeply($f,  { '-or' => [ { 'description' => 'h1' }, { 'description' => 'h2' } ] }, "got expected filter");
 
     # strip unused filter from -or
-    my $f = (Thruk::Utils::combine_filter(
+    $f = (Thruk::Utils::combine_filter(
         '-or', [
             {'description' => '' }, # match nothing
             {'description' => 'test' },
