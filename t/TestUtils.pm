@@ -1454,6 +1454,39 @@ sub js_eval_extracted {
 }
 
 #################################################
+sub is_deeply_diff {
+    my ($got, $expected, $name) = @_;
+
+    # Fast path: Test::More already knows they match
+    if (is_deeply($got, $expected, $name)) {
+        return 1;
+    }
+
+    # Otherwise produce a structural diff
+    local $Data::Dumper::Sortkeys = 1;
+    local $Data::Dumper::Indent   = 2;
+    local $Data::Dumper::Terse    = 1;
+
+    my $got_dump      = Dumper($got);
+    my $expected_dump = Dumper($expected);
+
+    diag("--- GOT");
+    diag($got_dump);
+    diag("--- EXPECTED");
+    diag($expected_dump);
+
+    return 0;
+}
+
+# replace is_deeply with our own version which shows the diff if the test fails
+{
+    no warnings 'redefine';
+    no strict 'refs';
+    *{'Test::More::is_deeply'} = \&is_deeply_diff;
+    *{'main::is_deeply'} = \&is_deeply_diff;
+};
+
+#################################################
 END {
     our $cookie_file;
     unlink($cookie_file) if defined $cookie_file;
