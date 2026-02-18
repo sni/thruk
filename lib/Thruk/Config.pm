@@ -748,7 +748,7 @@ sub set_default_config {
         my $ssl         = $site_config->{'CONFIG_APACHE_MODE'};
         my $proto     = $ssl eq 'ssl' ? 'https' : 'http';
         $config->{'omd_local_site_url'} = sprintf("%s://%s:%d/%s", $proto, "127.0.0.1", $siteport, $site);
-        # bypass system reverse proxy for restricted cgi for permormance and locking reasons
+        # bypass system reverse proxy for restricted cgi for performance and locking reasons
         if($config->{'cookie_auth_restricted_url'} && $config->{'cookie_auth_restricted_url'} =~ m|^https?://localhost/$site/thruk/cgi\-bin/restricted\.cgi$|mx) {
             $config->{'cookie_auth_restricted_url'} = $config->{'omd_local_site_url'}.'/thruk/cgi-bin/restricted.cgi';
         }
@@ -992,7 +992,7 @@ sub get_git_info {
 
   get_debug_details($c)
 
-return details useful for debuging
+return details useful for debugging
 
 =cut
 
@@ -1091,7 +1091,7 @@ sub get_user {
     # If we are the user we want to be we use getgroups
     # Which is fast and non intrusive against ldap/nis
     if($cuid eq $uid) {
-        # Get the grous from getgroups
+        # Get the groups from getgroups
         my @gids = POSIX::getgroups;
         foreach my $egid (@gids) {
             # Add zero to convert egid to an int like it is in the old function
@@ -1230,7 +1230,7 @@ sub _parse_rows {
         # simple key / value pairs
         my($k,$v) = _split_value($line);
         if(!defined $v) {
-            die("unknow config entry: ".$line." in ".$file.":".$cur_line);
+            die("unknown config entry: ".$line." in ".$file.":".$cur_line);
         }
         if(substr($v,0,1) eq '"') {
             $v =~ s|^"(.*)"$|$1|gmxo;
@@ -1396,7 +1396,7 @@ sub merge_cgi_cfg {
             my $cgi_list    = Thruk::Base::comma_separated_list($cfg->{$key});
             my $tlocal_list = Thruk::Base::comma_separated_list($c->config->{"_".$key});
             $c->config->{$key} = _merge_list($cgi_list, $tlocal_list);
-            # reset to empy by thruk_load.d
+            # reset to empty by thruk_load.d
             if(defined $c->config->{"_".$key} && scalar @{$tlocal_list} == 0) {
                 $c->config->{$key} = [];
             }
@@ -1513,8 +1513,8 @@ sub merge_sub_config {
                     # first key is agent name
                     for my $agentname (sort keys %{$block}) {
                         $config->{$key}->{$agentname} = {} unless $config->{$key}->{$agentname};
-                        for my $subkey (sort keys %{$block->{$agentname}}) {
-                            $config->{$key}->{$agentname}->{$subkey} = _merge_all($config->{$key}->{$agentname}->{$subkey}, $block->{$agentname}->{$subkey});
+                        for my $sub_key (sort keys %{$block->{$agentname}}) {
+                            $config->{$key}->{$agentname}->{$sub_key} = _merge_all($config->{$key}->{$agentname}->{$sub_key}, $block->{$agentname}->{$sub_key});
                         }
                     }
                 }

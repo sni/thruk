@@ -553,7 +553,7 @@ ex.:
 
 Allow specific hosts to bypass the csrf protection which
 requires a generated token to submit certain post requests,
-for example to send commands. Use comma seperated list or
+for example to send commands. Use comma separated list or
 multiple configuration attributes. Wildcards are allowed.
 
 ex.:
@@ -578,7 +578,7 @@ ex.:
 
 === user_password_min_length
 
-Sets the minimum lenght a password must have for users changing their passwords.
+Sets the minimum length a password must have for users changing their passwords.
 Admins still can change the password any way they want in the config tool. This
 just affects the user password reset.
 
@@ -589,7 +589,7 @@ ex.:
 
 === basic_auth_enabled
 {% include new_since.ad version="2.36" %}
-Show the basic auth user / password formular. Enabled when using cookie auth.
+Show the basic auth user / password form. Enabled when using cookie auth.
 You may want to set this to 0 if you only use oauth2 authentication.
 Set it to 2, if you want to only show the oauth2 authentication but also have
 a toggle button, which can display the basic auth login form as a fallback.
@@ -647,7 +647,7 @@ ex.:
 
 === slow_page_log_threshold
 
-If a page takes longer to render than this amount of seonds, a
+If a page takes longer to render than this amount of seconds, a
 profile will be logged. Set to 0 to disable logging completely.
 
 ex.:
@@ -671,7 +671,7 @@ ex.:
 
 === audit_logs
 
-Defines an optional seperate logfile with some extra audit relevant log
+Defines an optional separate logfile with some extra audit relevant log
 entries. The different categories can be used to enable/disabled specific
 messages. The `logfile` can use strftime format pattern to for ex.: add the
 timestamp to the logfile.
@@ -783,7 +783,7 @@ ex.:
 
 Changes the path to your logo images. Default is
 $url_prefix+'thruk/themes/'+$current_theme+'/images/logos/' and
-therefor relative to the current selected theme. You could set a fixed
+therefore relative to the current selected theme. You could set a fixed
 path here.
 Like usual, paths starting with a / will be absolute from your
 webserver root directory. Paths starting without a / will be relative
@@ -855,7 +855,7 @@ ex.:
 
 === search_long_plugin_output
 Search long_plugin_output in default search, ex. from the side navigation.
-It is enabled by default, but can have significat performance impact in larger
+It is enabled by default, but can have significant performance impact in larger
 setups.
 
 ex.:
@@ -1068,7 +1068,7 @@ ex.:
 
 
 === datetime_format
-Default timeformat. Use POSIX format.
+Default time format. Use POSIX format.
 
 ex.:
 
@@ -1076,7 +1076,7 @@ ex.:
 
 
 === datetime_format_long
-Default long timeformat.
+Default long time format.
 
 ex.:
 
@@ -1084,7 +1084,7 @@ ex.:
 
 
 === datetime_format_log
-Default log timeformat.
+Default log time format.
 
 ex.:
 
@@ -1092,7 +1092,7 @@ ex.:
 
 
 === datetime_format_trends
-Default trends timeformat.
+Default trends time format.
 
 ex.:
 
@@ -1100,7 +1100,7 @@ ex.:
 
 
 === datetime_format_today
-Default timeformat for todays date. Can be useful if you want a
+Default time format for todays date. Can be useful if you want a
 shorter date format for today.
 
 ex.:
@@ -1317,7 +1317,7 @@ ex.:
 
 
 === status_color_background
-Color complete status line with status colour or just the status
+Color complete status line with status color or just the status
 itself.
 
 ex.:
@@ -1627,7 +1627,7 @@ ex.:
 
 
 === hide_passive_icon
-Normally passive checks whould be displayed with a passive icon
+Normally passive checks would be displayed with a passive icon
 if their last result is passive.
 With this option, passive icon will be hidden in status details.
 
@@ -1659,7 +1659,7 @@ available / down / disabled sites. The 'compact' panel will also
 automatically be used if you use sections.
 With more than 50 backends, the 'collapsed' panel will be selected in 'auto' mode.
 With more than 100 backends, the 'tree' panel will be selected in 'auto' mode.
-Set sitepanel to list/compact/collapsed/tree/auto/off to change the default behaviour.
+Set sitepanel to list/compact/collapsed/tree/auto/off to change the default behavior.
 
 ex.:
 
@@ -1768,7 +1768,7 @@ ex.:
 
 === logcache
 Enables caching logfiles for faster access and less memory usage for
-the naemon process. Cache supports only Mysql. Prefered
+the naemon process. Cache supports only Mysql. Preferred
 type is Mysql. Format is a Mysql connection string like
 'mysql://hostname:port/db'. Using a cache dramatically decreases cpu and
 memory usage of Thruk and Naemon when accessing logfiles, for example when
@@ -1839,11 +1839,11 @@ ex.:
   logcache_compact_duration = 10w
 
 === logcache_auto_bypass
-Define wether logcache will be bypassed if the start / end time of a log querys
+Define wether logcache will be bypassed if the start / end time of a log queries
 is outside the range of the cache.
 
     - `0`: never, only use cached logs and return empty result if outside cached range. (default)
-    - `1`: partially, bypass logcache if start and end are outside cache range, otherwise return partialy result.
+    - `1`: partially, bypass logcache if start and end are outside cache range, otherwise return partially result.
     - `2`: always, bypass logcache if either start or end are outside the cache range.
 
 ex.:
@@ -1858,7 +1858,7 @@ script which is then responsible for updating the logcache database.
 This might be useful if you pull the logfiles from a ndo/ido database
 and then manually import those files.
 
-There are some useful enviromenet variables set before the script is started:
+There are some useful environment variables set before the script is started:
 
   - standard macros as listed in link:cli.html#_environment-variables[CLI Environment]
   - THRUK_BACKENDS is a semicolon separated list of the selected backends.
@@ -1872,7 +1872,7 @@ ex.:
 
 === logcache_fetchlogs_command
 The fetchlogs command is very similar to the `logcache_import_command` but it
-replaces only the the fetching logs part from the bultin logcache.
+replaces only the the fetching logs part from the builtin logcache.
 This script should return the plain text logfiles on stdout (standard
 naemon/nagios logfile format). This might be useful if you pull the logfiles
 from a ndo/ido database.
@@ -1885,7 +1885,7 @@ When having mixed backend cores, this command can be overridden in the peer conf
 
 See `./support/icinga2_ido_fetchlogs.sh` for an example.
 
-There are some useful enviromenet variables set before the script is started to
+There are some useful environment variables set before the script is started to
 control which logs should be fetched:
 
   - REMOTE_USER contains the current user.
@@ -1906,7 +1906,7 @@ Percona XtraDB Cluster or Galera Cluster it is a good idea to avoid locks and
 optimize/repair table statements since they are not properly replicated.
 
 Especially in Percona XtraDB Cluster > 5.6 the default setting of pxc_strict_mode
-will disable locks all togheter.
+will disable locks all together.
 
 This setting will make the logcache work in that case. More information about
 pxc_strict_mode available here:
@@ -2128,11 +2128,11 @@ ex.:
       auth_url      = https://oauthserver/oauth2/v1/authorize     # Initial authenticator redirect url
       token_url     = https://oauthserver/oauth2/v1/token         # URL to exchange code into token
       api_url       = https://oauthserver/oauth2/v1/userinfo      # API endpoint to retrieve user information from
-      login_field   = login                                       # Hash key from userinfo to get the actual username from. If not set, Thruk will try 'login', then 'email'
-      groups_field  = groups                                      # Hash key from userinfo to fetch teams from. If not set, Thruk will try 'groups'
+      login_field   = login                                       # Hash key from user info to get the actual username from. If not set, Thruk will try 'login', then 'email'
+      groups_field  = groups                                      # Hash key from user info to fetch teams from. If not set, Thruk will try 'groups'
       #enable_pkce  = 0                                           # enable oauth 2.1 pkce workflow if set to 1. Disabled by default
       #https_proxy  = http://<server>:<port>                      # optional proxy to use for accessing URLs from above
-      #ssl_verify_hostnames = 1                                   # skip ssl hostname verfication when set to 0
+      #ssl_verify_hostnames = 1                                   # skip ssl hostname verification when set to 0
       #autologin    = 0                                           # automatically select and submit this provider when set to 1
     </provider>
   </auth_oauth>
@@ -2280,7 +2280,7 @@ from the passive service to the active agent service.
 * Only passive services will be translated
 
 In this example, all passive check_mk checks will trigger the active agent check
-and therefor allow you to reschedule passive checks directly from the problems
+and therefore allow you to reschedule passive checks directly from the problems
 page.
 
 ex.:
@@ -2442,7 +2442,7 @@ without newlines and all newlines from the example have to be removed in order
 to try that. But its more readable this way. You can also use a trailing
 backslash to write the menus on multiple lines.
 
-Sample menu with two items and a seperator:
+Sample menu with two items and a separator:
 
 .....
 {% raw %}
@@ -2477,14 +2477,14 @@ A menu has the following attributes:
                         and `{% raw %}{{remote_user}}{% endraw %}` for the user name. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
                         An Icon can be either:
                           - a path to an image
-                          - an unicon icon when startin with `uil-` (link:https://iconscout.com/unicons/explore/line[list of unicon icons])
-                          - a font-awesome icon when startin with `fa-` (link:https://fontawesome.com/search?o=r&m=free&s=solid[list of font awesome icons])
+                          - an unicon icon when starting with `uil-` (link:https://iconscout.com/unicons/explore/line[list of unicon icons])
+                          - a font-awesome icon when starting with `fa-` (link:https://fontawesome.com/search?o=r&m=free&s=solid[list of font awesome icons])
      ** `title`         title of the menu, will be display on mouse over.
      ** `hidden`        menu will be hidden if true.
      ** `menu`          the actual menu definition as a list '[...]' of sub items.
      ** `...`           arbitrary attributes will be used as attributes of the menu icon html element.
 
-A single `"-"` item can be used as a menu item seperator.
+A single `"-"` item can be used as a menu item separator.
 
 
 The menu item can have the following attributes:
@@ -2492,11 +2492,11 @@ The menu item can have the following attributes:
      ** `icon`          icon for the menu item. You can use `{% raw %}{{theme}}{% endraw %}` as placeholder in the url. Within OMD, the the site variable `{% raw %}{{site}}{% endraw %}` must be prepended.
                         An Icon can be either:
                           - a path to an image
-                          - an unicon icon when startin with `uil-` (link:https://iconscout.com/unicons/explore/line[list of unicon icons])
-                          - a font-awesome icon when startin with `fa-` (link:https://fontawesome.com/search?o=r&m=free&s=solid[list of font awesome icons])
+                          - an unicon icon when starting with `uil-` (link:https://iconscout.com/unicons/explore/line[list of unicon icons])
+                          - a font-awesome icon when starting with `fa-` (link:https://fontawesome.com/search?o=r&m=free&s=solid[list of font awesome icons])
      ** `label`         label name of the menu item.
      ** `menu`          list of sub menu items.
-     ** `action`        url or action which will be run or openend. This can either be a
+     ** `action`        url or action which will be run or opened. This can either be a
                         http(s) link or a serveraction in the form server://actionname/argument1/argument2/...
                         the actionname must be a reference to a command from 'action_menu_actions'.
                         You may use `{% raw %}{{macros}}{% endraw %}` here too. Also javascript: links are valid,
@@ -2523,7 +2523,7 @@ The following macros can be used in the icon, action, title and label attribute.
 
 ==== action menu variables
 
-The following variables can be used in the action attribute when specifing a server action or a http(s) url.
+The following variables can be used in the action attribute when specifying a server action or a http(s) url.
 
      ** `{% raw %}$HOSTNAME${% endraw %}`        contains the host name
      ** `{% raw %}$HOSTADDRESS${% endraw %}`     contains the host address
@@ -2565,8 +2565,8 @@ Sample icons with two action icons:
 
 Menu files must have the .json file extension and contain the raw json
 definition of the action menu. One menu per file. The menu can be referenced
-by the filename later. For example if you filename is `/etc/thruk/action_menus/somemenu.json` then
-you can access the menu by the name `somemenu`.
+by the filename later. For example if you filename is `/etc/thruk/action_menus/some_menu.json` then
+you can access the menu by the name `some_menu`.
 
 
 *Variant 2* - reference a menu from an external file:
@@ -2577,7 +2577,7 @@ you can access the menu by the name `somemenu`.
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu      = file:///etc/thruk/standardmenu.json
+        standard_menu      = file:///etc/thruk/standard_menu.json
     </action_menu_items>
 {% endraw %}
 .....
@@ -2592,7 +2592,7 @@ Menu files must contain the raw json definition of the action menu.
   *thruk_local.conf:*
 
     <action_menu_items>
-        standardmenu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+        standard_menu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
                         "title": "test title",\
                         "menu":[\
                            {"icon":"uil-redo",\
@@ -2607,7 +2607,7 @@ Menu files must contain the raw json definition of the action menu.
     define host {
       host_name            localhost
       ...
-      _THRUK_ACTION_MENU   standardmenu
+      _THRUK_ACTION_MENU   standard_menu
     }
 {% endraw %}
 .....
@@ -2640,7 +2640,7 @@ action menu.
 This folder may also contain .js files since version 2.24.
 
 Both examples are equivalent and result in the same menu assuming there is
-a `/etc/thruk/action_menus/hostmenu.json` file.
+a `/etc/thruk/action_menus/host_menu.json` file.
 
 .....
 {% raw %}
@@ -2651,14 +2651,14 @@ a `/etc/thruk/action_menus/hostmenu.json` file.
 .....
 {% raw %}
     <action_menu_items>
-        hostmenu      = file:///etc/thruk/action_menus/hostmenu.json
+        host_menu     = file:///etc/thruk/action_menus/host_menu.json
     </action_menu_items>
 {% endraw %}
 .....
 
 === action_menu_apply
 {% include new_since.ad version="1.86" %}
-With apply rules adding action menus is made easy and independant from the actual
+With apply rules adding action menus is made easy and independent from the actual
 object configuration. You can setup a few regular expression rules which then add
 the corresponding action menu to matching hosts and services. The syntax is
 `menu_name = Hostpattern;Servicepattern`
@@ -2666,13 +2666,13 @@ the corresponding action menu to matching hosts and services. The syntax is
 ex.:
 
   <action_menu_apply>
-    hostmenu    = .*;$             # matches all hosts only
-    servicemenu = .*;.+$           # matches all services on all hosts
-    specialmenu = ^Host;Service$   # matches an exact service on one host only
-    cpu_menu    = .*;CPU           # matches all services starting with 'CPU'
-    hostmenu    = ^Host            # matches all hosts starting with 'Host' (incl. services)
-    demomenu    = ^Demo;.*$        # matches all services on the 'Demo' host
-    demomenu    = ^Test;           # a menu name can be used multiple times
+    host_menu    = .*;$             # matches all hosts only
+    service_menu = .*;.+$           # matches all services on all hosts
+    special_menu = ^Host;Service$   # matches an exact service on one host only
+    cpu_menu     = .*;CPU           # matches all services starting with 'CPU'
+    host_menu    = ^Host            # matches all hosts starting with 'Host' (incl. services)
+    demo_menu    = ^Demo;.*$        # matches all services on the 'Demo' host
+    demo_menu    = ^Test;           # a menu name can be used multiple times
   </action_menu_apply>
 
 
@@ -2681,7 +2681,7 @@ ex.:
 {% include new_since.ad version="1.86" %}
 Defines the available server commands from action_menu_items. Key/Value pair of the name
 of the script and the corresponding command. The command has to be a full path program
-and *not* just a shell command. Therefor you do not have to use quotes because the arguments
+and *not* just a shell command. Therefore you do not have to use quotes because the arguments
 are not interpreted by a shell before execution due to security reasons.
 
 It is possible to use most standard link:macros.html[Macros] and the username is available in the `REMOTE_USER`
@@ -2813,7 +2813,7 @@ for details.
                         that there is a backend. Note that this implies
                         one extra backend request per page.
                         (**DEPRECATED** - please do not use)
-     ** `authoritative` When having multiple backends, set this to true to gather autorization information only from this backend(s).
+     ** `authoritative` When having multiple backends, set this to true to gather authorization information only from this backend(s).
      ** `active`        Backend will be skipped as if it's not configured at all if set to 0.
      ** `section`       to group backends/sites by different sections, enter a
                         section.
@@ -2852,7 +2852,7 @@ for details.
                               adding "# thruk: readonly" on top of a
                               object config file.
         *** `obj_dir`         Path to your objects. Enables the objects editor.
-                              Reads all *.cfg from this folder and all subfolders.
+                              Reads all *.cfg from this folder and all subfolder.
                               (only needed when not using 'core_conf')
         *** `obj_file`        Path to a single objects file. Enables the objects
                               editor. Both 'obj_dir' and 'obj_file' can be
@@ -2865,7 +2865,7 @@ for details.
         *** `disable`         Set to `1` to disable config tool for this backend (ex.: when detected automatically for http backends)
      ** `lmd_options`
         *** `flags`           flags to passthrough to lmd
-        *** `...`             any attribute will be just passed into the connection seciont of the lmd.ini, see example below.
+        *** `...`             any attribute will be just passed into the connection section of the lmd.ini, see example below.
 
 ex.:
 
@@ -3037,7 +3037,7 @@ lists.
 Use `obj_readonly` regular expressions which will be appended to the backend
 specific readonly patterns from the Component Backend peer configtool. The same
 effect can be achieved by adding _"# thruk: readonly"_ on top of a object config file.
-Readdetails on the link:/documentation/configuration.html#peer[configtool section].
+Read details on the link:/documentation/configuration.html#peer[configtool section].
 
 === default_keys_host
 
@@ -3080,7 +3080,7 @@ ex.:
 
 
 === default_dashboard
-Contains a comma seperated list of dashboards you want to show by default.
+Contains a comma separated list of dashboards you want to show by default.
 
 === readonly
 Make panorama dashboard readonly. The user cannot add, remove or
@@ -3121,7 +3121,7 @@ Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Serv
 
   <Component Thruk::Plugin::Panorama>
     ...
-    wms_provider = <providername>   = ["<wms-ur>l", {"layers": "<layername>"}", {"properties": "..."}]
+    wms_provider = <providername>   = ["<wms-url>", {"layers": "<layername>"}", {"properties": "..."}]
   </Component>
 
 Properties can be set according to: http://dev.openlayers.org/docs/files/OpenLayers/Layer-js.html
@@ -3170,7 +3170,7 @@ for further information.
 === pnp_export
 pnp_export defines a script which exports a PNP4nagios graph into a
 local file which then can be included in reports. PNP4nagios images
-are either exported localy by executing php or remotly fetched with
+are either exported locally by executing php or remotely fetched with
 wget. This works automatically in OMD, but only for local sites of
 course. To make this work without OMD, set the variable 'PNP_ETC' and
 'PNP_INDEX' in the ~/.thruk file of your webserver. The PNP4nagios url
@@ -3319,7 +3319,7 @@ so you don't have to select custom first. Syntax is <name>;<function>
 
 === worker
 Set the number of parallel business process calculations. Setting it
-to 1 disables parallelization. Setting it to 0 trys to autodetect a
+to 1 disables parallelization. Setting it to 0 tries to autodetect a
 suitable value.
 
 Automatic bp calculations will be disabled if set to zero.
@@ -3380,8 +3380,8 @@ contact names as they show up in the Thruk interface.
 === Groups
 The groups directive overrides specific config settings for one group only.
 Group overrides are applied in alphabetical order. For example, if you have
-a user in group 'Admins' and in 'Superadmins', he will get all overrides from
-both groups, but the 'Admins' overrides will be superseded by the 'Superadmins'.
+a user in group 'Admins' and in 'SuperAdmins', he will get all overrides from
+both groups, but the 'Admins' overrides will be superseded by the 'SuperAdmins'.
 
 ex.:
 
