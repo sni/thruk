@@ -27,7 +27,7 @@ use Thruk::Utils::Status ();
 
 =head2 get_auth_filter
 
-  my $filter_string = get_auth_filter('hosts');
+  my $filter = get_auth_filter('hosts');
 
 returns a filter which can be used for authorization
 

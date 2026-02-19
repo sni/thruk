@@ -537,8 +537,7 @@ sub _process_host_page {
 
     # generate command line
     if(defined $host && $c->check_show_command_line_permissions("host", $host->{'name'})) {
-        my $command            = $c->db->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
-        $c->stash->{'command'} = $command;
+        $c->stash->{'command'} = $c->db->expand_command('host' => $host, 'source' => $c->config->{'show_full_commandline_source'} );
     }
 
     # object source

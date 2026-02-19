@@ -125,7 +125,7 @@ sub summary_set_group_defaults {
 
   summary_add_host_stats($prefix, $group, $host)
 
-count host statstics for this host
+count host statistics for this host
 
 =cut
 sub summary_add_host_stats {
