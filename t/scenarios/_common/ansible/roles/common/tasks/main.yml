@@ -68,8 +68,9 @@
     content: |
       #!/usr/bin/env bash
       echo "**************************"
-      echo -n "https://"
-      ip a | grep inet | grep -v inet6 | grep -v 127.0. | awk '{ print $2 }' | sed -e 's/\/.*/\/demo\//'
+      for IP in $(ip a | grep inet | grep -v inet6 | grep -v 127.0. | awk '{ print $2 }' | sed -e 's/\/.*/\/demo\//'); do
+        echo "https://$IP"
+      done
       echo "**************************"
 
       su - {{ site }}
