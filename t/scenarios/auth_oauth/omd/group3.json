@@ -12,7 +12,14 @@
       "services": [ "Https", "Disk /" ],
       "with_services": "2",
       "svc_commands": "1",
-      "allowed_commands": "7"
+      "allowed_commands": "7",
+      "show_command_line": "1"
+    },
+    {
+      "hosts" : ["*"],
+      "services" : ["Ping"],
+      "services_op" : "=",
+      "with_services" : "2"
     }
   ]
 }

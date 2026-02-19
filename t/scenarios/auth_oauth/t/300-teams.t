@@ -7,7 +7,7 @@ BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
-    plan tests => 152;
+    plan tests => 257;
 }
 
 ###############################################################################
@@ -85,14 +85,62 @@ BEGIN {
     ###########################################################################
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/status.cgi?style=detail',
-        'like'   => ['testuser', 'Https', 'Disk /' ],
-        'unlike' => ['Zombie', 'Ping' ],
+        'like'   => ['testuser', 'Https', 'Disk /', 'Ping' ],
+        'unlike' => ['Zombie', 'Load' ],
     );
 
     ###########################################################################
+    # _HOST_: no command permissions
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/extinfo.cgi?type=1&host=localhost',
         'like'   => ['localhost', 'Host Information', 'does not have permissions to execute commands' ],
+    );
+
+    ###########################################################################
+    # Http: service with command permissions
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost&service=Http',
+        'like'   => ['localhost', 'Http', 'Service Information', 'Disable active checks of this service' ],
+        'unlike' => ['Configuration Information', 'lib/monitoring-plugins/check_http' ],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/cmd.cgi?cmd_typ=7&host=localhost&service=Http',
+        'like'   => ['localhost', 'Http', 'Command Description', 'You are requesting to schedule a service check' ],
+    );
+
+    ###########################################################################
+    # Https: service with command permissions and command line
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost&service=Https',
+        'like'   => ['localhost', 'Https', 'Service Information', 'Disable active checks of this service', 'Configuration Information', 'lib/monitoring-plugins/check_http' ],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/cmd.cgi?cmd_typ=7&host=localhost&service=Https',
+        'like'   => ['localhost', 'Https', 'Command Description', 'You are requesting to schedule a service check' ],
+    );
+
+    ###########################################################################
+    # Load: no permission at all for this service
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost&service=Load',
+        'like'   => ['you do not have permission' ],
+        'code'   => 403,
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/cmd.cgi?cmd_typ=7&host=localhost&service=Load',
+        'like'   => ['you are not authorized for this command' ],
+    );
+
+    ###########################################################################
+    # Ping: read-only permission for this service
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost&service=Ping',
+        'like'   => ['localhost', 'Ping', 'Service Information', 'does not have permissions to execute commands' ],
+        'unlike' => ['Disable active checks of this service', 'Configuration Information', 'lib/monitoring-plugins/check_ping' ],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/cmd.cgi?cmd_typ=7&host=localhost&service=Ping',
+        'like'   => ['you are not authorized for this command' ],
     );
 
     ###########################################################################

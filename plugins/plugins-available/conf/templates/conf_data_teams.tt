@@ -165,7 +165,7 @@
                   IF !p.exists("allowed_commands"); p.allowed_commands = "";  END;
                 %]
                 <tr class="js-teams-permissions [% IF hidden %]hidden template[% END %]">
-                  <td class="pb-2 w-full" colspan="2">
+                  <td class="py-2 w-full" colspan="2">
                     <table>
                       <tr>
                         <th class="pl-3 min-w-[120px]">Hostgroups</th>
