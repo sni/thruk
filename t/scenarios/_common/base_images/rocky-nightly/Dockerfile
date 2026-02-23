@@ -8,10 +8,17 @@ RUN /root/ansible/install_role.sh test-config-generator
 RUN /root/ansible/install_role.sh local_tests
 
 # improve startup time of grafana after first launch
-RUN omd config demo set GRAFANA on; omd start demo grafana; omd stop demo; omd config demo set GRAFANA off
+RUN omd config demo set GRAFANA on; \
+	omd start demo grafana; \
+	omd status demo grafana || omd start demo grafana; \
+	omd stop demo; \
+	omd config demo set GRAFANA off
 
 # improve startup time of influxdb after first launch
-RUN omd config demo set INFLUXDB on; omd start demo influxdb; omd stop demo; omd config demo set INFLUXDB off
+RUN omd config demo set INFLUXDB on; \
+	omd start demo influxdb; \
+	omd stop demo; \
+	omd config demo set INFLUXDB off
 
 # show version string
 RUN echo "omd-labs-rocky:nightly:omd version: $(omd version -b)"

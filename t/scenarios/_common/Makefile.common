@@ -157,7 +157,7 @@ pre_prepare:
 prepare: base_images
 	$(MAKE) pre_prepare
 	@echo "### $@: $$(date "+%FT%T.%N")"
-	$(TIMEOUT_CMD) docker compose build
+	$(TIMEOUT_CMD) docker compose build --progress plain
 	mkdir -p ../../../var/tmp && chmod 777 ../../../var/tmp
 	docker compose up --remove-orphans -d
 	docker ps
