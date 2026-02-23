@@ -92,15 +92,15 @@
   <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;">
     <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
     <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
-    <div class="card shadow-float flexcol gap-0 w-[570px] h-[400px]">
+    <div class="card shadow-float flexcol gap-0 w-[570px] h-[420px] overflow-hidden">
       <div class="head p-0 h-10 justify-between">
         <div class="flexrow flex-nowrap gap-0">
-          <span class="tabs" id="tabs-1_[% bp.id %]_head" onclick="setTab('tabs-1_[% bp.id %]')">Type</span>
-          <span class="tabs" id="tabs-2_[% bp.id %]_head" onclick="setTab('tabs-2_[% bp.id %]')">Details</span>
-          <span class="tabs" id="tabs-3_[% bp.id %]_head" onclick="setTab('tabs-3_[% bp.id %]')">Filter</span>
-          <span class="tabs" id="tabs-4_[% bp.id %]_head" onclick="setTab('tabs-4_[% bp.id %]')">Children</span>
-          <span class="tabs" id="tabs-5_[% bp.id %]_head" onclick="setTab('tabs-5_[% bp.id %]')">Link</span>
-          <span class="tabs" id="tabs-6_[% bp.id %]_head" onclick="setTab('tabs-6_[% bp.id %]')">General</span>
+          <span class="tabs clickable" id="tabs-1_[% bp.id %]_head" onclick="setTab('tabs-1_[% bp.id %]')">Type</span>
+          <span class="tabs clickable" id="tabs-2_[% bp.id %]_head" onclick="setTab('tabs-2_[% bp.id %]')">Details</span>
+          <span class="tabs clickable" id="tabs-3_[% bp.id %]_head" onclick="setTab('tabs-3_[% bp.id %]')">Filter</span>
+          <span class="tabs clickable" id="tabs-4_[% bp.id %]_head" onclick="setTab('tabs-4_[% bp.id %]')">Children</span>
+          <span class="tabs clickable" id="tabs-5_[% bp.id %]_head" onclick="setTab('tabs-5_[% bp.id %]')">Link</span>
+          <span class="tabs clickable" id="tabs-6_[% bp.id %]_head" onclick="setTab('tabs-6_[% bp.id %]')">General</span>
         </div>
         <button class="iconOnly medium hoverable mr-2" onClick="closeModalWindow(); return false;"><i class="uil uil-times"></i></button>
       </div>
@@ -348,7 +348,7 @@
 <!-- TAB 3: FILTER -->
       <div id="tabs-3_[% bp.id %]" class="js-tabs grow h-full">
         <div class="p-2 flexcol">
-          <div class="grow-0 text-center">Add input/output filter for this node only or globaly for all nodes.</div>
+          <div class="grow-0 text-center">Add input/output filter for this node only or globally for all nodes.</div>
           <div class="grow">
             <table>
               <thead>
@@ -534,6 +534,25 @@
         <table class="cellspacing-y">
           <tr>
             <th colspan=2 class="align-top px-2 border-b borderDefault"><h4>Data Processing Options</h4></th>
+          </tr>
+          <tr>
+            <th class="text-right pr-2 align-top">Backends / Sites</th>
+            <td>
+              [% IF backends.size > 10 %]
+                [% PROCESS _backends_select_multi.tt param_name='bp_backends' selected_backends=bp.backends can_edit=1 %]
+              [% ELSIF backends.size > 1 %]
+                [% backends_selected=0 %]
+                [% IF bp.backends.size > 0 %][% backends_selected=1 %][% END %]
+                <div class="align-center flexrow gap-1">
+                  <input type="checkbox" id="bp_backends_toggle" name="bp_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('bp_backends');">
+                  <span onclick="toggleCheckBox('bp_backends_toggle'); toggleElement('bp_backends');" class="clickable"> Select Backends:</span>
+                </div>
+                <select id="bp_backends" name="bp_backends" multiple class="mt-1 w-56" style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]">
+                  [% FOREACH b = backends %]
+                  <option value="[% b | html %]"[% FOREACH rb = bp.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+                  [% END %]
+              [% END %]
+            </td>
           </tr>
           <tr>
             <th class="text-right pr-2">State Type</th>

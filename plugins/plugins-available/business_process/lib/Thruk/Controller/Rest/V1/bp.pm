@@ -66,7 +66,7 @@ sub _rest_get_thruk_bp_new {
     my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'name'} || 'New Business Process');
     $label = Thruk::BP::Utils::make_uniq_label($c, $label);
     $bp->set_label($c, $label);
-    $bp->save();
+    $bp->save($c);
 
     my $bps = Thruk::BP::Utils::load_bp_data($c);
     my($rc,$msg) = Thruk::BP::Utils::save_bp_objects($c, $bps);

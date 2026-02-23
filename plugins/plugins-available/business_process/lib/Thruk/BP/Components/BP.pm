@@ -67,6 +67,7 @@ sub new {
         'last_state_change'  => 0,
         'rankDir'            => 'TB',
         'state_type'         => 'both',
+        'backends'           => [],
 
         'exported_nodes'     => {},
         'testmode'           => 0,
@@ -112,7 +113,10 @@ sub new {
     # add default filter
     $self->{'default_filter'} = Thruk::Base::list($c->config->{'Thruk::Plugin::BP'}->{'default_filter'});
 
-    $self->save() if $self->{'need_save'};
+    # expand backends
+    $self->{'backends'} = Thruk::Utils::backends_hash_to_list($c, $bpdata->{'backends'} // []);
+
+    $self->save($c) if $self->{'need_save'};
 
     if(!$skip_nodes) {
         for my $n (@{$self->{'nodes'}}) {
@@ -205,8 +209,13 @@ sub update_status {
     $c->stats->profile(begin => "update_status");
     my $t0 = [gettimeofday];
 
-    # set backends to default list, bp result should be deterministic
-    $c->db->enable_default_backends();
+    # use selected backends or all
+    if(defined $self->{'backends'} && scalar @{$self->{'backends'}} > 0) {
+        $c->db->enable_backends($self->{'backends'}, 1);
+    } else {
+        # set backends to default list, bp result should be deterministic
+        $c->db->enable_default_backends();
+    }
 
     $type = 0 unless defined $type;
     my $last_state = $self->{'status'};
@@ -650,6 +659,9 @@ sub save {
     for my $n (@{$self->{'nodes'}}) {
         push @{$obj->{'nodes'}}, $n->get_save_obj();
     }
+
+    # backends
+    $obj->{'backends'} = Thruk::Utils::backends_list_to_hash($c, $self->{'backends'});
 
     Thruk::Utils::IO::json_lock_store($self->{'editfile'}, $obj, { pretty => 1 });
     $self->{'need_save'} = 0;

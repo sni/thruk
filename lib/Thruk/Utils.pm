@@ -3205,6 +3205,7 @@ returns array of backend ids converted as list of hashes
 =cut
 sub backends_list_to_hash {
     my($c, $backends) = @_;
+    $c = $Thruk::Globals::c unless defined $c;
     if(!defined $backends) {
         confess("backends uninitialized") unless $c->db();
         ($backends) = $c->db->select_backends('get_status');

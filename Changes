@@ -6,6 +6,8 @@ next:
           - add contacts to exportable columns in excel exports
           - Agents:
             - show top n processes for cpu/memory check
+          - Business Process:
+            - add option to select specific backends when updating status
 
 3.26     Fri Feb  6 14:36:22 CET 2026
           - add option to set default comment in commands

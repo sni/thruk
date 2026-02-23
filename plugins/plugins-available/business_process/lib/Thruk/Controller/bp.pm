@@ -156,8 +156,17 @@ sub index {
             Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such business process or no permissions', code => 404 });
             return _bp_start_page($c);
         }
+
         my $bp = $bps->[0];
         $c->stash->{'bp'} = $bp;
+
+        # set currently available backends
+        if(!defined $bp->{'backends'}) {
+            $bp->{'backends'} = [];
+            for my $b (keys %{$c->stash->{'backend_detail'}}) {
+                push @{$bp->{'backends'}}, $b if $c->stash->{'backend_detail'}->{$b}->{'disabled'} == 0;
+            }
+        }
 
         if($action eq 'commit') {
             if($c->config->{'demo_mode'}) {
@@ -356,6 +365,12 @@ sub index {
                 $bp->{$key} = $c->req->parameters->{'bp_'.$key} || '';
             }
 
+            # selected backends
+           $bp->{'backends'} = [];
+           if($c->req->parameters->{'bp_backends_toggle'}) {
+               $bp->{'backends'} = Thruk::Base::list($c->req->parameters->{'bp_backends'} || []);
+           }
+
             $bp->save($c);
             $bp->update_status($c, 1);
             my $json = { rc => 0, 'message' => 'OK' };
@@ -383,7 +398,7 @@ sub index {
             }],
         });
         $bp->set_label($c, $label);
-        $bp->save();
+        $bp->save($c);
         die("internal error") unless $bp;
         Thruk::Utils::set_message( $c, { style => 'success_message', msg => 'business process successfully created' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
