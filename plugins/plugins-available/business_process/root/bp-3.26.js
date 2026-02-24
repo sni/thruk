@@ -774,6 +774,9 @@ function bp_edit_node_submit(formId) {
     });
     var form = document.getElementById(formId);
 
+    // selected backends must actually selected
+    select_all_options('bp_backends');
+
     // temporarily disable templated fields
     jQuery(form).find(".template").find("input, textarea, select, button").attr("disabled", true);
     jQuery(form).find('#bp_'+bp_id+'_selected_nodes OPTION').prop('selected',true);

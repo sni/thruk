@@ -367,7 +367,7 @@ sub index {
 
             # selected backends
            $bp->{'backends'} = [];
-           if($c->req->parameters->{'bp_backends_toggle'}) {
+           if($c->req->parameters->{'backends_toggle'}) {
                $bp->{'backends'} = Thruk::Base::list($c->req->parameters->{'bp_backends'} || []);
            }
 

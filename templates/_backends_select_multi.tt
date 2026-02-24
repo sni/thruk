@@ -3,7 +3,7 @@
 
 <div class="flexrow flex-nowrap gap-1">
   <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('backends_toggle_table'); check_backends_input(this);" class="clickable"[% IF !can_edit %] disabled[% END %]>
-  <label for="backends_toggle" class="clickable">Select Backends</label>
+  <label for="backends_toggle" class="clickable">Select specific backends:</label>
 </div>
 
 <div class="flexrow flex-nowrap gap-1 pt-2">

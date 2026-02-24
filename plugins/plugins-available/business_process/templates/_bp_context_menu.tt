@@ -92,7 +92,7 @@
   <form action="bp.cgi" id="bp_edit_node_form" onsubmit="bp_edit_node_submit('bp_edit_node_form'); return false;">
     <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
     <input type="hidden" name="bp_node_id" id="bp_node_id" value="">
-    <div class="card shadow-float flexcol gap-0 w-[570px] h-[420px] overflow-hidden">
+    <div class="card shadow-float flexcol gap-0 w-[600px] h-[450px] overflow-hidden">
       <div class="head p-0 h-10 justify-between">
         <div class="flexrow flex-nowrap gap-0">
           <span class="tabs clickable" id="tabs-1_[% bp.id %]_head" onclick="setTab('tabs-1_[% bp.id %]')">Type</span>
@@ -530,27 +530,30 @@
       </div>
 
 <!-- TAB 6: GLOBAL OPTIONS -->
-      <div id="tabs-6_[% bp.id %]" class="js-tabs grow h-full">
+      <div id="tabs-6_[% bp.id %]" class="js-tabs grow h-full overflow-scroll">
         <table class="cellspacing-y">
           <tr>
             <th colspan=2 class="align-top px-2 border-b borderDefault"><h4>Data Processing Options</h4></th>
           </tr>
           <tr>
-            <th class="text-right pr-2 align-top">Backends / Sites</th>
-            <td>
+            <th class="text-right pr-2 align-top w-20">Sites</th>
+            <td class="pr-5">
               [% IF backends.size > 10 %]
                 [% PROCESS _backends_select_multi.tt param_name='bp_backends' selected_backends=bp.backends can_edit=1 %]
               [% ELSIF backends.size > 1 %]
                 [% backends_selected=0 %]
                 [% IF bp.backends.size > 0 %][% backends_selected=1 %][% END %]
                 <div class="align-center flexrow gap-1">
-                  <input type="checkbox" id="bp_backends_toggle" name="bp_backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('bp_backends');">
-                  <span onclick="toggleCheckBox('bp_backends_toggle'); toggleElement('bp_backends');" class="clickable"> Select Backends:</span>
+                  <input type="checkbox" id="backends_toggle" name="backends_toggle"[% IF backends_selected %] checked[% END %] onclick="toggleElement('bp_backends');">
+                  <span onclick="toggleCheckBox('backends_toggle'); toggleElement('bp_backends');" class="clickable"> Select specific backends:</span>
                 </div>
                 <select id="bp_backends" name="bp_backends" multiple class="mt-1 w-56" style="min-width: 180px;[% IF !backends_selected %] display: none;[% END %]">
                   [% FOREACH b = backends %]
                   <option value="[% b | html %]"[% FOREACH rb = bp.backends %][% IF backends_selected && rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
                   [% END %]
+                </select>
+              [% ELSE %]
+                <span class="textHINTsoft">Cannot specify backends, only one backend available.</span>
               [% END %]
             </td>
           </tr>
@@ -570,7 +573,7 @@
             </td>
           </tr>
           <tr>
-            <th colspan=2 class="align-top px-2 pt-5 border-b borderDefault"><h4>Graph Options</h4></th>
+            <th colspan=2 class="align-top pt-2 border-b borderDefault"><h4>Graph Options</h4></th>
           </tr>
           <tr>
             <th class="text-right pr-2">Direction</th>
