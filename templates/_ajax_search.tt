@@ -1,7 +1,13 @@
 ﻿<script>
 <!--
   jQuery(document).ready(function() {
+    var hasOtherAutoFocusElements = !!jQuery(".autofocus:visible").length;
+
     jQuery("input[type='search'][name='s0_value']").each(function(i, el) {
+      if(!hasOtherAutoFocusElements && !jQuery(el).hasClass("js-autoexpand") ) {
+        el.focus();
+      }
+      el.onkeydown  = el.click;
       el.onclick    = ajax_search.init;
       el.ondblclick = ajax_search.init;
     });

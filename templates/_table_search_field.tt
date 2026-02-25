@@ -1,16 +1,17 @@
 ﻿[% DEFAULT skip_hash = 0 %]
-<form action="#" method="GET">
+[% DEFAULT skip_form = 0 %]
+[% IF !skip_form %]<form action="#" method="GET">[% END %]
 <input
     type="text"
     placeholder="[% DEFAULT placeholder = 'filter'; placeholder %]"
     id="table_search_input"
-    class="deletable [% DEFAULT extraCls = ''; extraCls %]"
+    class="deletable autofocus [% DEFAULT extraCls = ''; extraCls %]"
     onchange='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onkeyup='table_search(this.id, [% encode_json_obj(ids) %], undefined, [% IF skip_hash %]false[% ELSE %]true[% END %])'
     onfocus='table_search(this.id, [% encode_json_obj(ids) %], true, [% IF skip_hash %]false[% ELSE %]true[% END %]); this.autocomplete="on"'
     autocomplete="off"
 >
-</form>
+[% IF !skip_form %]</form>[% END %]
 [% IF !skip_hash %]
 <script>
 <!--
@@ -24,7 +25,6 @@
     jQuery(document).ready(function() {
         // preserve hash
         jQuery("TABLE#[% id %] A").on('click', preserve_hash);
-        jQuery("#table_search_input").focus();
     });
 [%+ END +%]
 -->

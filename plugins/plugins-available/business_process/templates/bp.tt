@@ -24,7 +24,7 @@
     <div>
       <form action="bp.cgi" method="GET">
         <input type="hidden" name="type" value="[% type | html %]">
-        <input type="text" id="filter" placeholder="filter" class="deletable autosubmit" name="filter" value="[% filter | html%]" onfocus="this.click()" onclick="ajax_search.init(this, 'bp', { url: 'bp.cgi?format=search&amp;type=[% type | html %]', autosubmit:true })">
+        <input type="text" id="filter" placeholder="filter" class="deletable autosubmit autofocus" name="filter" value="[% filter | html%]" onkeydown="this.click()" onclick="ajax_search.init(this, 'bp', { url: 'bp.cgi?format=search&amp;type=[% type | html %]', autosubmit:true })">
       </form>
     </div>
     <div>

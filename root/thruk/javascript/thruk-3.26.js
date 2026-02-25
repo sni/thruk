@@ -288,6 +288,8 @@ function init_page() {
             }
         }
     } catch(err) { console.log(err); }
+
+    jQuery(".autofocus:visible").first().focus();
 }
 
 function cookieSaveScreenSize() {
@@ -3779,9 +3781,12 @@ function do_table_search_table(id, table, value) {
     if(value == "" && table.dataset["origUrl"]) {
         // filter cleared, restore previous layout
         var uri = table.dataset["origUrl"];
+        var tst = ""+uri;
         uri = uriWith(uri.replace(/\#.*$/, ''), {}, { page: null, entries: null });
-        redirect_url(uri);
-        return;
+        if(tst != uri) {
+            redirect_url(uri);
+            return;
+        }
     }
 
     do_table_search_table_filter(id, table, value);
@@ -4917,6 +4922,12 @@ function startColumnNamePopupEdit(pane_prefix, td) {
             }
         });
     }, 100);
+}
+
+function reloadPageIfColumnsChanged(pane_prefix) {
+    if(additionalParams[pane_prefix+'columns']) {
+        reloadPage();
+    }
 }
 
 // remove and return all child nodes
