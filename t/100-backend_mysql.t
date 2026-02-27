@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More tests => 74;
+use Test::More tests => 75;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -97,6 +97,13 @@ test_filter(
     'regular expression',
     [{ 'name' => { '~~' => 'no_worker' } }],  # input
     " WHERE name RLIKE 'no_worker'",          # expected
+);
+
+#####################################################################
+test_filter(
+    'regular expression II',
+    [{ type => { '~' => '^(HOST|SERVICE) ALERT$' } }],  # input
+    " WHERE type RLIKE '^(HOST|SERVICE) ALERT\$'",       # expected
 );
 
 #####################################################################

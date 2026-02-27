@@ -988,7 +988,9 @@ sub _replace_column_name {
             my @keys = keys %{$val};
             if(scalar @keys == 1) {
                 $op = $keys[0];
-                $val = $val->{$op};
+                if($op eq '=' || $op eq '!=') {
+                    $val = $val->{$op};
+                }
             }
         }
         if(!defined $val) {
