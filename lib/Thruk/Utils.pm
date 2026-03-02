@@ -4350,6 +4350,8 @@ sub _enhance_histou_url {
         $url = $url.'&spannulls='.($obj->{'check_interval'} * $interval_length * 2);
     }
 
+    $url = $url.'&hideLogo=1';
+
     return($url);
 }
 
