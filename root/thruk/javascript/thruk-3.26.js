@@ -8719,11 +8719,13 @@ function init_calender_inputs() {
     jQuery("IMG.cal_popup, I.cal_popup").off("click").on("click", show_cal).addClass("clickable");
 }
 
+var has_picker = {};
 function show_cal(ev) {
     // clicks in IMG tags redirect to corresponding input field
     if(ev.target.tagName == "IMG" || ev.target.tagName == "I") {
         var matches = ev.target.className.match(/for_([\w_]+)/);
         if(matches && matches[1]) {
+            // redirect clicking the img to the input field
             var el = document.getElementById(matches[1]);
             if(el) {
                 el.click();
@@ -8754,7 +8756,7 @@ function show_cal(ev) {
     var hasSubmit     = ev.target.className.match(/cal_popup_auto_submit/)   ? true : false;
     var hasCustom     = ev.target.className.match(/cal_custom/)              ? true : false;
 
-    if(document.getElementById(id1).picker) {
+    if(has_picker[id1]) {
         // once created, the daterangepicker add a event to handle open/close itself
         return;
     }
@@ -8772,7 +8774,7 @@ function show_cal(ev) {
         if(id1 == "t1")         { id2 = "t2"; }
         // show picker at the end date
         if(id2 && id1 != id2) {
-            if(hasRangeCond && jQuery('#'+id2).is(":visible")) {
+            if((hasRangeCond || hasRange) && jQuery('#'+id2).is(":visible") /* && !jQuery('#'+id2).is(":visible") */) {
                 document.getElementById(id2).click();
                 return;
             }
@@ -8837,6 +8839,15 @@ function show_cal(ev) {
         }
     }
 
+    if(!jQuery("#"+id1).data("initial_date")) {
+        jQuery("#"+id1).data("initial_date", date1);
+    }
+    if(hasRange) {
+        if(!jQuery("#"+id2).data("initial_date")) {
+            jQuery("#"+id2).data("initial_date", date2);
+        }
+    }
+
     var options = {
         "singleDatePicker": !hasRange,
         "minYear": date1.strftime("%Y") - 5,
@@ -8858,9 +8869,6 @@ function show_cal(ev) {
     };
     if(hasClear) {
         options.locale.cancelLabel = 'Clear';
-        jQuery('#'+id1).on('cancel.daterangepicker', function(ev, picker) {
-            jQuery(this).val('');
-        });
     } else {
         options.cancelButtonClasses = "hidden";
     }
@@ -8894,27 +8902,39 @@ function show_cal(ev) {
         }
     }
 
+    // when date changed manually in the input field, update the picker accordingly
     var _onKeyUp = function(ev) {
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
+        ev.stopPropagation();
         var picker = ev.data[0];
-        var date1 = _parseDate(document.getElementById(id1).value);
+        var date1  = _parseDate(document.getElementById(id1).value);
+        if(hasRange) {
+            date2 = _parseDate(document.getElementById(id2).value);
+        }
+        // reverse dates, because we always click on the end date when having ranges
+        if(date1 && date2 && date1 > date2) {
+            var tmp = date2;
+            date2 = date1;
+            date1 = tmp;
+        }
         if(date1) {
             var date = moment(date1);
-            picker.setEndDate(date);
+            picker.setStartDate(date);
             if(!hasRange) {
-                picker.setStartDate(date);
+                picker.setEndDate(date);
             }
         }
         if(hasRange) {
-            var date2 = _parseDate(document.getElementById(id2).value);
             if(date2) {
                 var date = moment(date2);
-                picker.setStartDate(date);
+                picker.setEndDate(date);
             }
         }
         picker.updateView();
     };
 
-    var _onShow = function(ev, picker, id) {
+    var _onShow = function(ev, picker) {
         picker.container.css("min-width", "300px");
         jQuery(".daterangepicker td.today").each(function() {
             if(!this.className.match(/off/)) {
@@ -8924,9 +8944,12 @@ function show_cal(ev) {
         jQuery('#'+id1).off("keyup").on("keyup", [picker], _onKeyUp);
         jQuery('#'+id2).off("keyup").on("keyup", [picker], _onKeyUp);
     };
-    var apply = function(start, end, label) {
+
+    updateInputs = function(start, end) {
+        if(start == null) { return; }
         if(hasRange) {
-            if(id1 == 'end_time' || id1 == 'end_date' || id1 == 't2') {
+            if(end == null) { return; }
+            if(id1 == 'end_time' || id1 == 'end_date' || id1 == 'end' || id1 == 't2') {
                 // reverse back if required
                 var tmp = id2;
                 id2 = id1;
@@ -8937,15 +8960,33 @@ function show_cal(ev) {
         } else {
             document.getElementById(id1).value = start.format('YYYY-MM-DD HH:mm:ss').replace(/:00$/, '');
         }
+    }
+
+    var apply = function(start, end, label) {
+        updateInputs(start, end);
         // submit the form automatically, no need to press update/apply twice
         if(hasSubmit) {
-            jQuery('#'+id1).parents('form:first').submit();
+            var changed = false;
+            if(jQuery("#"+id1).data("initial_date") && moment(jQuery("#"+id1).data("initial_date")).unix() != start.unix()) {
+                changed = true;
+            }
+            if(hasRange) {
+                if(jQuery("#"+id2).data("initial_date") && moment(jQuery("#"+id2).data("initial_date")).unix() != end.unix()) {
+                    changed = true;
+                }
+            }
+            if(changed) {
+                jQuery('#'+id1).parents('form:first').submit();
+            }
         }
     };
 
-    jQuery('#'+id1).on('showCalendar.daterangepicker', function(ev,picker) { _onShow(ev,picker,id1) });
+    has_picker[id1] = true;
+    jQuery('#'+id1).daterangepicker(options, apply);
+    jQuery('#'+id1).on('showCalendar.daterangepicker', function(ev,picker) { _onShow(ev,picker) });
     jQuery('#'+id1).on('hide.daterangepicker', function(ev,picker) {
-        document.getElementById(id1).picker = false;
+        if(has_picker[id1]) { has_picker[id1] = false; }
+        if(id2 && has_picker[id2]) { has_picker[id2] = false; }
 
         // restore input field(s)
         var val1  = document.getElementById(id1).value;
@@ -8960,13 +9001,52 @@ function show_cal(ev) {
             document.getElementById(id2).value = val2;
         }
 
+        jQuery("DIV.daterangepicker").remove();
+
         init_calender_inputs();
     });
-    jQuery('#'+id1).daterangepicker(options, apply);
-    document.getElementById(id1).picker = true;
 
     // show calendar
     jQuery('#'+id1).click();
+
+    var picker = jQuery('#'+id1).data('daterangepicker');
+    _onShow(null,picker);
+
+    // fix outside click when clicking on the other input field
+    if(!picker._outsideClick) {
+        picker._outsideClick = picker.outsideClick;
+    }
+    picker.outsideClick = function(ev) {
+        if(ev.target.id == id1 || ev.target.id == id2) {
+            return;
+        }
+        this._outsideClick(ev);
+    };
+
+    if(hasClear) {
+        // datepickers own cancel doesnt work for us because the hide triggers first
+        jQuery('.daterangepicker .cancelBtn').off("click").on("click", [picker], function(ev) {
+            ev.preventDefault();
+            ev.stopImmediatePropagation();
+            ev.stopPropagation();
+            picker.hide();
+            jQuery('#'+id1).val('');
+        });
+    }
+
+    // change event on time picker
+    jQuery('.daterangepicker').on("change.daterangepicker", [picker], function(ev) {
+        updateInputs(picker.startDate, picker.endDate);
+    });
+
+    // hook into update view to update the input fields
+    if(!picker._updateView) {
+        picker._updateView = picker.updateView;
+    }
+    picker.updateView = function() {
+        picker._updateView();
+        updateInputs(picker.startDate, picker.endDate);
+    };
 }
 
 /*******************************************************************************
