@@ -1,6 +1,6 @@
 
 build:
-	docker compose build --progress plain
+	docker compose --progress plain build
 
 prepare: build
 	docker compose up --remove-orphans -d
