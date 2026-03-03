@@ -4578,6 +4578,37 @@ function updateExcelPermanentLink() {
     initExcelExportSorting();
 }
 
+/* update permanent link of csv export */
+function updateCsvPermanentLink() {
+    var inp  = jQuery('#csv_export_url');
+    var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode][name!=all_col]').serialize();
+    var base = jQuery('#csvexportlink')[0].href;
+    base = cleanUnderscore(base);
+
+    if(!data) {
+        jQuery(inp).val(base);
+        return;
+    }
+
+    // Parse the serialized data to extract column names
+    var params = new URLSearchParams(data);
+    var columns = [];
+    params.forEach(function(value, key) {
+        if(key === 'columns') {
+        columns.push(value);
+        }
+    });
+
+    // Build the new URL with single columns parameter, to be used in the API endpoint
+    var newBase = base.split('?')[0];
+    if(columns.length > 0) {
+        newBase += '?columns=' + columns.join(',');
+    }
+
+    jQuery(inp).val(newBase);
+    initCsvExportSorting();
+}
+
 /* compare two objects and print diff
  * returns true if they differ and false if they are equal
  */
@@ -4725,6 +4756,29 @@ function initExcelExportSorting() {
         placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
             updateExcelPermanentLink();
+        }
+    });
+}
+
+function initCsvExportSorting() {
+    if(!has_jquery_ui()) {
+        load_jquery_ui(function() {
+            initCsvExportSorting();
+        });
+        return;
+    }
+    if(already_sortable["csv_export"]) {
+        return;
+    }
+    already_sortable["csv_export"] = true;
+
+    jQuery('TABLE.sortable_col_table').sortable({
+        items                : 'TR.sortable_row',
+        helper               : 'clone',
+        tolerance            : 'pointer',
+        placeholder          : 'sortable-placeholder',
+        update               : function( event, ui ) {
+            updateCsvPermanentLink();
         }
     });
 }

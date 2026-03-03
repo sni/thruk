@@ -3,6 +3,7 @@ package Thruk::Controller::status;
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use Time::HiRes qw/tv_interval gettimeofday/;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
@@ -703,6 +704,27 @@ sub _process_hostdetails_page {
             Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);
         }
         return $c->render(json => $hosts);
+    }
+    if ( $view_mode eq 'csv') {
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
+        my $filename = 'status.csv';
+        $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
+        $c->stash->{'data'}     = $hosts;
+        $c->stash->{'template'} = 'csv/status_hostdetail.tt';
+
+        my $t1 = [gettimeofday];
+        require Thruk::Views::ToolkitRenderer;
+        my $output = '';
+        Thruk::Views::ToolkitRenderer::render($c, $c->stash->{'template'}, undef, \$output);
+        $c->{'rendered'} = 1;
+        $c->res->content_type('text/csv');
+        $c->res->body($output);
+        $c->stats->profile(end => "render_csv: ".$c->stash->{'template'});
+        my $elapsed = tv_interval($t1);
+        $c->stash->{'total_render_waited'} += $elapsed;
+
+        return $output;
     }
 
     $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };

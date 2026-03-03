@@ -1,0 +1,113 @@
+﻿[% BLOCK cols %]
+  <table class="sortable_col_table rowhover">
+    [%- counter = 0 -%]
+    [%- FOR column IN columns -%]
+    [%- counter = counter + 1 -%]
+    [%- meta = column.split(':'); column = meta.0 -%]
+    [%- IF meta.size == 1; meta.1 = 1; END %]
+    <tr class="sortable_row">
+      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateCsvPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateCsvPermanentLink();" width="90%">[% column | html %]</td>
+    </tr>
+    [% END -%]
+    [%- FOREACH v IN get_exposed_custom_vars(1) %]
+      [%- counter = counter + 1 -%]
+      <tr class="sortable_row">
+        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateCsvPermanentLink();"></td>
+        <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateCsvPermanentLink();" width="90%">[% v | html %]</td>
+      </tr>
+    [% END %]
+  </table>
+[% END %]
+[% BLOCK checkall %]
+  <table class="rowhover">
+    <tr>
+      <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]')"></td>
+      <td class='clickable font-bold' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]');" width="90%">Select all</td>
+    </tr>
+  </table>
+[% END %]
+
+<div class="flex relative">
+  <a href="[% url_prefix %]r/[% api_endpoint %]" class="button round small" onclick="toggleElement('csv_export_columns', undefined, true); updateCsvPermanentLink(); return false;" id='csvexportlink' title="Export to Csv">
+    <i class="uil uil-grids"></i>
+  </a>
+  <div class="card shadow-float absolute z-20 top-7" style="display: none;" id="csv_export_columns">
+    <div class="head justify-between gap-2">
+      <h3>Choose Columns to Export</h3>
+      <button class="iconOnly" name="update" id="accept_ht" onclick="document.getElementById('csv_form_btn').click(); return false;" title="update">
+        <i class="fa-solid fa-check round small green"></i>
+      </button>
+    </div>
+    [% IF style != 'combined' %]
+      <form action='[% uri_with(c, 'view_mode' => 'csv') %]' method="POST">
+    [% ELSE %]
+      <input type="hidden" name="view_mode" value="html" id="view_mode">
+    [% END %]
+    <div class="py-2">
+      <table class="w-full">
+        [% IF columns != '' %]
+        <tr>
+          <td colspan=2>
+            [% PROCESS checkall prefix='' %]
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            [% PROCESS cols     prefix='' %]
+          </td>
+        </tr>
+        [% ELSE %]
+        <tr>
+          <td valign="top">
+            <div class="px-2 font-semibold">Hosts:</div>
+            [% PROCESS checkall prefix='host_' %]
+            [% PROCESS cols prefix='host_' columns=hostcolumns %]
+          </td>
+          <td valign="top">
+            <div class="px-2 font-semibold">Services:</div>
+            [% PROCESS checkall prefix='service_' %]
+            [% PROCESS cols prefix='service_' columns=servicecolumns %]
+          </td>
+        </tr>
+        [% END %]
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <input type="submit" class="w-full" name="export" id="csv_form_btn" value="Export" onclick="jQuery('#view_mode').val('csv'); setNoFormClean(); window.setTimeout(function() { toggleElement('csv_export_columns');}, 200);">
+          </td>
+        </tr>
+        <tr>
+          <td colspan=2><hr class="my-2"></td>
+        </tr>
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <div class="flexcol gap-1">
+              <button class="w-full" onclick="showElement('csv_export_url_row'); hideElement(this); return false;">
+                <i class="uil uil-link"></i>
+                Permanent link to this export
+              </button>
+              <div class="flexrow flex-nowrap gap-1" style="display: none;" id="csv_export_url_row">
+                <input type="text" value="" class="w-full" id="csv_export_url">
+                <button class="iconOnly px-1 copy_button" onclick="copyCode(event, 'csv_export_url'); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        [% IF c.config.exists('use_feature_reports') && c.config.use_feature_reports %]
+        <tr>
+          <td class="px-2 py-0.5" colspan="2">
+            <!-- Is not working yet !-->
+            <button class="w-full" onClick="window.location='[% url_prefix %]cgi-bin/reports2.cgi?action=edit&amp;report=new&amp;template=report_from_url.tt&amp;params.url='+(encodeURIComponent(document.getElementById('csv_export_url').value)); return false;">
+              <i class="uil uil-envelope-add"></i>
+              Create E-Mail Report
+            </button>
+          </td>
+        </tr>
+        [% END %]
+      </table>
+    </div>
+    [% IF style != 'combined' %]
+      </form>
+    [% END %]
+  </div>
+</div>
