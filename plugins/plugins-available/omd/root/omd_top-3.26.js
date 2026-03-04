@@ -93,15 +93,21 @@ function fetchTopDataDo() {
             var uri = 'omd.cgi?action=top_details&folder='+omd_top_folder+'&expand=1&time='+Math.floor(updateDetailsTableTimestamp/1000);
             if(data && data.raw) {
                 jQuery('#raw_top').find("tr:gt(0)").remove();
+                var systemHidden = jQuery("#hide_system_processes").is(":checked");
                 jQuery.each(data.raw, function(_, row) {
-                    var newRow = '<tr>';
+                    var sysClass = "";
+                    if(row[11].startsWith("[")) {
+                        sysClass = " class='js-system-process"+(systemHidden ? " hidden" : "")+"'";
+                    }
+                    var newRow = '<tr'+sysClass+'>';
                     jQuery.each(row, function(i, cell) {
+                        cell = escapeHTML(cell);
                         if(i == 0) {
                             newRow += '<td><a href="'+uri+'&pid='+cell+'">'+cell+'<\/a><\/td>';
                         } else if(i == 4) {
-                            newRow += '<td>'+row[12]+'m<\/td>';
+                            newRow += '<td>'+row[12]+'m<\/td>'; // virtual memory in MB
                         } else if(i == 5) {
-                            newRow += '<td>'+row[13]+'m<\/td>';
+                            newRow += '<td>'+row[13]+'m<\/td>'; // resident memory in MB
                         } else if(i <= 11) {
                             newRow += '<td>'+cell+'<\/td>';
                         }

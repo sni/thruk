@@ -6,8 +6,7 @@ use Carp;
 use IPC::Open3 qw/open3/;
 use POSIX ();
 
-use Thruk::Base ();
-use Thruk::Utils::IO ();
+use Thruk::Utils ();
 
 =head1 NAME
 

@@ -28,7 +28,7 @@
             [% IF key == "end";     NEXT; END %]
             [% IF key == "archive"; NEXT; END %]
             [% IF key == "pid";     NEXT; END %]
-            <input type="hidden" name="[% key %]" value="[% c.req.parameters.$key %]">
+            <input type="hidden" name="[% key | html %]" value="[% c.req.parameters.$key | html %]">
         [% END %]
       [% date_select_title="Top Reporting Overview" %]
       [% IF c.req.parameters.defined("pid"); date_select_title=date_select_title _ " - PID " _ c.req.parameters.pid; END %]
@@ -113,8 +113,14 @@
     </div>
 
     <div class="card flexcol flex-nowrap gap-0" id="raw_top_div" style="display: none;">
-      <div class="head">
-        [% PROCESS _table_search_field.tt ids=["raw_top"] %]
+      <div class="head flexrow gap-5">
+        <div>
+          [% PROCESS _table_search_field.tt ids=["raw_top"] %]
+        </div>
+        <div title="hide kernel system processes (ex.: [kworker/0:1])">
+          <input type="checkbox" id="hide_system_processes" onchange="jQuery('#raw_top tbody tr.js-system-process').toggleClass('hidden', this.checked);">
+          <label for="hide_system_processes">Hide system processes</label>
+        </div>
       </div>
       <table id="raw_top" class="tablesorter body cellspacing innercellborder striped">
         <thead>
