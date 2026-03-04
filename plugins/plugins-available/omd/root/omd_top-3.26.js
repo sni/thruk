@@ -28,8 +28,11 @@ var updateDetailsTableTimestamp;
 function updateDetailsTable(index, fetch) {
     var keys = [];
     jQuery.each(plots, function(name, plot) { keys.push(name); });
-    var timestamp = plots[keys[0]].getData()[0].data[index][0];
-    var date = new Date(timestamp);
+    var data      = plots[keys[0]].getData();
+    if(data.length == 0 || data[0].data.length == 0) {
+        return;
+    }
+    var timestamp = data[0].data[index][0];
     jQuery('#time').html(_dateString(timestamp));
 
     if(plots['load']) {

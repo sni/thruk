@@ -20,10 +20,23 @@
     <a class="button w-32" href="omd.cgi?action=top&folder=[% folder | uri %]">back to overview</a>
   </div>
   <div>
-      <h1>Top Reporting Overview</h1>
-      [% IF c.req.parameters.defined("pid") %]<h4>PID: [% c.req.parameters.pid %] / [% format_date(t1, datetime_format) %] - [% format_date(t2, datetime_format) %]</h4>[% END %]
+      <form method="GET" action="" id="date_form">
+        [% FOREACH key = c.req.parameters.keys.sort %]
+            [% IF key == "t1";      NEXT; END %]
+            [% IF key == "t2";      NEXT; END %]
+            [% IF key == "start";   NEXT; END %]
+            [% IF key == "end";     NEXT; END %]
+            [% IF key == "archive"; NEXT; END %]
+            [% IF key == "pid";     NEXT; END %]
+            <input type="hidden" name="[% key %]" value="[% c.req.parameters.$key %]">
+        [% END %]
+      [% date_select_title="Top Reporting Overview" %]
+      [% IF c.req.parameters.defined("pid"); date_select_title=date_select_title _ " - PID " _ c.req.parameters.pid; END %]
+      [% PROCESS _log_date_select.tt date_select_title=date_select_title start=t1 end=t2 skip_update_btn=1 %]
+      </form>
   </div>
-  <div class="w-44"></div>
+  <div class="w-44">
+  </div>
 </div>
 
 <div class="flexrow flex-nowrap">

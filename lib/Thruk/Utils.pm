@@ -52,7 +52,7 @@ sub parse_date {
         }
     };
     if($@) {
-        _error("parse_date error for '".$string."' - ".$@);
+        _error("parse_date error for '".($string//'(undef)')."' - ".$@);
         _error(longmess());
     }
     return $timestamp;
@@ -446,8 +446,8 @@ sub get_start_end_from_date_select_params {
 
     my($start,$end);
     my $archive     = $c->req->parameters->{'archive'} || 0;
-    my $param_start = $c->req->parameters->{'start'};
-    my $param_end   = $c->req->parameters->{'end'};
+    my $param_start = $c->req->parameters->{'t1'} // $c->req->parameters->{'start'};
+    my $param_end   = $c->req->parameters->{'t2'} // $c->req->parameters->{'end'};
 
     # start / end date from formular values?
     if(defined $param_start && defined $param_end) {
@@ -465,12 +465,14 @@ sub get_start_end_from_date_select_params {
         $start = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
         ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
         $end = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, 1), 0,0,0);
+        if($end == $start) { $end = $start+86400; }
     }
     elsif($archive eq '-1') {
         my($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($start);
         $start = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
         ($year,$month,$day, $hour,$min,$sec, $doy,$dow,$dst) = Localtime($end);
         $end = Thruk::Utils::DateTime::mktime(Add_Delta_Days($year,$month,$day, -1), 0,0,0);
+        if($end == $start) { $end = $start+86400; }
     }
 
     # swap date if they are mixed up
@@ -3335,6 +3337,7 @@ sub _parse_date {
     my($string) = @_;
 
     # simply try to expand first
+    die("no date string given") unless defined $string;
     return(_expand_timestring($string)) if($string =~ m/:/mx || $string =~ m/^\d{4}\-\d{1,2}\-\d{1,2}$/mx);
 
     # time arithmetic
