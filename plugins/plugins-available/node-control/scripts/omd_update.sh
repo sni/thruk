@@ -48,7 +48,7 @@ if [ $? -ne 1 ]; then
     fi
 fi
 
-if [ $(mount 2>/dev/null | grep -c /omd/sites/mon/tmp) -gt 0 ]; then
+if [ $(mount 2>/dev/null | grep -c /omd/sites/${OMD_SITE}/tmp) -gt 0 ]; then
     SITE_MOUNTED=1
 fi
 
@@ -140,7 +140,7 @@ if [ "$(omd version -b)" = "$OMD_UPDATE" ]; then
 fi
 
 if [ "$HAS_TMUX" = "1" ]; then
-    echo "*** [ERROR] update failed, ssh into $HOSTNAME and"
+    echo "*** [ERROR] update failed, ssh into ${OMD_SITE}@${HOSTNAME} and"
     echo "*** [ERROR] run 'tmux attach -t $session:$window' to manually investigate"
 else
     echo "*** [ERROR] update failed"
