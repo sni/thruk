@@ -277,6 +277,17 @@ sub render_excel {
     return(Thruk::Views::ExcelRenderer::render_excel($c));
 }
 
+=head2 render_csv
+
+detach to csv reader
+
+=cut
+sub render_csv {
+    my($c) = @_;
+    require Thruk::Views::CsvRenderer;
+    return(Thruk::Views::CsvRenderer::render_csv($c));
+}
+
 =head2 render_gd
 
 detach to gd controller
