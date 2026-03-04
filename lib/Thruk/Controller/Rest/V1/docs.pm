@@ -1350,6 +1350,24 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of hard down hosts",
+     "name": "down_hard",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unhandled hard down hosts",
+     "name": "down_hard_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of soft down hosts",
+     "name": "down_soft",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "number of hosts with eventhandlers disabled",
      "name": "eventhandler_disabled",
      "type": "",
@@ -1364,6 +1382,12 @@ __DATA__
     {
      "description": "number of hosts with flapping detection disabled",
      "name": "flapping_disabled",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of hosts in hard state",
+     "name": "hard",
      "type": "",
      "unit": ""
     },
@@ -1428,6 +1452,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of hosts in soft state",
+     "name": "soft",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "total number of hosts",
      "name": "total",
      "type": "",
@@ -1478,6 +1508,24 @@ __DATA__
     {
      "description": "number of unhandled unreachable hosts",
      "name": "unreachable_and_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unreachable hosts in hard state",
+     "name": "unreachable_hard",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unhandled unreachable hosts in hard state",
+     "name": "unreachable_hard_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unreachable hosts in soft state",
+     "name": "unreachable_soft",
      "type": "",
      "unit": ""
     },
@@ -2466,8 +2514,26 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of critical services in hard state",
+     "name": "critical_hard",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unhandled critical services in hard state",
+     "name": "critical_hard_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "number of unhandled critical services on down hosts",
      "name": "critical_on_down_host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of critical services in soft state",
+     "name": "critical_soft",
      "type": "",
      "unit": ""
     },
@@ -2486,6 +2552,12 @@ __DATA__
     {
      "description": "number of services with flapping detection disabled",
      "name": "flapping_disabled",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of services in hard state",
+     "name": "hard",
      "type": "",
      "unit": ""
     },
@@ -2574,6 +2646,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of services in soft state",
+     "name": "soft",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "total number of services",
      "name": "total",
      "type": "",
@@ -2628,8 +2706,26 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of unknown services in hard state",
+     "name": "unknown_hard",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unhandled unknown services in hard state",
+     "name": "unknown_hard_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "number of unhandled unknown services on down hosts",
      "name": "unknown_on_down_host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unknown services in soft state",
+     "name": "unknown_soft",
      "type": "",
      "unit": ""
     },
@@ -2670,8 +2766,26 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "number of warning services in hard state",
+     "name": "warning_hard",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of unhandled warning services in hard state",
+     "name": "warning_hard_unhandled",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "number of unhandled warning services on down hosts",
      "name": "warning_on_down_host",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "number of warning services in soft state",
+     "name": "warning_soft",
      "type": "",
      "unit": ""
     }
