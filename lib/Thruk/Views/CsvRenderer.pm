@@ -36,7 +36,25 @@ sub render_csv {
     my $t1 = [gettimeofday];
     require Thruk::Views::ToolkitRenderer;
     my $output = '';
-    Thruk::Views::ToolkitRenderer::render($c, $c->stash->{'template'}, undef, \$output);
+
+    if (defined $data && ref($data) eq 'ARRAY') {
+        foreach my $row (@{$data}) {
+            if (ref($row) eq 'ARRAY') {
+                $output .= join(',', map { "\"$_\"" } (@{$row}) ) . "\n";
+            } else {
+                $output .= "\"$row\"\n";
+            }
+        }
+    } elsif (defined $data && ref($data) eq 'HASH') {
+        # Handle hash data
+        my @keys = sort keys (%{$data});
+        $output .= join(',', map { "\"$_\"" } @keys) . "\n";
+        $output .= join(',', map { "\"$data->{$_}\"" } @keys) . "\n";
+    } else {
+        # Fallback for scalar data
+        $output = defined $data ? "$data\n" : "";
+    }
+
     $c->{'rendered'} = 1;
     $c->res->content_type('text/csv');
     $c->res->body($output);

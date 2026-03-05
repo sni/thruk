@@ -1,4 +1,4 @@
-[% USE date %]
+﻿[% USE date %]
 [% FOREACH col = columns %]
   [% IF col == "Site"                         %]Site,
   [% ELSIF col == "Hostname"                  %]Hostname,

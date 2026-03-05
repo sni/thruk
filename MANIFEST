@@ -166,6 +166,7 @@ lib/Thruk/Utils/SelfCheck.pm
 lib/Thruk/Utils/Status.pm
 lib/Thruk/Utils/Timezone.pm
 lib/Thruk/Utils/Trends.pm
+lib/Thruk/Views/CsvRenderer.pm
 lib/Thruk/Views/ExcelRenderer.pm
 lib/Thruk/Views/GDRenderer.pm
 lib/Thruk/Views/JSONRenderer.pm
@@ -3178,6 +3179,7 @@ templates/_backends_select_multi.tt
 templates/_blocks.tt
 templates/_cmd_form.tt
 templates/_cmd_parts.tt
+templates/_csv_export.tt
 templates/_comments_table.tt
 templates/_common_css.tt
 templates/_common_css_fonts.tt
@@ -3380,6 +3382,8 @@ templates/config_timeperiods.tt
 templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
+templates/csv/_status_hostdetail.tt
+templates/csv/status_hostdetail.tt
 templates/excel/_status_detail_worksheet.tt
 templates/excel/_status_hostdetail_worksheet.tt
 templates/excel/availability.tt

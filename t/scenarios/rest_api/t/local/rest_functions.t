@@ -49,7 +49,7 @@ TestUtils::test_command({
 {
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=concat(name, \"_\", state, \"::\") as test"',
-        like => [qr/^#test$/smx, qr/^localhost_\d::$/smx],
+        like => [qr/^#test$/smx, qr/^"localhost_\d::"$/smx],
     });
 };
 
@@ -71,7 +71,7 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=fmt(\"%s:%.3f\", name, state) as test"',
-        like => [qr/^#test$/smx, qr/^localhost:\d\.000$/smx],
+        like => [qr/^#test$/smx, qr/^"localhost:\d\.000"$/smx],
     });
 };
 
@@ -137,7 +137,7 @@ TestUtils::test_command({
 {
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=utc(last_check) as test"',
-        like => [qr/^#test$/smx, qr/^\d+\-\d+\-\d+\s+\d+:\d+:\d+\s+UTC$/smx],
+        like => [qr/^#test$/smx, qr/^\"\d+\-\d+\-\d+\s+\d+:\d+:\d+\s+UTC\"$/smx],
     });
 };
 
@@ -146,7 +146,7 @@ TestUtils::test_command({
 {
     TestUtils::test_command({
         cmd  => '/usr/bin/env thruk r "/csv/hosts?columns=date(last_check) as test"',
-        like => [qr/^#test$/smx, qr/^\d+\-\d+\-\d+\s+\d+:\d+:\d+/smx],
+        like => [qr/^#test$/smx, qr/^\"\d+\-\d+\-\d+\s+\d+:\d+:\d+/smx],
     });
 };
 
