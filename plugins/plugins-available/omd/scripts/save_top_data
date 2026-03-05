@@ -4,17 +4,25 @@ if [ "$OMD_ROOT" = "" ]; then
   exit 1
 fi
 
-set -e
-
 KEEP_FILES=10080     # keep last 7 days
 FOLDER=$OMD_ROOT/var/top
 
-mkdir -p $OMD_ROOT/var/top
+# override settings from env
+if [ "$THRUK_TOP_KEEP_FILES" != "" ]; then
+  KEEP_FILES=$THRUK_TOP_KEEP_FILES
+fi
+if [ "$THRUK_TOP_TARGET_FOLDER" != "" ]; then
+  FOLDER=$THRUK_TOP_TARGET_FOLDER
+fi
+
+set -e
+
+mkdir -p $FOLDER
 cd $FOLDER || exit 1
 
 export LD_LIBRARY_PATH="$OMD_ROOT/local/lib:$OMD_ROOT/lib"
 export LC_ALL=C
-export COLUMNS=5000
+export COLUMNS=8000
 
 # save top data
 FILE="$(date +%s).log"
