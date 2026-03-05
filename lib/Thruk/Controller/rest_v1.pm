@@ -370,13 +370,13 @@ sub _format_csv_output {
                         $output .= join(",", @{$d->{$col}});
                     } else {
                         # fallback to json encode
-                        $output .= _escape_newlines($encoder->encode($d->{$col}));
+                        $output .= _sanitize_csv_string($encoder->encode($d->{$col}));
                     }
                 }
                 elsif(ref($d->{$col}) ne '') {
-                    $output .= _escape_newlines($encoder->encode($d->{$col}));
+                    $output .= _sanitize_csv_string($encoder->encode($d->{$col}));
                 } else {
-                    $output .= _escape_newlines($d->{$col} // '');
+                    $output .= _sanitize_csv_string($d->{$col} // '');
                 }
                 $x++;
             }
@@ -392,11 +392,30 @@ sub _format_csv_output {
 }
 
 ##########################################################
-sub _escape_newlines {
+sub _sanitize_csv_string {
     my($str) = @_;
     return $str unless $str;
+
+    # Escape newlines
     $str =~ s/\n/\\n/gmx;
     $str =~ s/\r//gmx;
+
+    # Escape double quoutes, by placing two double quoutes in a row
+    $str =~ s/\"/\"\"/gmx;
+
+    my @problem_chars = (',', ';', ':', '"');
+    my $has_problem_chars = 0;
+    for my $char (@problem_chars) {
+        if( CORE::index($str,$char) != -1) {
+            $has_problem_chars = 1;
+            last;
+        }
+    }
+
+    if($has_problem_chars){
+        $str = '"' . $str . '"';
+    }
+
     return $str;
 }
 
