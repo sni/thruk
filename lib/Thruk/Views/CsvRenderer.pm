@@ -12,7 +12,6 @@ CSV data renderer
 
 use warnings;
 use strict;
-use Cpanel::JSON::XS ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 =head1 METHODS
