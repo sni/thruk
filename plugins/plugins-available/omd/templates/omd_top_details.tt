@@ -35,8 +35,7 @@
       [% PROCESS _log_date_select.tt date_select_title=date_select_title start=t1 end=t2 skip_update_btn=1 %]
       </form>
   </div>
-  <div class="w-44">
-  </div>
+  <div class="w-44"></div>
 </div>
 
 <div class="flexrow flex-nowrap">
