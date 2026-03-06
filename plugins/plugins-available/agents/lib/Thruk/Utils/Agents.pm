@@ -422,7 +422,6 @@ sub _set_checks_category {
                 $chk->{'exists'} = 'disabled';
             }
         }
-
     }
 
     for my $name (sort keys %{$services}) {
@@ -634,13 +633,18 @@ sub check_wildcard_match {
     }
     $str = Thruk::Base::list($str);
 
+    # if pattern only contains negated filters, add implicit ANY filter to make sure we do not exclude everything
+    my $has_positive = grep(!/^\!/mx, @{$pattern}) ? 1 : 0;
+    my $has_negative = grep( /^\!/mx, @{$pattern}) ? 1 : 0;
+    unshift @{$pattern}, "ANY" if(!$has_positive && $has_negative);
+
     # check excludes first
     for my $p (@{$pattern}) {
         next unless $p =~ m/^\!/mx;
-        $p = "$p";
-        $p =~ s=^\!==mx;
+        my $pat = "$p"; # make copy
+        $pat =~ s=^\!==mx;
         for my $s (@{$str}) {
-            return if check_pattern($s, $p, $substringmatch);
+            return if check_pattern($s, $pat, $substringmatch);
         }
     }
 
@@ -659,10 +663,11 @@ sub check_wildcard_match {
                 my $res;
                 # negated filter, none must match
                 if($sp =~ m/^\!/mx) {
+                    my $spat = "$sp"; # make copy
                     $res = 1;
-                    $sp =~ s/^\!//mx;
+                    $spat =~ s/^\!//mx;
                     for my $s (@{$str}) {
-                        if(check_pattern($s, $sp, $substringmatch)) {
+                        if(check_pattern($s, $spat, $substringmatch)) {
                             $res = 0;
                             last;
                         }

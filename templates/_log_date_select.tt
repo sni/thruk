@@ -1,8 +1,10 @@
 ﻿[% USE date %]
 
+[% DEFAULT date_select_title="Log File Navigation" %]
+[% DEFAULT skip_update_btn = 0 %]
 <div class="card min-w-[400px]">
   <div class="head justify-center">
-    <h3>Log File Navigation</h3>
+    <h3>[% date_select_title %]</h3>
   </div>
   <div class="body">
     <table class="w-full">
@@ -28,7 +30,7 @@
           <i class="uil uil-angle-double-right text-4xl w-9 h-9" title='Next Day'></i>
         </td>
       </tr>
-      <tr>
+      <tr[% IF skip_update_btn %] class="hidden"[% END %]>
         <td class="flex justify-center">
           <input type='submit' value='Update' class="w-24 mt-1">
           <input type="hidden" name="archive" value="" id="archive">

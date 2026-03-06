@@ -6,8 +6,7 @@ use Carp;
 use IPC::Open3 qw/open3/;
 use POSIX ();
 
-use Thruk::Base ();
-use Thruk::Utils::IO ();
+use Thruk::Utils ();
 
 =head1 NAME
 
@@ -91,10 +90,12 @@ sub top_graph_details {
     $c->stash->{template} = 'omd_top_details.tt';
     my @files = sort glob($self->{'folder'}.'/*.log '.$self->{'folder'}.'/*.gz');
 
-    my $t1  = $c->req->parameters->{'t1'};
-    my $t2  = $c->req->parameters->{'t2'};
+    my($t1, $t2) = Thruk::Utils::get_start_end_from_date_select_params($c);
     my $pid = $c->req->parameters->{'pid'};
     my $pattern = _get_pattern($c);
+
+    $c->stash->{'t1'} = $t1;
+    $c->stash->{'t2'} = $t2;
 
     if($pid) {
         $pattern = [
@@ -186,6 +187,7 @@ sub top_graph_details {
         $c->stash->{'t1'} = $t1;
         $c->stash->{'t2'} = $t2;
     }
+    confess("invalid time range") unless defined $t1;
 
     my $now = time();
     for my $file (@files) {

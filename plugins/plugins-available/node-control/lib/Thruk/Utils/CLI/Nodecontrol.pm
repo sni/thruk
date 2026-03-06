@@ -414,7 +414,7 @@ sub _status {
 
     my $status = $s->{'omd_status'};
 
-    return "" unless defined $status->{'OVERALL'};
+    return "UNKNOWN" unless defined $status->{'OVERALL'};
     return "OK" if $status->{'OVERALL'} == 0;
 
     my @failed;
@@ -423,6 +423,9 @@ sub _status {
         if($status->{$key} == 1) {
             push @failed, $key;
         }
+    }
+    if(scalar @failed >= scalar(keys %{$status}) - 1) {
+        return "STOPPED";
     }
     return "failed: ".join(', ', @failed);
 }

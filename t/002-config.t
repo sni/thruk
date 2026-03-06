@@ -252,6 +252,27 @@ if(!$@) {
 };
 
 ####################################################
+{
+    local $ENV{'THRUK_CONFIG'} = 't/data/agent_configs';
+    my $config = Thruk::Config::set_config_env();
+    ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
+    my $expected = {
+        '_FILE' => 't/data/agent_configs/thruk_local.conf',
+        '_LINE' => 2,
+        'exclude' => [{
+            '_FILE' => 't/data/agent_configs/thruk_local.conf',
+            '_LINE' => 3,
+            'host' => [
+                        'ANY',
+                        '!host001'
+                        ],
+            'service' => 'zombie processes'
+        }]
+    };
+    is_deeply($config->{'Thruk::Agents'}->{'snclient'}, $expected, "parsing agents config t/data/agent_configs/");
+};
+
+####################################################
 
 done_testing();
 

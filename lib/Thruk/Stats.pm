@@ -213,13 +213,14 @@ sub _format_html_row {
     my $name    = $row->{'name'};
     my $bold    = ($name =~ m/^\*/mx) ? 1 : 0;
        $name    =~ s/^\*//gmx;
+    my $fullname= $name;
        $name    = substr($indent.$name, 0, 78);
     my $output  = "<tr class='js-indent' data-indent='".($row->{'level'}-1)."'>";
     my $onclick = '';
     if($row->{'stack'}) {
         $onclick = "onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")'";
     }
-    $output .= "<td class='whitespace-pre ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.">".$name."</td>\n";
+    $output .= "<td class='whitespace-pre ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.($fullname ne $name ? " title='$fullname'" : "").">".$name."</td>\n";
     $output .= "<td class='text-right'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 0) {

@@ -1511,9 +1511,13 @@ hash of livestatus host statistics.
 |down_and_disabled_passive         |            |          | number of passive down hosts which have active checks disabled
 |down_and_scheduled                |            |          | number of down hosts which are in a scheduled downtime
 |down_and_unhandled                |            |          | number of unhandled down hosts
+|down_hard                         |            |          | number of hard down hosts
+|down_hard_unhandled               |            |          | number of unhandled hard down hosts
+|down_soft                         |            |          | number of soft down hosts
 |eventhandler_disabled             |            |          | number of hosts with eventhandlers disabled
 |flapping                          |            |          | number of flapping hosts
 |flapping_disabled                 |            |          | number of hosts with flapping detection disabled
+|hard                              |            |          | number of hosts in hard state
 |notifications_disabled            |            |          | number of hosts with notifications disabled
 |outages                           |            |          | number of network outages
 |passive_checks_disabled           |            |          | number of hosts which do not accept passive check results
@@ -1524,6 +1528,7 @@ hash of livestatus host statistics.
 |plain_pending                     |            |          | number of pending hosts which are not acknowleded or in a downtime
 |plain_unreachable                 |            |          | number of unreachable hosts which are not acknowleded or in a downtime
 |plain_up                          |            |          | number of up hosts which are not acknowleded or in a downtime
+|soft                              |            |          | number of hosts in soft state
 |total                             |            |          | total number of hosts
 |total_active                      |            |          | total number of active hosts
 |total_passive                     |            |          | total number of passive hosts
@@ -1533,6 +1538,9 @@ hash of livestatus host statistics.
 |unreachable_and_disabled_passive  |            |          | number of passive unreachable hosts which have active checks disabled
 |unreachable_and_scheduled         |            |          | number of unreachable hosts which are in a scheduled downtime
 |unreachable_and_unhandled         |            |          | number of unhandled unreachable hosts
+|unreachable_hard                  |            |          | number of unreachable hosts in hard state
+|unreachable_hard_unhandled        |            |          | number of unhandled unreachable hosts in hard state
+|unreachable_soft                  |            |          | number of unreachable hosts in soft state
 |up                                |            |          | number of up hosts
 |up_and_disabled_active            |            |          | number of active up hosts which have active checks disabled
 |up_and_disabled_passive           |            |          | number of passive up hosts which have active checks disabled
@@ -1993,10 +2001,14 @@ livestatus service statistics.
 |critical_and_disabled_passive     |            |          | number of passive critical services which have active checks disabled
 |critical_and_scheduled            |            |          | number of critical services which are in a scheduled downtime
 |critical_and_unhandled            |            |          | number of unhandled critical services
+|critical_hard                     |            |          | number of critical services in hard state
+|critical_hard_unhandled           |            |          | number of unhandled critical services in hard state
 |critical_on_down_host             |            |          | number of unhandled critical services on down hosts
+|critical_soft                     |            |          | number of critical services in soft state
 |eventhandler_disabled             |            |          | number of services with eventhandlers disabled
 |flapping                          |            |          | number of flapping services
 |flapping_disabled                 |            |          | number of services with flapping detection disabled
+|hard                              |            |          | number of services in hard state
 |notifications_disabled            |            |          | number of services with notifications disabled
 |ok                                |            |          | number of ok services
 |ok_and_disabled_active            |            |          | number of active ok services which have active checks disabled
@@ -2011,6 +2023,7 @@ livestatus service statistics.
 |plain_pending                     |            |          | number of pending services which are not acknowleded or in a downtime
 |plain_unknown                     |            |          | number of unknown services which are not acknowleded or in a downtime
 |plain_warning                     |            |          | number of warning services which are not acknowleded or in a downtime
+|soft                              |            |          | number of services in soft state
 |total                             |            |          | total number of services
 |total_active                      |            |          | total number of active services
 |total_passive                     |            |          | total number of passive services
@@ -2020,14 +2033,20 @@ livestatus service statistics.
 |unknown_and_disabled_passive      |            |          | number of passive unknown services which have active checks disabled
 |unknown_and_scheduled             |            |          | number of unknown services which are in a scheduled downtime
 |unknown_and_unhandled             |            |          | number of unhandled unknown services
+|unknown_hard                      |            |          | number of unknown services in hard state
+|unknown_hard_unhandled            |            |          | number of unhandled unknown services in hard state
 |unknown_on_down_host              |            |          | number of unhandled unknown services on down hosts
+|unknown_soft                      |            |          | number of unknown services in soft state
 |warning                           |            |          | number of warning services
 |warning_and_ack                   |            |          | number of warning services which are acknowledged
 |warning_and_disabled_active       |            |          | number of active warning services which have active checks disabled
 |warning_and_disabled_passive      |            |          | number of passive warning services which have active checks disabled
 |warning_and_scheduled             |            |          | number of warning services which are in a scheduled downtime
 |warning_and_unhandled             |            |          | number of unhandled warning services
+|warning_hard                      |            |          | number of warning services in hard state
+|warning_hard_unhandled            |            |          | number of unhandled warning services in hard state
 |warning_on_down_host              |            |          | number of unhandled warning services on down hosts
+|warning_soft                      |            |          | number of warning services in soft state
 |===========================================
 
 
