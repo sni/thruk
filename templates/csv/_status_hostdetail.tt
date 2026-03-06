@@ -1,0 +1,46 @@
+﻿[% USE date %]
+[% FOREACH col = columns %]
+  [% IF col == "Site"                         %]Site,
+  [% ELSIF col == "Hostname"                  %]Hostname,
+  [% ELSIF col == "Displayname"               %]Displayname,
+  [% ELSIF col == "Alias"                     %]Alias,
+  [% ELSIF col == "IP"                        %]IP,
+  [% ELSIF col == "Status"                    %]Status,
+  [% ELSIF col == "Parents"                   %]Parents,
+  [% ELSIF col == "Groups"                    %]Groups,
+  [% ELSIF col == "Acknowledged"              %]Acknowledged,
+  [% ELSIF col == "Downtime"                  %]Downtime,
+  [% ELSIF col == "Notifications"             %]Notifications,
+  [% ELSIF col == "Active Checks"             %]Active Checks,
+  [% ELSIF col == "Flapping"                  %]Flapping,
+  [% ELSIF col == "Last Check"                %]Last Check,
+  [% ELSIF col == "Duration"                  %]Duration,
+  [% ELSIF col == "Status Information"        %]Status Information,
+  [% ELSIF col == "Extra Status Information"  %]Extra Status Information,
+  [% ELSIF col == "Comments"                  %]Comments,
+  [% END %]
+[% END %]
+
+[% FOREACH row = data %]
+  [% FOREACH col = columns %]
+    [% IF col == "Site"                         %][% row.peer_name %],
+    [% ELSIF col == "Hostname"                  %][% row.name %],
+    [% ELSIF col == "Displayname"               %][% row.display_name %],
+    [% ELSIF col == "Alias"                     %][% row.alias %],
+    [% ELSIF col == "IP"                        %][% row.address %],
+    [% ELSIF col == "Status"                    %][% row.state %],
+    [% ELSIF col == "Parents"                   %][% row.parents %],
+    [% ELSIF col == "Groups"                    %][% row.groups %],
+    [% ELSIF col == "Acknowledged"              %][% row.acknowledged %],
+    [% ELSIF col == "Downtime"                  %][% row.scheduled_downtime_depth %],
+    [% ELSIF col == "Notifications"             %][% row.notifications_enabled %],
+    [% ELSIF col == "Active Checks"             %][% row.active_checks_enabled %],
+    [% ELSIF col == "Flapping"                  %][% row.is_flapping %],
+    [% ELSIF col == "Last Check"                %][% date.format(row.last_check, "%Y-%m-%d %H:%M:%S") %],
+    [% ELSIF col == "Duration"                  %][% IF row.last_state_change %][% duration(date.now - row.last_state_change) %][% ELSE %][% duration(date.now - program_start) %]+[% END %],
+    [% ELSIF col == "Status Information"        %][% row.plugin_output %],
+    [% ELSIF col == "Extra Status Information"  %][% row.long_plugin_output %],
+    [% ELSIF col == "Comments"                  %][% row.comments %],
+    [% END %]
+  [% END %]
+[% END %]

@@ -572,6 +572,16 @@ sub _process_details_page {
         }
         return $c->render(json => $services);
     }
+    if ( $view_mode eq 'csv') {
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'service');
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
+        my $filename = 'status.csv';
+        $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
+        $c->stash->{'data'}     = $services;
+        $c->stash->{'template'} = 'csv/status_hostdetail.tt';
+
+        return $c->render_csv();
+    }
 
     $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };
 
@@ -703,6 +713,16 @@ sub _process_hostdetails_page {
             Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline);
         }
         return $c->render(json => $hosts);
+    }
+    if ( $view_mode eq 'csv') {
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
+        my $filename = 'status.csv';
+        $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
+        $c->stash->{'data'}     = $hosts;
+        $c->stash->{'template'} = 'csv/status_hostdetail.tt';
+
+        return $c->render_csv();
     }
 
     $c->stash->{'data_sorted'} = { type => $sorttype, option => $sortoption };

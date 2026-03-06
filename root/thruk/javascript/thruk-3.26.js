@@ -4578,6 +4578,46 @@ function updateExcelPermanentLink() {
     initExcelExportSorting();
 }
 
+/* update permanent link of csv export */
+function updateCsvPermanentLink() {
+    var inp = jQuery('#csv_export_url');
+    // Find the container div
+    var container = jQuery('#csv_export_columns');
+
+    // Find and serialize all inputs within this container
+    var data = container.find('input[name!=bookmark][name!=referer][name!=view_mode][name!=all_col]').serialize();
+    var base = jQuery('#csvexportlink')[0].href;
+    base = cleanUnderscore(base);
+
+    // If no checkboxes are checked, return the base URL
+    if (!data) {
+        var cleanBase = base.split('?')[0];
+        jQuery(inp).val(cleanBase);
+        return cleanBase;
+    }
+
+    var params = new URLSearchParams(data);
+    var naemonColumns = [];
+
+    params.forEach(function(value, key) {
+        // Match the name used in the template, currently we have host_columns and service_columns
+        // This regex matches anything with 'columns', e.g 'host_columns', or 'service_columns'
+        if (key.indexOf('columns') !== -1) {
+            naemonColumns.push(value);
+        }
+    });
+
+    var newBase = base.split('?')[0];
+    if (naemonColumns.length > 0) {
+        newBase += '?columns=' + naemonColumns.join(',');
+    }
+
+    jQuery(inp).val(newBase);
+    initCsvExportSorting();
+
+    return newBase;
+}
+
 /* compare two objects and print diff
  * returns true if they differ and false if they are equal
  */
@@ -4725,6 +4765,29 @@ function initExcelExportSorting() {
         placeholder          : 'sortable-placeholder',
         update               : function( event, ui ) {
             updateExcelPermanentLink();
+        }
+    });
+}
+
+function initCsvExportSorting() {
+    if(!has_jquery_ui()) {
+        load_jquery_ui(function() {
+            initCsvExportSorting();
+        });
+        return;
+    }
+    if(already_sortable["csv_export"]) {
+        return;
+    }
+    already_sortable["csv_export"] = true;
+
+    jQuery('TABLE.sortable_col_table').sortable({
+        items                : 'TR.sortable_row',
+        helper               : 'clone',
+        tolerance            : 'pointer',
+        placeholder          : 'sortable-placeholder',
+        update               : function( event, ui ) {
+            updateCsvPermanentLink();
         }
     });
 }
@@ -5625,6 +5688,24 @@ function play_test_audio(btn, audio) {
             }
         }
     )
+}
+
+function forceDownloadHref(href, filename) {
+    if (!href || !filename) return;
+
+    //console.log("href:", href, " filename:", filename);
+
+    const link = document.createElement('a');
+    link.href = href;
+    link.setAttribute('download', filename);
+
+    // Ensure it's hidden so it doesn't flicker on screen
+    link.style.display = 'none';
+
+    document.body.appendChild(link);
+    // Wait a bit before clicking a link, clicking immediately does not work.
+    setTimeout(() => {link.click()}, 100);
+    document.body.removeChild(link);
 }
 
 
@@ -8387,7 +8468,7 @@ function toggleFilterCheckBox(id) {
   }
 }
 
-/* toggle all checkbox for attribute filter */
+/* toggle almost all (first 99) checkboxes for attribute filter */
 function toggleAllFilterCheckBox(prefix) {
   var box = document.getElementById(prefix+"ht0");
   var state = false;

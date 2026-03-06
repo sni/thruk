@@ -13,7 +13,7 @@
     [% style="comments" %]
     [% PROCESS _json_export.tt %]
     [% columns=[ 'Hostname', 'Service', 'Site', 'Entry Time', 'Author', 'Comment', 'Comment ID', 'Persistent', 'Type', 'Expires' ] %]
-    [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 %]
+    [% PROCESS _excel_export.tt columns=columns with_custom_vars=0 prefix="extinfo_type_3_excel_" %]
   </div>
   <div class="basis-1/3 self-end">
     <div class="hint text-center whitespace-nowrap text-xs">Mark comments with leftclick. Select multiple with shift + mouse.</div>
