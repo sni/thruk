@@ -61,7 +61,7 @@ Used as a prefix for the <input> IDs in the form. Make sure its unique on the re
 
 <div class="flex relative">
   <a
-    href="[% url_prefix %]r/[% api_endpoint %]"
+    href="[% url_prefix %]r/[% api_endpoint %][% IF filter_text %]?q=***[% filter_text | uri %]***[% END %]"
     class="button round small"
     onclick="toggleElement('csv_export_columns', undefined, true); updateCsvPermanentLink(); return false;"
     id='csvexportlink'

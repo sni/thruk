@@ -8,7 +8,7 @@ BEGIN {
     require TestUtils;
     import TestUtils;
 }
-plan tests => 34;
+plan tests => 55;
 
 ###########################################################
 # test thruks script path
@@ -45,5 +45,20 @@ $ENV{'THRUK_TEST_AUTH_USER'} = "omdadmin";
         url    => 'http://localhost/demo/thruk/r/csv/hosts?columns=name,comments',
         like   => ['name;comments', ';\d'],
         unlike => ['\['],
+    );
+    # simple host query
+    TestUtils::test_page(
+        url  => 'http://localhost/demo/thruk/r/csv/hosts?columns=name&q=***name ~ ^loc***',
+        like => ['localhost'],
+    );
+    # simple host query with _host prefix
+    TestUtils::test_page(
+        url  => 'http://localhost/demo/thruk/r/csv/hosts?columns=host_name&q=***host_name ~ ^loc***',
+        like => ['localhost'],
+    );
+    # simple service query with _service prefix
+    TestUtils::test_page(
+        url  => 'http://localhost/demo/thruk/r/csv/services?columns=host_name,service_description&q=***service_description ~ ^Ping***',
+        like => ['localhost;Ping'],
     );
 };

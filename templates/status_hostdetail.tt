@@ -55,7 +55,7 @@
         [% columns_excel=[ 'Site:0', 'Hostname', 'Displayname:0', 'IP', 'Alias:0', 'Parents:0', 'Groups:0', 'Status', 'Acknowledged', 'Downtime', 'Notifications', 'Active Checks', 'Flapping', 'Last Check', 'Contacts', 'Duration', 'Status Information', 'Extra Status Information:0', 'Comments:0' ] %]
         [% PROCESS _excel_export.tt columns=columns_excel with_custom_vars=1 prefix="status_hostdetail_excel_" %]
         [% columns_csv=[ 'address::0', 'alias::0', 'display_name::0', 'name:Hostname:1', 'hoststate(state):hoststate:1', 'parents::0', 'groups::0', 'acknowledged::0', 'downtimes::0', 'notifications_enabled::0', 'active_checks_enabled::0', 'is_flapping::0', 'utc(last_check):utc(last_check):0', 'duration::0', 'plugin_output::0', 'long_plugin_output::0', 'contacts::0', 'comments::0' ] %]
-        [% PROCESS _csv_export.tt columns=columns_csv with_custom_vars=1 api_endpoint='csv/hosts' prefix="status_hostdetail_csv_" %]
+        [% PROCESS _csv_export.tt columns=columns_csv with_custom_vars=1 api_endpoint='csv/hosts' prefix="status_hostdetail_csv_" filter_text=search2text("service", searches.$paneprefix, 1) %]
         [% IF hostgroup != '' && hostgroup != 'all' %]
           <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
         [% ELSIF servicegroup != '' && servicegroup != 'all' %]

@@ -265,6 +265,9 @@ sub process_rest_request {
     $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
     $c->stash->{'meta_column_info'} = {};
 
+
+    delete $c->stash->{'req_table'};
+
     if(!$data) {
         eval {
             $data = _fetch($c, $path_info, $method);
@@ -1619,23 +1622,25 @@ sub _livestatus_options {
 
 ##########################################################
 sub _livestatus_filter {
-    my($c, $ref_columns) = @_;
-    if($ref_columns && ref $ref_columns eq '') {
-        if($ref_columns eq 'hosts') {
+    my($c, $table) = @_;
+    my $ref_columns;
+    $c->stash->{'req_table'} = $table if $table;
+    if($table && ref $table eq '') {
+        if($table eq 'hosts') {
             $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_host_columns}, @{$Thruk::Backend::Provider::Livestatus::extra_host_columns}]);
         }
-        elsif($ref_columns eq 'services') {
+        elsif($table eq 'services') {
             $ref_columns = Thruk::Base::array2hash([@{$Thruk::Backend::Provider::Livestatus::default_service_columns}, @{$Thruk::Backend::Provider::Livestatus::ref_service_columns}]);
         }
-        elsif($ref_columns eq 'contacts') {
+        elsif($table eq 'contacts') {
             $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_contact_columns);
         }
-        elsif($ref_columns eq 'logs') {
+        elsif($table eq 'logs') {
             $ref_columns = Thruk::Base::array2hash($Thruk::Backend::Provider::Livestatus::default_logs_columns);
             # logcache has no plugin_output column
             delete $ref_columns->{"plugin_output"};
         } else {
-            confess("unsupported type: ".$ref_columns);
+            confess("unsupported type: ".$table);
         }
     }
     my($filter) = _get_filter($c, PRE_STATS);
@@ -1661,6 +1666,7 @@ sub _fixup_livestatus_filter {
                 if($ref_columns && !$ref_columns->{$f}) {
                     my $tst = $f;
                     if($tst =~ s/^service_//mxo) { $f = $tst if($ref_columns->{$tst}); }
+                    if($tst =~ s/^host_//mxo)    { $f = $tst if($ref_columns->{$tst}); }
                 }
                 if($ref_columns && !$ref_columns->{$f}) {
                     # normalize filter
@@ -3238,6 +3244,7 @@ sub _parse_columns_data_names {
     my($raw, $keep_functions) = @_;
     my $columns = [];
     my $num_cols = scalar @{$raw};
+    my $c = $Thruk::Globals::c;
     for(my $x = 0; $x < $num_cols; $x++) {
         my $name = $raw->[$x];
         my $realcol;
@@ -3248,6 +3255,11 @@ sub _parse_columns_data_names {
             $name =~ s/\s+as\s+([^\s]+)\s*$//mxi; # strip "as alias" from column
         } else {
             $name =~ s/^([^:]+):[^"']*?$/$1/gmx; # strip alias
+        }
+        if($c && $c->stash->{'req_table'}) {
+            # fix wrong column names
+            if($c->stash->{'req_table'} eq 'hosts') { $name =~ s/^host_//gmx; }
+            if($c->stash->{'req_table'} eq 'services') { $name =~ s/^service_//gmx; }
         }
         if(!$keep_functions) {
             $name =~ s/^.*\(([^)]+)\)$/$1/gmx; # extract column name from aggregation function

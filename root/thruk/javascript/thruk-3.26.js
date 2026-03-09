@@ -4589,16 +4589,8 @@ function updateCsvPermanentLink() {
     var base = jQuery('#csvexportlink')[0].href;
     base = cleanUnderscore(base);
 
-    // If no checkboxes are checked, return the base URL
-    if (!data) {
-        var cleanBase = base.split('?')[0];
-        jQuery(inp).val(cleanBase);
-        return cleanBase;
-    }
-
-    var params = new URLSearchParams(data);
+    var params        = new URLSearchParams(data);
     var naemonColumns = [];
-
     params.forEach(function(value, key) {
         // Match the name used in the template, currently we have host_columns and service_columns
         // This regex matches anything with 'columns', e.g 'host_columns', or 'service_columns'
@@ -4607,9 +4599,11 @@ function updateCsvPermanentLink() {
         }
     });
 
-    var newBase = base.split('?')[0];
+    var newBase;
     if (naemonColumns.length > 0) {
-        newBase += '?columns=' + naemonColumns.join(',');
+        newBase = uriWith(base, {'columns': naemonColumns});
+    } else {
+        newBase = uriWith(base, {}, {'columns': null});
     }
 
     jQuery(inp).val(newBase);
