@@ -26,15 +26,24 @@ jobs:
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
       - uses: abbbi/github-actions-tune@v1
-      - name: ./.ci/prepare_machine.sh
-        run: timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
-      - name: ./.ci/install_deps.sh
-        run: |
+      - name: prepare machine
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          timeout_minutes: 10
+          command: |
+            timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
+      - name: install dependencies
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 5
+          timeout_minutes: 10
+          command: |
             chmod o+x /home/runner/
             timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
       - name: ./script/install_puppeteer.sh
         run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
-      - name: make more diskspace
+      - name: free some disk space
         run: |
             # remove unused images
             timeout -v 15m sudo bash -x ./.ci/docker_clean_safe.sh
