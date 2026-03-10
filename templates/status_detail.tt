@@ -77,7 +77,7 @@
       [%# Extra Status Information requires conditionals which the api cannnot do %]
       [%# Comment requires looping through a %]
       [% columns_csv=[ 'host_name::1', 'host_display_name::0', 'host_address::0', 'host_alias::0', 'host_parents::0', 'host_groups::0','host_acknowledged::0', 'host_scheduled_downtime_depth::0', 'host_notifications_enabled::0','host_active_checks_enabled::0', 'host_is_flapping::0', 'description::1', 'display_name::0','servicestate(state):servicestate:1', 'utc(last_check):utc(last_check):0', 'current_attempt::0', 'max_check_attempts::0', 'acknowledged::0', 'scheduled_downtime_depth::0', 'notifications_enabled::0', 'active_checks_enabled::0', 'is_flapping::0', 'contacts::0'] %]
-      [% PROCESS _csv_export.tt columns=columns_csv with_custom_vars=1 api_endpoint='csv/services' prefix="status_detail_csv_" filter_text=search2text("service", searches.$paneprefix, 1) %]
+      [% PROCESS _csv_export.tt columns=columns_csv with_custom_vars=1 api_endpoint='csv/services' prefix="status_detail_csv_" filter_text=csv_filter_text %]
       [% IF hostgroup != '' && hostgroup != 'all' %]
         <a class="button round small" href="extinfo.cgi?type=5&amp;hostgroup=[% hostgroup | uri %]" title="send hostgroup commands"><i class="uil uil-icons"></i></a>
       [% ELSIF servicegroup != '' && servicegroup != 'all' %]

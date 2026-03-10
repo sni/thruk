@@ -492,6 +492,7 @@ sub _process_details_page {
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    $c->stash->{'csv_filter_text'} = Thruk::Utils::Status::search2text($c, "service", $c->stash->{'searches'}->{'dfl_'}, 1);
     return 1 if $c->stash->{'has_error'};
 
     # reverse order for duration
@@ -651,6 +652,7 @@ sub _process_hostdetails_page {
         $sortnum++;
     }
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
+    $c->stash->{'csv_filter_text'} = Thruk::Utils::Status::search2text($c, "host", $c->stash->{'searches'}->{'dfl_'}, 1);
     return 1 if $c->stash->{'has_error'};
 
     # reverse order for duration
