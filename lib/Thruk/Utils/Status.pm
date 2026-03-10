@@ -2775,6 +2775,10 @@ sub parse_lexical_filter {
                     undef $key;
                     my $f = parse_lexical_filter($string, $keep_custom_fields, 1);
                     push @{$filter}, $f;
+                    if(defined $combine) {
+                        $filter = _lexical_combine($combine, $filter);
+                        undef $combine;
+                    }
                     next;
                 }
                 if($key eq ')') {

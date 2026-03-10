@@ -75,9 +75,9 @@ _test_filter('(host_groups ~~ "g1" AND host_groups ~~ "g2")  OR (host_name = "h1
 _test_filter('(host_name = 1) or (host_name = 2) or (host_name = 3)',
              "Filter: host_name = 1\nFilter: host_name = 2\nFilter: host_name = 3\nOr: 3",
              "host_name = 1 or host_name = 2 or host_name = 3");
-_test_filter('(host_name = test and message ~~ \'(\s|;)localhost(;|$)\'))',
-             "Filter: host_name = test\nFilter: message ~~ (\\s|;)localhost(;|\$)\nAnd: 2",
-             "host_name = 'test' and message ~~ '(\\s|;)localhost(;|\$)'");
+_test_filter('(host_name = \'localhost\' or (type = \'EXTERNAL COMMAND\' and message ~~ \'(\s|;)localhost(;|$)\'))',
+             "Filter: host_name = localhost\nFilter: type = EXTERNAL COMMAND\nFilter: message ~~ (\\s|;)localhost(;|\$)\nAnd: 2\nOr: 2",
+             "host_name = 'localhost' or (type = 'EXTERNAL COMMAND' and message ~~ '(\\s|;)localhost(;|\$)')");
 
 sub _test_filter {
     my($filter, $expect, $exp_ftext) = @_;
