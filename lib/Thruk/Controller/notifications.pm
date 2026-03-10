@@ -82,6 +82,7 @@ sub index {
     if($errors == 0) {
         $total_filter = Thruk::Utils::combine_filter('-and', $filter);
     }
+    $c->stash->{'total_filter'} = [$total_filter];
 
     my $order = "DESC";
     if($oldestfirst) {

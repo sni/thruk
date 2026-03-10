@@ -2022,13 +2022,27 @@ sub _obj_name {
 
   search2text($type, $filter)
 
-returns text/lexical filter for structured filter
+returns text/lexical filter for status search
 
 =cut
 sub search2text {
     my $c = $Thruk::Globals::c;
     require Thruk::Utils::Status;
     return(Thruk::Utils::Status::search2text($c, @_));
+}
+
+########################################
+
+=head2 filter2text
+
+  filter2text($filter, [$indent])
+
+returns text/lexical filter for any filter
+
+=cut
+sub filter2text {
+    require Thruk::Utils::Status;
+    return(Thruk::Utils::Status::filter2text(@_));
 }
 
 ########################################

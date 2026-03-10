@@ -4,7 +4,7 @@
   [% PROCESS _add_bookmark.tt style="detail" %]
   [% PROCESS _show_link.tt style="detail" %]
   [% PROCESS _excel_export.tt columns=[ 'Time', 'Site', 'Event', 'Event Detail', 'Hostname', 'Service Description', 'Info', 'Message' ] with_custom_vars=0 prefix="logs_export_excel_" %]
-  [% PROCESS _csv_export.tt columns=[ 'class::0', 'command_name::0', 'contact_name::0', 'host_name::1', 'message::1', 'options::0', 'peer_key::0', 'peer_name::0', 'plugin_output::0', 'service_description::0', 'servicestate(state):state:1', 'state_type::0', 'utc(time):utc(time):1', 'type::0' ] with_custom_vars=0 api_endpoint='csv/notifications' prefix="logs_export_csv_" filter_text="" %]
+  [% PROCESS _csv_export.tt columns=[ 'class::0', 'command_name::0', 'contact_name::0', 'host_name::1', 'message::1', 'options::0', 'peer_key::0', 'peer_name::0', 'plugin_output::0', 'service_description::0', 'servicestate(state):state:1', 'state_type::0', 'utc(time):utc(time):1', 'type::0' ] with_custom_vars=0 api_endpoint='csv/logs' prefix="logs_export_csv_" filter_text=filter2text(total_filter, 1) %]
 </div>
 
 <div class="card w-full min-w-[420px]">

@@ -3153,6 +3153,7 @@ sub _filtercombine {
 
 sub _filterval {
     my($val) = @_;
+    return "''" unless defined $val;
     if(ref $val) {
         confess("no refs allowed here");
     }

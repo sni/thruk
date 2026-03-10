@@ -154,6 +154,8 @@ sub index {
         $order = "ASC";
     }
 
+    $c->stash->{'total_filter'} = [$total_filter];
+
     if( defined $c->req->parameters->{'view_mode'} and $c->req->parameters->{'view_mode'} eq 'xls' ) {
         $c->stash->{'template'}   = 'excel/logs.tt';
         $c->stash->{'file_name'}  = 'logs.xls';
