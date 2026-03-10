@@ -993,23 +993,27 @@ sub _process_grid_page {
         }
 
         for my $member ( @{ $group->{'members'} } ) {
-            my( $hostname, $servicename );
-            if( $c->stash->{substyle} eq 'host' ) {
-                $hostname = $member;
-            } else {
-                ( $hostname, $servicename ) = @{$member};
-            }
-            next unless defined $host_data->{$hostname};
-
-            # add all services
-            $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'} = {} unless defined $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'};
-            if( $c->stash->{substyle} eq 'host' ) {
-                for my $service ( sort keys %{ $services_data->{$hostname} } ) {
-                    $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$service} = 1;
+            for my $peer_key ( @{ $group->{'peer_key'} } ) {
+                my( $hostname, $servicename );
+                if( $c->stash->{substyle} eq 'host' ) {
+                    $hostname = $member;
+                } else {
+                    ( $hostname, $servicename ) = @{$member};
                 }
-            }
-            else {
-                $joined_groups{$name}->{'hosts'}->{$hostname}->{'services'}->{$servicename} = 1;
+                next unless defined $host_data->{$hostname}->{$peer_key};
+
+                # add all services
+                $joined_groups{$name}->{'hosts'}->{$hostname}->{$peer_key}->{'services'} = {} unless defined $joined_groups{$name}->{'hosts'}->{$hostname}->{$peer_key}->{'services'};
+                if( $c->stash->{substyle} eq 'host' ) {
+                    for my $peer_key ( sort keys %{ $services_data->{$hostname} } ) {
+                        for my $service ( sort keys %{ $services_data->{$hostname}->{$peer_key} } ) {
+                            $joined_groups{$name}->{'hosts'}->{$hostname}->{$peer_key}->{'services'}->{$service} = 1;
+                        }
+                    }
+                }
+                else {
+                    $joined_groups{$name}->{'hosts'}->{$hostname}->{$peer_key}->{'services'}->{$servicename} = 1;
+                }
             }
         }
 
@@ -1048,10 +1052,16 @@ sub _process_grid_page {
 
     for my $group (@{$c->stash->{'data'}}) {
         for my $hostname (keys %{$group->{hosts}}) {
-            # merge host data
-            %{$group->{hosts}->{$hostname}} = (%{$group->{hosts}->{$hostname}}, %{$host_data->{$hostname}});
-            for my $servicename (keys %{$group->{hosts}->{$hostname}->{'services'}}) {
-                $group->{hosts}->{$hostname}->{'services'}->{$servicename} = $services_data->{$hostname}->{$servicename};
+            for my $peer_key (keys %{$group->{hosts}->{$hostname}}) {
+                # merge host data
+                %{$group->{hosts}->{$hostname}->{$peer_key}} = (%{$group->{hosts}->{$hostname}->{$peer_key}}, %{$host_data->{$hostname}->{$peer_key}});
+                for my $servicename (keys %{$group->{hosts}->{$hostname}->{$peer_key}->{'services'}}) {
+                    if(!defined $services_data->{$hostname}->{$peer_key}->{$servicename}) {
+                        delete $group->{hosts}->{$hostname}->{$peer_key}->{'services'}->{$servicename};
+                        next;
+                    }
+                    $group->{hosts}->{$hostname}->{$peer_key}->{'services'}->{$servicename} = $services_data->{$hostname}->{$peer_key}->{$servicename};
+                }
             }
         }
     }
@@ -1707,7 +1717,7 @@ sub _fill_host_services_hashes {
     my $tmp_host_data = $c->db->get_hosts( filter => $hostfilter, columns => $all_columns ? undef : [qw/name/] );
     if( defined $tmp_host_data ) {
         for my $host ( @{$tmp_host_data} ) {
-            $host_data->{ $host->{'name'} } = $host;
+            $host_data->{ $host->{'name'} }->{ $host->{'peer_key'} } = $host;
         }
     }
 
@@ -1715,7 +1725,7 @@ sub _fill_host_services_hashes {
     my $tmp_services = $c->db->get_services( filter => $servicefilter, columns => $all_columns ? undef : [qw/host_name description/] );
     if( defined $tmp_services ) {
         for my $service ( @{$tmp_services} ) {
-            $services_data->{ $service->{'host_name'} }->{ $service->{'description'} } = $service;
+            $services_data->{ $service->{'host_name'} }->{ $service->{'peer_key'} }->{ $service->{'description'} } = $service;
         }
     }
     return($host_data, $services_data);

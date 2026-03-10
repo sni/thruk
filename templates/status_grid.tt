@@ -108,7 +108,10 @@
             </thead>
             <tbody>
               [% FOR hostname IN g.hosts.keys.sort %]
-                [% SET h = g.hosts.$hostname %]
+                [% SET hosts_data = g.hosts.$hostname %]
+                [% FOR peer_key IN hosts_data.keys.sort %]
+                  [% SET h = g.hosts.$hostname.$peer_key; LAST; %]
+                [% END %]
                 [% hoststate = '' %]
                 [% IF h.state == 1 %]
                   [% hoststate = 'DOWN' %]
@@ -132,20 +135,23 @@
                   [% ELSIF col.field == "state" %]
                     <td class="">
                       <div class="flex gap-0.5 flex-row flex-wrap">
-                        [% FOR servicename IN h.services.keys.sort %]
-                          [% SET s = h.services.$servicename %]
-                          [% IF s.has_been_checked == 0 %]
-                            [% SET s_status = 'PENDING' %]
-                          [% ELSIF s.state == 0 %]
-                            [% SET s_status = 'OK' %]
-                          [% ELSIF s.state == 1 %]
-                            [% SET s_status = 'WARNING' %]
-                          [% ELSIF s.state == 2 %]
-                            [% SET s_status = 'CRITICAL' %]
-                          [% ELSIF s.state == 3 %]
-                            [% SET s_status = 'UNKNOWN' %]
+                        [% FOR peer_key IN hosts_data.keys.sort %]
+                          [% SET hst = g.hosts.$hostname.$peer_key; %]
+                          [% FOR servicename IN hst.services.keys.sort %]
+                            [% SET s = hst.services.$servicename %]
+                            [% IF s.has_been_checked == 0 %]
+                              [% SET s_status = 'PENDING' %]
+                            [% ELSIF s.state == 0 %]
+                              [% SET s_status = 'OK' %]
+                            [% ELSIF s.state == 1 %]
+                              [% SET s_status = 'WARNING' %]
+                            [% ELSIF s.state == 2 %]
+                              [% SET s_status = 'CRITICAL' %]
+                            [% ELSIF s.state == 3 %]
+                              [% SET s_status = 'UNKNOWN' %]
+                            [% END %]
+                            <a href="extinfo.cgi?type=2&amp;host=[% hst.name | uri %]&amp;service=[% s.description | uri %]&backend=[% peer_key | uri %]" class='[% s_status %] badge'>[% _service(s) | html %]</a>
                           [% END %]
-                          <a href="extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=[% s.description | uri %]" class='[% s_status %] badge'>[% _service(s) | html %]</a>
                         [% END %]
                       </div>
                     </td>
