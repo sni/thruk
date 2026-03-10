@@ -17,32 +17,43 @@ env:
 
 jobs:
   citest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - name: perl -V
         run: perl -V
+
       - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
         uses: mxschmitt/action-tmate@v3
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
       - uses: abbbi/github-actions-tune@v1
+
       - name: prepare machine
         uses: nick-fields/retry@v3
         with:
-          max_attempts: 5
-          timeout_minutes: 10
+          max_attempts: 3
+          timeout_minutes: 6
           command: |
-            timeout -v 15m sudo bash -x ./.ci/prepare_machine.sh
+            timeout -v 5m sudo bash -x ./.ci/prepare_machine.sh
       - name: install dependencies
         uses: nick-fields/retry@v3
         with:
-          max_attempts: 5
-          timeout_minutes: 10
+          max_attempts: 3
+          timeout_minutes: 6
           command: |
             chmod o+x /home/runner/
-            timeout -v 15m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
-      - name: ./script/install_puppeteer.sh
-        run: timeout -v 15m sudo bash -x ./script/install_puppeteer.sh
+            timeout -v 5m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
+
+      - name: install puppeteer
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          timeout_minutes: 3
+          command: |
+            timeout -v 2m sudo bash -x ./script/install_puppeteer.sh
+
       - name: free some disk space
         run: |
             # remove unused images
@@ -50,6 +61,7 @@ jobs:
             # remove unrelated large sdk
             sudo rm -rf /usr/local/lib/android
             df -h
+
       - name: cache files
         id: thruk-test-cache
         uses: actions/cache@v5
@@ -58,8 +70,12 @@ jobs:
             ${{ env.THRUK_TEST_MODULES_CACHE }}
             ${{ env.THRUK_CRITIC_CACHE_FILE }}
           key: thruk-test-cache
+
       - name: make cache files writable
-        run: "sudo chown -R naemon: ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :"
+        run: |
+          sudo chown -R naemon: ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
+          ls -la ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
+
       - name: make citest
         run: |
           timeout -v 90m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && HARNESS_TIMER=1 stdbuf -o0 -e0 make citest'
