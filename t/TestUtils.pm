@@ -274,6 +274,7 @@ sub test_page {
         my $msg = $1;
         fail('Request '.$opts->{'url'}.' had error message: '.$msg) unless $opts->{'fail_message_ok'};
         fail('Request '.$opts->{'url'}.' error message contains escaped html: '.$msg) if $msg =~ m/&lt;.*&gt;/mx;
+        set_cookie('thruk_message', '', 1);
     }
 
     # wait for something?
@@ -532,6 +533,7 @@ sub test_page {
             unless($request->is_success) {
                 $errors++;
                 diag("'$test_url' is missing, status: ".$request->code);
+                #bail_out_req("'$test_url' is missing, status: ".$request->code, $request);
             }
         }
         is( $errors, 0, 'All stylesheets, images and javascript exist' );

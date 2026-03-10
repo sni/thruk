@@ -1664,9 +1664,13 @@ sub _fixup_livestatus_filter {
                 _fixup_livestatus_filter($c, $filter->{$f}, $ref_columns);
             } else {
                 if($ref_columns && !$ref_columns->{$f}) {
-                    my $tst = $f;
+                    my $tst = "$f";
+                    my $orig = $tst;
                     if($tst =~ s/^service_//mxo) { $f = $tst if($ref_columns->{$tst}); }
                     if($tst =~ s/^host_//mxo)    { $f = $tst if($ref_columns->{$tst}); }
+                    if($tst ne $orig) {
+                        $filter->{$f} = delete $filter->{$orig};
+                    }
                 }
                 if($ref_columns && !$ref_columns->{$f}) {
                     # normalize filter
@@ -3011,7 +3015,15 @@ sub _match_complex_filter {
                         } elsif($localkey eq 'description' && defined $data->{'service'}) {
                             $localkey = 'service';
                         } else {
-                            $missed->{$localkey}->{$nr} = 1;
+                            # fix wrong column names
+                            my $c = $Thruk::Globals::c;
+                            if($c->stash->{'req_table'}) {
+                                if($c->stash->{'req_table'} eq 'hosts')    { $localkey =~ s/^host_//gmx; }
+                                if($c->stash->{'req_table'} eq 'services') { $localkey =~ s/^service_//gmx; }
+                            }
+                            if(!defined $data->{$localkey}) {
+                                $missed->{$localkey}->{$nr} = 1;
+                            }
                         }
                     }
                     return(_compare($op, $data->{$localkey}, $val->{$op}));
@@ -3258,7 +3270,7 @@ sub _parse_columns_data_names {
         }
         if($c && $c->stash->{'req_table'}) {
             # fix wrong column names
-            if($c->stash->{'req_table'} eq 'hosts') { $name =~ s/^host_//gmx; }
+            if($c->stash->{'req_table'} eq 'hosts')    { $name =~ s/^host_//gmx; }
             if($c->stash->{'req_table'} eq 'services') { $name =~ s/^service_//gmx; }
         }
         if(!$keep_functions) {
