@@ -1331,7 +1331,7 @@ sub js_init {
         );
     });
 
-    js_ok("function diag(txt) { console.log(txt); }", 'added diag function');
+    js_ok("function diag(txt) { console.info(txt); }", 'added diag function');
     return($mech);
 }
 
@@ -1384,8 +1384,9 @@ sub js_is {
     $mech->clear_js_errors();
     my($val, $type) = $mech->eval_in_page($src);
     my @err = $mech->js_errors();
+    diag("console messages for: ".($msg//'unknown')) if scalar @err > 0;
     for my $e (@err) {
-      _js_diag_error($e, "console messages for: ".($msg//'unknown'));
+      _js_diag_error($e);
     }
     $mech->clear_js_errors();
     is($val, $expect, $msg);
@@ -1418,8 +1419,8 @@ sub _js_diag_error {
         );
         $known = 1;
     }
-    if($e->{'type'} && $e->{'type'} eq 'debug') {
-        diag("not failing on debug lvl console message");
+    if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
+        #diag("not failing on debug lvl console message");
         return;
     } else {
         fail("got js error");

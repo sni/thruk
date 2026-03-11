@@ -38,3 +38,16 @@ function test_allowed_frames() {
     }
     return 1;
 }
+
+function test_uriWith() {
+    var url1 = "http://localhost:3000/thruk/r/csv/services";
+    var url2 = uriWith(url1, {'columns': ["col1", "col2" ]});
+    var exp  = "http://localhost:3000/thruk/r/csv/services?columns=col1&columns=col2";
+    if(url2 != exp) {
+        diag("expected: " + exp );
+        diag("but got:  " + url2);
+        return 0;
+    }
+
+    return 1;
+}
