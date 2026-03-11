@@ -10618,11 +10618,15 @@ function toUnixtime(ts) {
 function replaceHistouTitle(title, hst, svc) {
     title = title.replace(hst + ' - ', '');
     title = title.replace(hst + ' ', '');
-    title = title.replace(svc + ' - ', '');
-    title = title.replace(svc + ' ', '');
-    title = title.replace(/^\/check_\S+[^\/]*\/ /, '');
-    title = title.replace(/^check_\S+ - /, '');
-    title = title.replace(/^check_\S+ /, '');
+    title = title.replace('hostcheck - ', '');
+    title = title.replace('hostcheck ', '');
+	if(svc != "") {
+        title = title.replace(svc + ' - ', '');
+        title = title.replace(svc + ' ', '');
+    }
+    title = title.replace(/^\/check(_|\-)\S+[^\/]*\/ /, '');
+    title = title.replace(/^check(_|\-)\S+ - /, '');
+    title = title.replace(/^check(_|\-)\S+ /, '');
     title = title.replace(/^\${|:\w+}/g, '');
     return(title);
 }
