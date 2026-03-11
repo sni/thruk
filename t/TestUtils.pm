@@ -488,8 +488,8 @@ sub test_page {
         verify_html_js($content) unless $opts->{'skip_js_check'};
         # remove script tags without a src
         $content =~ s/<script(?!([^>]*src=[^>]*))[^>]*>.+?<\/script>//gsmxio;
-        my @matches1 = $content =~ m/<(?:[^>]+)\s+(src|href)='(.+?)'/gio;
-        my @matches2 = $content =~ m/<(?:[^>]+)\s+(src|href)="(.+?)"/gio;
+        my @matches1 = $content =~ m/<(?:[^>]+)\s+(src|href)='(.*?)'/gio;
+        my @matches2 = $content =~ m/<(?:[^>]+)\s+(src|href)="(.*?)"/gio;
         my $links_to_check;
         my $x=0;
         for my $match (@matches1, @matches2) {
@@ -507,6 +507,7 @@ sub test_page {
             next if $match =~ m|^/thruk/frame\.html|mxo and defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
+            next if $match eq '';
             next if $match =~ m/data:image\/png;base64/mxo;
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmxo;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmxo;
