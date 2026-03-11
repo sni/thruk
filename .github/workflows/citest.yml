@@ -35,13 +35,16 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 6
+          retry_wait_seconds: 180
           command: |
             timeout -v 5m sudo bash -x ./.ci/prepare_machine.sh
+
       - name: install dependencies
         uses: nick-fields/retry@v3
         with:
           max_attempts: 3
           timeout_minutes: 6
+          retry_wait_seconds: 180
           command: |
             chmod o+x /home/runner/
             timeout -v 5m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
@@ -51,6 +54,7 @@ jobs:
         with:
           max_attempts: 3
           timeout_minutes: 3
+          retry_wait_seconds: 180
           command: |
             timeout -v 2m sudo bash -x ./script/install_puppeteer.sh
 
