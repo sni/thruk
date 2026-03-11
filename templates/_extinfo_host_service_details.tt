@@ -134,7 +134,7 @@ END
     </tr>
   [% END %]
   <tr>
-    <th>Host</th>
+    <th class="w-0">Host</th>
     <td>
       <div class="flex gap-x-2">
         <div>
