@@ -1802,8 +1802,11 @@ function toQueryParams(str) {
         str = window.location.href.slice(i + 1);
     }
     if(str.match(/^https?:/)) {
-        str = str.replace(/.*?\?/, '');
-        str = str.replace(/\#.*$/, '');
+        var i = str.indexOf('?');
+        if(i == -1) {
+            return vars;
+        }
+        str = str.slice(i + 1)
     }
     if (str == "") { return vars; };
     str = str.replace(/#.*$/g, '');
