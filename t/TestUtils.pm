@@ -1413,10 +1413,9 @@ sub _js_diag_error {
         $known = 1;
     }
     if($e->{'args'}) {
-        diag(join ", ",
-            map { $_->{value} // $_->{description} }
-            @{$e->{args}}
-        );
+        for my $a (@{$e->{args}}) {
+            diag(_js_format_err_arg($a));
+        }
         $known = 1;
     }
     if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
@@ -1438,6 +1437,29 @@ sub _js_diag_error {
     }
 
     diag("unknown error: ".Dumper($e)) unless $known;
+}
+
+#################################################
+sub _js_format_err_arg {
+    my($arg) = @_;
+
+    if($arg->{'type'} eq 'object' && defined $arg->{'preview'} && defined $arg->{'preview'}->{'properties'}) {
+        my $x = 0;
+        my $str = ($arg->{'className'} // "unknown") . "(";
+        for my $p (@{$arg->{'preview'}->{'properties'}}) {
+            if($x > 0) {
+                $str .= ", ";
+            }
+            $x++;
+
+            $str .= sprintf("%s (%s): %s", $p->{'name'}, $p->{'type'}, $p->{'value'});
+        }
+        $str .= ")";
+        return($str);
+    }
+
+    return $arg->{'value'} if defined $arg->{'value'};
+    return $arg->{'description'} if defined $arg->{'description'};
 }
 
 #################################################
