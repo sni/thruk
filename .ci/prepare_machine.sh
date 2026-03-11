@@ -71,10 +71,10 @@ apt-get -y install \
     zlib1g-dev \
 
 # list of mirrors: https://mirrors.opensuse.org/
-#echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list
-curl -s "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" \
-    -o /etc/apt/trusted.gpg.d/naemon.asc
+mkdir -p /etc/apt/sources.list.d
+curl -sS "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" -o /etc/apt/trusted.gpg.d/naemon.asc
+#echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
+echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
 apt-get -y update
 apt-get -y install naemon-core naemon-livestatus
 chsh -s /bin/bash naemon
