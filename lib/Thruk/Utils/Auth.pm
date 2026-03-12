@@ -72,7 +72,7 @@ sub get_auth_filter {
         }
         return(Thruk::Utils::combine_filter(
             '-or', [
-                $can_submit_commands ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
+                (!$cmd_permissions || $can_submit_commands) ? {'contacts' => { '>=' => $user_name }} : {'name' => '' },
                 @{permissions_filter($c, 'hosts', $cmd_permissions, $show_cmdline_permissions)},
             ],
         ));
