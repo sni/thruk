@@ -544,7 +544,7 @@ sub _process_details_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, [''], 'service');
+        Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'host');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
@@ -1303,7 +1303,7 @@ sub _process_combined_page {
     $c->stash->{'services_limit_hit'} = 0;
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
+        Thruk::Utils::Status::set_selected_columns($c, ['status_combined_excel_host_','status_combined_excel_service_']);
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'hosts'}     = $hosts;
@@ -1397,7 +1397,7 @@ sub _process_perfmap_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, [''], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
+        Thruk::Utils::Status::set_selected_columns($c, ['status_perfmap_excel_'], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
         my $filename = 'performancedata.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'name'}      = 'Performance';

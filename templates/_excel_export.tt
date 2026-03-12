@@ -66,12 +66,12 @@ Used as a prefix for the <input> IDs in the form. Make sure its unique on the re
           <td valign="top">
             <div class="px-2 font-semibold">Hosts:</div>
             [% PROCESS checkall prefix='host_' %]
-            [% PROCESS cols prefix='host_' columns=hostcolumns %]
+            [% PROCESS cols prefix=(prefix _ 'host_') columns=hostcolumns %]
           </td>
           <td valign="top">
             <div class="px-2 font-semibold">Services:</div>
             [% PROCESS checkall prefix='service_' %]
-            [% PROCESS cols prefix='service_' columns=servicecolumns %]
+            [% PROCESS cols prefix=(prefix _ 'service_') columns=servicecolumns %]
           </td>
         </tr>
         [% END %]
