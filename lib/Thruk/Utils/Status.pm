@@ -1872,7 +1872,13 @@ sub set_selected_columns {
             confess("must set a type");
         }
         my $ref_col = $default_cols || $default_compat_columns->{$type} || $default_compat_columns->{$prefix.$type};
-        my $cols    = Thruk::Base::list($c->req->parameters->{$prefix.'columns'} || $ref_col);
+        my $cols    = Thruk::Base::list($c->req->parameters->{$prefix.'columns'} || Thruk::Base::list($c->req->parameters->{'columns'}) || $ref_col);
+        Thruk::Utils::Log::_info("prefix");
+        Thruk::Utils::Log::_info("$prefix");
+        Thruk::Utils::Log::_info("$c->req_parameters");
+        Thruk::Utils::Log::_info($c->req->parameters);
+        Thruk::Utils::Log::_info("cols");
+        Thruk::Utils::Log::_info($cols);
         for my $col (@{$cols}) {
             if($col =~ m/^\d+$/mx) {
                 push @{$columns}, $ref_col->[$col-1];
@@ -1881,9 +1887,17 @@ sub set_selected_columns {
             }
             $last_col++;
         }
-        $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1);
+        $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1); # Excel column names start with A, which has ASCII value 65
         $c->stash->{$prefix.'columns'}  = $columns;
+        $c->stash->{'last_col'} = chr(65+$last_col-1); # Excel column names start with A, which has ASCII value 65
+        $c->stash->{'columns'}  = $columns;
+        Thruk::Utils::Log::_info("columns");
+        Thruk::Utils::Log::_info($columns);
+        Thruk::Utils::Log::_info("last_col");
+        Thruk::Utils::Log::_info($last_col);
     }
+
+
     return;
 }
 

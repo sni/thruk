@@ -688,12 +688,14 @@ sub _process_hostdetails_page {
                         );
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
+        Thruk::Utils::Status::set_selected_columns($c, ['status_hostdetail_excel_'], 'host');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         my $filename = 'status.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
         $c->stash->{'data'}     = $hosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
+        Thruk::Utils::Log::_info("\$c->stash->{'data'}");
+        Thruk::Utils::Log::_info($c->stash->{'data'});
         return $c->render_excel();
     }
     if ( $view_mode eq 'json' ) {
