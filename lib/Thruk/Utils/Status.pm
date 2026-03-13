@@ -1846,12 +1846,6 @@ set selected columns for the excel export (columns are also set from templates/s
 sub set_selected_columns {
     my($c, $prefixes, $type, $default_cols) = @_;
 
-    Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$prefixes");
-    Thruk::Utils::Log::_info($prefixes);
-
-    Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$c->req_parameters");
-    Thruk::Utils::Log::_info($c->req->parameters);
-
     confess("must set a prefix") unless $prefixes;
 
     my $default_compat_columns = {
@@ -1867,8 +1861,6 @@ sub set_selected_columns {
         my $columns = [];
         my $last_col = 0;
         my $type = $type;
-        Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$prefix");
-        Thruk::Utils::Log::_info("$prefix");
         if(!$type) {
             if($prefix eq 'host_') {
                 $type = "host";
@@ -1881,8 +1873,6 @@ sub set_selected_columns {
         }
         my $ref_col = $default_cols || $default_compat_columns->{$type} || $default_compat_columns->{$prefix.$type};
         my $cols    = Thruk::Base::list($c->req->parameters->{$prefix.'columns'} || Thruk::Base::list($c->req->parameters->{'columns'}) || $ref_col);
-        Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$cols");
-        Thruk::Utils::Log::_info($cols);
         for my $col (@{$cols}) {
             if($col =~ m/^\d+$/mx) {
                 push @{$columns}, $ref_col->[$col-1];
@@ -1895,10 +1885,6 @@ sub set_selected_columns {
         $c->stash->{$prefix.'columns'}  = $columns;
         $c->stash->{'last_col'} = chr(65+$last_col-1); # Excel column names start with A, which has ASCII value 65
         $c->stash->{'columns'}  = $columns;
-        Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$columns");
-        Thruk::Utils::Log::_info($columns);
-        Thruk::Utils::Log::_info("lib::Thruk::Controller | Status.pm | set_selected_columns | \$last_col");
-        Thruk::Utils::Log::_info($last_col);
     }
 
 
