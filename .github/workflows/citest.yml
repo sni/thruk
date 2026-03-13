@@ -80,13 +80,22 @@ jobs:
           sudo chown -R naemon: ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
           ls -la ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
 
+      - name: test env
+        run: |
+          timeout -v 10m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && THRUK_TEST_MODULES_CACHE=${{ env.THRUK_TEST_MODULES_CACHE }} THRUK_CRITIC_CACHE_FILE=${{ env.THRUK_CRITIC_CACHE_FILE }} HARNESS_TIMER=1 stdbuf -o0 -e0 env | sort'
+
       - name: make quicktest
         run: |
-          timeout -v 10m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && HARNESS_TIMER=1 stdbuf -o0 -e0 make quicktest'
+          timeout -v 10m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && THRUK_TEST_MODULES_CACHE=${{ env.THRUK_TEST_MODULES_CACHE }} THRUK_CRITIC_CACHE_FILE=${{ env.THRUK_CRITIC_CACHE_FILE }} HARNESS_TIMER=1 stdbuf -o0 -e0 make quicktest'
 
       - name: make citest
         run: |
-          timeout -v 90m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && HARNESS_TIMER=1 stdbuf -o0 -e0 make citest'
+          timeout -v 90m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && THRUK_TEST_MODULES_CACHE=${{ env.THRUK_TEST_MODULES_CACHE }} THRUK_CRITIC_CACHE_FILE=${{ env.THRUK_CRITIC_CACHE_FILE }} HARNESS_TIMER=1 stdbuf -o0 -e0 make citest'
+
+      - name: remove cache
+        run: |
+          gh cache list -R $GITHUB_REPOSITORY --json id --jq '.[].id' 2>/dev/null | xargs -r gh cache delete
+          ls -la ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
 
       - name: save updated cache back
         id: thruk-test-cache-save
