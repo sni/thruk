@@ -4568,8 +4568,7 @@ function getXHRerrorMsg(responseText, textStatus, jqXHR, errorThrown) {
 }
 
 /* update permanent link of excel export */
-/* if prefix is defined, the prefix from individual data elements will be taken out */
-function updateExcelPermanentLink(removePrefix) {
+function updateExcelPermanentLink() {
     var inp  = jQuery('#excel_export_url');
     var data = jQuery(inp).parents('FORM').find('input[name!=bookmark][name!=referer][name!=view_mode][name!=all_col]').serialize();
     var base = jQuery('#excelexportlink')[0].href;
@@ -4578,26 +4577,6 @@ function updateExcelPermanentLink(removePrefix) {
         jQuery(inp).val(base);
         return;
     }
-
-    // remove prefix from data keys if removePrefix is provided
-    if (removePrefix && typeof removePrefix === 'string') {
-        var newData = [];
-        var pairs = data.split('&'); // serialize adds '&' as seperators
-        for (var i = 0; i < pairs.length; i++) {
-            var pair = pairs[i];
-            var keyValue = pair.split('=');
-            var key = keyValue[0];
-            var value = keyValue[1] || '';
-
-            if (key.startsWith(removePrefix)) {
-                key = key.substring(removePrefix.length);
-            }
-
-            newData.push(key + '=' + value);
-        }
-        data = newData.join('&');
-    }
-
     jQuery(inp).val(base + (base.match(/\?/) ? '&' : '&') + data);
     initExcelExportSorting();
 }
