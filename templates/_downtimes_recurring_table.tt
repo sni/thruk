@@ -94,7 +94,9 @@
                     <input type="hidden" name="nr" value="[% d.file | html %]">
                     <input type="hidden" name="type" value="6">
                     <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
-                    <button title="remove none-existing entries" onclick="var btn = this; return send_form_in_background(btn, {recurring: 'fix'}, function() { window.setTimeout(function() { fade(jQuery(btn).parents('TR')); }, 1000); }); return false;"><i class="uil uil-band-aid"></i> fix it</button>
+                    <button title="removes none-existing entries, removes downtime if empty afterwards" onclick="var btn = this; return send_form_in_background(btn, {recurring: 'fix'}, function() { window.setTimeout(function() { fade(jQuery(btn).parents('TR')); }, 1000); }); return false;">
+                      <i class="uil uil-band-aid"></i> fix it
+                    </button>
                   </form>
                 </div>
               [% END %]
