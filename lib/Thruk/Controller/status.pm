@@ -1396,7 +1396,7 @@ sub _process_perfmap_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['status_perfmap_excel_'], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
+        Thruk::Utils::Status::set_selected_columns($c, [''], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
         my $filename = 'performancedata.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["] );
         $c->stash->{'name'}      = 'Performance';
