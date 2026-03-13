@@ -88,6 +88,7 @@
     - 'alias l="ls -la"'
     - 'alias vi="vim"'
     - 'alias psg="ps -efl | grep"'
+    - 'alias install_ansible_role="/thruk/t/scenarios/_common/ansible/install_role.sh"'
     - 'export HISTCONTROL="ignoredups:ignorespace:erasedups"'
     - 'export HISTSIZE=100000'
     - 'shopt -s histappend'

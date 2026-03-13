@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 92;
+    plan tests => 106;
 
     use lib('t');
     require TestUtils;
@@ -43,7 +43,7 @@ for my $peer ('tier1a', 'tier2c', 'tier2e') {
 ###########################################################
 TestUtils::test_page(
     url      => 'https://localhost/demo/thruk/cgi-bin/node_control.cgi',
-    like     => ['6.66-test'],
+    like     => ['6.66-test', 'localssh'],
 );
 
 TestUtils::test_page(
@@ -106,4 +106,15 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk nc runtime tier3a',
     errlike => ['/tier3a updated runtime successfully: OK/'],
+});
+
+# make sure extended backends show up in list
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk nc -l',
+    like => ['/localssh/', '/tier1a/', '/tier2b/', '/Rocky/'],
+});
+
+TestUtils::test_command({
+    cmd  => '/usr/bin/env thruk r "/csv/thruk/node-control/nodes?columns=peer_name,section,peer_key,host_name,omd_version,os_name,os_version,last_error"',
+    like => ['/localssh;;ebd70;localhost/', '/Rocky/', '/tier3c/'],
 });

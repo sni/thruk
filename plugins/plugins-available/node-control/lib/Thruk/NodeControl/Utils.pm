@@ -7,6 +7,7 @@ use Cpanel::JSON::XS ();
 use Cwd qw/abs_path/;
 use File::Temp qw/tempfile/;
 
+use Thruk::Backend::Manager ();
 use Thruk::Constants qw/:peer_states/;
 use Thruk::Utils ();
 use Thruk::Utils::External ();
@@ -101,6 +102,42 @@ sub get_peers {
 
     $c->stats->profile(end => "get_peers");
     return \@peers;
+}
+
+##########################################################
+
+=head2 finish_servers_list
+
+  finish_servers_list($c, $servers, $columns)
+
+return final peers list and columns
+
+=cut
+sub finish_servers_list {
+    my($c, $servers, $columns) = @_;
+
+    # allow addons to change and extend visible columns
+    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
+    for my $mod (@{$modules}) {
+        if($mod->can("set_columns")) {
+            my($cols) = $mod->set_columns($columns);
+            $columns = $cols if $cols;
+        }
+    }
+
+    # allow addons to change server list
+    for my $mod (@{$modules}) {
+        if($mod->can("adjust_server_list")) {
+            my($s) = $mod->adjust_server_list($c, $servers);
+            $servers = $s if $s;
+        }
+    }
+
+    # sort servers by section, host_name, site
+    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
+    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
+
+    return($servers, $columns);
 }
 
 ##########################################################
