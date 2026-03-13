@@ -72,7 +72,9 @@ apt-get -y install \
 
 # list of mirrors: https://mirrors.opensuse.org/
 mkdir -p /etc/apt/sources.list.d
-curl -sS "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" -o /etc/apt/trusted.gpg.d/naemon.asc
+test -s /etc/apt/trusted.gpg.d/naemon.asc ||
+    curl -sS "https://download.thruk.org/obs_naemon.asc" -o /etc/apt/trusted.gpg.d/naemon.asc || \
+    curl -sS "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" -o /etc/apt/trusted.gpg.d/naemon.asc
 #echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
 echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
 apt-get -y update
