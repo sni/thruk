@@ -4,7 +4,6 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
-use Thruk::Backend::Manager ();
 use Thruk::NodeControl::Utils ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
@@ -110,29 +109,11 @@ sub index {
     $c->stash->{omd_default_version}    = $config->{'omd_default_version'},
     $c->stash->{omd_available_versions} = Thruk::NodeControl::Utils::get_available_omd_versions($c, $peers);
 
-    # sort servers by section, host_name, site
-    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
-    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
+    my $columns = [qw/section backend hostname site omd status os virt cpu memory disk actions/];
+    ($servers, $columns) = Thruk::NodeControl::Utils::finish_servers_list($c, $servers, $columns);
 
-    $c->stash->{'columns'} = [qw/section backend hostname site omd status os virt cpu memory disk actions/];
-
-    # allow addons to change and extend visible columns
-    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
-    for my $mod (@{$modules}) {
-        if($mod->can("set_columns")) {
-            my($cols) = $mod->set_columns($c->stash->{'columns'});
-            $c->stash->{'columns'} = $cols if $cols;
-        }
-    }
-
-    # allow addons to change server list
-    for my $mod (@{$modules}) {
-        if($mod->can("adjust_server_list")) {
-            my($s) = $mod->adjust_server_list($c, $servers);
-            $servers = $s if $s;
-        }
-    }
-    $c->stash->{data} = $servers;
+    $c->stash->{'columns'} = $columns;
+    $c->stash->{'data'}    = $servers;
 
     return 1;
 }
@@ -153,22 +134,10 @@ sub TO_JSON {
     }
     Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
 
-    # allow addons to change and extend visible columns
-    my $modules = Thruk::NodeControl::Utils::get_addon_modules();
-    for my $mod (@{$modules}) {
-        if($mod->can("set_columns")) {
-            my($cols) = $mod->set_columns($c->stash->{'columns'});
-            $c->stash->{'columns'} = $cols if $cols;
-        }
-    }
+    my $columns = [qw/section backend hostname site omd status os virt cpu memory disk actions/];
+    ($servers, $columns) = Thruk::NodeControl::Utils::finish_servers_list($c, $servers, $columns);
 
-    # allow addons to change server list
-    for my $mod (@{$modules}) {
-        if($mod->can("adjust_server_list")) {
-            my($s) = $mod->adjust_server_list($c, $servers);
-            $servers = $s if $s;
-        }
-    }
+    $c->stash->{'columns'} = $columns;
 
     return $servers;
 }

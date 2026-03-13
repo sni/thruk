@@ -4,7 +4,7 @@ ROLE=$1
 shift
 
 if [ "$ROLE" = "" ]; then
-  echo "Usage: $0 <role>"
+  echo "Usage: $0 <role> [<ansible args>]"
   echo "available roles:"
   ls -1 $ANSIBLE_ROLES_PATH
   exit 1

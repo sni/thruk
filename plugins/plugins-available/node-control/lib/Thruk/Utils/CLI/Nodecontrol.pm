@@ -166,8 +166,17 @@ sub _action_list {
     my($c, $opt, $commandoptions, $config, $global_options) = @_;
     my @data;
 
-    for my $peer (@{Thruk::NodeControl::Utils::get_peers($c)}) {
-        my $s = Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+    my $peers   = Thruk::NodeControl::Utils::get_peers($c);
+    my $servers = [];
+    for my $peer (@{$peers}) {
+        push @{$servers}, Thruk::NodeControl::Utils::get_server($c, $peer, $config);
+    }
+    Thruk::Action::AddDefaults::set_possible_backends($c, $c->stash->{'disabled_backends'}, $peers);
+
+    my $columns = [qw/section backend hostname site omd status os virt cpu memory disk actions/];
+    ($servers, $columns) = Thruk::NodeControl::Utils::finish_servers_list($c, $servers, $columns);
+
+    for my $s (@{$servers}) {
         my $v = $s->{'omd_version'};
         $v =~ s/-labs-edition//gmx;
         if(defined $opt->{'version'} && $v ne $opt->{'version'}) { next; }
@@ -175,7 +184,7 @@ sub _action_list {
         if(defined $commandoptions && scalar @{$commandoptions} > 0)  {
             $found = 0;
             for my $pat (@{$commandoptions}) {
-                if(lc($pat) eq 'ALL' || $peer->{'name'} =~ m/$pat/mx || $peer->{'key'} =~ m/$pat/mx || $peer->{'section'} =~ m/$pat/mx) {
+                if(lc($pat) eq 'ALL' || $s->{'peer_name'} =~ m/$pat/mx || $s->{'peer_key'} =~ m/$pat/mx || $s->{'section'} =~ m/$pat/mx) {
                     $found = 1;
                     last;
                 }
@@ -184,8 +193,8 @@ sub _action_list {
         next unless $found;
         push @data, {
             Section => $s->{'section'} eq 'Default' ? '' : $s->{'section'},
-            Name    => $peer->{'name'},
-            ID      => $peer->{'key'},
+            Name    => $s->{'peer_name'},
+            ID      => $s->{'peer_key'},
             Host    => $s->{'host_name'},
             Site    => $s->{'omd_site'},
             Version => $v,
