@@ -394,7 +394,7 @@ sub end {
 =cut
 
 sub add_defaults {
-    my ($c, $flags, $no_config_adjustments) = @_;
+    my ($c, $flags, $no_config_adjustments, $group_start_over) = @_;
     confess("no c?") unless defined $c;
 
     my($flags_hash, $flags_name) = _get_flags($flags);
@@ -402,6 +402,7 @@ sub add_defaults {
 
     ###############################
     # user / group specific config?
+    my $user_groups = $c->user_exists ? $c->user->{'groups'} : [];
     if(!$no_config_adjustments && $c->user_exists) {
         $c->stash->{'usr_config_adjustments'} = [];
         for my $group (@{$c->user->{'groups'}}) {
@@ -428,7 +429,7 @@ sub add_defaults {
                 require Thruk::Backend::Manager;
                 $c->{'db'} = Thruk::Backend::Manager->new($pool);
             }
-            add_defaults($c, $flags, 1);
+            add_defaults($c, $flags, 1, $group_start_over);
         }
     }
     if($flags_hash->{ADD_USER_ONLY}) {
@@ -590,6 +591,16 @@ sub add_defaults {
         ) {
             # refresh dynamic roles and groups
             $c->user->set_dynamic_attributes($c);
+
+            # check if groups have changed and restart if so (check if there are group adjustments in the config at all)
+            if(!Thruk::Utils::deep_compare($c->user->{'groups'}, $user_groups)) {
+                for my $group (@{$c->user->{'groups'}}) {
+                    if($c->config->{'Group'}->{$group}) {
+                        # found a new group and there are adjustments for it, start over
+                        return(add_defaults($c, $flags, 0, 1)) unless $group_start_over;
+                    }
+                }
+            }
         }
         if($c->{'session'} && !$c->{'session'}->{'fake'}) {
             $c->stash->{'cookie_auth'} = 1;
