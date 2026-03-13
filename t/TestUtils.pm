@@ -1317,7 +1317,6 @@ sub js_init {
         headless         => 1,
         separate_session => 1,
         incognito        => 1,
-        tab              => 'current',
         launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
     );
     $mech->get_local(-f "./data/blank.html" ? "./data/blank.html" : "../../data/blank.html");
