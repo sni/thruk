@@ -10257,6 +10257,7 @@ var ajax_search = {
         resetRefresh();
         evt              = (evt) ? evt : ((window.event) ? event : null);
         if(!evt) { return false; }
+        if(!ajax_search.input_field) { return false; }
         var input        = document.getElementById(ajax_search.input_field);
         var panel        = document.getElementById(ajax_search.result_pan);
         var focus        = false;
