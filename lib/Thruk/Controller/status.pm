@@ -612,10 +612,10 @@ sub _process_hostdetails_page {
     $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $user_data = Thruk::Utils::get_user_data($c);
-    Thruk::Utils::Log::_info("\$c->req->parameters");
+    Thruk::Utils::Log::_info("lib::Thruk::Controller | status.pm | _process_hostdetails_page | \$c->req->parameters");
     Thruk::Utils::Log::_info($c->req->parameters);
     my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} ||  $c->req->parameters->{'status_hostdetail_excel_columns'} || $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'})});
-    Thruk::Utils::Log::_info("\$selected_columns");
+    Thruk::Utils::Log::_info("lib::Thruk::Controller | status.pm | _process_hostdetails_page | \$selected_columns");
     Thruk::Utils::Log::_info($selected_columns);
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
@@ -698,7 +698,7 @@ sub _process_hostdetails_page {
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
         $c->stash->{'data'}     = $hosts;
         $c->stash->{'template'} = 'excel/status_hostdetail.tt';
-        Thruk::Utils::Log::_info("\$c->stash->{'data'}");
+        Thruk::Utils::Log::_info("lib::Thruk::Controller | status.pm | _process_hostdetails_page | \$c->stash->{'data'}");
         Thruk::Utils::Log::_info($c->stash->{'data'});
         return $c->render_excel();
     }
