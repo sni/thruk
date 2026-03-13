@@ -1,8 +1,14 @@
-﻿[%# Variables for this template %]
-[%# prefix:
-Used as a prefix for the <input> IDs in the form. Make sure its unique on the rendered page, otherwise the (de)selectAll function does not work properly due to collisions with other inputs.
+﻿[%# This template is used to open up a popup menu and select columns for excel export. %]
+
+[%# Variables %]
+[%# prefix: Used as a prefix for the <input> IDs in the form. Make sure its unique on the rendered page, otherwise the (de)selectAll function does not work properly due to collisions with other inputs.
 %]
+<!-- _excel_export.tt | prefix value is: [% prefix %]' -->
+
+
 [% BLOCK cols %]
+  <!-- _excel_export.tt BLOCK cols | prefix value is: '[% prefix %]' -->
+  <!-- _excel_export.tt BLOCK cols | columns value is: [[% columns.join(',') %]] -->
   <table class="sortable_col_table rowhover">
     [%- counter = 0 -%]
     [%- FOR column IN columns -%]
@@ -10,30 +16,31 @@ Used as a prefix for the <input> IDs in the form. Make sure its unique on the re
     [%- meta = column.split(':'); column = meta.0 -%]
     [%- IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
-      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink('[% prefix %]');"[% IF meta.1 == 1 %] checked[% END %]></td>
-      <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink('[% prefix %]');" width="90%">[% column | html %]</td>
+      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
     </tr>
     [% END -%]
     [%- FOREACH v IN get_exposed_custom_vars(1) %]
       [%- counter = counter + 1 -%]
       <tr class="sortable_row">
-        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink('[% prefix %]');"></td>
-        <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink('[% prefix %]');" width="90%">[% v | html %]</td>
+        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+        <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
       </tr>
     [% END %]
   </table>
 [% END %]
 [% BLOCK checkall %]
+  <!-- _excel_export.tt BLOCK checkall | prefix value is: [% prefix %]' -->
   <table class="rowhover">
     <tr>
-      <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink('[% prefix %]');"></td>
-      <td class='clickable font-bold' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink('[% prefix %]');" width="90%">Select all</td>
+      <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink();"></td>
+      <td class='clickable font-bold' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink();" width="90%">Select all</td>
     </tr>
   </table>
 [% END %]
 
 <div class="flex relative">
-  <a href="[% uri_with(c, 'view_mode' => 'xls') %]" class="button round small" onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink('[% prefix %]'); return false;" id='excelexportlink' title="Export to Excel">
+  <a href="[% uri_with(c, 'view_mode' => 'xls') %]" class="button round small" onclick="toggleElement('excel_export_columns', undefined, true); updateExcelPermanentLink(); return false;" id='excelexportlink' title="Export to Excel">
     <i class="uil uil-table"></i>
   </a>
   <div class="card shadow-float absolute z-20 top-7" style="display: none;" id="excel_export_columns">
@@ -65,13 +72,17 @@ Used as a prefix for the <input> IDs in the form. Make sure its unique on the re
         <tr>
           <td valign="top">
             <div class="px-2 font-semibold">Hosts:</div>
-            [% PROCESS checkall prefix='host_' %]
-            [% PROCESS cols prefix=(prefix _ 'host_') columns=hostcolumns %]
+            [%# Variables in template toolkit are global and not scoped. Adding the _host suffix once is enough #%]
+            [% PROCESS checkall prefix=(prefix _ 'host_') %]
+            [% PROCESS cols prefix=prefix columns=hostcolumns %]
+            [%# Restore the original prefix #%]
+            [%- prefix = prefix.substr(0,prefix.length - 5) -%]
           </td>
           <td valign="top">
             <div class="px-2 font-semibold">Services:</div>
-            [% PROCESS checkall prefix='service_' %]
-            [% PROCESS cols prefix=(prefix _ 'service_') columns=servicecolumns %]
+            [% PROCESS checkall prefix=(prefix _ 'service_') %]
+            [% PROCESS cols prefix=prefix columns=servicecolumns %]
+            [%- prefix = prefix.substr(0,prefix.length - 8) -%]
           </td>
         </tr>
         [% END %]
