@@ -92,6 +92,8 @@ jobs:
         run: |
           gh cache delete --all
           ls -la ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: save updated cache back
         id: thruk-test-cache-save
