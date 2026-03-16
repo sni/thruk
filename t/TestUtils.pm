@@ -24,6 +24,7 @@ use File::Temp qw/tempfile/;
 use HTTP::Cookies::Netscape;
 use HTTP::Request ();
 use HTTP::Request::Common 6.12 qw/GET POST/;
+use POSIX ();
 use Plack::Test;
 use Test::More;
 use Time::HiRes qw/sleep gettimeofday tv_interval/;
@@ -756,6 +757,7 @@ sub test_command {
     }
 
     my($prg,$arg) = split(/\s+/, $test->{'cmd'}, 2);
+    $test->{'start_time'} = &time_milli_str();
 
     # wait for something?
     if(defined $test->{'waitfor'}) {
@@ -1116,12 +1118,14 @@ sub bail_out_cmd {
 
     diag("\n######################################################\n");
     diag("cmd diagnostics:");
-    diag("error:  '".(ref $msg ? Dumper($msg) : $msg)."'\n");
+    diag("error:       '".(ref $msg ? Dumper($msg) : $msg)."'\n");
     my $cmd = $test->{'test_cmd'};
-    diag("cmd:    '".$test->{'cmd'}."' failed\n");
-    diag("stdout: '".($cmd->stdout // '')."'\n") if $cmd;
-    diag("stderr: '".($cmd->stderr // '')."'\n") if $cmd;
-    diag("exit:   '".($rc // '(none)')."'\n");
+    diag("cmd:         '".$test->{'cmd'}."' failed\n");
+    diag("stdout:      '".($cmd->stdout // '')."'\n") if $cmd;
+    diag("stderr:      '".($cmd->stderr // '')."'\n") if $cmd;
+    diag("exit:         ".($rc // '(none)')."\n");
+    diag("time (start): ".($test->{'start_time'} // '<unknown>')."\n");
+    diag("time (end):   ".time_milli_str()."\n");
 
     diag(Carp::longmess("started here:"));
     diag("\n######################################################\n");
@@ -1395,6 +1399,14 @@ sub js_is {
 #################################################
 sub _js_diag_error {
     my($e, $diag) = @_;
+
+    if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
+        return unless $ENV{'HARNESS_VERBOSE'};
+        diag("not failing on debug ".$e->{'type'}." console message");
+    } else {
+        fail("got js error");
+    }
+
     diag($diag) if $diag;
     my $known = 0;
     if($e->{'message'}) {
@@ -1417,12 +1429,6 @@ sub _js_diag_error {
         }
         $known = 1;
     }
-    if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
-        #diag("not failing on debug lvl console message");
-        return;
-    } else {
-        fail("got js error");
-    }
     if($e->{'stackTrace'} && ref $e->{'stackTrace'} eq 'HASH' && $e->{'stackTrace'}->{'callFrames'}) {
         diag("Stack Trace:");
         for my $frame (@{$e->{'stackTrace'}->{'callFrames'}}) {
@@ -1444,16 +1450,16 @@ sub _js_format_err_arg {
 
     if($arg->{'type'} eq 'object' && defined $arg->{'preview'} && defined $arg->{'preview'}->{'properties'}) {
         my $x = 0;
-        my $str = ($arg->{'className'} // "unknown") . "(";
+        my $str = ($arg->{'className'} // "unknown") . "{ ";
         for my $p (@{$arg->{'preview'}->{'properties'}}) {
             if($x > 0) {
                 $str .= ", ";
             }
             $x++;
 
-            $str .= sprintf("%s (%s): %s", $p->{'name'}, $p->{'type'}, $p->{'value'});
+            $str .= sprintf("'%s' (%s): %s", $p->{'name'}, $p->{'type'}, $p->{'value'});
         }
-        $str .= ")";
+        $str .= " }";
         return($str);
     }
 
@@ -1501,6 +1507,16 @@ sub is_deeply_diff {
     diag($expected_dump);
 
     return 0;
+}
+
+#################################################
+# return current time with milliseconds
+sub time_milli_str {
+    my($seconds, $microseconds) = Time::HiRes::gettimeofday;
+    return(sprintf("%s,%s",
+        POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime($seconds)),
+        substr(sprintf("%06s", $microseconds), 0, 3),
+    ));
 }
 
 # replace is_deeply with our own version which shows the diff if the test fails
