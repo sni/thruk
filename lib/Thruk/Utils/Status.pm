@@ -1872,7 +1872,7 @@ sub set_selected_columns {
             confess("must set a type");
         }
         my $ref_col = $default_cols || $default_compat_columns->{$type} || $default_compat_columns->{$prefix.$type};
-        my $cols    = Thruk::Base::list($c->req->parameters->{$prefix.'columns'} || Thruk::Base::list($c->req->parameters->{'columns'}) || $ref_col);
+        my $cols    = Thruk::Base::list( $c->req->parameters->{$prefix.'columns'} || $c->req->parameters->{'columns'} || $ref_col);
         for my $col (@{$cols}) {
             if($col =~ m/^\d+$/mx) {
                 push @{$columns}, $ref_col->[$col-1];
@@ -1884,6 +1884,7 @@ sub set_selected_columns {
         $c->stash->{$prefix.'last_col'} = chr(65+$last_col-1); # Excel column names start with A, which has ASCII value 65
         $c->stash->{$prefix.'columns'}  = $columns;
         $c->stash->{'last_col'} = chr(65+$last_col-1); # Excel column names start with A, which has ASCII value 65
+        # In the combined view when selecting all fields from Hosts and Services, the total number goes beyond 26 and spills over to the AA, AB rows.
         $c->stash->{'columns'}  = $columns;
     }
 
