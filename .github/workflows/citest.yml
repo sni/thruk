@@ -89,6 +89,7 @@ jobs:
           timeout -v 90m sudo su naemon -c 'eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib) && THRUK_TEST_MODULES_CACHE=${{ env.THRUK_TEST_MODULES_CACHE }} THRUK_CRITIC_CACHE_FILE=${{ env.THRUK_CRITIC_CACHE_FILE }} HARNESS_TIMER=1 stdbuf -o0 -e0 make citest'
 
       - name: remove cache
+        if: ${{ github.event_name != 'pull_request' }}
         run: |
           gh cache delete --all
           ls -la ${{ env.THRUK_TEST_MODULES_CACHE }} ${{ env.THRUK_CRITIC_CACHE_FILE }} || :
@@ -96,6 +97,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: save updated cache back
+        if: ${{ github.event_name != 'pull_request' }}
         id: thruk-test-cache-save
         uses: actions/cache/save@v5
         with:
