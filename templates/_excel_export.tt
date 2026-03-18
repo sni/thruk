@@ -6,15 +6,15 @@
     [%- meta = column.split(':'); column = meta.0 -%]
     [%- IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
-      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% cols_prefix %]ht[% counter %]" name="[% cols_prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
-      <td class='clickable pr-2' id="[% cols_prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
+      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% cols_prefix | html %]ht[% counter %]" name="[% cols_prefix | html %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class='clickable pr-2' id="[% cols_prefix | html %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
     </tr>
     [% END -%]
     [%- FOREACH v IN get_exposed_custom_vars(1) %]
       [%- counter = counter + 1 -%]
       <tr class="sortable_row">
-        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% cols_prefix %]ht[% counter %]" name="[% cols_prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
-        <td class='clickable pr-2' id="[% cols_prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
+        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% cols_prefix | html %]ht[% counter %]" name="[% cols_prefix | html %]columns" onclick=" updateExcelPermanentLink();"></td>
+        <td class='clickable pr-2' id="[% cols_prefix | html %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
       </tr>
     [% END %]
   </table>
@@ -23,8 +23,8 @@
 [% BLOCK checkall %]
   <table class="rowhover">
     <tr>
-      <td class="px-2 py-0.5"><input type="checkbox" id="[% checkall_prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% checkall_prefix %]'); updateExcelPermanentLink();"></td>
-      <td class='clickable font-bold' id="[% checkall_prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% checkall_prefix %]'); updateExcelPermanentLink();" width="90%">Select all</td>
+      <td class="px-2 py-0.5"><input type="checkbox" id="[% checkall_prefix | html %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% checkall_prefix | html %]'); updateExcelPermanentLink();"></td>
+      <td class='clickable font-bold' id="[% checkall_prefix | html %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% checkall_prefix | html %]'); updateExcelPermanentLink();" width="90%">Select all</td>
     </tr>
   </table>
 [% END %]
