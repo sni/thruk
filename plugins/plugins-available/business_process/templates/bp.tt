@@ -7,7 +7,7 @@
   <div class="head justify-between">
     <div class="flexrow gap-1 flex-nowrap w-52">
       [% PROCESS _json_export.tt %]
-      [% PROCESS _excel_export.tt columns=excel_columns with_custom_vars=0 prefix="business_process_" %]
+      [% PROCESS _excel_export.tt columns=excel_columns with_custom_vars=0 prefix="" %]
     </div>
     [% IF has_remote_bps %]
       <div class="flexrow flex-nowrap gap-0">

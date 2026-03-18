@@ -452,7 +452,7 @@ sub _process_details_page {
 
     my $user_data = Thruk::Utils::get_user_data($c);
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_service_columns($c);
-    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} || $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'})});
+    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} ||  $c->req->parameters->{'status_detail_excel_columns'} || $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'})});
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
     $c->stash->{'comments_by_host'}          = {};
     $c->stash->{'comments_by_host_service'}  = {};
@@ -544,7 +544,7 @@ sub _process_details_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, [''], 'service');
+        Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'service');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
@@ -612,7 +612,7 @@ sub _process_hostdetails_page {
     $c->stash->{'status_search_add_default_filter'} = "host";
 
     my $user_data = Thruk::Utils::get_user_data($c);
-    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} ||  $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'})});
+    my $selected_columns = join(",", @{Thruk::Base::list($c->req->parameters->{'dfl_columns'} ||  $c->req->parameters->{'status_hostdetail_excel_columns'} || $c->req->parameters->{'columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'})});
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 0;
     $c->stash->{'default_columns'}->{'dfl_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'table_columns'}->{'dfl_'}   = Thruk::Utils::Status::sort_table_columns($c->stash->{'default_columns'}->{'dfl_'}, $selected_columns);
@@ -688,7 +688,7 @@ sub _process_hostdetails_page {
                         );
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, [''], 'host');
+        Thruk::Utils::Status::set_selected_columns($c, ['status_hostdetail_excel_'], 'host');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         my $filename = 'status.xls';
         $c->res->headers->header( 'Content-Disposition', qq[attachment; filename="] . $filename . q["]);
@@ -1182,8 +1182,9 @@ sub _process_combined_page {
     my $view_mode = $c->req->parameters->{'view_mode'} || 'html';
 
     my $user_data = Thruk::Utils::get_user_data($c);
-    my $selected_hst_columns = $c->req->parameters->{'hst_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
-    my $selected_svc_columns = $c->req->parameters->{'svc_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
+    my $selected_hst_columns = $c->req->parameters->{'host_columns'} || $c->req->parameters->{'hst_columns'} || $user_data->{'columns'}->{'hst'} || $c->config->{'default_host_columns'};
+    my $selected_svc_columns = $c->req->parameters->{'service_columns'} || $c->req->parameters->{'svc_columns'} || $user_data->{'columns'}->{'svc'} || $c->config->{'default_service_columns'};
+
     $c->stash->{'show_host_attempts'} = defined $c->config->{'show_host_attempts'} ? $c->config->{'show_host_attempts'} : 1;
     $c->stash->{'default_columns'}->{'hst_'} = Thruk::Utils::Status::get_host_columns($c);
     $c->stash->{'default_columns'}->{'svc_'} = Thruk::Utils::Status::get_service_columns($c);
@@ -1248,7 +1249,7 @@ sub _process_combined_page {
         push @{$extra_svc_columns}, 'long_plugin_output';
         push @{$extra_hst_columns}, 'long_plugin_output';
     }
-    push @{$extra_svc_columns}, 'contacts' if ($selected_svc_columns && $selected_svc_columns =~ m/contacts/imx);
+    push @{$extra_svc_columns}, 'contacts' if ( grep ( /^contacts$/ixm , @{Thruk::Base::list($selected_svc_columns)} ) );
 
     my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
                                          sort   => { $order => $sortoptions->{$sortoption}->[0] },
@@ -1288,7 +1289,7 @@ sub _process_combined_page {
     $sortoption = 1 if !defined $sortoptions->{$sortoption};
     $c->stash->{'hst_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'hst_orderdir'} = $order;
-    push @{$extra_hst_columns}, 'contacts' if ($selected_hst_columns && $selected_hst_columns =~ m/contacts/imx);
+    push @{$extra_hst_columns}, 'contacts' if ( grep ( /^contacts$/ixm , @{Thruk::Base::list($selected_hst_columns)} ) );
 
     my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
                                    sort   => { $order => $sortoptions->{$sortoption}->[0] },
