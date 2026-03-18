@@ -1,9 +1,4 @@
-﻿[%# Variables %]
-[%# prefix: Used as a prefix for the <input> IDs in the form. Make sure its unique on the rendered page, otherwise the (de)selectAll function does not work properly due to collisions with other inputs.
-%]
-
-
-[% BLOCK cols %]
+﻿[% BLOCK cols %]
   <table class="sortable_col_table rowhover">
     [%- counter = 0 -%]
     [%- FOR column IN columns -%]
