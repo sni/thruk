@@ -11,24 +11,25 @@
     [%- meta = column.split(':'); column = meta.0 -%]
     [%- IF meta.size == 1; meta.1 = 1; END %]
     <tr class="sortable_row">
-      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
-      <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
+      <td class="px-2 py-0.5"><input type="checkbox" value="[% column | html %]" id="[% cols_prefix %]ht[% counter %]" name="[% cols_prefix %]columns" onclick=" updateExcelPermanentLink();"[% IF meta.1 == 1 %] checked[% END %]></td>
+      <td class='clickable pr-2' id="[% cols_prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% column | html %]</td>
     </tr>
     [% END -%]
     [%- FOREACH v IN get_exposed_custom_vars(1) %]
       [%- counter = counter + 1 -%]
       <tr class="sortable_row">
-        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% prefix %]ht[% counter %]" name="[% prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
-        <td class='clickable pr-2' id="[% prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
+        <td class="px-2 py-0.5"><input type="checkbox" value="[% v | html %]" id="[% cols_prefix %]ht[% counter %]" name="[% cols_prefix %]columns" onclick=" updateExcelPermanentLink();"></td>
+        <td class='clickable pr-2' id="[% cols_prefix %]ht[% counter %]n" onclick="toggleFilterCheckBox(this.id); updateExcelPermanentLink();" width="90%">[% v | html %]</td>
       </tr>
     [% END %]
   </table>
 [% END %]
+
 [% BLOCK checkall %]
   <table class="rowhover">
     <tr>
-      <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink();"></td>
-      <td class='clickable font-bold' id="[% prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink();" width="90%">Select all</td>
+      <td class="px-2 py-0.5"><input type="checkbox" id="[% checkall_prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% checkall_prefix %]'); updateExcelPermanentLink();"></td>
+      <td class='clickable font-bold' id="[% checkall_prefix %]ht0n" onclick="toggleFilterCheckBox(this.id); toggleAllFilterCheckBox('[% checkall_prefix %]'); updateExcelPermanentLink();" width="90%">Select all</td>
     </tr>
   </table>
 [% END %]
@@ -54,27 +55,25 @@
         [% IF columns != '' %]
         <tr>
           <td colspan=2>
-            [% PROCESS checkall prefix=prefix %]
+            [% PROCESS checkall checkall_prefix=prefix %]
           </td>
         </tr>
         <tr>
           <td colspan=2>
-            [% PROCESS cols     prefix=prefix %]
+            [% PROCESS cols     cols_prefix=prefix %]
           </td>
         </tr>
         [% ELSE %]
         <tr>
           <td valign="top">
             <div class="px-2 font-semibold">Hosts:</div>
-            [% PROCESS checkall prefix=(prefix _ 'host_') %]
-            [% PROCESS cols prefix=prefix columns=hostcolumns %]
-            [%- prefix = prefix.substr(0,prefix.length - 5) -%]
+            [% PROCESS checkall checkall_prefix=(prefix _ 'host_') %]
+            [% PROCESS cols cols_prefix=(prefix _ 'host_') columns=hostcolumns %]
           </td>
           <td valign="top">
             <div class="px-2 font-semibold">Services:</div>
-            [% PROCESS checkall prefix=(prefix _ 'service_') %]
-            [% PROCESS cols prefix=prefix columns=servicecolumns %]
-            [%- prefix = prefix.substr(0,prefix.length - 8) -%]
+            [% PROCESS checkall checkall_prefix=(prefix _ 'service_') %]
+            [% PROCESS cols cols_prefix=(prefix _ 'service_') columns=servicecolumns %]
           </td>
         </tr>
         [% END %]
