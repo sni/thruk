@@ -544,7 +544,7 @@ sub _process_details_page {
     }
 
     if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'host');
+        Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'service');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
         $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
         $c->stash->{'data'}     = $services;
