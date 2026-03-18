@@ -1,14 +1,9 @@
-﻿[%# This template is used to open up a popup menu and select columns for excel export. %]
-
-[%# Variables %]
+﻿[%# Variables %]
 [%# prefix: Used as a prefix for the <input> IDs in the form. Make sure its unique on the rendered page, otherwise the (de)selectAll function does not work properly due to collisions with other inputs.
 %]
-<!-- _excel_export.tt | prefix value is: [% prefix %]' -->
 
 
 [% BLOCK cols %]
-  <!-- _excel_export.tt BLOCK cols | prefix value is: '[% prefix %]' -->
-  <!-- _excel_export.tt BLOCK cols | columns value is: [[% columns.join(',') %]] -->
   <table class="sortable_col_table rowhover">
     [%- counter = 0 -%]
     [%- FOR column IN columns -%]
@@ -30,7 +25,6 @@
   </table>
 [% END %]
 [% BLOCK checkall %]
-  <!-- _excel_export.tt BLOCK checkall | prefix value is: [% prefix %]' -->
   <table class="rowhover">
     <tr>
       <td class="px-2 py-0.5"><input type="checkbox" id="[% prefix %]ht0" value="" name="all_col" onclick="toggleAllFilterCheckBox('[% prefix %]'); updateExcelPermanentLink();"></td>
@@ -72,10 +66,8 @@
         <tr>
           <td valign="top">
             <div class="px-2 font-semibold">Hosts:</div>
-            [%# Variables in template toolkit are global and not scoped. Adding the _host suffix once is enough #%]
             [% PROCESS checkall prefix=(prefix _ 'host_') %]
             [% PROCESS cols prefix=prefix columns=hostcolumns %]
-            [%# Restore the original prefix #%]
             [%- prefix = prefix.substr(0,prefix.length - 5) -%]
           </td>
           <td valign="top">
