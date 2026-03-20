@@ -31,7 +31,7 @@ jobs:
       - uses: abbbi/github-actions-tune@v1
 
       - name: prepare machine
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: 3
           timeout_minutes: 6
@@ -40,7 +40,7 @@ jobs:
             timeout -v 5m sudo bash -x ./.ci/prepare_machine.sh
 
       - name: install dependencies
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: 3
           timeout_minutes: 6
@@ -50,7 +50,7 @@ jobs:
             timeout -v 5m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
 
       - name: install puppeteer
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@v4
         with:
           max_attempts: 3
           timeout_minutes: 3
