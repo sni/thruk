@@ -34,7 +34,7 @@ jobs:
         uses: nick-fields/retry@v4
         with:
           max_attempts: 3
-          timeout_minutes: 6
+          timeout_minutes: 15
           retry_wait_seconds: 180
           command: |
             timeout -v 5m sudo bash -x ./.ci/prepare_machine.sh
@@ -43,7 +43,7 @@ jobs:
         uses: nick-fields/retry@v4
         with:
           max_attempts: 3
-          timeout_minutes: 6
+          timeout_minutes: 15
           retry_wait_seconds: 180
           command: |
             chmod o+x /home/runner/
@@ -53,7 +53,7 @@ jobs:
         uses: nick-fields/retry@v4
         with:
           max_attempts: 3
-          timeout_minutes: 3
+          timeout_minutes: 15
           retry_wait_seconds: 180
           command: |
             timeout -v 2m sudo bash -x ./script/install_puppeteer.sh
