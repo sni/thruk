@@ -8873,24 +8873,37 @@ function show_cal(ev) {
         }
     }
 
-    var _parseDate = function(date_val) {
-        var date_time = date_val.split(" ");
-        if(date_time.length == 1) { date_time[1] = "0:0:0"; }
-        if(date_time.length == 2) {
-            var dates     = date_time[0].split('-');
-            if(dates[2] == undefined) {
-                return;
-            }
-            var times     = date_time[1].split(':');
-            if(times[1] == undefined) {
-                times = new Array(0,0,0);
-            }
-            if(times[2] == undefined) {
-                times[2] = 0;
-            }
-            return(new Date(dates[0], (dates[1]-1), dates[2], times[0], times[1], times[2]));
+    // require_time: if toggled, function needs typing the hour and minute fully to return a date
+    var _parseDate = function(date_val, require_time) {
+        if(!date_val) {
+            return;
         }
-        return;
+        date_val = jQuery.trim(date_val);
+        // four digits (year), slash , two digits (month), shash , two digits (day) , at least one spacing ,
+        // two digits (hour) , semicolon , two digits (minute)
+        // optional: semicolon , two digits (second)
+        var match = date_val.match(/^(\d{4})-(\d{2})-(\d{2})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+        if(!match) {
+            return;
+        }
+        if(require_time && (match[4] == undefined || match[5] == undefined)) {
+            return;
+        }
+
+        var year   = parseInt(match[1], 10);
+        var month  = parseInt(match[2], 10);
+        var day    = parseInt(match[3], 10);
+        var hour   = match[4] != undefined ? parseInt(match[4], 10) : 0;
+        var minute = match[5] != undefined ? parseInt(match[5], 10) : 0;
+        var second = match[6] != undefined ? parseInt(match[6], 10) : 0;
+        var date   = new Date(year, (month-1), day, hour, minute, second);
+
+        // javascript keeps months indexed from zero
+        if(date.getFullYear() !== year || date.getMonth() !== (month-1) || date.getDate() !== day
+           || date.getHours() !== hour || date.getMinutes() !== minute || date.getSeconds() !== second) {
+            return;
+        }
+        return(date);
     };
 
     var date1 = _parseDate(document.getElementById(id1).value);
@@ -8986,9 +8999,10 @@ function show_cal(ev) {
         ev.stopImmediatePropagation();
         ev.stopPropagation();
         var picker = ev.data[0];
-        var date1  = _parseDate(document.getElementById(id1).value);
+        var date1  = _parseDate(document.getElementById(id1).value, true);
+        var changed = false;
         if(hasRange) {
-            date2 = _parseDate(document.getElementById(id2).value);
+            date2 = _parseDate(document.getElementById(id2).value, true);
         }
         // reverse dates, because we always click on the end date when having ranges
         if(date1 && date2 && date1 > date2) {
@@ -8999,6 +9013,7 @@ function show_cal(ev) {
         if(date1) {
             var date = moment(date1);
             picker.setStartDate(date);
+            changed = true;
             if(!hasRange) {
                 picker.setEndDate(date);
             }
@@ -9007,9 +9022,16 @@ function show_cal(ev) {
             if(date2) {
                 var date = moment(date2);
                 picker.setEndDate(date);
+                changed = true;
             }
         }
-        picker.updateView();
+        if(changed) {
+            if(picker._updateView) {
+                picker._updateView();
+            } else {
+                picker.updateView();
+            }
+        }
     };
 
     var _onShow = function(ev, picker) {
