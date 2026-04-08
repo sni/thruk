@@ -43,7 +43,7 @@
         [% IF c.check_user_roles('authorized_for_configuration_information') %]
           <div class="flex flex-nowrap gap-x-1">
             <a href="config.cgi?type=hosts&amp;jump2=[% host.name | uri %]">View Configuration For This Host</a>
-            [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+            [% IF use_feature_configtool && c.check_user_roles('admin') && backends_with_obj_config.$peer_key %]
               <a href="conf.cgi?edit&amp;host=[% host.name | uri %][% add_request_backend %]"> (Edit This Host)</a>
             [% END %]
           </div>

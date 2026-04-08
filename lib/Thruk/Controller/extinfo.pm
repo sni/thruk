@@ -827,8 +827,7 @@ sub _process_perf_info_page {
 
     # apache statistics
     $c->stash->{'apache_status'} = [];
-    if(    $c->check_user_roles("authorized_for_configuration_information")
-       and $c->check_user_roles("authorized_for_system_information")) {
+    if($c->check_user_roles("authorized_for_system_information")) {
         my $apache = $c->req->parameters->{'apache'};
 
         for my $name (sort keys %{$c->config->{'apache_status'}}) {
@@ -841,16 +840,14 @@ sub _process_perf_info_page {
     }
 
     # cluster statistics
-    if(    $c->check_user_roles("authorized_for_configuration_information")
-       and $c->check_user_roles("authorized_for_system_information")) {
+    if($c->check_user_roles("authorized_for_system_information")) {
         if($c->req->parameters->{'cluster'}) {
             return _process_perf_info_cluster_page($c);
         }
     }
 
     # logcache statistics
-    if(    $c->check_user_roles("authorized_for_configuration_information")
-       and $c->check_user_roles("authorized_for_system_information")) {
+    if($c->check_user_roles("authorized_for_system_information")) {
         if($c->req->parameters->{'logcachedetails'}) {
             return _process_perf_info_logcache_details($c);
         }

@@ -295,13 +295,13 @@ sub _process_raw_request {
         # get available custom variables
         my $data = [];
         my $exposed_only = $c->req->parameters->{'exposed_only'} || 0;
-        if($type eq 'custom variable' || !$c->check_user_roles("authorized_for_configuration_information")) {
+        if($type eq 'custom variable' || !$c->check_user_roles("admin")) {
             $data = Thruk::Utils::Status::get_custom_variable_names($c, 'all', $exposed_only, $filter, $c->req->parameters->{'prefix'});
         }
         if($type eq 'custom value') {
             my $allowed = $data;
             my $varname = $c->req->parameters->{'var'} || '';
-            if(!$c->check_user_roles("authorized_for_configuration_information") && !grep/^\Q$varname\E$/mx, @{$allowed}) {
+            if(!$c->check_user_roles("admin") && !grep/^\Q$varname\E$/mx, @{$allowed}) {
                 $data = ["you are not authorized for this custom variable"];
             } else {
                 my $uniq = {};
@@ -563,7 +563,7 @@ sub _process_details_page {
             }
         }
 
-        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed      = $c->check_user_roles("admin");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
         Thruk::Utils::fill_commands_cache($c);
@@ -706,7 +706,7 @@ sub _process_hostdetails_page {
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
         }
-        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed      = $c->check_user_roles("admin");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
         Thruk::Utils::fill_commands_cache($c);
@@ -1311,7 +1311,7 @@ sub _process_combined_page {
         return $c->render_excel();
     }
     elsif ( $view_mode eq 'json' ) {
-        my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+        my $allowed      = $c->check_user_roles("admin");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
         Thruk::Utils::fill_commands_cache($c);

@@ -46,7 +46,7 @@
             <a href="config.cgi?type=services&amp;jump2=[% service.host_name | uri %]&amp;jump3=[% service.description | uri %]">
               View Configuration For This Service
             </a>
-            [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') && backends_with_obj_config.$peer_key %]
+            [% IF use_feature_configtool && c.check_user_roles('admin') && backends_with_obj_config.$peer_key %]
               <a href="conf.cgi?edit&amp;host=[% service.host_name | uri %]&amp;service=[% service.description | uri %][% add_request_backend %]"> (Edit This Service)</a>
             [% END %]
           </div>

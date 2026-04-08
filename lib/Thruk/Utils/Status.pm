@@ -2943,7 +2943,7 @@ sub get_custom_variable_names {
     @{$data} = grep(/$filter/mxi, @{$data}) if $filter;
 
     # filter all of them which are not listed by show_custom_vars unless we have extended permissions
-    if($exposed_only || !$c->check_user_roles("authorized_for_configuration_information")) {
+    if($exposed_only || !$c->check_user_roles("admin")) {
         my $newlist = [];
         my $allowed = Thruk::Utils::get_exposed_custom_vars($c->config);
         for my $varname (@{$data}) {

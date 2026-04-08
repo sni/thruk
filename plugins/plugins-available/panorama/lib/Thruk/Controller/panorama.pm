@@ -1856,7 +1856,7 @@ sub _task_hosts {
             $h->{'THRUK_ACTION_MENU'} = $cust->{'THRUK_ACTION_MENU'} // '';
         }
     }
-    if(!$c->check_user_roles("authorized_for_configuration_information")) {
+    if(!$c->check_user_roles("admin")) {
         # remove custom macro colums which could contain confidential informations
         for my $h ( @{$c->stash->{'data'}}) {
             delete $h->{'custom_variable_names'};
@@ -1977,7 +1977,7 @@ sub _task_services {
         $s->{'THRUK_ACTION_MENU'}     = $cust->{'THRUK_ACTION_MENU'} // '';
         $s->{'HOSTTHRUK_ACTION_MENU'} = $cust->{'HOSTTHRUK_ACTION_MENU'} // '';
     }
-    if(!$c->check_user_roles("authorized_for_configuration_information")) {
+    if(!$c->check_user_roles("admin")) {
         # remove custom macro colums which could contain confidential informations
         for my $s ( @{$c->stash->{'data'}}) {
             delete $s->{'host_custom_variable_names'};
@@ -2008,7 +2008,7 @@ sub _task_squares_data {
 
     my $now          = time();
     my $data         = [];
-    my $allowed      = $c->check_user_roles("authorized_for_configuration_information");
+    my $allowed      = $c->check_user_roles("admin");
     my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
     my $show_full_commandline = $c->config->{'show_full_commandline'};

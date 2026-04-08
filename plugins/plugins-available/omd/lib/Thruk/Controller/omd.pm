@@ -44,10 +44,7 @@ sub index {
     our $hosts_list = undef;
 
     # check permissions
-    unless( $c->check_user_roles( "authorized_for_configuration_information")
-        and $c->check_user_roles( "authorized_for_system_commands")) {
-        return $c->detach('/error/index/8');
-    }
+    return $c->detach('/error/index/8') unless $c->check_user_roles("admin");
 
     # get input folders
     my $default_parser = 'LinuxTop';
