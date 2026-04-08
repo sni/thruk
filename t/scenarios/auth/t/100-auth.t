@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 362;
+    plan tests => 402;
 
     use lib('t');
     require TestUtils;
@@ -59,6 +59,15 @@ BEGIN {
         'like'   => ['"check_http', '-a \*\*\* -u', '/demo/omd/index.html'],
         'unlike' => ['test:test'],
     );
+    # admin user can search by all custom vars
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services?_EXPOSED=exposed_customvartest123&columns=description',
+        'like'   => ['"Http"'],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services?_SECRET=secret_customvartest123&columns=description',
+        'like'   => ['"Http"'],
+    );
 
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
@@ -82,6 +91,12 @@ BEGIN {
     TestUtils::test_page(
         'url'    => '/thruk/r/thruk/whoami',
         'like'   => ['admin', 'authorized_for_admin'],
+    );
+    # admin user will see all custom variables
+    TestUtils::test_page(
+        'url'    => '/thruk/cgi-bin/status.cgi?style=detail&view_mode=json',
+        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'exposed_customvartest123', 'secret_customvartest123'],
+        'unlike' => ['test:test'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/login.cgi?logout',
@@ -110,30 +125,40 @@ BEGIN {
         'like'   => ['Service.*Http.*on.*test', '-a \*\*\* -u'],
         'unlike' => ['test:test'],
     );
+    # conf info user must not see unexposed custom variables
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/status.cgi?style=detail&view_mode=json',
-        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'customvartest123'],
-        'unlike' => ['test:test'],
+        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'exposed_customvartest123'],
+        'unlike' => ['test:test', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/status.cgi?style=combined&view_mode=json',
-        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'customvartest123'],
-        'unlike' => ['test:test'],
+        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'exposed_customvartest123'],
+        'unlike' => ['test:test', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services',
-        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'customvartest123'],
-        'unlike' => ['test:test'],
+        'like'   => ['"Http"', '"check_http', '-a \*\*\* -u', 'exposed_customvartest123'],
+        'unlike' => ['test:test', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services?columns=custom_variable_values,check_command',
-        'like'   => ['custom_variable_values', 'check_command', 'customvartest123', '/demo/omd/index.html'],
-        'unlike' => ['test:test'],
+        'like'   => ['custom_variable_values', 'check_command', 'exposed_customvartest123', '/demo/omd/index.html'],
+        'unlike' => ['test:test', 'secret_customvartest123', 'custom_variable_names'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services/test/Http/commandline',
         'like'   => ['"check_http', '-a \*\*\* -u', '/demo/omd/index.html'],
-        'unlike' => ['test:test'],
+        'unlike' => ['test:test', 'secret_customvartest123'],
+    );
+    # conf user can only search by exposed custom vars
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services?_EXPOSED=exposed_customvartest123&columns=description',
+        'like'   => ['"Http"'],
+    );
+    TestUtils::test_page(
+        'url'    => '/thruk/r/services?_SECRET=secret_customvartest123&columns=description',
+        'unlike' => ['"Http"'],
     );
 
     TestUtils::test_page(
@@ -166,27 +191,27 @@ BEGIN {
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/extinfo.cgi?type=2&host=test&service=Http',
         'like'   => ['Service.*Http.*on.*test'],
-        'unlike' => ['test:test', 'plugins\/check_http', 'customvartest123'],
+        'unlike' => ['test:test', 'plugins\/check_http', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/status.cgi?style=detail&view_mode=json',
         'like'   => ['"Http"', '"check_http'],
-        'unlike' => ['test:test', '/demo/omd/index.html', 'customvartest123'],
+        'unlike' => ['test:test', '/demo/omd/index.html', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/cgi-bin/status.cgi?style=combined&view_mode=json',
         'like'   => ['"Http"', '"check_http'],
-        'unlike' => ['test:test', '/demo/omd/index.html', 'customvartest123'],
+        'unlike' => ['test:test', '/demo/omd/index.html', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services',
         'like'   => ['"Http"', '"check_http'],
-        'unlike' => ['test:test', '/demo/omd/index.html', 'customvartest123'],
+        'unlike' => ['test:test', '/demo/omd/index.html', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services?columns=custom_variable_values,check_command',
         'like'   => ['custom_variable_values', 'check_command'],
-        'unlike' => ['test:test', '/demo/omd/index.html', 'customvartest123'],
+        'unlike' => ['test:test', '/demo/omd/index.html', 'secret_customvartest123'],
     );
     TestUtils::test_page(
         'url'    => '/thruk/r/services/test/Http/commandline',

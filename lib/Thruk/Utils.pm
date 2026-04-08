@@ -1045,29 +1045,29 @@ sub check_custom_var_list {
 
 =head2 set_allowed_rows_data
 
-  set_allowed_rows_data($obj, $allowed, $allowed_list, $show_full_commandline)
+  set_allowed_rows_data($obj, $allowed, $allowed_list, $show_full_commandline, $has_conf_info)
 
 set custom variables for host/service obj
 
 =cut
 sub set_allowed_rows_data {
-    my($obj, $allowed, $allowed_list, $show_full_commandline) = @_;
+    my($obj, $allowed_all_cust, $allowed_list, $show_full_commandline, $has_conf_info) = @_;
 
     if($obj->{'custom_variable_names'}) {
         $obj->{'custom_variables'} = get_custom_vars(undef, $obj);
         for my $key (@{$obj->{'custom_variable_names'}}) {
-            if($allowed || check_custom_var_list($key, $allowed_list)) {
+            if($allowed_all_cust || check_custom_var_list($key, $allowed_list)) {
                 $obj->{'_'.uc($key)} = $obj->{'custom_variables'}->{$key};
             } else {
                 delete $obj->{'custom_variables'}->{$key};
             }
         }
-        if(!$allowed) {
+        if(!$allowed_all_cust) {
             $obj->{'custom_variable_names'}  = [keys   %{$obj->{'custom_variables'}}];
             $obj->{'custom_variable_values'} = [values %{$obj->{'custom_variables'}}];
         }
     }
-    elsif($obj->{'custom_variable_values'} && !$allowed) {
+    elsif($obj->{'custom_variable_values'} && !$allowed_all_cust) {
         $obj->{'custom_variables'}       = {} if $obj->{'custom_variables'};
         $obj->{'custom_variable_values'} = [];
     }
@@ -1075,18 +1075,18 @@ sub set_allowed_rows_data {
     if($obj->{'host_custom_variable_names'}) {
         $obj->{'host_custom_variables'} = get_custom_vars(undef, $obj, 'host_');
         for my $key (@{$obj->{'host_custom_variable_names'}}) {
-            if($allowed || check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
+            if($allowed_all_cust || check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
                 $obj->{'_HOST'.uc($key)} = $obj->{'host_custom_variables'}->{$key};
             } else {
                 delete $obj->{'host_custom_variables'}->{$key};
             }
         }
-        if(!$allowed) {
+        if(!$allowed_all_cust) {
             $obj->{'host_custom_variable_names'}  = [keys   %{$obj->{'host_custom_variables'}}];
             $obj->{'host_custom_variable_values'} = [values %{$obj->{'host_custom_variables'}}];
         }
     }
-    elsif($obj->{'host_custom_variable_values'} && !$allowed) {
+    elsif($obj->{'host_custom_variable_values'} && !$allowed_all_cust) {
         $obj->{'host_custom_variables'}       = {} if $obj->{'host_custom_variables'};
         $obj->{'host_custom_variable_values'} = [];
     }
@@ -1094,7 +1094,7 @@ sub set_allowed_rows_data {
     # update check command and apply obfuscation
     my $c = $Thruk::Globals::c or die("not initialized!");
     if($obj->{'check_command'}) {
-        if($show_full_commandline && (($show_full_commandline == 1 && $allowed) || $show_full_commandline == 2)) {
+        if($show_full_commandline && (($show_full_commandline == 1 && $has_conf_info) || $show_full_commandline == 2)) {
             if($obj->{'host_name'}) {
                 my $command = $c->db->expand_command('host' => $obj, 'service' => $obj, 'source' => $c->config->{'show_full_commandline_source'} );
                 $obj->{'check_command'} = $command->{'line'};
@@ -1108,7 +1108,7 @@ sub set_allowed_rows_data {
     }
 
     if($obj->{'host_check_command'}) {
-        if($show_full_commandline && (($show_full_commandline == 1 && $allowed) || $show_full_commandline == 2)) {
+        if($show_full_commandline && (($show_full_commandline == 1 && $has_conf_info) || $show_full_commandline == 2)) {
             my $command = $c->db->expand_command('host' => $obj, 'source' => $c->config->{'show_full_commandline_source'} );
             $obj->{'host_check_command'} = $command->{'line'};
         } else {

@@ -1548,7 +1548,6 @@ sub _livestatus_options {
                     $col = "downtimes_with_info"    if $col eq 'downtimes_info';
                     if($col =~ m/^_/mx) {
                         $col = 'custom_variable_values';
-                        push @{$columns}, 'custom_variable_names'  if ! grep { $_ eq 'custom_variable_names' }  @{$columns};
                         if($type eq 'services') {
                             push @{$columns}, 'host_custom_variable_values' if ! grep { $_ eq 'host_custom_variable_values' } @{$columns};
                             push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
@@ -1558,8 +1557,14 @@ sub _livestatus_options {
                         push @{$columns}, 'custom_variable_values' if ! grep { $_ eq 'custom_variable_values' } @{$columns};
                         push @{$columns}, 'custom_variable_names'  if ! grep { $_ eq 'custom_variable_names' }  @{$columns};
                     }
+                    if($col eq 'custom_variable_values') {
+                        push @{$columns}, 'custom_variable_names'  if ! grep { $_ eq 'custom_variable_names' }  @{$columns};
+                    }
                     if($col eq 'host_custom_variables') {
                         push @{$columns}, 'host_custom_variable_values' if ! grep { $_ eq 'host_custom_variable_values' } @{$columns};
+                        push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
+                    }
+                    if($col eq 'host_custom_variable_values') {
                         push @{$columns}, 'host_custom_variable_names'  if ! grep { $_ eq 'host_custom_variable_names' }  @{$columns};
                     }
                     if($col eq '*') {
@@ -1765,8 +1770,9 @@ sub _expand_perfdata_and_custom_vars {
     }
 
     my $show_full_commandline = $c->config->{'show_full_commandline'};
+    my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
     for my $row (@{$data}) {
-        Thruk::Utils::set_allowed_rows_data($row, $allowed, $allowed_list, $show_full_commandline);
+        Thruk::Utils::set_allowed_rows_data($row, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
 
         if($row->{'perf_data'}) {
             my $perfdata = (Thruk::Utils::Filter::split_perfdata($row->{'perf_data'}))[0];

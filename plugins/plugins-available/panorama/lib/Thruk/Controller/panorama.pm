@@ -2006,10 +2006,11 @@ sub _task_squares_data {
     my( $hostfilter, $servicefilter, $groupfilter ) = _do_filter($c);
     return if $c->stash->{'has_error'};
 
-    my $now          = time();
-    my $data         = [];
-    my $allowed      = $c->check_user_roles("admin");
-    my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+    my $now           = time();
+    my $data          = [];
+    my $allowed       = $c->check_user_roles("admin");
+    my $allowed_list  = Thruk::Utils::get_exposed_custom_vars($c->config);
+    my $has_conf_info = $c->check_user_roles("authorized_for_configuration_information");
 
     my $show_full_commandline = $c->config->{'show_full_commandline'};
     if($source eq 'services' || $source eq 'both') {
@@ -2019,7 +2020,7 @@ sub _task_squares_data {
                                     sort    => { ASC => [ 'host_name',   'description' ] },
                                 );
         for my $svc (@{$services}) {
-            Thruk::Utils::set_allowed_rows_data($svc, $allowed, $allowed_list, $show_full_commandline);
+            Thruk::Utils::set_allowed_rows_data($svc, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
             push @{$data}, { uniq         => $svc->{'host_name'}.';'.$svc->{'description'},
                              name         => $c->req->parameters->{'service_label'} ? _squares_data_label($svc, $c->req->parameters->{'service_label'}) : $svc->{'host_name'}.' - '.$svc->{'description'},
                              host_name    => $svc->{'host_name'},
@@ -2041,7 +2042,7 @@ sub _task_squares_data {
                                     sort    => { ASC => [ 'name' ] },
                                 );
         for my $hst (@{$hosts}) {
-            Thruk::Utils::set_allowed_rows_data($hst, $allowed, $allowed_list, $show_full_commandline);
+            Thruk::Utils::set_allowed_rows_data($hst, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
             push @{$data}, { uniq         => $hst->{'name'},
                              name         => $c->req->parameters->{'host_label'} ? _squares_data_label($hst, $c->req->parameters->{'host_label'}) : $hst->{'name'},
                              host_name    => $hst->{'name'},

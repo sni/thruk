@@ -117,7 +117,7 @@ sub _process_show {
                                  );
 
     for my $hst (@{$hosts}) {
-        Thruk::Utils::set_allowed_rows_data($hst, 1);
+        Thruk::Utils::set_allowed_rows_data($hst, 1, undef, undef, 1);
         $info->{$hst->{'name'}} = {
             'version'          => '',
             'full_version'     => '',
