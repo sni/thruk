@@ -1226,20 +1226,39 @@ sub single_search {
             push @servicefilter,       { notification_period => { $op => $value } };
         }
         elsif ( $filter->{'type'} eq 'custom variable' ) {
-            my $pre = uc($filter->{'val_pre'});
-            push @hostfilter,       { custom_variables => { $op => $pre." ".$value } };
-            my $cop = '-or';
-            if($op eq '!=')  { $cop = '-and' }
-            if($op eq '!~~') { $cop = '-and' }
-            if($op eq '='  && $value eq '') { $cop = '-and' }
-            if($op eq '!=' && $value eq '') { $cop = '-or' }
-            if($custom_host_only) {
-                push @servicefilter, { host_custom_variables => { $op => $pre." ".$value } };
+            my $allowed = 1;
+            my $varname = uc($filter->{'val_pre'});
+            my $rand    = "";
+            # user are only allowed to filter by exposed variables
+            if(!$c->check_user_roles("admin")) {
+                my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+                if(!Thruk::Utils::check_custom_var_list($varname, $allowed_list)) {
+                    $errors++;
+                    Thruk::Utils::set_message($c, 'fail_message', "you are have no permission to filter by this custom variable");
+                    $allowed = 0;
+                    $rand = int(rand(1000000));
+                }
+            }
+
+            if(!$allowed) {
+                # add a filter which matches nothing when not allowed
+                push @hostfilter,    { custom_variables => { $op => "NONE_EXISTING_VARIABLE".$rand." someothernoneexistingvalue".$rand } };
+                push @servicefilter, { custom_variables => { $op => "NONE_EXISTING_VARIABLE".$rand." someothernoneexistingvalue".$rand } };
             } else {
-                push @servicefilter, { $cop => [ host_custom_variables => { $op => $pre." ".$value },
-                                                    custom_variables => { $op => $pre." ".$value },
-                                            ],
-                                    };
+                push @hostfilter,       { custom_variables => { $op => $varname." ".$value } };
+                my $cop = '-or';
+                if($op eq '!=')  { $cop = '-and' }
+                if($op eq '!~~') { $cop = '-and' }
+                if($op eq '='  && $value eq '') { $cop = '-and' }
+                if($op eq '!=' && $value eq '') { $cop = '-or' }
+                if($custom_host_only) {
+                    push @servicefilter, { host_custom_variables => { $op => $varname." ".$value } };
+                } else {
+                    push @servicefilter, { $cop => [ host_custom_variables => { $op => $varname." ".$value },
+                                                        custom_variables => { $op => $varname." ".$value },
+                                                ],
+                                        };
+                }
             }
         }
         else {
