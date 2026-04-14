@@ -885,7 +885,7 @@ processes a single search box filter
 
 =cut
 sub single_search {
-    my( $c, $search, $strict, $custom_host_only ) = @_;
+    my( $c, $search, $strict, $custom_host_only, $allow_all_custom_vars ) = @_;
 
     my $errors = 0;
     my(@hostfilter, @servicefilter, @hostgroupfilter, @servicegroupfilter);
@@ -1230,7 +1230,7 @@ sub single_search {
             my $varname = uc($filter->{'val_pre'});
             my $rand    = "";
             # user are only allowed to filter by exposed variables
-            if(!$c->check_user_roles("admin")) {
+            if(!$allow_all_custom_vars && !$c->check_user_roles("admin")) {
                 my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
                 if(!Thruk::Utils::check_custom_var_list($varname, $allowed_list)) {
                     $errors++;

@@ -306,7 +306,7 @@ sub permissions_filter {
                         'val_pre' => $p->{'svc_custom_var'},
                     }],
                 };
-                my($hostfilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+                my($hostfilter) = Thruk::Utils::Status::single_search($c, $search, 1, undef, 1);
                 push @svc_filter, $hostfilter; # use the host filter here, because the service filter would match host and service variables and we don't want that here
                 _warn($search) if $c->stash->{'has_error'};
                 die("invalid auth filter") if $c->stash->{'has_error'};
@@ -347,7 +347,7 @@ sub permissions_filter {
                     'val_pre' => $p->{'hst_custom_var'},
                 }],
             };
-            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, undef, 1);
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, undef, 1, 1);
             push @hst_filter, ($type eq 'hosts' ? $hostfilter : $servicefilter);
             _warn($search) if $c->stash->{'has_error'};
             die("invalid auth filter") if $c->stash->{'has_error'};
