@@ -150,6 +150,9 @@ sub _debug_http_response {
 ##############################################
 sub _strip_line {
     my($error, $all_lines) = @_;
+
+    return unless defined $error;
+
     chomp($error);
 
     my $re = qr/\ at\ .+?\ line\ \d+\.$/mx;
