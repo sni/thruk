@@ -1691,12 +1691,6 @@ sub _do_on_peers {
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
 
-    for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
-        # cleanup errors a bit
-        $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
-        $c->stash->{'failed_backends'}->{$key} = _strip_line($c->stash->{'failed_backends'}->{$key});
-    }
-
     # all backends failed, set a error message
     if(!$err && scalar keys %{$c->stash->{'failed_backends'}} > 0) {
         # check if all requested backends fail (recalculate requested backends because already failed ones would not be counted otherwise)
@@ -1717,15 +1711,33 @@ sub _do_on_peers {
         }
     }
 
+    # cleanup errors a bit, but print them first to debug log
+    if(!$err) {
+        my $details_err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+        _debug($details_err);
+        _debug2(Carp::longmess("backend error"));
+    }
+    for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
+        $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
+        $c->stash->{'failed_backends'}->{$key} = _strip_line($c->stash->{'failed_backends'}->{$key});
+    }
+
     &timing_breakpoint('_get_result: '.$function);
     if(!defined $result || $err) {
         if(!$err) {
             $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
         }
         my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
-        _debug($err);
-        _debug2(Carp::longmess("backend error"));
-        $err = $short_err if $short_err;
+        # this means, this is a connection error -> debug log only
+        if(defined $short_err) {
+            _debug($err);
+            _debug2(Carp::longmess("backend error"));
+            $err = $short_err;
+        } else {
+            # otherwise it might be an internal error
+            _warn($err);
+            _warn(Carp::longmess("internal backend error"));
+        }
         $c->stash->{'backend_error'} = $err;
         if($function eq 'send_command'
             || $c->stash->{backend_errors_handling} == DIE

@@ -4242,6 +4242,10 @@ sub extract_connection_error {
         return($1, $err);
     }
 
+    if($err =~ m|(connection\ error\ dial\ unix.*)|smx) {
+        return($1, $err);
+    }
+
     if($err =~ m|(Couldn't\ connect\ to\ UNIX\-socket.*$)|mx) {
         return($1, $err);
     }
