@@ -1725,7 +1725,7 @@ sub _do_on_peers {
     }
 
     &timing_breakpoint('_get_result: '.$function);
-    if(!defined $result || $err) {
+    if(($num_selected_backends > 0 && !defined $result) || $err) {
         if(!$err) {
             $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
         }
