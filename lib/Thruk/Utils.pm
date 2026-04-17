@@ -4238,6 +4238,10 @@ sub extract_connection_error {
         return($1, $err);
     }
 
+    if($err =~ m|(failed\ to\ connect\ to\ .*?:.*)|smx) {
+        return($1, $err);
+    }
+
     if($err =~ m|(dial\s.*?connect:\s+connection\ refused)|smx) {
         return($1, $err);
     }
@@ -4255,6 +4259,10 @@ sub extract_connection_error {
     }
 
     if($err =~ m|^(OMD:.*?)\s+at\s+|smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m|^(\d+:\ .*?)\s+at\s+|smx) {
         return($1, $err);
     }
 
