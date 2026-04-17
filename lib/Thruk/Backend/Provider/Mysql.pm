@@ -524,7 +524,7 @@ sub get_logs {
     }
 
     # queries with authorization
-    my $data;
+    my $data = [];
     if($auth_data->{'username'}) {
         my($contact,$strict,$authorized_for_all_services,$authorized_for_all_hosts,$authorized_for_system_information) = ($auth_data->{'username'},$auth_data->{'strict'},$auth_data->{'authorized_for_all_services'},$auth_data->{'authorized_for_all_hosts'},$auth_data->{'authorized_for_system_information'});
         my $sth = $dbh->prepare($sql);
