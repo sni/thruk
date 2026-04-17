@@ -88,7 +88,7 @@ sub cmd {
             Enabled => (!defined $peer->{'hidden'} || $peer->{'hidden'} == 0) ? 'Yes' : 'No',
             Address => $addr || $peer->{'peer_config'}->{'options'}->{'host_name'},
             Version => _get_peer_version($c, $key),
-            Status  => $error || 'OK',
+            Status  => _strip_line($error || 'OK'),
         };
     }
     my $output = Thruk::Utils::text_table(

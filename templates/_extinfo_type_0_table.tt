@@ -67,7 +67,7 @@
     [% IF down == 1 %]
     <td colspan="8" class="textALERT text-left whitespace-pre truncate overflow-hidden" style="max-width: 40vw;">
       [%- IF backend_detail.$pd.last_error != "OK" -%]
-        [%- escape_html(backend_detail.$pd.last_error) -%]
+        [%- escape_html(strip_error_str(backend_detail.$pd.last_error)) -%]
       [%- END -%]
     </td>
     [% ELSE %]

@@ -2484,7 +2484,7 @@ sub _rest_get_sites {
             section             => $c->stash->{'backend_detail'}->{$key}->{'section'},
             type                => $c->stash->{'backend_detail'}->{$key}->{'type'},
             status              => $error ? 1 : 0,
-            last_error          => $error,
+            last_error          => _strip_line($error),
             connected           => $error ? 0 : 1,
             federation_key      => $peer->{'fed_info'}->{'key'}     || [ $peer->{'key'} ],
             federation_name     => $peer->{'fed_info'}->{'name'}    || [ $peer->{'name'} ],
