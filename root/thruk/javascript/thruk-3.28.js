@@ -3730,16 +3730,16 @@ function do_table_search(preserve_hash) {
             var matches = table.className.match(/searchSubTable_([^\ ]*)/);
             if(matches && matches[1]) {
                 jQuery(table).find("TABLE."+matches[1]).each(function(x, t) {
-                    do_table_search_table(id, t, value);
+                    do_table_search_table(id, t, value, preserve_hash);
                 });
             } else {
-                do_table_search_table(id, table, value);
+                do_table_search_table(id, table, value, preserve_hash);
             }
         }
     });
 }
 
-function do_table_search_table(id, table, value) {
+function do_table_search_table(id, table, value, preserve_hash) {
     if(table.dataset["search"] && table.dataset["search"] == value) { return; }
     if(!table.dataset["search"] && !value) { return; }
     /* make tables fixed width to avoid flickering */
@@ -3749,7 +3749,7 @@ function do_table_search_table(id, table, value) {
     table.dataset["search"] = value;
 
     // in case the page uses paged data, we need to fetch all rows
-    if(window.pager && window.pager.entries < window.pager.total_items && !table.dataset["origUrl"]) {
+    if(preserve_hash && window.pager && window.pager.entries < window.pager.total_items && !table.dataset["origUrl"]) {
         var origUrl = ""+window.location.href;
         var url = uriWith(window.location.href, {'entries': 'all'});
         var origTable = table;
