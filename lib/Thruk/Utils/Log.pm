@@ -167,7 +167,7 @@ sub _strip_line {
     }
 
 	# ex.: 400: Failed validation of service as type service (argument 0) at /src/thruk/lib/Monitoring/Livestatus.pm line 1568, <GEN7> line 1.
-    if($lines[0] =~ s/$re//gmx) {
+    if(defined $lines[0] && $lines[0] =~ s/$re//gmx) {
         return($lines[0]);
     }
 
