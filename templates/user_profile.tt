@@ -20,23 +20,9 @@
           </div>
         </td>
       </tr>
-      <tr class="hoverable">
+      <tr>
         <th class="align-top">Teams</th>
-        <td>
-          [%- IF profile_user.teams.size > 0 -%]
-            [%- has_admin = c.check_user_roles("admin") -%]
-            [%- FOREACH t = profile_user.teams.sort -%]
-              [%- IF has_admin -%]
-                <a class="link" href="conf.cgi?sub=teams&action=edit&team=[% t | uri %]">[% t | html %]</a>
-              [%- ELSE -%]
-                [%- t | html -%]
-              [%- END -%]
-              [%- IF !loop.last %], [% END -%]
-            [%- END -%]
-          [%- ELSE -%]
-            &lt;none&gt;
-          [% END %]
-        </td>
+        <td>[% PROCESS _user_teams.tt %]</td>
       </tr>
       <tr>
         <th class="align-top">Effective Roles</th>

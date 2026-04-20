@@ -3181,7 +3181,6 @@ templates/_backends_select_multi.tt
 templates/_blocks.tt
 templates/_cmd_form.tt
 templates/_cmd_parts.tt
-templates/_csv_export.tt
 templates/_comments_table.tt
 templates/_common_css.tt
 templates/_common_css_fonts.tt
@@ -3189,6 +3188,7 @@ templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_common_js_files.tt
 templates/_cron_edit.tt
+templates/_csv_export.tt
 templates/_customvar_box.tt
 templates/_db_stats.tt
 templates/_downtimes_recurring_table.tt
@@ -3251,6 +3251,7 @@ templates/_third_graph.tt
 templates/_timeperiods_select_options.tt
 templates/_user_profile_frame.tt
 templates/_user_roles.tt
+templates/_user_teams.tt
 templates/_wizard_list.tt
 templates/avail_outages.tt
 templates/avail_report_form_box.tt
@@ -3381,11 +3382,11 @@ templates/config_hosts.tt
 templates/config_servicegroups.tt
 templates/config_services.tt
 templates/config_timeperiods.tt
+templates/csv/_status_hostdetail.tt
+templates/csv/status_hostdetail.tt
 templates/custom_perf_bar_adjustments.tt
 templates/docs.tt
 templates/error.tt
-templates/csv/_status_hostdetail.tt
-templates/csv/status_hostdetail.tt
 templates/excel/_status_detail_worksheet.tt
 templates/excel/_status_hostdetail_worksheet.tt
 templates/excel/availability.tt
