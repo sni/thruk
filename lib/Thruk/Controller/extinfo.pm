@@ -1086,11 +1086,6 @@ sub _check_stale_check {
         $second_next_planned_check = $next_planned_check + $retry_interval;
     }
 
-    # wait at least twice of the normal check interval
-    if($obj->{'last_check'} > time() - $check_interval * 2) {
-        return(0);
-    }
-
     return(0) if $second_next_planned_check > time();
 
     # did any of the parents fail?
