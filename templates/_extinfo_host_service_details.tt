@@ -111,10 +111,19 @@ END
 [% IF stale_hint %]
 <div class="card alert w-auto red relative shadow-none flexcol gap-1 flex-nowrap justify-center p-2 m-2">
   <h3>Stale [% type | html %] detected</h3>
-  <div>
-    This [% type | html %] has not been checked recently. Have a look at the
-    <a href="[% uri_with(c, { type => 'dtree' }) %]" class="link font-bold">dependency tree <i class="uil uil-share-alt align-middle"></i></a>
-    to get a hint.
+  <div class="whitespace-pre-line">
+    <p class="mb-2">
+      This [% type | html %] has likely missed two scheduled checks in a row according to its last check time: [% date.format(obj.last_check) %]
+    </p>
+    <p class="mb-2">
+      This could be a dependency issue, you can check the <a href="[% uri_with(c, { type => 'dtree' }) %]" class="link font-bold">dependency tree</a> to confirm this.
+    </p>
+    <p>
+      If rescheduling a manual check works and last update is fresh, it is likely that the core is scheduling checks properly but not getting results.
+    </p>
+    <p>
+      If Gearman is used, it could that gearman workers are down or overloaded beyond the point where they can follow the schedule.
+    </p>
   </div>
 </div>
 [% END %]

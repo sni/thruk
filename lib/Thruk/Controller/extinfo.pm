@@ -1050,16 +1050,47 @@ sub _check_stale_check {
 
     return(0) unless $obj->{'in_check_period'};
 
-    # do dependencies exist
-    return(0) unless(scalar @{$obj->{'depends_exec'}||[]} > 0 || scalar @{$obj->{'parents'}||[]} > 0);
+    # stalement requirement:
+    # from the last check time, a next check is scheduled
+    # if from that next check, hypotetical second next check is scheduled as well
+    # if the second next check lies in the past, the service is marked stale, as it missed two planned checks
 
     my $peer_key       = $obj->{'peer_key'};
     my $check_interval = $obj->{'check_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
+    my $retry_interval = $obj->{'retry_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
+    my $max_check_attempts = $obj->{'max_check_attempts'};
+    my $current_attempt = $obj->{'current_attempt'};
+    my $state = $obj->{'state'};
+    my $last_check = $obj->{'last_check'}; # Last time the check got an answer
+    # obj.next_check is refreshed, even when there hasnt been any responses for a while. 
+    # Staleness detection is based on last_check, next_check does not help
+
+    my $next_planned_check = 0;
+    if ($state == 0) {
+        $next_planned_check = $last_check + $check_interval;
+    }
+    elsif ($state != 0 && $current_attempt != $max_check_attempts) {
+        $next_planned_check = $last_check + $check_interval;
+    }
+    else{
+        $next_planned_check = $last_check + $retry_interval;
+    }
+    my $second_next_planned_check = 0;
+    if ($state == 0) {
+        $second_next_planned_check = $next_planned_check + $check_interval;
+    }
+    elsif ($state != 0 && $current_attempt != $max_check_attempts) {
+        $second_next_planned_check = $next_planned_check + $check_interval;
+    }
+    else{
+        $second_next_planned_check = $next_planned_check + $retry_interval;
 
     # wait at least twice of the normal check interval
     if($obj->{'last_check'} > time() - $check_interval * 2) {
         return(0);
     }
+
+    return(0) if $second_next_planned_check > time();
 
     # did any of the parents fail?
     my $worst = 0;
