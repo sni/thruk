@@ -1062,7 +1062,7 @@ sub _check_stale_check {
     my $current_attempt = $obj->{'current_attempt'};
     my $state = $obj->{'state'};
     my $last_check = $obj->{'last_check'}; # Last time the check got an answer
-    # obj.next_check is refreshed, even when there hasnt been any responses for a while. 
+    # obj.next_check is refreshed, even when there hasnt been any responses for a while.
     # Staleness detection is based on last_check, next_check does not help
 
     my $next_planned_check = 0;
@@ -1084,6 +1084,7 @@ sub _check_stale_check {
     }
     else{
         $second_next_planned_check = $next_planned_check + $retry_interval;
+    }
 
     # wait at least twice of the normal check interval
     if($obj->{'last_check'} > time() - $check_interval * 2) {
