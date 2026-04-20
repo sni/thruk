@@ -969,18 +969,20 @@ sub _has_star_permissions {
     return 0 unless $permissions;
 
     for my $p (@{$permissions}) {
+        # must have * hosts or hostgroups
         next unless(grep(/^\*$/mx, @{$p->{'hosts'}}) || grep(/^\*$/mx, @{$p->{'hostgroups'}}));
+
         if($with_services) {
-            next if $p->{'with_services'} ne '1';
-            next if ($with_commands && (!$p->{'svc_commands'} || $p->{'allowed_commands'}));
+            next if $p->{'with_services'} ne '1'; # 1 = incl. all services
+            next if ($with_commands && (!$p->{'svc_commands'} || $p->{'allowed_commands'})); # not if list of commands is limited
         } else {
-            next if ($with_commands && (!$p->{'hst_commands'} || $p->{'allowed_commands'}));
+            next if $p->{'with_services'} eq '2'; # 2 = specific services. Star permission not when there is a service filter involved
+            next if ($with_commands && (!$p->{'hst_commands'} || $p->{'allowed_commands'})); # not if list of commands is limited
         }
         return 1;
     }
     return 0;
 }
-
 
 ########################################
 
