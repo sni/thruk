@@ -52,7 +52,7 @@
       </td>
       [% IF n.last_error != "" %]
         <td style="text-align: left;" colspan="3">
-          [% strip_error_str(n.last_error | html) %]
+          [% strip_error_str(n.last_error) | html %]
         </td>
       [% ELSE %]
         <td style="text-align: center;">
