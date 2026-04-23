@@ -1070,20 +1070,21 @@ sub _check_stale_check {
         $next_planned_check = $last_check + $check_interval;
     }
     elsif ($state != 0 && $current_attempt != $max_check_attempts) {
-        $next_planned_check = $last_check + $check_interval;
-    }
-    else{
         $next_planned_check = $last_check + $retry_interval;
     }
+    else{
+        $next_planned_check = $last_check + $check_interval;
+    }
+
     my $second_next_planned_check = 0;
     if ($state == 0) {
         $second_next_planned_check = $next_planned_check + $check_interval;
     }
     elsif ($state != 0 && $current_attempt != $max_check_attempts) {
-        $second_next_planned_check = $next_planned_check + $check_interval;
+        $second_next_planned_check = $next_planned_check + $retry_interval;
     }
     else{
-        $second_next_planned_check = $next_planned_check + $retry_interval;
+        $second_next_planned_check = $next_planned_check + $check_interval;
     }
 
     return(0) if $second_next_planned_check > time();
