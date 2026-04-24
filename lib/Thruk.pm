@@ -597,11 +597,14 @@ sub _check_exit_reason {
         $log = \&_warn;
         &{$log}("got signal %s while handling %s request in %s\n", $sig, $c->req->method//'', $url//'');
     }
+    my $agent = $c->req->header('User-Agent');
     &{$log}("User:       %s\n", $c->stash->{'remote_user'}) if $c->stash->{'remote_user'};
     &{$log}("Runtime:    %.2fs\n", $request_runtime);
+    &{$log}("Pid:        %d\n", $$);
     &{$log}("Timeout:    %d set in %s:%s\n", $Thruk::last_alarm->{'value'}, $Thruk::last_alarm->{'caller'}->[1], $Thruk::last_alarm->{'caller'}->[2]) if ($sig eq 'ALRM' && $Thruk::last_alarm);
     &{$log}("Address:    %s\n", $c->req->address) if $c->req->address;
     &{$log}("Parameters: %s\n", $params // '<none>');
+    &{$log}("UserAgent:  %s\n", $agent) if $agent;
     if($c->stash->{errorDetails}) {
         for my $row (split(/\n|<br>/mx, $c->stash->{errorDetails})) {
             &{$log}("%s\n", $row);
@@ -962,9 +965,11 @@ stop all thruk pids except ourselves
 
 =cut
 sub stop_all {
-    my($self) = @_;
+    my($self, $reason) = @_;
     $pidfile  = Thruk->config->{'tmp_path'}.'/thruk.pid';
     if(-f $pidfile) {
+        $reason = $reason ? " (".$reason.")" : "";
+        _info("thruk gracefully stopping next thruk instance".$reason);
         for my $pid (Thruk::Utils::IO::read_as_list($pidfile)) {
             next if $pid == $$;
             kill("TERM", $pid);
@@ -977,15 +982,17 @@ sub stop_all {
 
 =head2 graceful_stop
 
-    graceful_stop($c)
+    graceful_stop($c, [$reason])
 
 stop our process gracefully
 
 =cut
 sub graceful_stop {
-    my($self, $c) = @_;
+    my($self, $c, $reason) = @_;
+    $reason = $reason ? " (".$reason.")" : "";
     if($c && $c->env->{'psgix.harakiri'}) {
         # if plack server does support harakiri mode, only supported if plack uses a procmanager
+        _info("thruk gracefully stopping with psgix.harakiri.commit".$reason);
         $c->env->{'psgix.harakiri.commit'} = 1;
     }
     elsif($c && $c->env->{'psgix.cleanup'}) {
@@ -993,7 +1000,9 @@ sub graceful_stop {
         push @{$c->env->{'psgix.cleanup.handlers'}}, sub {
             kill("TERM", $$);
         };
+        _info("thruk gracefully stopping with psgix.cleanup.handlers".$reason);
     } else {
+        _info("thruk gracefully stopping with sigterm".$reason);
         # kill it the hard way
         kill("TERM", $$); # send SIGTERM to ourselves which should be used in the FCGI::ProcManager::pm_post_dispatch then
     }

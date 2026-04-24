@@ -871,7 +871,7 @@ sub _cmd_precompile {
 sub _cmd_stop {
     my($c, $action) = @_;
     $c->stats->profile(begin => "_cmd_stop()");
-    $c->app->stop_all();
+    $c->app->stop_all("requested by cli command");
     $c->stats->profile(end => "_cmd_stop()");
     return(sprintf("OK - all processes %s\n", $action eq 'stop' ? "stopped" : "restarted"));
 }

@@ -2613,6 +2613,7 @@ sub restart_later {
         return $c->redirect_to($redirect);
     }
 
+    _info("thruk restarting in 1sec with cmd: ".$cmd);
     require Thruk::Utils::External;
     return(Thruk::Utils::External::cmd($c, {
         'cmd'        => "sleep 1 ; ".$cmd."; sleep 1",
@@ -3052,7 +3053,7 @@ sub check_memory_usage {
         my $msg = sprintf("Thruk exiting process due to memory usage: %dmb%s (limit: %dmb, pid: %d)", $mem, $inc, $c->config->{'max_process_memory'}, $$);
         log_error_with_details($c, $msg);
         print STDERR $msg,"\n";
-        $c->app->graceful_stop($c);
+        $c->app->graceful_stop($c, "cleanup memory consumption");
     }
     $c->app->{'previous_reqest_memory'} = $mem;
     return;
@@ -3100,9 +3101,9 @@ stop all thruk pids
 
 =cut
 sub stop_all {
-    my($c) = @_;
-    $c->app->stop_all();
-    $c->app->graceful_stop($c);
+    my($c, $reason) = @_;
+    $c->app->stop_all($reason);
+    $c->app->graceful_stop($c, $reason);
     return(1);
 }
 
