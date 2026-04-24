@@ -1055,9 +1055,16 @@ sub _check_stale_check {
 
     my $peer_key       = $obj->{'peer_key'};
     my $check_interval = $obj->{'check_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
+    my $retry_interval = $obj->{'retry_interval'} * $c->stash->{'pi_detail'}->{$peer_key}->{'interval_length'};
+    my $interval       = $check_interval;
 
-    # wait at least twice of the normal check interval
-    if($obj->{'last_check'} > time() - $check_interval * 2) {
+    # no need to be accurate here, use the longer interval. We only want to give a hint without wrong conclusions
+    if($obj->{'state_type'} == 0 && $retry_interval > $check_interval) {
+        $interval = $retry_interval;
+    }
+
+    # wait at least twice of the check interval
+    if($obj->{'last_check'} > time() - $interval * 2) {
         return(0);
     }
 
