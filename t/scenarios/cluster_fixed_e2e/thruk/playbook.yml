@@ -6,7 +6,6 @@
     - role: thruk_developer
     - role: ssh_site_login
   tasks:
-  - shell: "crond"
   - name: "omd config change"
     shell: "omd config demo change"
     args:
