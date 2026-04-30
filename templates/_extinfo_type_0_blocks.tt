@@ -206,7 +206,7 @@
         [% ELSE %]
           [% IF backend_detail.$pd.last_error != "OK" %]
             <div class="textALERT">
-            [% escape_html(backend_detail.$pd.last_error) %]
+            [% escape_html(strip_error_str(backend_detail.$pd.last_error)) %]
             </div>
           [% END %]
         [% END %]

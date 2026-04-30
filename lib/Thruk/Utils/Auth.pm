@@ -230,6 +230,12 @@ sub get_auth_filter {
             push @filter, { '-and' => [ 'service_description' => undef, 'host_name' => undef ]};
         }
 
+        # log permissions from teams
+        push @filter, { '-or' => [
+            _adjust_log_filter_prefix(permissions_filter($c, 'hosts')),
+            _adjust_log_filter_prefix(permissions_filter($c, 'services')),
+         ]};
+
         # combine all filter by OR
         $log_filter->{'filter'} = {'-or' => \@filter};
         return({ auth_filter => $log_filter}) if $c->config->{'logcache'};
@@ -306,7 +312,7 @@ sub permissions_filter {
                         'val_pre' => $p->{'svc_custom_var'},
                     }],
                 };
-                my($hostfilter) = Thruk::Utils::Status::single_search($c, $search, 1);
+                my($hostfilter) = Thruk::Utils::Status::single_search($c, $search, 1, undef, 1);
                 push @svc_filter, $hostfilter; # use the host filter here, because the service filter would match host and service variables and we don't want that here
                 _warn($search) if $c->stash->{'has_error'};
                 die("invalid auth filter") if $c->stash->{'has_error'};
@@ -347,7 +353,7 @@ sub permissions_filter {
                     'val_pre' => $p->{'hst_custom_var'},
                 }],
             };
-            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, undef, 1);
+            my($hostfilter, $servicefilter) = Thruk::Utils::Status::single_search($c, $search, undef, 1, 1);
             push @hst_filter, ($type eq 'hosts' ? $hostfilter : $servicefilter);
             _warn($search) if $c->stash->{'has_error'};
             die("invalid auth filter") if $c->stash->{'has_error'};
@@ -392,6 +398,40 @@ sub _filter_dups {
     }
 
     return @filtered;
+}
+
+##############################################
+sub _adjust_log_filter_prefix {
+    my($filter) = @_;
+
+    if(ref $filter eq 'ARRAY') {
+        for my $f (@{$filter}) {
+            _adjust_log_filter_prefix($f);
+        }
+
+        return $filter;
+    }
+    if(ref $filter eq 'HASH') {
+        for my $key (sort keys %{$filter}) {
+            if($key eq '-and' || $key eq '-or') {
+                _adjust_log_filter_prefix($filter->{$key});
+                next;
+            }
+
+            my $newKey = $key;
+            if(   $key eq 'name')        { $newKey = 'host_name'; }
+            elsif($key eq 'description') { $newKey = 'service_description'; }
+            else                         { $newKey = 'current_'.$key; }
+
+            if($key ne $newKey) {
+                $filter->{$newKey} = delete $filter->{$key};
+            }
+        }
+
+        return $filter;
+    }
+
+    return $filter;
 }
 
 ##############################################

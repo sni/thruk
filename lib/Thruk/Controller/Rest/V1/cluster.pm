@@ -80,7 +80,7 @@ sub _rest_get_thruk_cluster_restart {
         next if $c->cluster->is_it_me($n);
         _debug(sprintf("restarting node: %s -> %s", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
         # run stop on all nodes, apache will start them again automatically
-        $c->cluster->run_cluster($n, "Thruk::Utils::stop_all", [$c]);
+        $c->cluster->run_cluster($n, "Thruk::Utils::stop_all", [$c, "requested by rest api request"]);
         _debug(sprintf("restarting node: %s -> %s: done", $Thruk::Globals::HOSTNAME, $n->{'hostname'}|| $n->{'node_url'}));
     }
 
@@ -97,7 +97,7 @@ sub _rest_get_thruk_cluster_restart {
     alarm(0);
 
     # stop our own process gracefully
-    $c->app->stop_all();
+    $c->app->stop_all("requested by rest api request");
 
     return({'message' => 'all cluster nodes restarted', 'nodes' => $nodes});
 }

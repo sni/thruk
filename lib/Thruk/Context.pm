@@ -1005,7 +1005,7 @@ sub finalize_request {
             # redirected page, save stats for next page to show
             $c->{'session'}->{'page_profiles'} = [] unless $c->{'session'}->{'page_profiles'};
             push @{$c->{'session'}->{'page_profiles'}}, @{$c->stash->{'page_profiles'}};
-            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} });
+            Thruk::Utils::IO::json_lock_patch($c->{'session'}->{'file'}, { page_profiles => $c->{'session'}->{'page_profiles'} }) if $c->{'session'}->{'file'};
         }
     }
     # slow pages log

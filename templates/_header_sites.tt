@@ -1,7 +1,7 @@
 ﻿[%- BLOCK site_btn -%]
   [%- b = initial_backends.$id -%]
   [%- IF b.exists('cls') && b.cls != "" -%]
-    <button data-id="[% id %]" class="button_peer button_peer[% b.cls %]" title="[% b.last_error | html %]" onclick="toggleBackend('[% id %]')">[% b.name | html %]</button>
+    <button data-id="[% id %]" class="button_peer button_peer[% b.cls %]" title="[% strip_error_str(b.last_error) | html %]" onclick="toggleBackend('[% id %]')">[% b.name | html %]</button>
   [%- END -%]
 [%- END -%]
 

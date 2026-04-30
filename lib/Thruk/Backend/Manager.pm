@@ -1690,11 +1690,11 @@ sub _do_on_peers {
         ($result, $type, $totalsize, $err) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     }
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
-
+    my $con_errors = 0;
     for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
-        # cleanup errors a bit
         $c->stash->{'failed_backends'}->{$key} =~ s/^ERROR:\s*//mx;
-        $c->stash->{'failed_backends'}->{$key} = _strip_line($c->stash->{'failed_backends'}->{$key});
+        my($short_err, undef) = Thruk::Utils::extract_connection_error($c->stash->{'failed_backends'}->{$key});
+        $con_errors++ if defined $short_err;
     }
 
     # all backends failed, set a error message
@@ -1715,17 +1715,31 @@ sub _do_on_peers {
         if($num_selected_backends == $num_failed) {
             $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
         }
+
+        my $details_err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+        _debug($details_err);
+        _debug2(Carp::longmess("backend error"));
+    } elsif ($err) {
+        my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+        $con_errors = $num_selected_backends if defined $short_err;
     }
 
     &timing_breakpoint('_get_result: '.$function);
-    if(!defined $result || $err) {
+    if(($num_selected_backends > 0 && !defined $result) || $err) {
         if(!$err) {
             $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
         }
-        my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
-        _debug($err);
-        _debug2(Carp::longmess("backend error"));
-        $err = $short_err if $short_err;
+        # this means, this is a connection error -> debug log only
+        if($con_errors > 0 && $con_errors == $num_selected_backends) {
+            _debug($err);
+            _debug2(Carp::longmess("backend error"));
+            my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+            $err = $short_err if $short_err;
+        } else {
+            # otherwise it might be an internal error
+            _warn($err);
+            _warn(Carp::longmess("internal backend error"));
+        }
         $c->stash->{'backend_error'} = $err;
         if($function eq 'send_command'
             || $c->stash->{backend_errors_handling} == DIE
@@ -2097,7 +2111,7 @@ sub _get_result_lmd_with_retries {
     my $err = $@;
     return($result, $type, $totalsize, undef) unless $err;
 
-    _debug($err) if $err;
+    _trace($err) if $err;
     if($err && $err =~ m/^502:|bad\ request:/mx) { # lmd sends error 502 if all backends are down
         $c->stash->{'lmd_ok'} = 1;
     }

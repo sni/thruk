@@ -1,12 +1,7 @@
 ﻿[% IF profile_user.roles.list.size == 0 %]
-  none
+  &lt;none&gt;
 [% ELSE %]
   <table class="w-full rowhover">
-    [% IF profile_user.roles.list.size == 0 %]
-      <tr>
-        <td class="align-top">&lt;none&gt;</td>
-      </tr>
-    [% END %]
     [% has_admin = profile_user.check_user_roles("admin") %]
     [% FOREACH r = profile_user.roles.list.sort %]
       <tr[% IF has_admin && r != "authorized_for_admin" %] style="display: none;" class="js-hidden_roles"[% END %]>

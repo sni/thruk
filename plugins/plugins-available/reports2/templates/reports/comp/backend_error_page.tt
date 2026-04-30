@@ -2,7 +2,7 @@
 [% WRAPPER 'reports/comp/page_standard.tt' pagetitle="Backend Errors" title="Backend Errors" %]
     [% FOREACH b = selected_backends %]
         [% IF failed_backends.exists(b) %]
-            [% c.db.get_peer_by_key(b).peer_name %]: [% failed_backends.$b %]<br>
+            [% c.db.get_peer_by_key(b).peer_name %]: [% strip_error_str(failed_backends.$b) %]<br>
         [% END %]
     [% END %]
 [% END %]

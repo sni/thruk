@@ -958,6 +958,22 @@ sub strip_command_args {
 
 ########################################
 
+=head2 strip_error_str
+
+  my $striped_string = strip_error_str($error)
+
+returns a string without the "at line ..." part
+
+=cut
+sub strip_error_str {
+    my($text) = @_;
+    my $short = _strip_line("$text");
+
+    return($short);
+}
+
+########################################
+
 =head2 calculate_first_notification_delay_remaining
 
   my $remaining = calculate_first_notification_delay_remaining($obj)

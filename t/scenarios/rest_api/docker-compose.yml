@@ -11,3 +11,6 @@ services:
         - .:/scenario:ro
         - .:/test:ro
         - ../../../var/tmp:/var/tmp:rw
+    # required for strace
+    #cap_add:
+    #    - SYS_PTRACE

@@ -912,8 +912,8 @@ sub cmd {
     my($rc, $combined, $stdout, $stderr);
     if(ref $cmd eq 'ARRAY') {
         my $prog = shift @{$cmd};
-        my $dbg = sprintf('IO::cmd: %s %s', $prog, Thruk::Base::shorten(join(' ', @{$cmd}), 50));
-        &timing_breakpoint($dbg);
+        my $dbg = sprintf('IO::cmd: %s %s', $prog, Thruk::Base::shorten(join(' ', @{$cmd}), 300));
+        &timing_breakpoint('IO::cmd: '.$prog);
         _debug($dbg) if $c;
         my $errrdr = gensym;
         my($pid, $wtr, $rdr, @lines);
