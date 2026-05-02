@@ -1,0 +1,51 @@
+[%
+  locale_name          = 'icelandic';      # language name should be in english
+  reportDateTimeFormat = '%Y-%m-%d  %H:%M:%S';
+  reportDateFormat     = '%Y-%m-%d';
+  weekAbbr             = 'Vika';
+  monthNames           = ['Jan','Feb','Mars','Apr','Maí','Jún','Júl','Ágú','Sept','Okt','Nóv','Des'];
+  dayNames             = ['Mán','Þri','Mið','Fim','Fös','Lau','Sun'];
+  translations         = {
+# keep those personal names
+    'Up'                                    => 'Up',
+    'Down'                                  => 'Down',
+    'Unreachable'                           => 'Unreachable',
+    'Ok'                                    => 'Ok',
+    'Warning'                               => 'Warning',
+    'Unknown'                               => 'Unknown',
+    'Critical'                              => 'Critical',
+    'Host:'                                 => 'Host:',
+    'Service:'                              => 'Service:',
+
+# translated patterns
+    'Hostgroup:'                            => 'Netþjónahópur:',
+    'Servicegroup:'                         => 'Þjónustuhópur:',
+    'Event Report'                          => 'Atvikaskýrsla',
+    'SLA Report'                            => 'SLA skýrsla',
+    'SLA Outage Report'                     => 'SLA atvikaskýrsla',
+    'Business Process:'                     => 'Foretningsprocess:',
+    'Report Timeperiod:'                    => 'Tímabil:',
+    'Legend'                                => 'Forklaring',
+    'Host Alert'                            => 'Netþjónnavillur',
+    'Service Alert'                         => 'Þjónustuvillur',
+    'Totals'                                => 'Samtölur',
+    'Events'                                => 'Atvik',
+    'no events during this timeperiod.'     => 'engin atvik á tímabilinu.',
+    'SLA Overview Graph'                    => 'SLA yfirlitsmynd',
+    'Availability'                          => 'Aðgengi',
+    'Service: %s on %s'                     => 'Þjónusta: %s á %s',
+    'Average Availability'                  => 'Meðaltal á aðgengi',
+    'Total Uptime'                          => 'Uppitími',
+    'Total Downtime'                        => 'Niðritími',
+    'no outages during this timeperiod'     => 'engin frávik á tímabilinu',
+    'Worst Outages'                         => 'Alvarlegustu frávik',
+    'Latest Outages'                        => 'Nýlegastu frávik',
+    'Outages'                               => 'Frávik',
+    'Report:'                               => 'Skýrsla:',
+    'Description:'                          => 'Lýsing:',
+    'Your report is attached.'              => 'Skýrsla í viðhengi.',
+    'Out of Scope'                          => 'Utan viðmiðs',
+  };
+
+  set_time_locale("is_IS.UTF-8");
+%]
