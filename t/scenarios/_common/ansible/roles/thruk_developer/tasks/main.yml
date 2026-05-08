@@ -48,8 +48,13 @@
   when: thruk_path.stat.exists
 - name: "disable auto restarts"
   shell: "sudo su - {{ site }} -c 'touch .THRUK_RESTARTER_DISABLED'"
-- name: "add file to .gitignore"
+- name: "add files to .gitignore"
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/.gitignore
-    line: ".THRUK_RESTARTER_DISABLED"
-    regexp: '^.THRUK_RESTARTER_DISABLED'
+    line: "{{ ignore_line }}"
+    state: present
+  loop_control:
+    loop_var: ignore_line
+  with_items:
+    - ".THRUK_RESTARTER_DISABLED"
+    - ".THRUK_RESTARTER_DISABLED.TMP"
