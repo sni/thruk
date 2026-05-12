@@ -127,7 +127,7 @@ END
         <div class="flex gap-x-2">
           [% _service(obj) | html %]
           [% IF service.icon_image_expanded %]
-            <img src='[% logo_path_prefix %][% service.icon_image_expanded %]'[% IF service.icon_image_alt %] alt="[% service.icon_image_alt | html %]" title="[% service.icon_image_alt | html %]"[% END %] width="20" height="20">
+            <img src='[% logo_path_prefix %][% service.icon_image_expanded %]'[% IF service.icon_image_alt %] alt="[% service.icon_image_alt %]" title="[% service.icon_image_alt %]"[% END %] width="20" height="20">
           [% END %]
         </div>
       </td>
@@ -146,7 +146,7 @@ END
         </div>
         [% IF type == "host" %]
           [% IF host.icon_image_expanded %]
-              <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' alt="[% host.icon_image_alt | html %]" title="[% host.icon_image_alt | html %]" width="20" height="20">
+              <img src='[% logo_path_prefix %][% host.icon_image_expanded %]' alt="[% host.icon_image_alt %]" title="[% host.icon_image_alt %]" width="20" height="20">
           [% END %]
         [% END %]
       </div>
