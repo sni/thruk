@@ -7,7 +7,7 @@
  *
  */
 
-const puppeteer = require('puppeteer');
+const puppeteer = require("fix-esm").require("puppeteer");
 const os        = require('os');
 const path      = require('path');
 

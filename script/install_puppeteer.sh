@@ -81,7 +81,7 @@ if [ $INSTALL_NODE = "1" ]; then
 fi
 
 export PATH=$DEST/node/bin:$PATH
-$NPM i $NPMOPTS progress puppeteer@$PUPPETEER_VERSION
+$NPM i $NPMOPTS fix-esm progress puppeteer@$PUPPETEER_VERSION
 
 if [ $INSTALL_NODE = "1" ]; then
     # install again, somehow previous module install removes it
