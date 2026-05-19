@@ -1159,6 +1159,14 @@ sub _cmd_raw {
     my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
+    if($function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
+        if(ref $res eq 'ARRAY' && $res->[1] == 0) {
+            $c->res->body($res->[2]);
+            $c->{'rendered'} = 1;
+            return;
+        }
+    }
+
     # inject/add proxy version and config tool settings to processinfo result
     if($function eq 'get_processinfo' and defined $res and ref $res eq 'ARRAY' and defined $res->[2] and ref $res->[2] eq 'HASH') {
         $res->[2]->{$key}->{'thruk'} = {
