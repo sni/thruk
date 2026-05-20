@@ -1159,6 +1159,7 @@ sub _cmd_raw {
     my @res = $c->db->pool->do_on_peer($key, $function, $opt->{'args'});
     my $res = shift @res;
 
+    # passthrough livestatus results if possible (even without LMD)
     if($function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
         if(ref $res eq 'ARRAY' && $res->[1] == 0) {
             $c->res->body($res->[2]);
