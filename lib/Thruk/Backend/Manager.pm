@@ -2146,6 +2146,7 @@ sub _get_result_lmd_with_retries {
         if($code != 502) {
             $c->stash->{'lmd_error'} = $self->lmd_peer->peer_addr().": ".$err;
             $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
+            _error("lmd error code %d: %s", $code, $c->stash->{'lmd_error'});
             require Thruk::Utils::External;
             Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
         }
