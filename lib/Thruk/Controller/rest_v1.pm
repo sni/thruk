@@ -1847,7 +1847,12 @@ sub _get_columns_meta_for_path {
     require Thruk::Controller::Rest::V1::docs;
     my $keys = Thruk::Controller::Rest::V1::docs::keys();
     my $alias_columns = get_aliased_columns($c);
-    my $req_columns   = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
+    my $req_columns  = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
+
+    # Remove the 'limit' if present, it is a parameter but not a request column.
+    if ($req_columns && @{$req_columns}) {
+        @{$req_columns} = grep { $_ ne 'limit' } @{$req_columns};
+    }
     my $columns = {};
     for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
         my $p = $path;
@@ -1864,6 +1869,21 @@ sub _get_columns_meta_for_path {
             $columns->{$d->{'name'}} = $col;
         }
         last;
+    }
+    # If request does not specify any columns, it should include metadata for all columns
+    if(scalar @{$req_columns} == 0) {
+        my $firstrow;
+        if(ref $data eq 'ARRAY' && $data->[0]) {
+            $firstrow = $data->[0];
+        }
+        elsif(ref $data eq 'HASH') {
+            $firstrow = $data;
+        }
+        if($firstrow) {
+            for my $key (sort keys %{$firstrow}) {
+                push @{$req_columns}, $key ;
+            }
+        }
     }
 
     my $meta = [];
@@ -1882,21 +1902,6 @@ sub _get_columns_meta_for_path {
             $col->{'config'}->{'unit'} = 'bytes' if $col->{'config'}->{'unit'} eq 'B';
         }
         push @{$meta}, $col;
-    }
-
-    if(scalar @{$meta} == 0) {
-        my $firstrow;
-        if(ref $data eq 'ARRAY' && $data->[0]) {
-            $firstrow = $data->[0];
-        }
-        elsif(ref $data eq 'HASH') {
-            $firstrow = $data;
-        }
-        if($firstrow) {
-            for my $key (sort keys %{$firstrow}) {
-                push @{$meta}, { name => $key };
-            }
-        }
     }
 
     # add missing columns from data
