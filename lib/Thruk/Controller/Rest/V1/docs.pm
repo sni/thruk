@@ -4322,6 +4322,72 @@ __DATA__
    ]
   }
  },
+ "/thruk/metrics": {
+  "GET": {
+   "columns": [
+    {
+     "description": "business process calculation duration in seconds",
+     "name": "business_process_duration_seconds",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "timestamp of last business process calculation",
+     "name": "business_process_last_update",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "total number of business processes",
+     "name": "business_process_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of worker processes used to calculate business processes",
+     "name": "business_process_worker_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of active thruk sessions (active during the last 5 minutes)",
+     "name": "sessions_active_5min_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of thruk sessions",
+     "name": "sessions_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of uniq users active during the last 5 minutes",
+     "name": "sessions_uniq_user_5min_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of uniq users",
+     "name": "sessions_uniq_user_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of locked thruk users",
+     "name": "users_locked_total",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "total number of thruk users",
+     "name": "users_total",
+     "type": "number",
+     "unit": ""
+    }
+   ]
+  }
+ },
  "/thruk/users": {
   "GET": {
    "columns": [
