@@ -4387,5 +4387,83 @@ __DATA__
     }
    ]
   }
+ },
+ "/thruk/whoami": {
+  "GET": {
+   "columns": [
+    {
+     "description": "alias name",
+     "name": "alias",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "authentication method",
+     "name": "auth_src",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "flag whether this account is allowed to submit commands",
+     "name": "can_submit_commands",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "email address",
+     "name": "email",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "list of contactgroups",
+     "name": "groups",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "flag whether this account has a thruk profile or not",
+     "name": "has_thruk_profile",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "username",
+     "name": "id",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "timestamp of last successfull login",
+     "name": "last_login",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "flag whether account is locked or not",
+     "name": "locked",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "original username",
+     "name": "original_username",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "list of roles for this user",
+     "name": "roles",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "users selected timezone",
+     "name": "tz",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
  }
 }
