@@ -1861,8 +1861,23 @@ sub _get_columns_meta_for_path {
 
     require Thruk::Controller::Rest::V1::docs;
     require Thruk::Controller::Rest::V1::livestatus_docs;
-    my $keys = Thruk::Controller::Rest::V1::docs::keys();
-    $keys = { %{Thruk::Controller::Rest::V1::livestatus_docs::keys()}, %{$keys} };
+    my $lv_keys = Thruk::Controller::Rest::V1::livestatus_docs::keys();
+    my $keys    = { %{$lv_keys} };
+    my $docs    = Thruk::Controller::Rest::V1::docs::keys();
+    for my $path (keys %{$docs}) {
+        if($keys->{$path} && $keys->{$path}->{GET} && $docs->{$path}->{GET}) {
+            my $col_hash = {};
+            for my $col (@{$keys->{$path}->{GET}->{columns}}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            for my $col (@{$docs->{$path}->{GET}->{columns}}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            $keys->{$path}->{GET}->{columns} = [values %{$col_hash}];
+        } else {
+            $keys->{$path} = $docs->{$path};
+        }
+    }
     # Thruk::Utils::Log::_debug("\$keys: ".Dumper($keys));
     my $alias_columns = get_aliased_columns($c);
     Thruk::Utils::Log::_debug("\$alias_columns: ".Dumper($alias_columns));
