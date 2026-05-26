@@ -1874,7 +1874,13 @@ sub _get_columns_meta_for_path {
         @{$req_columns} = grep { $_ ne 'limit' } @{$req_columns};
     }
     my $columns = {};
-    for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
+    for my $path (sort {
+        my $a_wc = ($a =~ /</) ? 1 : 0;
+        my $b_wc = ($b =~ /</) ? 1 : 0;
+        $a_wc <=> $b_wc
+        ||
+        length $b <=> length $a
+    } keys %{$keys}) {
         my $p = $path;
         # Finding syntax
         # '<' literal
