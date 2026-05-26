@@ -710,6 +710,132 @@ __DATA__
    ]
   }
  },
+ "hostgroups/<name>/stats": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "active_checks_disabled_active",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "active_checks_disabled_passive",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_ack",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_disabled_active",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_disabled_passive",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_scheduled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_unhandled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_hard",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_and_unhandled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "down_soft",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "eventhandler_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "flapping",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "flapping_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "hard",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "notifications_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "outages",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "passive_checks_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "pending",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "pending_and_disabled",
+     "type": "number",
+     "unit": ""
+    }
+   ]
+  }
+ },
  "/hostgroups/<name>/availability": {
   "GET": {
    "columns": [
@@ -1610,19 +1736,43 @@ __DATA__
     {
      "description": "description of the url",
      "name": "description",
-     "type": "number",
+     "type": "string",
      "unit": ""
     },
     {
      "description": "protocol to use for this url",
      "name": "protocol",
-     "type": "number",
+     "type": "string",
      "unit": ""
     },
     {
      "description": "the rest url",
      "name": "url",
-     "type": "number",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/": {
+  "GET": {
+   "columns": [
+    {
+     "description": "description of the url",
+     "name": "description",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "protocol to use for this url",
+     "name": "protocol",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "the rest url",
+     "name": "url",
+     "type": "string",
      "unit": ""
     }
    ]
@@ -4238,18 +4388,24 @@ __DATA__
     {
      "description": "groups/roles as provided by the oauth server",
      "name": "oauth_groups",
-     "type": "",
+     "type": "string",
      "unit": ""
     },
     {
      "description": "extra session roles",
      "name": "roles",
-     "type": "",
+     "type": "string",
      "unit": ""
     },
     {
      "description": "username of this session",
      "name": "username",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "page_profiles",
      "type": "string",
      "unit": ""
     }
@@ -4548,9 +4704,789 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "modified_attributes_list",
-     "name": "peer_section",
+     "description": "",
+     "name": "modified_attributes_list",
      "type": "array_of_strings",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/thruk/config": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "ENCODING",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "user",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_action_url_target",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_admin",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_all_host_commands",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_all_hosts",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_all_service_commands",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_all_services",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_broadcasts",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_business_processes",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_configuration_information",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_dokuwiki_admin",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_dokuwiki_user",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "_authorized_contactgroup_for_panorama_view_media_manager",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/hostgroups": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "num_services_hard_crit",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_ok",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_unknown",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_warn",
+     "type": "number",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/hosts": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "accept_passive_checks",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "action_url_expanded",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "check_freshness",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "check_options",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "checks_enabled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "childs",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments_info",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments_with_info",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "custom_variable_names",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "custom_variable_values",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "custom_variables",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "downtimes_info",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "downtimes_with_info",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "groups",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "hard_state",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "icon_image_expanded",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "in_check_period",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "in_notification_period",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "is_executing",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "latency",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "modified_attributes_list",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "notes_expanded",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "notes_url_expanded",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/notifications": {
+  "GET": {
+   "columns": [
+    {
+     "description": "the class of the message as integer (0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command)",
+     "name": "class",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "timestamp of the log entry",
+     "name": "time",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "type of the log entry",
+     "name": "type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "state type (HARD or SOFT)",
+     "name": "state_type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "log message text",
+     "name": "message",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "host name associated with this log entry",
+     "name": "host_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "service description associated with this log entry",
+     "name": "service_description",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "comment text from the log entry",
+     "name": "comment",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "plugin output from the log entry",
+     "name": "plugin_output",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "state of the host or service at the time of the log entry",
+     "name": "state",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "current attempt number when this log entry was generated",
+     "name": "attempt",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "contact name associated with this log entry",
+     "name": "contact_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "command name associated with this log entry",
+     "name": "command_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "line number of the log entry in the log file",
+     "name": "lineno",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "options string from the log entry",
+     "name": "options",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/processinfo": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "check_external_commands",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "data_source_version",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "nagios_pid",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "obsess_over_hosts",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "obsess_over_services",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "address of the peer ip:port or unix socket",
+     "name": "peer_addr",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/processinfo/stats": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "cached_log_messages",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "connections",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "connections_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "forks",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "forks_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "host_checks",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "host_checks_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "log_messages",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "log_messages_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "neb_callbacks",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "neb_callbacks_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "requests",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "requests_rate",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "service_checks",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "service_checks_rate",
+     "type": "number",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/servicegroups": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "num_services_hard_crit",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_ok",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_unknown",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "num_services_hard_warn",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/servicegroups/<name>/stats": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "active_checks_disabled_active",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "active_checks_disabled_passive",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_and_ack",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_and_disabled_active",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_and_disabled_passive",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_and_scheduled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_and_unhandled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_hard",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_hard_unhandled",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_on_down_host",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "critical_soft",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "eventhandler_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "flapping",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "flapping_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "hard",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "notifications_disabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "ok",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "ok_and_disabled_active",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "ok_and_disabled_passive",
+     "type": "number",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/services": {
+  "GET": {
+   "columns": [
+    {
+     "description": "",
+     "name": "accept_passive_checks",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "action_url_expanded",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "check_options",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "checks_enabled",
+     "type": "boolean",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments_info",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "comments_with_info",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "custom_variable_names",
+     "type": "array_of_strings",
+     "unit": ""
+    },
+    {
+     "description": "",
+     "name": "custom_variable_values",
+     "type": "array_of_strings",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/timeperiods": {
+  "GET": {
+   "columns": [
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
      "unit": ""
     }
    ]

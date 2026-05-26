@@ -1938,8 +1938,32 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "additional contact address (address1 through address6)",
+     "description": "additional contact address (address1 through address5)",
      "name": "address1",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "additional contact address (address1 through address5)",
+     "name": "address2",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "additional contact address (address1 through address5)",
+     "name": "address3",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "additional contact address (address1 through address5)",
+     "name": "address4",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "additional contact address (address1 through address5)",
+     "name": "address5",
      "type": "string",
      "unit": ""
     },
@@ -2562,6 +2586,12 @@ __DATA__
   "GET": {
    "columns": [
     {
+     "description": "the class of the message as integer (0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command)",
+     "name": "class",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "timestamp of the log entry",
      "name": "time",
      "type": "time",
@@ -2663,6 +2693,12 @@ __DATA__
  "/alerts": {
   "GET": {
    "columns": [
+    {
+     "description": "the class of the message as integer (0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command)",
+     "name": "class",
+     "type": "number",
+     "unit": ""
+    },
     {
      "description": "timestamp of the log entry",
      "name": "time",
