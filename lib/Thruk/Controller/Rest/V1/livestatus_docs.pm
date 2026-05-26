@@ -10,7 +10,7 @@ Thruk::Controller::Rest::V1::livestatus_docs - Livestatus table column metadata
 
 =head1 DESCRIPTION
 
-Contains column attributes for Livestatus table endpoints.
+Contains column attributes for Livestatus table endpoints like /hosts and /services . These can be added to column metadata before more specific endpoints
 
 =head1 METHODS
 
@@ -1942,6 +1942,24 @@ __DATA__
      "name": "address1",
      "type": "string",
      "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "section as defined in Thruk::Backend component configuration",
+     "name": "peer_section",
+     "type": "string",
+     "unit": ""
     }
    ]
   }
@@ -2068,6 +2086,18 @@ __DATA__
      "name": "members",
      "type": "string",
      "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
     }
    ]
   }
@@ -2144,6 +2174,18 @@ __DATA__
     {
      "description": "the actual command line to execute",
      "name": "line",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
      "type": "string",
      "unit": ""
     }
@@ -2247,6 +2289,18 @@ __DATA__
      "description": "timestamp when the comment expires",
      "name": "expire_time",
      "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
      "unit": ""
     }
    ]
@@ -2588,6 +2642,120 @@ __DATA__
     {
      "description": "options string from the log entry",
      "name": "options",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/alerts": {
+  "GET": {
+   "columns": [
+    {
+     "description": "timestamp of the log entry",
+     "name": "time",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "type of the log entry",
+     "name": "type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "state type (HARD or SOFT)",
+     "name": "state_type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "log message text",
+     "name": "message",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "host name associated with this log entry",
+     "name": "host_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "service description associated with this log entry",
+     "name": "service_description",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "comment text from the log entry",
+     "name": "comment",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "plugin output from the log entry",
+     "name": "plugin_output",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "state of the host or service at the time of the log entry",
+     "name": "state",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "current attempt number when this log entry was generated",
+     "name": "attempt",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "contact name associated with this log entry",
+     "name": "contact_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "command name associated with this log entry",
+     "name": "command_name",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "line number of the log entry in the log file",
+     "name": "lineno",
+     "type": "number",
+     "unit": ""
+    },
+    {
+     "description": "options string from the log entry",
+     "name": "options",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "id as defined in Thruk::Backend component configuration",
+     "name": "peer_key",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "name as defined in Thruk::Backend component configuration",
+     "name": "peer_name",
      "type": "string",
      "unit": ""
     }
