@@ -266,27 +266,33 @@ sub process_rest_request {
     $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
     $c->stash->{'meta_column_info'} = {};
 
+    my $metadata_only = $c->req->header('X-Thruk-Output-Metadata-Only');
+    $wrapped = 1 if $metadata_only;
 
     delete $c->stash->{'req_table'};
 
     if(!$data) {
-        eval {
-            $data = _fetch($c, $path_info, $method);
+        if($metadata_only) {
+            $data = [];
+        } else {
+            eval {
+                $data = _fetch($c, $path_info, $method);
 
-            # generic post processing
-            $data = _post_processing($c, $data);
-        };
-        my $err = $@;
-        if($err) {
-            if($err =~ m/bad\ request:\s*(.*)\s+at\s+.*\.pm\s+line\s+\d+\.$/mx) {
-                $data = { 'message' => 'error during request', description => $1, code => 400 };
-            } else {
-                $data = { 'message' => 'error during request', description => $err, code => 500 };
-            }
-            if($c->{"detached"}) {
-                _debug($err);
-            } else {
-                _error($err);
+                # generic post processing
+                $data = _post_processing($c, $data);
+            };
+            my $err = $@;
+            if($err) {
+                if($err =~ m/bad\ request:\s*(.*)\s+at\s+.*\.pm\s+line\s+\d+\.$/mx) {
+                    $data = { 'message' => 'error during request', description => $1, code => 400 };
+                } else {
+                    $data = { 'message' => 'error during request', description => $err, code => 500 };
+                }
+                if($c->{"detached"}) {
+                    _debug($err);
+                } else {
+                    _error($err);
+                }
             }
         }
     }
@@ -1943,6 +1949,11 @@ sub _get_columns_meta_for_path {
                 push @{$req_columns}, $key ;
             }
         }
+    }
+
+    # fallback: use all documented columns when no data to extract from
+    if(scalar @{$req_columns} == 0 && scalar keys %{$columns}) {
+        @{$req_columns} = sort keys %{$columns};
     }
 
     my $meta = [];
