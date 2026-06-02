@@ -42,7 +42,7 @@
           <th class="w-24">Command</th>
           <td class="relative">
             <input type='hidden' id="opt_persistent" name='persistent' value="comments">
-            <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full" onclick="toggleElement('command_select', null, true); jQuery(this).blur(); return false;">
+            <select name="quick_command" id="quick_command" onChange="check_selected_command(this.value)" class="w-full" onmousedown="event.preventDefault()" onclick="toggleElement('command_select', null, true); jQuery(this).blur(); return false;">
               [% FOREACH qc = quick_commands %]
                 [% IF qc == "-"; NEXT; END %]
                 [% IF !qc.defined("cls");  qc.cls  = ""; END %]
