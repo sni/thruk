@@ -1043,6 +1043,76 @@ sub check_custom_var_list {
 
 ########################################
 
+=head2 _build_custom_var_matcher
+
+  _build_custom_var_matcher($allowed_list)
+
+precomputes a lookup structure for fast custom variable matching
+
+=cut
+sub _build_custom_var_matcher {
+    my($allowed_list) = @_;
+    return {} unless $allowed_list && ref $allowed_list eq 'ARRAY';
+
+    my %exact;
+    my @regexes;
+    my @host_regexes;
+
+    for my $allow (@{$allowed_list}) {
+        my $name = $allow;
+        $name =~ s/^_//gmx;
+        if(CORE::index($name, '*') == -1) {
+            $exact{$name} = 1;
+        } else {
+            my $re = $name;
+            $re =~ s/\*/.*/gmx;
+            if($name =~ m/^host/mxi) {
+                push @host_regexes, qr/^$re$/mx;
+            } else {
+                push @regexes, qr/^$re$/mx;
+            }
+        }
+    }
+
+    return {
+        exact        => \%exact,
+        regexes      => \@regexes,
+        host_regexes => \@host_regexes,
+    };
+}
+
+########################################
+
+=head2 _cv_lookup
+
+  _cv_lookup($varname, $matcher)
+
+checks if a custom variable name is allowed using a precomputed matcher
+
+=cut
+sub _cv_lookup {
+    my($var, $matcher) = @_;
+    return unless $matcher;
+
+    my $varname = $var;
+    $varname =~ s/^_//gmx;
+
+    return 1 if $matcher->{exact}{$varname};
+
+    my $regexes;
+    if($varname =~ m/^host/mxi) {
+        $regexes = $matcher->{host_regexes};
+    } else {
+        $regexes = $matcher->{regexes};
+    }
+    for my $re (@{$regexes}) {
+        return 1 if $varname =~ $re;
+    }
+    return;
+}
+
+########################################
+
 =head2 set_allowed_rows_data
 
   set_allowed_rows_data($obj, $allowed, $allowed_list, $show_full_commandline, $has_conf_info)
@@ -1053,10 +1123,16 @@ set custom variables for host/service obj
 sub set_allowed_rows_data {
     my($obj, $allowed_all_cust, $allowed_list, $show_full_commandline, $has_conf_info) = @_;
 
+    my $cv_matcher;
+    if(!$allowed_all_cust && $allowed_list && ref $allowed_list eq 'ARRAY') {
+        $cv_matcher = _build_custom_var_matcher($allowed_list);
+    }
+    my $_is_allowed = $cv_matcher ? sub { _cv_lookup(shift, $cv_matcher) } : sub { check_custom_var_list(shift, $allowed_list) };
+
     if($obj->{'custom_variable_names'}) {
         $obj->{'custom_variables'} = get_custom_vars(undef, $obj);
         for my $key (@{$obj->{'custom_variable_names'}}) {
-            if($allowed_all_cust || check_custom_var_list($key, $allowed_list)) {
+            if($allowed_all_cust || $_is_allowed->($key)) {
                 $obj->{'_'.uc($key)} = $obj->{'custom_variables'}->{$key};
             } else {
                 delete $obj->{'custom_variables'}->{$key};
@@ -1075,7 +1151,7 @@ sub set_allowed_rows_data {
     if($obj->{'host_custom_variable_names'}) {
         $obj->{'host_custom_variables'} = get_custom_vars(undef, $obj, 'host_');
         for my $key (@{$obj->{'host_custom_variable_names'}}) {
-            if($allowed_all_cust || check_custom_var_list('_HOST'.uc($key), $allowed_list)) {
+            if($allowed_all_cust || $_is_allowed->('_HOST'.uc($key))) {
                 $obj->{'_HOST'.uc($key)} = $obj->{'host_custom_variables'}->{$key};
             } else {
                 delete $obj->{'host_custom_variables'}->{$key};
