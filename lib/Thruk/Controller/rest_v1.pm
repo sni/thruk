@@ -7,7 +7,6 @@ use Cpanel::JSON::XS ();
 use Module::Load qw/load/;
 use Time::HiRes ();
 use URI::Escape qw/uri_unescape/;
-use Data::Dumper;
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Authentication::User ();
@@ -302,7 +301,6 @@ sub process_rest_request {
         # wrap data along with column meta data
         my $request_method = $method || $c->req->method;
         my $columns        = _get_columns_meta_for_path($c, $path_info, $request_method, $data);
-        Thruk::Utils::Log::_debug("\$columns:".Dumper($columns));
         my $meta           = {};
         $meta->{"columns"} = $columns if $columns;
         $data = {
@@ -1015,11 +1013,6 @@ returns list of requested columns or undef
 sub get_request_columns {
     my($c, $type) = @_;
 
-    Thruk::Utils::Log::_debug("get_request_columns");
-
-    # Thruk::Utils::Log::_debug("\$c->req".Dumper($c->req));
-    Thruk::Utils::Log::_debug("[get_request_columns] paramseters are: " . Dumper($c->req->parameters));
-
     return unless $c->req->parameters->{'columns'};
 
     my $columns = _split_columns($c->req->parameters->{'columns'});
@@ -1039,8 +1032,6 @@ sub get_request_columns {
         return(_parse_columns_data($columns));
     }
 
-    Thruk::Utils::Log::_debug("[get_request_columns] \$columns".Dumper($columns));
-
     return($columns);
 }
 
@@ -1056,8 +1047,6 @@ returns hash of columns with their alias
 =cut
 sub get_aliased_columns {
     my($c) = @_;
-
-    Thruk::Utils::Log::_debug("get_aliased_columns");
 
     my $alias_columns = {};
     my $columns = get_request_columns($c, STRUCT);
@@ -1861,9 +1850,6 @@ sub _get_help_for_path {
 ##########################################################
 sub _get_columns_meta_for_path {
     my($c, $path_info, $method, $data) = @_;
-    Thruk::Utils::Log::_debug("_get_columns_meta_for_path:");
-    Thruk::Utils::Log::_debug("\$path_info: ".$path_info);
-    Thruk::Utils::Log::_debug("\$method: ".$method);
 
     require Thruk::Controller::Rest::V1::docs;
     require Thruk::Controller::Rest::V1::livestatus_docs;
@@ -1884,10 +1870,7 @@ sub _get_columns_meta_for_path {
             $keys->{$path} = $docs->{$path};
         }
     }
-    # Thruk::Utils::Log::_debug("\$keys: ".Dumper($keys));
     my $alias_columns = get_aliased_columns($c);
-    Thruk::Utils::Log::_debug("\$alias_columns: ".Dumper($alias_columns));
-    # When no filter is used, like Picking '*' in Grafana, the returned array is empty
     my $req_columns  = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
 
     # Remove the 'limit' if present, it is a parameter but not a request column.
@@ -1912,16 +1895,10 @@ sub _get_columns_meta_for_path {
         # So patterns like '/host/<name>/outages' get replaced to '/host/[^/]*/outages' for regex matches
         $p =~ s%<[^>]+>%[^/]*%gmx;
 
-        # Thruk::Utils::Log::_debug("\$path: ".$path);
-        # Thruk::Utils::Log::_debug("\$p: ".$p);
-
         if($path_info !~ qr/$p/mx) {
             next;
         }
         next unless ($keys->{$path}->{$method});
-
-        # Thruk::Utils::Log::_debug("\$keys: ".Dumper($keys));
-        Thruk::Utils::Log::_debug("\$path: ".Dumper($path));
 
         for my $d (@{$keys->{$path}->{$method}->{'columns'}}) {
             my $col = { 'name' => $d->{'name'} };
@@ -1931,9 +1908,6 @@ sub _get_columns_meta_for_path {
         }
         last;
     }
-
-    Thruk::Utils::Log::_debug("\$columns: ".Dumper($columns));
-    # Thruk::Utils::Log::_debug("\$columns: ".join(" ",@{$columns}));
 
     # If request does not specify any columns, it should include metadata for all columns
     if(scalar @{$req_columns} == 0) {
@@ -3310,8 +3284,6 @@ sub _post_process_logs {
 sub _parse_columns_data_alias {
     my($raw) = @_;
 
-    Thruk::Utils::Log::_debug("parse_columns_data_alias");
-
     my $num_cols = scalar @{$raw};
     my $columns = [];
     for(my $x = 0; $x < $num_cols; $x++) {
@@ -3338,8 +3310,6 @@ sub _parse_columns_data_alias {
 # _parse_columns_data_names parses list of columns into their names (without alias and functions)
 sub _parse_columns_data_names {
     my($raw, $keep_functions) = @_;
-
-    Thruk::Utils::Log::_debug("parse_columns_data_names");
 
     my $columns = [];
     my $num_cols = scalar @{$raw};
@@ -3384,8 +3354,6 @@ sub _parse_columns_data_names {
 # ];
 sub _parse_columns_data {
     my($raw) = @_;
-
-    Thruk::Utils::Log::_debug("parse_columns_data");
 
     my $columns = [];
 
