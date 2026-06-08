@@ -356,6 +356,7 @@ sub kill_if_not_responding {
         timeout     => $lmd_timeout+2,
         background  => 1,
     });
+    _error("restarting lmd by sub process: %s", $job);
 
     my $extra = 5;
     my $is_running = Thruk::Utils::External::wait_for_job($c, $job, $lmd_timeout+$extra);
