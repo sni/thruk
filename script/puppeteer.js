@@ -7,7 +7,24 @@
  *
  */
 
-const puppeteer = require("fix-esm").require("puppeteer");
+var puppeteer;
+try {
+  // Prefer loading via fix-esm when available.
+  puppeteer = require("fix-esm").require("puppeteer");
+} catch (fixEsmErr) {
+  try {
+    // Fall back to regular CommonJS loading.
+    puppeteer = require("puppeteer");
+  } catch (puppeteerErr) {
+    console.error("failed to load puppeteer.");
+    if (fixEsmErr && fixEsmErr.code !== 'MODULE_NOT_FOUND') {
+      console.error("loading through fix-esm failed: " + fixEsmErr.message);
+    }
+    console.error("please ensure the 'puppeteer' module is installed and available in NODE_PATH.");
+    console.error("error: " + puppeteerErr.message);
+    process.exit(1);
+  }
+}
 const os        = require('os');
 const path      = require('path');
 
