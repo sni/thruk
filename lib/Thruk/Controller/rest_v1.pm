@@ -1879,8 +1879,8 @@ sub _get_columns_meta_for_path {
     }
     my $columns = {};
     for my $path (sort {
-        my $a_wc = ($a =~ /</) ? 1 : 0;
-        my $b_wc = ($b =~ /</) ? 1 : 0;
+        my $a_wc = ($a =~ /</mx) ? 1 : 0;
+        my $b_wc = ($b =~ /</mx) ? 1 : 0;
         $a_wc <=> $b_wc
         ||
         length $b <=> length $a

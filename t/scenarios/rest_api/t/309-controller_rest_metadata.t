@@ -5,6 +5,7 @@ use Test::More;
 use URI::Escape qw/uri_escape/;
 
 use lib 'lib';
+
 use Thruk::Utils::IO ();
 
 BEGIN {

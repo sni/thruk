@@ -93,6 +93,7 @@ lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/Rest/V1/cmd.pm
 lib/Thruk/Controller/Rest/V1/docs.pm
+lib/Thruk/Controller/Rest/V1/livestatus_docs.pm
 lib/Thruk/Controller/Rest/V1/logcache.pm
 lib/Thruk/Controller/Rest/V1/outages.pm
 lib/Thruk/Controller/Rest/V1/recurring_downtimes.pm
@@ -3111,6 +3112,7 @@ t/scenarios/rest_api/t/305-controller_rest_reports.t
 t/scenarios/rest_api/t/306-controller_rest_scenario.t
 t/scenarios/rest_api/t/307-controller_rest_commands.t
 t/scenarios/rest_api/t/308-controller_rest_background.t
+t/scenarios/rest_api/t/309-controller_rest_metadata.t
 t/scenarios/rest_api/t/local/00_init.t
 t/scenarios/rest_api/t/local/rest.t
 t/scenarios/rest_api/t/local/rest_api_misc.t
