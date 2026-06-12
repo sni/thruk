@@ -36,18 +36,19 @@ my $service_group       = $test_svc->{'groups'}->[0];
 # create example session
 Thruk::Utils::OAuth::store_oauth_session($c, "docs-update", ["example-team"]);
 
+my $root = $c->config->{'project_root'};
 my $cmds = _update_cmds($c);
-_update_docs($c, "docs/documentation/rest.asciidoc", "lib/Thruk/Controller/Rest/V1/docs.pm");
-_update_docs($c, "docs/documentation/rest_commands.asciidoc");
-_update_cmds_list($c, "docs/documentation/commands.html", $cmds);
-unlink('var/cluster/nodes');
+_update_docs($c, $root."/docs/documentation/rest.asciidoc",        $root."/lib/Thruk/Controller/Rest/V1/docs.pm");
+_update_docs($c, $root."/docs/documentation/rest_commands.asciidoc");
+_update_cmds_list($c, $root."/docs/documentation/commands.html", $cmds);
+unlink($c->config->{'var_path'}.'/cluster/nodes');
 $c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
 
 ################################################################################
 sub _update_cmds {
     my($c) = @_;
-    my $output_file = "lib/Thruk/Controller/Rest/V1/cmd.pm";
+    my $output_file = $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/cmd.pm";
     my $content = Thruk::Utils::IO::read($output_file);
     $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
 
@@ -315,14 +316,17 @@ sub _update_docs {
         Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
     }
 
-    my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-    `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
-    `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
-    `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
-    `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
-    `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
-    my $system_api_key = decode_json(`./script/thruk r -d "comment=test" -d "system=1" -d "roles=admin" -d "force_user=test" /thruk/api_keys`);
-    my $api_key = decode_json(`./script/thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
+    my $root = $c->config->{'project_root'};
+    my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths($c);
+    `mkdir -p bp;            cp $root/t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
+    `mkdir -p panorama;      cp $root/t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+    `mkdir -p var/broadcast; cp $root/t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
+    `mkdir -p var/downtimes; cp $root/t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
+    `mkdir -p var/reports;   cp $root/t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    my $system_api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', system => '1', roles => 'admin', force_user => 'test'});
+    die("failed to create system api_key: ".($system_api_key->{'message'} || 'unknown error')."\n") unless $system_api_key && $system_api_key->{'private_key'};
+    my $api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', username => 'restapidocs'});
+    die("failed to create api_key: ".($api_key->{'message'} || 'unknown error')."\n") unless $api_key && $api_key->{'private_key'};
     # fake usage
     Thruk::Utils::IO::json_lock_store($api_key->{'file'}.".stats", { last_used => time(), last_from => "127.0.0.1" });
     # fake error message

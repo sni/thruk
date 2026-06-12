@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp;
 use Cpanel::JSON::XS ();
+use File::Basename ();
 use Module::Load qw/load/;
 use Time::HiRes ();
 use URI::Escape qw/uri_unescape/;
@@ -1740,7 +1741,7 @@ sub _expand_perfdata_and_custom_vars {
     my($c, $data, $type) = @_;
     return $data unless ref $data eq 'ARRAY';
 
-    # check wether user is allowed to see all custom variables
+    # check whether user is allowed to see all custom variables
     my $allowed      = $c->check_user_roles("admin");
     my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
@@ -2011,9 +2012,10 @@ sub get_rest_paths {
                             $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/*.pm",
                         )))];
     } else {
-        $input_files = [glob("lib/Thruk/Controller/rest_v1.pm
-                             plugins/plugins-available/*/lib/Thruk/Controller/Rest/V1/*.pm
-                             lib/Thruk/Controller/Rest/V1/*.pm")];
+        my $root = $ENV{'THRUKOLDPWD'} || File::Basename::dirname(File::Basename::dirname(File::Basename::dirname(File::Basename::dirname(__FILE__))));
+        $input_files = [glob("$root/lib/Thruk/Controller/rest_v1.pm
+                             $root/plugins/plugins-available/*/lib/Thruk/Controller/Rest/V1/*.pm
+                             $root/lib/Thruk/Controller/Rest/V1/*.pm")];
     }
 
     my $paths = {};
