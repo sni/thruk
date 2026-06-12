@@ -3288,7 +3288,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "flag wheter this business process is horizontal or vertical",
+     "description": "flag whether this business process is horizontal or vertical",
      "name": "rankDir",
      "type": "string",
      "unit": ""
@@ -4182,13 +4182,13 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "flag wheter the report failed to generate last time",
+     "description": "flag whether the report failed to generate last time",
      "name": "failed",
      "type": "boolean",
      "unit": ""
     },
     {
-     "description": "flag wheter the report is public or not",
+     "description": "flag whether the report is public or not",
      "name": "is_public",
      "type": "boolean",
      "unit": ""
