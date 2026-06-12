@@ -430,7 +430,7 @@ sub _update_docs {
                     if(!$typ && !$unit) {
                         ($typ, $unit) = Thruk::Controller::rest_v1::guess_field_type($url, $name);
                     }
-                    if($typ && $typ ne 'time' && $typ ne 'number') {
+                    if($typ && $typ ne 'time' && $typ ne 'number' && $typ ne 'boolean' && $typ ne 'string' && $typ ne 'array_of_strings' ) {
                         die("unknown typ in $url ($name): $typ");
                     }
 
