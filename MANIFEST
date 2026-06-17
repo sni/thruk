@@ -2365,6 +2365,7 @@ script/thruk_server.pl
 script/thruk_set_standard_header
 script/thruk_update.sh
 script/thruk_update_docs_rest.pl
+script/thruk_update_livestatus_docs.pl
 script/thruk_version.sh
 SECURITY.md
 ssi/extinfo-header.ssi-tickets
