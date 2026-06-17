@@ -415,6 +415,18 @@ TR:nth-child(even) TD.tableRowSelected {
     @apply bg-[color:var(--row-selected-even-bg)] text-[color:var(--row-selected-fg)] !important;
   }
 }
+TH.links.rowSelected {
+  @apply bg-[color:var(--row-selected-odd-bg)] text-[color:var(--row-selected-fg)] !important;
+  A {
+    @apply bg-inherit !important;
+  }
+}
+TH.links.rowSelected:hover {
+  @apply bg-[color:var(--row-selected-even-bg)] text-[color:var(--row-selected-fg)] !important;
+  A {
+    @apply bg-[color:var(--row-selected-even-bg)] !important;
+  }
+}
 
 @media print {
   .noprint {
