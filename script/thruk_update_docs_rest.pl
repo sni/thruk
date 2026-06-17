@@ -366,6 +366,7 @@ sub _update_docs {
     };
 
     my $content    = Thruk::Utils::IO::read($output_file);
+    my $additional = _parse_additional_attributes($content);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
@@ -418,6 +419,9 @@ sub _update_docs {
                 }
             }
             if($keys->{$url}->{$proto}) {
+                if($additional->{$url}->{$proto}) {
+                    $content .= $additional->{$url}->{$proto};
+                }
                 $raw_json->{$url}->{$proto} = { columns => [] };
                 $content .= '[options="header"]'."\n";
                 $content .= "|===========================================\n";
@@ -512,6 +516,7 @@ sub _update_cmds_list {
 sub _fetch_keys {
     my($c, $proto, $url, $doc) = @_;
 
+    # These are skipped since they are aliases to other points
     return if $proto ne 'GET';
     return if $doc =~ m/alias|https?:/mxi;
     return if $url eq '/thruk/jobs/<id>/output';
@@ -604,6 +609,9 @@ sub _parse_attribute_docs {
             $proto = $1;
             $url   = $2;
         }
+        # Parses the attributes in the asciidoc table like this:
+        # |host                              | string     |          | host name
+        # |plugin_output                     | string     |          | last plugin output during outage
         if($url && $line =~ m%^\|([^\|]+?)\s*\|([^\|]+?)\s*\|([^\|]+?)\s*\|\s*(.*)$%mx) {
             next if $1 eq 'Attribute';
             $attributes->{$url}->{$proto}->{$1} = [$2, $3, $4];
@@ -614,6 +622,25 @@ sub _parse_attribute_docs {
         }
     }
     return $attributes;
+}
+
+################################################################################
+sub _parse_additional_attributes {
+    my($content) = @_;
+    my $additional = {};
+    my $last_url;
+    my $last_proto;
+    for my $line (split/\n/mx, $content) {
+        if($line =~ m%^===\ (\w+)\ (/.*)$%mx) {
+            $last_url   = $2;
+            $last_proto = $1;
+        }
+        # Beware this line if its present, then add it to description
+        if($line eq 'Additional attributes added by Thruk:') {
+            $additional->{$last_url}->{$last_proto} = $line."\n\n";
+        }
+    }
+    return $additional;
 }
 
 ################################################################################

@@ -1072,6 +1072,17 @@ Deletes given contactgroup from configuration.
 lists livestatus contacts.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#contacts for details.
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|in_host_notification_period       | boolean    |          | Whether the contact is currently in its host notification period
+|in_service_notification_period    | boolean    |          | Whether the contact is currently in its service notification period
+|modified_attributes_list          | array_of_strings |          | A list of all modified attributes
+|===========================================
+
+
 === GET /contacts/<name>
 
 lists contacts for given name.
@@ -1132,6 +1143,18 @@ alias for /downtimes?id=<id>
 
 lists livestatus hostgroups.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#hostgroups for details.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|num_services_hard_crit            | number     |          | Number of services in hard CRITICAL state
+|num_services_hard_ok              | number     |          | Number of services in hard OK state
+|num_services_hard_unknown         | number     |          | Number of services in hard UNKNOWN state
+|num_services_hard_warn            | number     |          | Number of services in hard WARNING state
+|===========================================
+
 
 === GET /hostgroups/<name>
 
@@ -1247,10 +1270,69 @@ Optional arguments:
 hash of livestatus hostgroup statistics.
 alias for /hosts/stats?groups[gte]=<name>
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|active_checks_disabled_active     | number     |          | Hosts with active checks disabled that are active
+|active_checks_disabled_passive    | number     |          | Hosts with active checks disabled that are passive
+|down                              | number     |          | Number of hosts in DOWN state
+|down_and_ack                      | number     |          | Number of hosts in DOWN state with acknowledgement
+|down_and_disabled_active          | number     |          | Number of hosts in DOWN state with active checks disabled
+|down_and_disabled_passive         | number     |          | Number of hosts in DOWN state with passive checks disabled
+|down_and_scheduled                | number     |          | Number of hosts in DOWN state with scheduled downtime
+|down_and_unhandled                | number     |          | Number of unhandled hosts in DOWN state
+|down_hard                         | number     |          | Number of hosts in hard DOWN state
+|down_soft                         | number     |          | Number of hosts in soft DOWN state
+|eventhandler_disabled             | boolean    |          | Whether event handler is disabled
+|flapping                          | boolean    |          | Whether the host is flapping
+|flapping_disabled                 | boolean    |          | Whether flap detection is disabled
+|hard                              | string     |          | Hard state as string
+|notifications_disabled            | boolean    |          | Whether notifications are disabled
+|outages                           | number     |          | Number of current outages
+|passive_checks_disabled           | boolean    |          | Whether passive checks are disabled
+|pending                           | number     |          | Number of pending hosts
+|pending_and_disabled              | number     |          | Number of pending hosts with checks disabled
+|===========================================
+
+
 === GET /hosts
 
 lists livestatus hosts.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for details.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|accept_passive_checks             | boolean    |          | Whether passive host checks are accepted (0/1)
+|action_url_expanded               | string     |          | The action url with the most important macros expanded
+|check_freshness                   | number     |          | Whether freshness checks are activated (0/1)
+|check_options                     | number     |          | The current check option: forced, normal, freshness (0-2)
+|checks_enabled                    | number     |          | Whether checks are enabled (0/1)
+|childs                            | array_of_strings |          | A list of all direct children of the host
+|comments                          | array_of_strings |          | A list of the ids of all comments
+|comments_info                     | string     |          | A list of all comments with id, author, comment, entry_type and entry_time
+|comments_with_info                | string     |          | A list of all comments with id, author, comment, entry_type, expires and expire_time
+|custom_variable_names             | array_of_strings |          | A list of the names of all custom variables
+|custom_variable_values            | array_of_strings |          | A list of the values of the custom variables
+|custom_variables                  | array_of_strings |          | A dictionary of the custom variables
+|downtimes_info                    | string     |          | A list of the ids of all downtimes with additional info
+|downtimes_with_info               | number     |          | Number of downtimes with additional info
+|groups                            | array_of_strings |          | A list of all host groups this host is in
+|hard_state                        | number     |          | The hard state of the host
+|icon_image_expanded               | string     |          | The icon image with the most important macros expanded
+|in_check_period                   | boolean    |          | Whether this host is currently in its check period (0/1)
+|in_notification_period            | boolean    |          | Whether this host is currently in its notification period (0/1)
+|is_executing                      | boolean    |          | Whether there is a check currently running (0/1)
+|latency                           | number     |          | Host check latency in seconds
+|modified_attributes_list          | array_of_strings |          | A list of all modified attributes
+|notes_expanded                    | string     |          | The notes with the most important macros expanded
+|notes_url_expanded                | string     |          | The notes url with the most important macros expanded
+|===========================================
+
 
 === GET /hosts/<name>
 
@@ -1622,20 +1704,98 @@ see https://www.naemon.io/documentation/usersguide/livestatus.html#log for detai
 lists notifications based on logfiles.
 alias for /logs?class=3
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|attempt                           | number     |          | Current attempt number when this log entry was generated
+|class                             | number     |          | The class of the message as integer (0:info, 1:state, 2:program, 3:notification, 4:passive, 5:command)
+|command_name                      | string     |          | Command name associated with this log entry
+|comment                           | string     |          | Comment text from the log entry
+|contact_name                      | string     |          | Contact name associated with this log entry
+|host_name                         | string     |          | Host name associated with this log entry
+|lineno                            | number     |          | Line number of the log entry in the log file
+|message                           | string     |          | Log message text
+|options                           | string     |          | Options string from the log entry
+|peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
+|peer_name                         | string     |          | name as defined in Thruk::Backend component configuration
+|plugin_output                     | string     |          | Plugin output from the log entry
+|service_description               | string     |          | Service description associated with this log entry
+|state                             | number     |          | State of the host or service at the time of the log entry
+|state_type                        | string     |          | State type (HARD or SOFT)
+|time                              | time       |          | Timestamp of the log entry (unix timestamp)
+|type                              | string     |          | Type of the log entry
+|===========================================
+
+
 === GET /processinfo
 
 lists livestatus sites status.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|check_external_commands           | number     |          | Whether the core accepts external commands (0/1)
+|data_source_version               | string     |          | Version of the data source (livestatus version)
+|nagios_pid                        | number     |          | The process ID of the monitoring core
+|obsess_over_hosts                 | boolean    |          | Whether the core obsesses over hosts (0/1)
+|obsess_over_services              | boolean    |          | Whether the core obsesses over services (0/1)
+|peer_addr                         | string     |          | Address of the peer (ip:port or unix socket)
+|peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
+|peer_name                         | string     |          | name as defined in Thruk::Backend component configuration
+|===========================================
+
 
 === GET /processinfo/stats
 
 lists livestatus sites statistics.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#status for details.
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|cached_log_messages               | number     |          | Number of cached log messages
+|connections                       | number     |          | Number of connections
+|connections_rate                  | number     |          | Connections per second
+|forks                             | number     |          | Number of forks
+|forks_rate                        | number     |          | Forks per second
+|host_checks                       | number     |          | Number of host checks
+|host_checks_rate                  | number     |          | Host checks per second
+|log_messages                      | number     |          | Number of log messages
+|log_messages_rate                 | number     |          | Log messages per second
+|neb_callbacks                     | number     |          | Number of NEB callbacks
+|neb_callbacks_rate                | number     |          | NEB callbacks per second
+|requests                          | number     |          | Number of requests
+|requests_rate                     | number     |          | Requests per second
+|service_checks                    | number     |          | Number of service checks
+|service_checks_rate               | number     |          | Service checks per second
+|===========================================
+
+
 === GET /servicegroups
 
 lists livestatus servicegroups.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#servicegroups for details.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|num_services_hard_crit            | number     |          | Number of services in hard CRITICAL state
+|num_services_hard_ok              | number     |          | Number of services in hard OK state
+|num_services_hard_unknown         | number     |          | Number of services in hard UNKNOWN state
+|num_services_hard_warn            | number     |          | Number of services in hard WARNING state
+|peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
+|peer_name                         | string     |          | name as defined in Thruk::Backend component configuration
+|===========================================
+
 
 === GET /servicegroups/<name>
 
@@ -1756,10 +1916,55 @@ Optional arguments:
 hash of livestatus servicegroup statistics.
 alias for /services/stats?service_groups[gte]=<name>
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|active_checks_disabled_active     | number     |          | Services with active checks disabled that are active
+|active_checks_disabled_passive    | number     |          | Services with active checks disabled that are passive
+|critical                          | number     |          | Number of services in CRITICAL state
+|critical_and_ack                  | number     |          | Number of services in CRITICAL state with acknowledgement
+|critical_and_disabled_active      | number     |          | Number of services in CRITICAL state with active checks disabled
+|critical_and_disabled_passive     | number     |          | Number of services in CRITICAL state with passive checks disabled
+|critical_and_scheduled            | number     |          | Number of services in CRITICAL state with scheduled downtime
+|critical_and_unhandled            | number     |          | Number of unhandled services in CRITICAL state
+|critical_hard                     | number     |          | Number of services in hard CRITICAL state
+|critical_hard_unhandled           | number     |          | Number of unhandled services in hard CRITICAL state
+|critical_on_down_host             | number     |          | Number of services in CRITICAL state on down hosts
+|critical_soft                     | number     |          | Number of services in soft CRITICAL state
+|eventhandler_disabled             | boolean    |          | Whether event handler is disabled
+|flapping                          | number     |          | Number of services that are flapping
+|flapping_disabled                 | boolean    |          | Whether flap detection is disabled
+|hard                              | number     |          | Number of services in hard state
+|notifications_disabled            | boolean    |          | Whether notifications are disabled
+|ok                                | number     |          | Number of services in OK state
+|ok_and_disabled_active            | number     |          | Number of services in OK state with active checks disabled
+|ok_and_disabled_passive           | number     |          | Number of services in OK state with passive checks disabled
+|===========================================
+
+
 === GET /services
 
 lists livestatus services.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#services for details.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|accept_passive_checks             | boolean    |          | Whether passive service checks are accepted (0/1)
+|action_url_expanded               | string     |          | The action url with the most important macros expanded
+|check_options                     | string     |          | The current check option: forced, normal, freshness (0-2)
+|checks_enabled                    | boolean    |          | Whether checks are enabled (0/1)
+|comments                          | string     |          | A list of the ids of all comments
+|comments_info                     | string     |          | A list of all comments with id, author, comment, entry_type and entry_time
+|comments_with_info                | string     |          | A list of all comments with id, author, comment, entry_type, expires and expire_time
+|custom_variable_names             | array_of_strings |          | A list of the names of all custom variables
+|custom_variable_values            | array_of_strings |          | A list of the values of the custom variables
+|===========================================
+
 
 === GET /services/<host>/<service>
 
@@ -2661,10 +2866,28 @@ alias for /thruk/users?id=<id>
 lists livestatus timeperiods.
 see https://www.naemon.io/documentation/usersguide/livestatus.html#timeperiods for details.
 
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
+|peer_name                         | string     |          | name as defined in Thruk::Backend component configuration
+|===========================================
+
+
 === GET /timeperiods/<name>
 
 lists timeperiods for given name.
 alias for /timeperiods?name=<name>
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
+|peer_name                         | string     |          | name as defined in Thruk::Backend component configuration
+|===========================================
+
 
 === GET /timeperiods/<name>/config
 
