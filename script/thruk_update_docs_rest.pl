@@ -61,7 +61,7 @@ sub _update_cmds {
     my $cmds = {
         'contacts' => {
             'ENABLE_CONTACT_HOST_NOTIFICATIONS'           => {"docs" => "Enables host notifications for a particular contact."},
-            'ENABLE_CONTACT_SVC_NOTIFICATIONS'            => {"docs" => "Disables service notifications for a particular contact."},
+            'ENABLE_CONTACT_SVC_NOTIFICATIONS'            => {"docs" => "Enables service notifications for a particular contact."},
             'DISABLE_CONTACT_SVC_NOTIFICATIONS'           => {"docs" => "Disables service notifications for a particular contact."},
             'DISABLE_CONTACT_HOST_NOTIFICATIONS'          => {"docs" => "Disables host notifications for a particular contact."},
             'CHANGE_CUSTOM_CONTACT_VAR'                   => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom contact variable."},
@@ -81,7 +81,7 @@ sub _update_cmds {
         'hosts' => {
             'DEL_ACTIVE_HOST_DOWNTIMES'                   => {"docs" => "Removes all currently active downtimes for this host.", "thrukcmd" => 1 },
             'DEL_DOWNTIME'                                => {"args" => ["downtime_id"], "required" => ["downtime_id"], "docs" => "Removes downtime by id for this host.", "thrukcmd" => 1 },
-            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes downtime by id for this host.", "thrukcmd" => 1 },
+            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes comment by id for this host.", "thrukcmd" => 1 },
             'SET_HOST_NOTIFICATION_NUMBER'                => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state."},
             'CHANGE_RETRY_HOST_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the retry check interval for a particular host."},
             'CHANGE_NORMAL_HOST_CHECK_INTERVAL'           => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular host."},
@@ -103,10 +103,10 @@ sub _update_cmds {
         'services' => {
             'DEL_ACTIVE_SERVICE_DOWNTIMES'                => {"docs" => "Removes all currently active downtimes for this service.", "thrukcmd" => 1 },
             'DEL_DOWNTIME'                                => {"args" => ["downtime_id"], "required" => ["downtime_id"], "docs" => "Removes downtime by id for this service.", "thrukcmd" => 1 },
-            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes downtime by id for this service.", "thrukcmd" => 1 },
+            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes comment by id for this service.", "thrukcmd" => 1 },
             'SET_SVC_NOTIFICATION_NUMBER'                 => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state."},
             'CHANGE_SVC_NOTIFICATION_TIMEPERIOD'          => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the service notification timeperiod to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
-            'CHANGE_SVC_CHECK_TIMEPERIOD'                 => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the check timeperiod for a particular service to what is specified by the \'check_timeperiod\' option. The \'check_timeperiod\' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_SVC_CHECK_TIMEPERIOD'                 => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the check timeperiod for a particular service to what is specified by the \'check_timeperiod\' option. The \'check_timeperiod\' option should be the short name of the timeperiod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
             # not implemented in naemon-core
             #'CHANGE_SVC_EVENT_HANDLER'                    => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the event handler command for a particular service to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
             #'CHANGE_SVC_CHECK_COMMAND'                    => {"args" => ["checkcommand"], "required" => ["checkcommand"], "docs" => "Changes the check command for a particular service to be that specified by the \'check_command\' option. The \'check_command\' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started."},
@@ -118,17 +118,17 @@ sub _update_cmds {
         },
         'servicegroups' => {
             'ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'      => {"docs" => "Enables the acceptance and processing of passive checks for all services in a particular servicegroup."},
-            'ENABLE_SERViCEGROUP_PASSIVE_HOST_CHECKS'     => {"docs" => "Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
+            'ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS'     => {"docs" => "Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
             'DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'     => {"docs" => "Disables the acceptance and processing of passive checks for all services in a particular servicegroup."},
             'DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS'    => {"docs" => "Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
         },
         'system' => {
             'READ_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care."},
             'RESTART_PROGRAM'                             => {"docs" => "Restarts the Naemon process."},
-            'SAVE_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention"},
+            'SAVE_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention information is saved before the Naemon process shuts down and (potentially) at regularly scheduled intervals. This command allows you to force Naemon to save this information to the state retention file immediately. This does not affect the current status information in the Naemon process."},
             'SHUTDOWN_PROGRAM'                            => {"docs" => "Shuts down the Naemon process."},
             'ENABLE_SERVICE_FRESHNESS_CHECKS'             => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
-            'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
+            'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all hosts on a program-wide basis. Individual hosts that have freshness checks disabled will not be checked for freshness."},
             'DISABLE_SERVICE_FRESHNESS_CHECKS'            => {"docs" => "Disables freshness checks of all services on a program-wide basis."},
             'DISABLE_HOST_FRESHNESS_CHECKS'               => {"docs" => "Disables freshness checks of all hosts on a program-wide basis."},
             'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
