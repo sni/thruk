@@ -4,13 +4,11 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Test::More;
 use URI::Escape qw/uri_escape/;
 
-use lib 'lib';
-
 use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 596;
+    plan tests => 1060;
 }
 
 BEGIN {
@@ -97,12 +95,13 @@ my $config = {};
     $config = decode_json($page->{'content'});
 }
 
-for my $url (@{$list_pages}) {
+for my $url_orig (@{$list_pages}) {
+    my $url = $url_orig;
     SKIP: {
         skip "skipped, logcache is disabled ", 8 if ($url =~ m/logcache/mx && !$config->{'logcache'});
 
         if($url =~ m/logs/mx) {
-            $url = $url.'?limit=100';
+            $url .= '?limit=100';
         }
 
         my $page = TestUtils::test_page(
@@ -118,6 +117,36 @@ for my $url (@{$hash_pages}) {
     my $page = TestUtils::test_page(
         'url'          => '/thruk/r'.$url,
         'content_type' => 'application/json; charset=utf-8',
+    );
+    my $data = decode_json($page->{'content'});
+    is(ref $data, 'HASH', "json result is a hash: ".$url);
+}
+
+# API calls should work with the X-Thruk-Output-Metadata-Only as well
+for my $url_orig (@{$list_pages}) {
+    my $url = $url_orig;
+    SKIP: {
+        skip "skipped, logcache is disabled ", 8 if ($url =~ m/logcache/mx && !$config->{'logcache'});
+
+        if($url =~ m/logs/mx) {
+            $url .= '?limit=100';
+        }
+
+        my $page = TestUtils::test_page(
+            'url'          => '/thruk/r'.$url,
+            'content_type' => 'application/json; charset=utf-8',
+            'headers'      => { 'X-Thruk-Output-Metadata-Only' => 'true' }
+        );
+        my $data = decode_json($page->{'content'});
+        is(ref $data, 'ARRAY', "json result is an array: ".$url);
+    };
+}
+
+for my $url (@{$hash_pages}) {
+    my $page = TestUtils::test_page(
+        'url'          => '/thruk/r'.$url,
+        'content_type' => 'application/json; charset=utf-8',
+        'headers'      => { 'X-Thruk-Output-Metadata-Only' => 'true' }
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is a hash: ".$url);
