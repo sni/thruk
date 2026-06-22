@@ -407,7 +407,8 @@ sub add_defaults {
         $c->stash->{'usr_config_adjustments'} = [];
 
         # Role adjustments
-        for my $role (sort @{$c->user->{'roles'}}) {
+        for my $r (sort @{$c->user->{'roles'}}) {
+            my $role = "$r";
             if($c->config->{'Role'}->{$role}) {
                 push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Role'}->{$role};
             }
