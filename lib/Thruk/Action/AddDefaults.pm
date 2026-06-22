@@ -401,15 +401,30 @@ sub add_defaults {
     $c->stats->profile(begin => "AddDefaults::add_defaults(".$flags_name.")");
 
     ###############################
-    # user / group specific config?
+    # user / group / role specific config?
     my $user_groups = $c->user_exists ? $c->user->{'groups'} : [];
     if(!$no_config_adjustments && $c->user_exists) {
         $c->stash->{'usr_config_adjustments'} = [];
-        for my $group (@{$c->user->{'groups'}}) {
+
+        # Role adjustments
+        for my $role (sort @{$c->user->{'roles'}}) {
+            if($c->config->{'Role'}->{$role}) {
+                push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Role'}->{$role};
+            }
+            $role =~ s|^authorized_for_||gmx;
+            if($c->config->{'Role'}->{$role}) {
+                push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Role'}->{$role};
+            }
+        }
+
+        # Group adjustments
+        for my $group (sort @{$c->user->{'groups'}}) {
             if($c->config->{'Group'}->{$group}) {
                 push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Group'}->{$group};
             }
         }
+
+        # User adjustments
         if(defined $c->config->{'User'}->{$c->stash->{'remote_user'}}) {
             push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'User'}->{$c->stash->{'remote_user'}};
         }
