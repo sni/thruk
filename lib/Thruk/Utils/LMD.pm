@@ -350,6 +350,7 @@ sub kill_if_not_responding {
     return if($ctime > time() - 120);
 
     # kill in background job
+    require Thruk::Utils::External;
     my $job = Thruk::Utils::External::perl($c, {
         expr        => 'Thruk::Utils::LMD::_kill_step2($c, '.$lmd_timeout.', '.$lmd_pid.')',
         message     => 'killing lmd',
