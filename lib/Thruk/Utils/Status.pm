@@ -3335,4 +3335,71 @@ sub improve_filter {
 
 ##############################################
 
+=head2 try_host_only_filter
+
+  try_host_only_filter($c, $params)
+
+try to redirect to url with using only the hostname filter. When using parts or the full
+hostname in the navbar search and press enter, thruk would do a slow full text search.
+So if the search text matches a hostname or a part of it, we can redirect to the url
+with the hostname filter instead, which is way faster.
+
+=cut
+sub try_host_only_filter {
+    my($c, $params) = @_;
+
+    return if     defined $params->{'_'};                                     # not on page reloads, no need to check every time
+    return unless ($params->{'s0_type'} && $params->{'s0_type'} eq 'search'); # first search is a search filter
+    return unless ($params->{'s0_op'}   && $params->{'s0_op'}   eq '~');      # full text regex filter
+    return if     defined $params->{'s1_type'}; # there is only one search
+
+    my $name = $params->{'s0_value'};
+    if(!Thruk::Utils::is_valid_regular_expression(undef, $name)) {
+        return;
+    }
+
+    # is there a host with that name?
+    my $hosts = $c->db->get_hosts(
+                filter  => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), {
+                    name => { '~~' => '^'.$name },
+                } ],
+                columns => ['name'],
+    );
+
+    # direct match?
+    for my $hst (@{$hosts}) {
+        if($hst->{'name'} eq $name) {
+            $params->{'s0_op'}   = '=';
+            $params->{'s0_type'} = 'host';
+
+            return Thruk::Utils::Filter::uri_with($c, $params, 1);
+        }
+    }
+
+    # base hostname match?
+    for my $hst (@{$hosts}) {
+        if($hst->{'name'} =~ m/^$name\./gmx) {
+            $params->{'s0_op'}    = '=';
+            $params->{'s0_type'}  = 'host';
+            $params->{'s0_value'} = $hst->{'name'};
+
+            return Thruk::Utils::Filter::uri_with($c, $params, 1);
+        }
+    }
+
+    # multiple matches?
+    if(scalar @{$hosts} > 0) {
+        $params->{'s0_op'}    = '~';
+        $params->{'s0_type'}  = 'host';
+        $params->{'s0_value'} = '^'.$name;
+
+        return Thruk::Utils::Filter::uri_with($c, $params, 1);
+    }
+
+    return;
+}
+
+
+##############################################
+
 1;

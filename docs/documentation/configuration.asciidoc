@@ -863,6 +863,16 @@ ex.:
   search_long_plugin_output = 1
 
 
+=== search_hosts_first
+{% include new_since.ad version="3.30" %}
+
+When searching from the navigation bar, try to search hosts first.
+
+ex.:
+
+  search_hosts_first = 1
+
+
 === default_service_filter
 {% include new_since.ad version="1.86-2" %}
 The `default_service_filter` set a default service filter which is used when no

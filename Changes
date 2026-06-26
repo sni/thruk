@@ -5,6 +5,7 @@ next:
           - Teams:
             - fix authentication by unexposed custom variables
           - add role specific config overrrides
+          - improve search performance
 
 3.28     Thu Apr  9 19:18:58 CEST 2026
           - thruk_local.d settings overrule cgi.cfg values

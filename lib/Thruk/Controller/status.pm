@@ -459,6 +459,16 @@ sub _process_details_page {
     Thruk::Utils::Status::set_comments_and_downtimes($c) if($selected_columns && $selected_columns =~ m/comments/imx);
     $c->stash->{'has_user_columns'}->{'dfl_'} = ($user_data->{'columns'}->{'svc'} || $c->req->parameters->{'dfl_columns'}) ? 1 : 0;
 
+    # try redirect to host only filter, ex.: for searches from the navbar
+    if($view_mode eq 'html' && $c->config->{'search_hosts_first'}) {
+        my $host_filter_url = Thruk::Utils::Status::try_host_only_filter($c, $c->req->parameters);
+        if($host_filter_url) {
+            $host_filter_url =~ s/&amp;/&/gmx;
+            return $c->redirect_to($host_filter_url);
+        }
+    }
+
+
     # which host to display?
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
 
