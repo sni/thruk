@@ -253,7 +253,7 @@ sub _rest_get_external_command {
         }
     }
 
-    if($cmd->{'name'} eq 'del_downtime') {
+    if($cmd->{'name'} eq 'del_downtime' || $cmd->{'name'} eq 'del_host_downtime') {
         $commands = {};
         my $id   = $c->req->parameters->{'downtime_id'};
         if(defined $description) {
@@ -269,7 +269,7 @@ sub _rest_get_external_command {
         }
     }
 
-    if($cmd->{'name'} eq 'del_comment') {
+    if($cmd->{'name'} eq 'del_comment' || $cmd->{'name'} eq 'del_host_comment') {
         $commands = {};
         my $id   = $c->req->parameters->{'comment_id'};
         if(defined $description) {
