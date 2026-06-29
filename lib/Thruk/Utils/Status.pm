@@ -3366,6 +3366,16 @@ sub try_host_only_filter {
                 columns => ['name'],
     );
 
+    # single matche?
+    if(scalar @{$hosts} == 1) {
+        my $hst = $hosts->[0];
+        $params->{'s0_op'}    = '=';
+        $params->{'s0_type'}  = 'host';
+        $params->{'s0_value'} = $hst->{'name'};
+
+        return Thruk::Utils::Filter::uri_with($c, $params, 1);
+    }
+
     # direct match?
     for my $hst (@{$hosts}) {
         if($hst->{'name'} eq $name) {
