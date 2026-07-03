@@ -253,33 +253,47 @@ sub _rest_get_external_command {
         }
     }
 
+    # reduce downtime del commands to applicable backends
     if($cmd->{'name'} eq 'del_downtime' || $cmd->{'name'} eq 'del_host_downtime') {
         $commands = {};
-        my $id   = $c->req->parameters->{'downtime_id'};
-        if(defined $description) {
-            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+        my $options = {};
+        $options->{backend}  = $backends if defined $backends;
+        $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), id => $c->req->parameters->{'downtime_id'} ];
+        if(!defined $description || $cmd->{'name'} eq 'del_host_downtime') {
+            push @{$options->{'filter'}}, service_description => undef;
+        }
+        if(defined $name)        { push @{$options->{'filter'}}, host_name           => $name; }
+        if(defined $description) { push @{$options->{'filter'}}, service_description => $description; }
+
+        my $data = $c->db->get_downtimes(%{$options});
+        for my $d (@{$data}) {
+            $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
+            if($d->{'service_description'}) {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_DOWNTIME;%d", time(), $d->{'id'});
-            }
-        } else {
-            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+            } else {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_DOWNTIME;%d", time(), $d->{'id'});
             }
         }
     }
 
+    # reduce comment del commands to applicable backends
     if($cmd->{'name'} eq 'del_comment' || $cmd->{'name'} eq 'del_host_comment') {
         $commands = {};
-        my $id   = $c->req->parameters->{'comment_id'};
-        if(defined $description) {
-            my $data = $c->db->get_comments(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+        my $options = {};
+        $options->{backend}  = $backends if defined $backends;
+        $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), id => $c->req->parameters->{'comment_id'} ];
+        if(!defined $description || $cmd->{'name'} eq 'del_host_comment') {
+            push @{$options->{'filter'}}, service_description => undef;
+        }
+        if(defined $name)        { push @{$options->{'filter'}}, host_name           => $name; }
+        if(defined $description) { push @{$options->{'filter'}}, service_description => $description; }
+
+        my $data = $c->db->get_comments(%{$options});
+        for my $d (@{$data}) {
+            $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
+            if($d->{'service_description'}) {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d", time(), $d->{'id'});
-            }
-        } else {
-            my $data = $c->db->get_comments(filter => [{ host_name => $name, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+            } else {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d", time(), $d->{'id'});
             }
         }
