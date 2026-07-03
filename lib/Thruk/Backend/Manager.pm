@@ -2384,8 +2384,10 @@ sub _merge_answer {
             $return = {} unless ref $return eq 'HASH';
             my $tmp = $data->{$key};
             map {
-                $tmp->{$_}->{'peer_key'} = $key;
-                $tmp->{$_}->{'peer_name'} = $name;
+                if(ref $tmp->{$_} eq 'HASH') {
+                    $tmp->{$_}->{'peer_key'} = $key;
+                    $tmp->{$_}->{'peer_name'} = $name;
+                }
             } keys %{$data->{$key}};
             $return = { %{$return}, %{$data->{$key} } };
         }
