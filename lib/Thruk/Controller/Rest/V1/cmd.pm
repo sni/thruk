@@ -304,6 +304,9 @@ sub _rest_get_external_command {
     if($c->stash->{'last_command_error'}) {
         return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400, commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
     }
+    if(scalar @{$c->stash->{'last_command_lines'} // []} == 0) {
+        return({ 'message' => 'sending command failed', 'error' => "cannot send command, affected backend list is empty.", code => 400 });
+    }
     return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'} // []}) });
 }
 

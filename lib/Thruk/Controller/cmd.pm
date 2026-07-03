@@ -3,6 +3,7 @@ package Thruk::Controller::cmd;
 use warnings;
 use strict;
 use Data::Dumper;
+use Time::HiRes ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Utils::Auth ();
@@ -453,7 +454,12 @@ sub redirect_or_success {
         _debug("bulk sending commands succeeded");
     } else {
         if($c->stash->{'last_command_error'}) {
-            Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$c->stash->{'last_command_error'});
+            my @lines = split/\n/mx, $c->stash->{'last_command_error'};
+            if(scalar @lines <= 1) {
+                Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$c->stash->{'last_command_error'});
+            } else {
+                Thruk::Utils::set_message($c, 'fail_message', "sending command failed.\n".$c->stash->{'last_command_error'});
+            }
         } else {
             Thruk::Utils::set_message($c, 'fail_message', "sending command failed");
         }
@@ -573,14 +579,21 @@ sub redirect_or_success {
             }
         }
         else {
-            # just do nothing for a second
-            sleep(1);
+            # give the command a moment to be processed
+            Time::HiRes::sleep(0.2);
         }
 
         return if $just_return;
         if($c->req->parameters->{'json'}) {
-            return $c->render(json => {'success' => 0, 'error' => $c->stash->{'last_command_error'} }) if $c->stash->{'last_command_error'};
-            return $c->render(json => {'success' => 1});
+            my $json = {'success' => 1};
+            if($c->stash->{'last_command_error'}) {
+                $json->{'error'}   = $c->stash->{'last_command_error'};
+                $json->{'success'} = 0;
+            }
+            if($c->stash->{'failed_backends'}) {
+                $json->{'failed'} = $c->stash->{'failed_backends'};
+            }
+            return $c->render(json => $json);
         }
         else {
             $c->redirect_to($referer);
@@ -588,10 +601,6 @@ sub redirect_or_success {
     }
     else {
         return if $just_return;
-        if($c->req->parameters->{'json'}) {
-            return $c->render(json => {'success' => 0, 'error' => $c->stash->{'last_command_error'} }) if $c->stash->{'last_command_error'};
-            return $c->render(json => {'success' => 1});
-        }
         $c->stash->{template} = 'cmd_success.tt';
     }
 
@@ -780,6 +789,7 @@ sub do_send_command {
                 Thruk::Utils::set_message( $c, 'fail_message', "cannot send command, affected backend list is empty. ".$error );
                 return;
             }
+            $joined_backends = join(',', @{$backends_list});
         }
 
         push @{$c->stash->{'commands2send'}->{$joined_backends}}, $cmd_line;
@@ -923,7 +933,7 @@ sub _bulk_send_backend {
     };
     my $err = $@;
     if($err) {
-        $err = _strip_line($err);
+        $err = _strip_line($err, 1);
         $c->stash->{'last_command_error'} = $err;
         _warn($err) unless($c->want_json_response() || Thruk::Base->mode_cli());
         Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
@@ -1067,32 +1077,32 @@ sub get_affected_backends {
     my($data, $filter, $error);
     if(defined $required_fields->{'hostgroup'}) {
         $data = $c->db->get_hostgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hostgroups' ), name => $required_fields->{'hostgroup'}],
-                                           columns => [qw/name/] );
+                                           columns => [qw/name/], backends => $backends );
         $filter = "hostgroup=".$required_fields->{'hostgroup'};
     }
     elsif(defined $required_fields->{'servicegroup'}) {
         $data = $c->db->get_servicegroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'servicegroups' ), name => $required_fields->{'servicegroup'}],
-                                              columns => [qw/name/] );
+                                              columns => [qw/name/], backends => $backends );
         $filter = "servicegroup=".$required_fields->{'servicegroup'};
     }
     elsif(defined $required_fields->{'service'}) {
         $data = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), description => $required_fields->{'service'}, host_name => $required_fields->{'host'}],
-                                         columns => [qw/host_name description/] );
+                                         columns => [qw/host_name description/], backends => $backends );
         $filter = "host=".$required_fields->{'host'}." service=".$required_fields->{'service'};
     }
     elsif(defined $required_fields->{'host'}) {
         $data = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), name => $required_fields->{'host'}],
-                                      columns => [qw/name/] );
+                                      columns => [qw/name/], backends => $backends );
         $filter = "host=".$required_fields->{'host'};
     }
     elsif(defined $required_fields->{'contact'}) {
         $data = $c->db->get_contacts(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contacts' ), name => $required_fields->{'contact'}],
-                                      columns => [qw/name/] );
+                                      columns => [qw/name/], backends => $backends );
         $filter = "contact=".$required_fields->{'contact'};
     }
     elsif(defined $required_fields->{'contactgroup'}) {
         $data = $c->db->get_contactgroups(filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'contactgroups' ), name => $required_fields->{'contactgroup'}],
-                                      columns => [qw/name/] );
+                                      columns => [qw/name/], backends => $backends );
         $filter = "contactgroup=".$required_fields->{'contactgroup'};
     }
 
@@ -1107,10 +1117,17 @@ sub get_affected_backends {
         }
     }
 
+    # add failed backends again since we cannot say if they are affected
+    my $failed = $c->stash->{'failed_backends'} // $Thruk::Globals::c->stash->{'failed_backends'};
+    if($failed && ref $failed eq 'HASH') {
+        for my $peer_key (sort keys %{$failed}) {
+            $affected_backends->{$peer_key} = 1;
+        }
+    }
+
     my $backend_list = [keys %{$affected_backends}];
     if(scalar @{$backend_list} == 0) {
         $error = "no object found by filter: ".$filter;
-        my $failed = $c->stash->{'failed_backends'} // $Thruk::Globals::c->stash->{'failed_backends'};
         if($failed && ref $failed eq 'HASH') {
             my @failed_backends;
             for my $peer_key (sort keys %{$failed}) {

@@ -245,7 +245,14 @@ Always returns true.
 
 sub do {
     my($self, $statement, $opt) = @_;
-    $self->_send($statement, $opt);
+    my $res = $self->_send($statement, $opt);
+
+    if(ref $res) {
+        if(ref $res eq 'HASH' && $res->{'failed'}) {
+            $self->{'meta_data'} = $res;
+        }
+        return $res;
+    }
     return(1);
 }
 
@@ -732,7 +739,7 @@ sub _send {
         $msg    = $self->_get_error($status);
     }
 
-    elsif($statement =~ m/^ResponseHeader:/mx) {
+    elsif($statement =~ m/^ResponseHeader:/mx && !$ENV{'THRUK_USE_LMD'}) {
         $status = 495;
         $msg    = $self->_get_error($status);
     }
@@ -742,7 +749,7 @@ sub _send {
         $msg    = $self->_get_error($status);
     }
 
-    elsif($statement =~ m/^OuputFormat:/mx) {
+    elsif($statement =~ m/^OuputFormat:/mx && !$ENV{'THRUK_USE_LMD'}) {
         $status = 493;
         $msg    = $self->_get_error($status);
     }
@@ -795,7 +802,7 @@ sub _send {
             }
         }
 
-        # Commands need no additional header
+        # Commands need no additional header (but LMD supports it meanwhile)
         if($statement !~ m/^COMMAND/mx) {
             if($opt->{'wrapped_json'}) {
                 $header .= "OutputFormat: wrapped_json\n";
@@ -854,6 +861,9 @@ sub _send {
     my $result;
     if($status == 200) {
         $result = $body;
+        if($statement =~ m/^COMMAND/mx) {
+            return($result);
+        }
     } else {
         my $json_decoder = Cpanel::JSON::XS->new->utf8->relaxed;
         # fix json output
@@ -1146,6 +1156,7 @@ sub _send_socket_do {
 sub _read_socket_do {
     my($self, $sock, $statement) = @_;
     my($recv,$header);
+    our $json_decoder;
 
     my $s = IO::Select->new();
     $s->add($sock);
@@ -1157,6 +1168,23 @@ sub _read_socket_do {
             $recv = <$sock>;
         }
         if($recv) {
+            if($statement =~ m/^ResponseHeader:\s+fixed16/sgmx) {
+                $header = $recv;
+                $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
+                my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
+                if($content_length > 0) {
+                    $sock->read($recv, $content_length) or return($self->_socket_error($statement, 'reading body from socket failed'.($! ? ': '.$! : '')));
+                }
+                if($json_decoder) {
+                    $json_decoder->incr_reset;
+                } else {
+                    $json_decoder = Cpanel::JSON::XS->new->utf8->relaxed;
+                }
+                $json_decoder->incr_parse($recv);
+                $recv = $json_decoder->incr_parse or return($self->_socket_error($statement, 'reading remaining bytes from socket failed'.($! ? ': '.$! : '')));
+                $json_decoder->incr_reset;
+                return($status, $self->_get_error($status), $recv);
+            }
             chomp($recv);
             if($recv =~ m/^(\d+):\s*(.*)$/mx) {
                 return($1, $recv, undef);
@@ -1188,7 +1216,6 @@ sub _read_socket_do {
     $self->{'logger'}->debug("header: $header") if $self->{'verbose'};
     my($status, $msg, $content_length) = &_parse_header($self, $header, $sock);
     return($status, $msg, undef) if !defined $content_length;
-    our $json_decoder;
     if($json_decoder) {
         $json_decoder->incr_reset;
     } else {
