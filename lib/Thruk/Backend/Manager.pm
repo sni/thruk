@@ -1009,7 +1009,8 @@ sub logcache_stats {
     return unless defined $c->config->{'logcache'};
 
     my $type = '';
-    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'mysql'      if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
     my(@stats);
     if($type eq 'mysql') {
         if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
@@ -1018,6 +1019,13 @@ sub logcache_stats {
             $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
         }
         @stats = Thruk::Backend::Provider::Mysql->_log_stats($c, $backends);
+    } elsif($type eq 'postgresql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'}) {
+            require Thruk::Backend::Provider::Postgresql;
+            Thruk::Backend::Provider::Postgresql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'} = 1;
+        }
+        @stats = Thruk::Backend::Provider::Postgresql->_log_stats($c, $backends);
     } else {
         die("unknown type: ".$type);
     }
@@ -1051,7 +1059,8 @@ sub logcache_existing_caches {
     my($self, $c) = @_;
 
     my $type = '';
-    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'mysql'      if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
     my $stats;
     if($type eq 'mysql') {
         if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
@@ -1060,6 +1069,13 @@ sub logcache_existing_caches {
             $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
         }
         $stats = Thruk::Backend::Provider::Mysql->get_existing_caches($c);
+    } elsif($type eq 'postgresql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'}) {
+            require Thruk::Backend::Provider::Postgresql;
+            Thruk::Backend::Provider::Postgresql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'} = 1;
+        }
+        $stats = Thruk::Backend::Provider::Postgresql->get_existing_caches($c);
     } else {
         die("unknown type: ".$type);
     }
@@ -1231,7 +1247,8 @@ sub _renew_logcache {
         }
     } else {
         my $type = '';
-        $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+        $type = 'mysql'      if $c->config->{'logcache'} =~ m/^mysql/mxi;
+        $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
         if(scalar @{$backends2import} > 0) {
             require Thruk::Utils::External;
             my $job = Thruk::Utils::External::perl($c,

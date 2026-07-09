@@ -150,12 +150,20 @@ sub cmd {
     }
 
     my $type = '';
-    $type = 'mysql' if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'mysql'      if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
+
+    my $provider_class = '';
+    if($type eq 'mysql') {
+        $provider_class = 'Thruk::Backend::Provider::Mysql';
+    } elsif($type eq 'postgresql') {
+        $provider_class = 'Thruk::Backend::Provider::Postgresql';
+    }
 
     eval {
-        if($type eq 'mysql') {
-            require Thruk::Backend::Provider::Mysql;
-            Thruk::Backend::Provider::Mysql->import;
+        if($provider_class) {
+            require Module::Load;
+            Module::Load::load($provider_class);
         } else {
             die("unknown logcache type: ".$type);
         }
@@ -172,7 +180,9 @@ sub cmd {
     }
 
     if($ENV{'THRUK_CRON'} && $mode eq 'update') {
-        return("", 0) unless Thruk::Backend::Provider::Mysql::check_global_lock($c);
+        my $lock_func = $provider_class.'::check_global_lock';
+        no strict 'refs';
+        return("", 0) unless $lock_func->($c);
         $lock_created = $c->config->{'tmp_path'}."/logcache_import.lock";
         Thruk::Utils::IO::write($lock_created, $$);
     }
@@ -181,7 +191,7 @@ sub cmd {
         # check if tables already existing
         my $exist = 0;
         for my $peer_key (@{$backends}) {
-            my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
+            my($stats) = $provider_class->_log_stats($c, $peer_key);
             if($stats && $stats->{'cache_version'}) {
                 _info("logcache does already exist for backend: %s.", $stats->{'name'});
                 $exist = 1;
@@ -198,7 +208,7 @@ sub cmd {
     if($mode eq 'drop' && !$global_options->{'yes'}) {
         my $found = 0;
         for my $peer_key (@{$backends}) {
-            my($stats) = Thruk::Backend::Provider::Mysql->_log_stats($c, $peer_key);
+            my($stats) = $provider_class->_log_stats($c, $peer_key);
             if($stats && $stats->{'cache_version'}) {
                 _info("logcache will be removed for backend: %s.", $stats->{'name'});
                 $found++;
@@ -221,13 +231,13 @@ sub cmd {
     }
 
     if($mode eq 'stats') {
-        my $stats = Thruk::Backend::Provider::Mysql->_log_stats($c);
+        my $stats = $provider_class->_log_stats($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats, 0);
     }
     elsif($mode eq 'removeunused') {
-        my $stats= Thruk::Backend::Provider::Mysql->_log_removeunused($c);
+        my $stats= $provider_class->_log_removeunused($c);
         Thruk::Backend::Manager::close_logcache_connections($c);
         $c->stats->profile(end => "_cmd_import_logs($action)");
         return($stats."\n", 0);
@@ -263,7 +273,7 @@ sub cmd {
                 my $t1 = [gettimeofday];
                 my($log_count, $plugin_ref_count, $err) = (0, 0);
                 eval {
-                    my(undef, $loc_log_count, $errors) = Thruk::Backend::Provider::Mysql->_import_logs($c, $mode, $backend, $blocksize, $opt);
+                    my(undef, $loc_log_count, $errors) = $provider_class->_import_logs($c, $mode, $backend, $blocksize, $opt);
                     $c->stats->profile(end => "_cmd_import_logs($action)");
                     if($mode eq 'clean' || $mode eq 'compact') {
                         $plugin_ref_count += $loc_log_count->[1];
