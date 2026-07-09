@@ -302,7 +302,33 @@ sub _rest_get_external_command {
     Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     if($c->stash->{'last_command_error'}) {
-        return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400, commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
+        my $data = {
+            'message'   => 'sending command failed',
+            'error'     => $c->stash->{'last_command_error'},
+            'code'      => 400,
+            'commands'  => join("\n", @{$c->stash->{'last_command_lines'}}),
+        };
+        if($c->stash->{'failed_backends'} && scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+            $data->{'failed_backends'} = $c->stash->{'failed_backends'};
+
+            # did some commands succeed?
+            if(scalar %{$c->stash->{'failed_backends'}} < scalar keys %{$commands}) {
+                $data->{'message'} = sprintf('sending command failed on %d of %d sites', scalar %{$c->stash->{'failed_backends'}}, scalar keys %{$commands});
+            }
+
+            # set code from backend response
+            for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
+                my $msg = $c->stash->{'failed_backends'}->{$key};
+                if($msg =~ m/^(^\d+):/mx) {
+                    my $code = $1;
+                    if($code > $data->{'code'}) {
+                        $data->{'code'} = $code;
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
     if(scalar @{$c->stash->{'last_command_lines'} // []} == 0) {
         return({ 'message' => 'sending command failed', 'error' => "cannot send command, affected backend list is empty.", code => 400 });
