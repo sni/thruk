@@ -1745,12 +1745,12 @@ sub _do_on_peers {
     &timing_breakpoint('_get_result: '.$function);
     if($function eq 'send_command') {
         if(!$err) {
-            $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+            $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
         }
     }
     if(($num_selected_backends > 0 && !defined $result) || $err) {
         if(!$err) {
-            $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+            $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
         }
         # this means, this is a connection error -> debug log only
         if(($con_errors > 0 && $con_errors == $num_selected_backends) || $function eq 'send_command') {
@@ -3248,6 +3248,21 @@ sub caching_query {
 
     $c->stats->profile(end => "caching_query: ".$function);
     return($res);
+}
+
+########################################
+sub _join_failed_backends {
+    my($failed_backends, $get_results_for) = @_;
+
+    my @res;
+    for my $key (@{$get_results_for}) {
+        next unless $failed_backends->{$key};
+
+        push @res, Thruk::Utils::Filter::peer_name($key).": ".$failed_backends->{$key};
+    }
+
+    return unless scalar @res > 0;
+    return join("\n", @res);
 }
 
 ########################################

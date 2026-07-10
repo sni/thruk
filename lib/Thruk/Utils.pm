@@ -4267,7 +4267,7 @@ sub extract_connection_error {
         return($1, $err);
     }
 
-    if($err =~ m|(\d+\Q: cannot send command, peer is down\E)|smx) {
+    if($err =~ m|^(.*\d+\Q: cannot send command, peer is down\E)|smx) {
         return($1, $err);
     }
 
