@@ -5,6 +5,7 @@ use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
+use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -25,15 +26,14 @@ connection provider for Mysql connections
 
 =cut
 
-## no lint
 # backward-compat aliases so callers using the package-variable form still work
-{ no warnings 'once'; ## no critic (ProhibitNoWarnings)
+## no critic (ProhibitNoWarnings)
+no warnings 'once';
 *Thruk::Backend::Provider::Mysql::cache_version = \$Thruk::Backend::Provider::DBcommon::cache_version;
 *Thruk::Backend::Provider::Mysql::db_types      = \$Thruk::Backend::Provider::DBcommon::db_types;
 *Thruk::Backend::Provider::Mysql::db_classes     = \$Thruk::Backend::Provider::DBcommon::db_classes;
 *Thruk::Backend::Provider::Mysql::tables         = \@Thruk::Backend::Provider::DBcommon::tables;
-}
-## use lint
+use warnings;
 
 ##########################################################
 
@@ -99,9 +99,6 @@ sub _quote {
     return 'NULL' unless defined $val;
     if(ref $val eq 'ARRAY') {
         return [ map { $self->_quote($_) } @{$val} ];
-    }
-    if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
-        return $val;
     }
     $val =~ s/'/\\'/gmx;
     return "'".$val."'";
@@ -345,7 +342,6 @@ sub _get_create_schema {
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(8, 'compact_duration', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(9, 'compact_till', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(10,'lock_mode', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(11,'peer_name', '')",
     );
     return \@statements;
 }
@@ -391,12 +387,10 @@ sub _update_status {
 
 sub _finish_update {
     my($self, $c, $dbh, $prefix, $duration) = @_;
-    my $peer_name = Thruk::Utils::Filter::peer_name($self->{'peer_config'}->{'peer_key'});
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(6,'update_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','') ON DUPLICATE KEY UPDATE value=''");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(11,'peer_name',".$dbh->quote($peer_name).") ON DUPLICATE KEY UPDATE value=".$dbh->quote($peer_name));
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->commit || return;
     return 1;
@@ -469,15 +463,7 @@ sub _enable_index {
 
 ##########################################################
 
-sub _sql_extra_columns {
-    return ',
-            (CASE
-                WHEN l.type = "HOST NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 4), ";", -1)
-                WHEN l.type = "SERVICE NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 5), ";", -1)
-                ELSE ""
-            END) as command_name,
-            SUBSTRING_INDEX(l.message, \': \', 1) as plugin_output';
-}
+sub _sql_extra_columns { return ', SUBSTRING_INDEX(l.message, \': \', 1) as plugin_output' }
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
@@ -525,9 +511,6 @@ sub _sql_regex_operator {
 sub _db_table_stats {
     my($self, $dbh, $prefix) = @_;
     my($index_size, $data_size, $items, $status, $msg);
-    if(!$self->_has_log_table($dbh, $prefix)) {
-        return(0, 0, 0, {}, "logcache not yet created");
-    }
     eval {
         my $res = $dbh->selectall_arrayref("SELECT SUM(index_length) as index_size, SUM(data_length) as data_size, SUM(table_rows) as items FROM information_schema.TABLES WHERE table_schema=Database() AND table_name LIKE '".$prefix."_%'", { Slice => {} });
         if($res && $res->[0]) {
@@ -792,7 +775,8 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        $forcestart = Thruk::Utils::parse_date($c, $options->{'start'});
+        require Thruk::Utils::DateTime;
+        $forcestart = Thruk::Utils::DateTime::parse_date($c, $options->{'start'});
     }
 
     my $backend_count = 0;
@@ -873,7 +857,8 @@ sub _import_logs {
         };
     }
 
-    if($Thruk::Backend::Provider::DBcommon::global_lock_created) {
+    our $global_lock_created;
+    if($global_lock_created) {
         unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
 
@@ -1015,7 +1000,7 @@ sub _check_lock {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
+        our $global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 

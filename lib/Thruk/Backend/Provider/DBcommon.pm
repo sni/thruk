@@ -3,28 +3,16 @@ package Thruk::Backend::Provider::DBcommon;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
+use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
-
-=head1 NAME
-
-Thruk::Backend::Provider::DBcommon - shared base for DB-backed logcache providers
-
-=head1 DESCRIPTION
-
-Contains the common engine shared by the MySQL and PostgreSQL logcache
-providers. Database-specific logic is delegated to the concrete subclass
-via overridable helper methods (_quote, _sql_extra_columns, etc.).
-
-=head1 METHODS
-
-=cut
 
 $Thruk::Backend::Provider::DBcommon::cache_version = 6;
 
@@ -72,8 +60,6 @@ use constant {
 };
 
 @Thruk::Backend::Provider::DBcommon::tables = (qw/contact contact_host_rel contact_service_rel host log service status/);
-
-$Thruk::Backend::Provider::DBcommon::global_lock_created = 0;
 
 END {
     # close all connections at the end
@@ -530,7 +516,7 @@ sub _get_subfilter {
             if($k eq '>='  and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '= '.join(' OR '.$f.' = ', @{$self->_quote($v)}); }
             if($k eq '!>=' and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '!= '.join(' OR '.$f.' != ', @{$self->_quote($v)}); }
             if($k eq '!>=')                         { return '!= '.$self->_quote($v); }
-            if($k eq '>=' and $v !~ m/^[\d\.]+$/mx) { return 'IN ('.$self->_quote($v).')'; }
+            if($k eq '>=' and $v !~ m/^[\d\.]+$/mx) { return 'IN ('.join(',', @{$self->_quote($v)}).')'; }
             if($k eq '>=')                          { return '>= '.$self->_quote($v); }
             if($k eq '<=')                          { return '<= '.$self->_quote($v); }
             if($k eq '>')                           { return '> '.$self->_quote($v); }
@@ -771,9 +757,6 @@ sub _logcache_stats_types {
         for my $t (@{$types}) {
             $total += $t->{'total'};
         }
-        for my $t (@{$types}) {
-            $t->{'procent'} = $total ? ($t->{'total'} / $total) * 100 : 0;
-        }
         push @result, {
             key    => $key,
             name   => $peer->{'name'},
@@ -782,7 +765,7 @@ sub _logcache_stats_types {
         };
     }
     $c->stats->profile(end => $driver."::_logcache_stats_types: ".$groupby);
-    return \@result;
+    return @result;
 }
 
 sub _log_removeunused {
@@ -790,10 +773,10 @@ sub _log_removeunused {
     my $driver = $self->_driver_name();
     $c->stats->profile(begin => $driver."::_log_removeunused");
 
-    my @backends = $self->_log_stats($c);
+    my $backends = $self->_log_stats($c);
     # get first logcache dbh
     my $peer;
-    for my $b (@backends) {
+    for my $b (@{$backends}) {
         next unless $b->{'enabled'};
         $peer = $c->db->get_peer_by_key($b->{'key'});
         last;
@@ -804,40 +787,30 @@ sub _log_removeunused {
     my $dbh  = $peer->logcache->_dbh();
     my $table_names = $self->_get_all_table_names($dbh);
     my $res = {};
-    for my $t (@{$table_names}) {
-        if($t =~ m/^(.*?)_(status|log)/mx) {
-            my $key = $1;
-            $res->{$key} = 1 unless $res->{$key};
-        }
-        if($t =~ m/^(.*?)_status/mx) {
-            my $key = $1;
-            # fetch name
-            my $table_status = $self->_quote_table($key."_status");
-            my @names = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 11 LIMIT 1')};
-            $res->{$key} = $names[0] if scalar @names > 0;
-        }
-    }
+    for my $t (@{$table_names}) { $res->{$t} = {}; }
 
     # gather backend ids
-    for my $b (@backends) {
-        delete $res->{$b};
+    my $backends_hash = {};
+    for my $b (@{$backends}) {
+        next unless $b->{'enabled'};
+        $backends_hash->{$b->{'key'}} = 1;
     }
-
     # find tables without a backend
-    for my $key (@{$c->stash->{'backends'}}) {
-        delete $res->{$key};
+    for my $tbl (keys %{$res}) {
+        my $key = $tbl;
+        $key =~ s/_.*$//gmx;
+        delete $backends_hash->{$key};
     }
-
     if($print_only) {
         $c->stats->profile(end => $driver."::_log_removeunused");
-        return($res);
+        return($backends_hash);
     }
 
     my $removed = 0;
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
-    for my $key (keys %{$res}) {
-        for my $tbl (keys %{$table_names}) {
+    for my $key (keys %{$backends_hash}) {
+        for my $tbl (keys %{$res}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
             $dbh->do("DROP TABLE " . $self->_quote_table($tbl) . $cascade);
@@ -870,7 +843,7 @@ sub _log_check_inconsistency {
         my $dbh = $peer->logcache->_dbh;
 
         my $table = $self->_quote_table($prefix."_host");
-        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count(host_id) > 1");
+        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count > 1");
         $sth->execute;
         my $num = 0;
         for my $r (@{$sth->fetchall_arrayref()}) {
@@ -931,7 +904,8 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        $forcestart = Thruk::Utils::parse_date($c, $options->{'start'});
+        require Thruk::Utils::DateTime;
+        $forcestart = Thruk::Utils::DateTime::parse_date($c, $options->{'start'});
     }
 
     # do this in a single transaction if blocksize is undef/0
@@ -1081,7 +1055,7 @@ sub _import_logs {
 }
 
 sub _get_running_thruk_pids {
-    my($self, undef) = @_;
+    my($self, $c) = @_;
     my $active_thruk_pids = {};
     my $pids = Thruk::Utils::IO::cmd("pgrep -f 'thruk_server.pl|thruk_fastcgi|fcgi-pm' 2>/dev/null");
     if($pids) {
@@ -1174,7 +1148,7 @@ sub _db_lock_tables {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
+        our $global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 
@@ -1222,6 +1196,7 @@ sub _import_peer_logfiles {
         $c->stats->profile(end => "get livestatus timestamp no filter");
     }
     if(!$start) {
+        my $driver = $self->_driver_name();
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
 
