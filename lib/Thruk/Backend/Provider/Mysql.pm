@@ -5,7 +5,6 @@ use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
-use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -26,14 +25,15 @@ connection provider for Mysql connections
 
 =cut
 
+## no lint
 # backward-compat aliases so callers using the package-variable form still work
-## no critic (ProhibitNoWarnings)
-no warnings 'once';
+{ no warnings 'once'; ## no critic (ProhibitNoWarnings)
 *Thruk::Backend::Provider::Mysql::cache_version = \$Thruk::Backend::Provider::DBcommon::cache_version;
 *Thruk::Backend::Provider::Mysql::db_types      = \$Thruk::Backend::Provider::DBcommon::db_types;
 *Thruk::Backend::Provider::Mysql::db_classes     = \$Thruk::Backend::Provider::DBcommon::db_classes;
 *Thruk::Backend::Provider::Mysql::tables         = \@Thruk::Backend::Provider::DBcommon::tables;
-use warnings;
+}
+## use lint
 
 ##########################################################
 

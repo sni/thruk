@@ -5,7 +5,6 @@ use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
-use POSIX ();
 use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -26,14 +25,15 @@ connection provider for Postgresql connections
 
 =cut
 
+## no lint
 # backward-compat aliases so callers using the package-variable form still work
-## no critic (ProhibitNoWarnings)
-no warnings 'once';
+{ no warnings 'once'; ## no critic (ProhibitNoWarnings)
 *Thruk::Backend::Provider::Postgresql::cache_version = \$Thruk::Backend::Provider::DBcommon::cache_version;
 *Thruk::Backend::Provider::Postgresql::db_types      = \$Thruk::Backend::Provider::DBcommon::db_types;
 *Thruk::Backend::Provider::Postgresql::db_classes     = \$Thruk::Backend::Provider::DBcommon::db_classes;
 *Thruk::Backend::Provider::Postgresql::tables         = \@Thruk::Backend::Provider::DBcommon::tables;
-use warnings;
+}
+## use lint
 
 ##########################################################
 
@@ -501,7 +501,7 @@ sub _db_table_stats {
              AND c.relname LIKE ?
              AND c.relkind = 'r'",
             { Slice => {} },
-            $prefix.'_%'
+            $prefix.'_%',
         );
         if($res && $res->[0]) {
             $index_size = $res->[0]->{'index_size'};

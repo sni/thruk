@@ -3,16 +3,28 @@ package Thruk::Backend::Provider::DBcommon;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Data::Dumper qw/Dumper/;
 use Module::Load qw/load/;
 use POSIX ();
-use Time::HiRes qw/gettimeofday tv_interval/;
 
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::Log qw/:all/;
 
 use parent 'Thruk::Backend::Provider::Base';
+
+=head1 NAME
+
+Thruk::Backend::Provider::DBcommon - shared base for DB-backed logcache providers
+
+=head1 DESCRIPTION
+
+Contains the common engine shared by the MySQL and PostgreSQL logcache
+providers. Database-specific logic is delegated to the concrete subclass
+via overridable helper methods (_quote, _sql_extra_columns, etc.).
+
+=head1 METHODS
+
+=cut
 
 $Thruk::Backend::Provider::DBcommon::cache_version = 6;
 
