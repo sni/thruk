@@ -283,7 +283,7 @@ sub logcache {
             die("unknown logcache type in: ".$self->{'logcache'});
         }
         my $provider_key = $provider_class;
-        $provider_key    =~ s/.*:://;
+        $provider_key    =~ s/.*:://mx;
         if(!defined $Thruk::Backend::Peer::ProviderLoaded->{$provider_key}) {
             require Module::Load;
             Module::Load::load($provider_class);

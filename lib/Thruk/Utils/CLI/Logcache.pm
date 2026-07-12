@@ -181,7 +181,7 @@ sub cmd {
 
     if($ENV{'THRUK_CRON'} && $mode eq 'update') {
         my $lock_func = $provider_class.'::check_global_lock';
-        no strict 'refs';
+        no strict 'refs'; ## no critic (ProhibitNoStrict)
         return("", 0) unless $lock_func->($c);
         $lock_created = $c->config->{'tmp_path'}."/logcache_import.lock";
         Thruk::Utils::IO::write($lock_created, $$);
