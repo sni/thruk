@@ -312,8 +312,8 @@ sub _rest_get_external_command {
             $data->{'failed_backends'} = $c->stash->{'failed_backends'};
 
             # did some commands succeed?
-            if(scalar %{$c->stash->{'failed_backends'}} < scalar keys %{$commands}) {
-                $data->{'message'} = sprintf('sending command failed on %d of %d sites', scalar %{$c->stash->{'failed_backends'}}, scalar keys %{$commands});
+            if((scalar keys %{$c->stash->{'failed_backends'}}) < (scalar keys %{$commands})) {
+                $data->{'message'} = sprintf('sending command failed on %d of %d sites', (scalar keys %{$c->stash->{'failed_backends'}}), (scalar keys %{$commands}));
             }
 
             # set code from backend response
