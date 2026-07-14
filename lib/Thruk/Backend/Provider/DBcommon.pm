@@ -1067,7 +1067,7 @@ sub _import_logs {
 }
 
 sub _get_running_thruk_pids {
-    my($self, $c) = @_;
+    my($self, undef) = @_;
     my $active_thruk_pids = {};
     my $pids = Thruk::Utils::IO::cmd("pgrep -f 'thruk_server.pl|thruk_fastcgi|fcgi-pm' 2>/dev/null");
     if($pids) {
@@ -1208,7 +1208,6 @@ sub _import_peer_logfiles {
         $c->stats->profile(end => "get livestatus timestamp no filter");
     }
     if(!$start) {
-        my $driver = $self->_driver_name();
         die("something went wrong, cannot get start from logfiles (".(defined $start ? $start : "undef").")\nIf this is an Icinga2 please have a look at: https://thruk.org/documentation/logfile-cache.html#icinga-2 for a workaround.\n");
     }
 
