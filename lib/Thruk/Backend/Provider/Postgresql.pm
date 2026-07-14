@@ -353,7 +353,7 @@ sub _lock_table_exclusive {
 }
 
 sub _release_write_locks {
-    my($self, $dbh) = @_;
+    my($self, undef) = @_;
     # no-op on PostgreSQL; locks are released on commit/rollback
     return;
 }
@@ -422,7 +422,7 @@ sub _db_optimize_tables {
 ##########################################################
 
 sub _disable_index {
-    my($self, $dbh, $prefix) = @_;
+    my($self, undef, undef) = @_;
     # no-op on PostgreSQL
     return;
 }
