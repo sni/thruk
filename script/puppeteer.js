@@ -25,17 +25,19 @@ try {
     process.exit(1);
   }
 }
-const os        = require('os');
-const path      = require('path');
+const os          = require('os');
+const path        = require('path');
+const { timeout } = require("puppeteer");
 
-var url       = process.argv[2];
-var output    = process.argv[3];
-var width     = process.argv[4];
-var height    = process.argv[5];
-var sessionid = process.argv[6];
-var is_report = process.argv[7];
-var waitTimeout = 20000;
-var debug     = false;
+var url           = process.argv[2];
+var output        = process.argv[3];
+var width         = process.argv[4];
+var height        = process.argv[5];
+var sessionid     = process.argv[6];
+var is_report     = process.argv[7];
+var waitTimeout   = 20000;
+var startTimeout  = 30000;
+var debug         = false;
 
 let _debug = debug ? console.log : function() {};
 
@@ -50,6 +52,12 @@ if(process.env['OMD_ROOT']) {
 if (!process.env['XDG_CONFIG_HOME']) { process.env['XDG_CONFIG_HOME'] = tempDir; }
 if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir; }
 
+// override wait timeout from env (in seconds)
+if (process.env['WAIT_TIMEOUT']) { waitTimeout = process.env['WAIT_TIMEOUT'] * 1000; }
+
+// override browser start wait timeout from env (in seconds)
+if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] * 1000; }
+
 (async () => {
   const browser = await puppeteer.launch({
           headless: "1", // keep old headless mode for now but disabled deprecation warning
@@ -60,7 +68,8 @@ if (!process.env['XDG_CACHE_HOME'])  { process.env['XDG_CACHE_HOME']  = tempDir;
               '--disable-setuid-sandbox',
               '--ignore-certificate-errors', // fix ignoreHTTPSErrors not working well: https://github.com/puppeteer/puppeteer/issues/3119
               '--window-size='+width+','+height
-          ]
+          ],
+          timeout: startTimeout
           // doesn't work: makes puppeteer twice as slow
           //,userDataDir: '/dev/null' // avoid leaking /tmp/puppeteer_dev_profile-xxxx folders https://github.com/puppeteer/puppeteer/issues/6414
   });
