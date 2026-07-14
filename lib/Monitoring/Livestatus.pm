@@ -11,7 +11,7 @@ use Storable qw/dclone/;
 use Monitoring::Livestatus::INET ();
 use Monitoring::Livestatus::UNIX ();
 
-our $VERSION = '0.84';
+our $VERSION = '0.86';
 
 
 # list of allowed options
