@@ -593,11 +593,11 @@ sub _extract_checks {
         my $proto = "https";
         $proto = "http" if($mode && $mode eq 'http');
         my $command = $chk->{'check_command'} // sprintf(
-                "check_thruk_agent!%s\$USER1\$/check_nsc_web %s %s -p '%s' -u '%s://%s:%s' '%s'",
+                "check_thruk_agent!CHECK_NSC_WEB_PASSWORD='%s' %s\$USER1\$/check_nsc_web %s %s -u '%s://%s:%s' '%s'",
+                $svc_password,
                 $proxy_cmd,
                 _check_nsc_web_extra_options($c, $mode),
                 ($chk->{'nscweb'} // ''),
-                $svc_password,
                 $proto,
                 '$HOSTADDRESS$',
                 '$_HOSTAGENT_PORT$',
