@@ -93,7 +93,7 @@ EOT
 
     ok($checks->{'svc.snclient'}, "service check found");
     is($checks->{'svc.snclient'}->{'name'},   "service snclient", "service: name");
-    is($checks->{'svc.snclient'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!$USER1$/check_nsc_web -t 35  -p \'$_HOSTAGENT_PASSWORD$\' -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'snclient\'', "service: check_command");
+    is($checks->{'svc.snclient'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!CHECK_NSC_WEB_PASSWORD=\'$_HOSTAGENT_PASSWORD$\' $USER1$/check_nsc_web -t 35  -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'snclient\'', "service: check_command");
 }
 
 ###########################################################
@@ -163,11 +163,11 @@ EOT
 
     ok($checks->{'svc.snclient'}, "service check found");
     is($checks->{'svc.snclient'}->{'name'}, "service snclient", "service: name");
-    is($checks->{'svc.snclient'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!$USER1$/check_nsc_web -t 35  -p \'$_HOSTAGENT_PASSWORD$\' -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'snclient\'', "service: check_command");
+    is($checks->{'svc.snclient'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!CHECK_NSC_WEB_PASSWORD=\'$_HOSTAGENT_PASSWORD$\' $USER1$/check_nsc_web -t 35  -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'snclient\'', "service: check_command");
 
     ok($checks->{'svc.someservice'}, "service check found");
     is($checks->{'svc.someservice'}->{'name'}, "service someservice", "service: name");
-    is($checks->{'svc.someservice'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!$USER1$/check_nsc_web -t 35  -p \'$_HOSTAGENT_PASSWORD$\' -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'someservice\'', "service: check_command");
+    is($checks->{'svc.someservice'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!CHECK_NSC_WEB_PASSWORD=\'$_HOSTAGENT_PASSWORD$\' $USER1$/check_nsc_web -t 35  -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' service=\'someservice\'', "service: check_command");
 }
 
 ###########################################################
@@ -237,7 +237,7 @@ EOT
 
     ok($checks->{'svc.extra_services'}, "service check found");
     is($checks->{'svc.extra_services'}->{'name'}, "extra services", "service: name");
-    is($checks->{'svc.extra_services'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!$USER1$/check_nsc_web -t 35  -p \'$_HOSTAGENT_PASSWORD$\' -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' "filter=name = \'s*\'"', "service: check_command");
+    is($checks->{'svc.extra_services'}->{'svc_conf'}->{'check_command'}, 'check_thruk_agent!CHECK_NSC_WEB_PASSWORD=\'$_HOSTAGENT_PASSWORD$\' $USER1$/check_nsc_web -t 35  -u \'http://$HOSTADDRESS$:$_HOSTAGENT_PORT$\' \'check_service\' "filter=name = \'s*\'"', "service: check_command");
 }
 
 ###########################################################
