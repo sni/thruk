@@ -20,21 +20,43 @@ for my $svc (split/\n/mx, $services) {
         my($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
         next unless $rc == 0;
 
-        if($log =~ m/^(.*?)perl.*defunct/mx) {
+        my $matcher = qr/^(.*?)perl.*defunct/mx;
+
+        if($log =~ $matcher) {
             # found zombies, wait 3 seconds to disappear
             sleep(3);
             ($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
             next unless $rc == 0;
         }
 
-        if($log =~ m/^(.*?)perl.*defunct/mx) {
-            my($usr, $pid) = split(/\s+/, $1);
-            fail(sprintf("%s_%d: has perl zombies", $svc, $index));
-            diag($log);
-            for my $cmd ("ls -la /proc/$pid/", "cat /proc/$pid/cmdline", "cat /proc/$pid/environ") {
-                diag($cmd);
-                my(undef, $details) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont $cmd");
-                diag($details);
+        if($log =~ $matcher) {
+            my $found   = 0;
+            my $details = [];
+            for my $line (split/\n/mx, $log) {
+                if($line =~ $matcher) {
+                    my $line_details = [];
+                    my($usr, $pid) = split(/\s+/, $1);
+                    my $still_exists = 1;
+                    for my $cmd ("ls -la /proc/$pid/", "cat /proc/$pid/cmdline", "cat /proc/$pid/environ") {
+                        push @{$line_details}, "%> ".$cmd;
+                        my(undef, $output) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont $cmd 2>&1");
+                        push @{$line_details}, $output;
+                        if($output =~ m/\QNo such file or directory\E/mxi) {
+                            $still_exists = 0;
+                            last;
+                        }
+                    }
+                    if($still_exists) {
+                        $found = 1;
+                        push @{$details}, @{$line_details};
+                    }
+                }
+            }
+            if($found) {
+                fail(sprintf("%s_%d: has perl zombies", $svc, $index));
+                diag("#> ps auxww");
+                diag($log);
+                diag(join("\n", @{$details}));
             }
         }
     }
