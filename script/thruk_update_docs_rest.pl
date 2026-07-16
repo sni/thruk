@@ -548,6 +548,9 @@ sub _fetch_keys {
     if($tst_url =~ "/outages") {
         $c->req->parameters->{'includesoftstates'} = 1;
     }
+    if($tst_url =~ "/(host|service)groups/.*/outages" || $tst_url =~ "/services/.*/?outages") {
+        $c->req->parameters->{'service[ne]'} = "";
+    }
     Thruk::Action::AddDefaults::set_enabled_backends($c);
     my $data = Thruk::Controller::rest_v1::process_rest_request($c, $tst_url);
     if($data && ref($data) eq 'ARRAY' && $data->[0] && ref($data->[0]) eq 'HASH') {
