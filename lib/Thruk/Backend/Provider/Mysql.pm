@@ -100,6 +100,9 @@ sub _quote {
     if(ref $val eq 'ARRAY') {
         return [ map { $self->_quote($_) } @{$val} ];
     }
+    if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
+        return $val;
+    }
     $val =~ s/'/\\'/gmx;
     return "'".$val."'";
 }

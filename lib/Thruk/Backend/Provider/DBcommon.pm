@@ -528,7 +528,7 @@ sub _get_subfilter {
             if($k eq '>='  and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '= '.join(' OR '.$f.' = ', @{$self->_quote($v)}); }
             if($k eq '!>=' and ref $v eq 'ARRAY')   { confess("whuus") unless defined $f; return '!= '.join(' OR '.$f.' != ', @{$self->_quote($v)}); }
             if($k eq '!>=')                         { return '!= '.$self->_quote($v); }
-            if($k eq '>=' and $v !~ m/^[\d\.]+$/mx) { return 'IN ('.join(',', @{$self->_quote($v)}).')'; }
+            if($k eq '>=' and $v !~ m/^[\d\.]+$/mx) { return 'IN ('.$self->_quote($v).')'; }
             if($k eq '>=')                          { return '>= '.$self->_quote($v); }
             if($k eq '<=')                          { return '<= '.$self->_quote($v); }
             if($k eq '>')                           { return '> '.$self->_quote($v); }
@@ -777,7 +777,7 @@ sub _logcache_stats_types {
         };
     }
     $c->stats->profile(end => $driver."::_logcache_stats_types: ".$groupby);
-    return @result;
+    return \@result;
 }
 
 sub _log_removeunused {

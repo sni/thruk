@@ -100,6 +100,9 @@ sub _quote {
     if(ref $val eq 'ARRAY') {
         return [ map { $self->_quote($_) } @{$val} ];
     }
+    if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
+        return $val;
+    }
     $val =~ s/'/\\''/gmx;
     return "'".$val."'";
 }
@@ -475,11 +478,14 @@ sub _sql_drop_table_cascade {
 
 sub _sql_regex_operator {
     my($self, $op, $val) = @_;
-    if($op eq '~' || $op eq '~~') {
+    if($op eq '~~') {
+        return '~* '.$self->_quote($val);
+    }
+    if($op eq '~') {
         return '~ '.$self->_quote($val);
     }
     if($op eq '!~~') {
-        return '!~ '.$self->_quote($val);
+        return '!~* '.$self->_quote($val);
     }
     return '= '.$self->_quote($val);
 }
