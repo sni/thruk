@@ -150,6 +150,8 @@ sub _handle_file {
 
     my $done = {hosts => {}, groups => {}};
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
+    if(scalar @{$backends} == 0) { $backends = $c->db->get_default_backends(); }
+
     my $errors = 0;
     for($retries = 0; $retries < $total_retries; $retries++) {
         sleep($retry_delay * $retries) if $retries > 0;
@@ -161,7 +163,7 @@ sub _handle_file {
                 $downtime->{'service'} = undef;
                 my $rc;
                 eval {
-                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'hosts'}->{$hst};
@@ -184,7 +186,7 @@ sub _handle_file {
                     $downtime->{'service'} = $svc;
                     my $rc;
                     eval {
-                        $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                        ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
                     };
                     if($rc && !$@) {
                         $errors-- if defined $done->{'services'}->{$hst}->{$svc};
@@ -208,7 +210,7 @@ sub _handle_file {
                 $downtime->{$downtime->{'target'}} = $grp;
                 my $rc;
                 eval {
-                    $rc = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'groups'}->{$grp};
@@ -221,6 +223,7 @@ sub _handle_file {
             }
             $downtime->{$downtime->{'target'}} = $grps;
         }
+        last if scalar @{$backends} == 0;
         last unless $errors;
     }
 
@@ -299,13 +302,29 @@ sub set_downtime {
         if($@) {
             die("failed to parse json: ".$@);
         }
-        return 1 if $data->{'success'};
-        _warn($data->{'error'});
-        return 0;
+        if($data && ref $data eq 'HASH' && $data->{'failed'}) {
+            for my $key (sort keys %{$data->{'failed'}}) {
+                if($data->{'failed'}->{$key} =~ m/^\Q400: Failed validation of \E/mx) {
+                    $backends = Thruk::Base::array_remove($backends, $key);
+                }
+            }
+            for my $key (@{$backends}) {
+                # probably worked, no need to retry
+                if(!defined $data->{'failed'}->{$key}) {
+                    $backends = Thruk::Base::array_remove($backends, $key);
+                }
+            }
+            # no more backends we need to retry
+            $data->{'success'} = 1 if scalar @{$backends} == 0;
+            $data->{'error'} = 1 if scalar @{$backends} == 0;
+        }
+        return(1, $backends) if $data->{'success'};
+        _warn($data->{'error'}) if defined $data->{'error'};
+        return(0, $backends);
     }
-    return 1 if $res[0] == 200;
+    return(1, $backends) if $res[0] == 200;
     # error is already printed?
-    return 0;
+    return(0, $backends);
 }
 
 ##############################################

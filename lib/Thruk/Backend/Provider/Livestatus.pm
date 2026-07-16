@@ -6,9 +6,9 @@ use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
 
 use Monitoring::Livestatus::Class::Lite ();
-use Thruk::Base ();
 use Thruk::Timer qw/timing_breakpoint/;
-use Thruk::Utils::IO ();
+use Thruk::Utils ();
+use Thruk::Utils::LMD ();
 
 use base 'Thruk::Backend::Provider::Base';
 
@@ -270,15 +270,22 @@ sub send_command {
     my($self, %options) = @_;
     cluck("empty command") if (!defined $options{'command'} || $options{'command'} eq '');
     if($options{'backend'} && $self->{'lmd_optimizations'}) {
-        my $backend_header = 'Backends: '.join(" ", @{$options{'backend'}});
+        my $extra_header = 'Backends: '.join(" ", @{$options{'backend'}});
+
+        my $c = $Thruk::Globals::c;
+        my $lmd_version = $ENV{'THRUK_USE_LMD'} ? Thruk::Utils::LMD::get_lmd_version($c->config) : 0;
+        if($ENV{'THRUK_USE_LMD'} && Thruk::Utils::version_compare($lmd_version//0, '2.8.2')) {
+            $extra_header .= "\nResponseHeader: fixed16\nOutputFormat: wrapped_json";
+        }
+
         my $new_commands = [];
         for my $cmd (split/\n+/mx, $options{'command'}) {
-            push @{$new_commands}, $cmd."\n".$backend_header;
+            push @{$new_commands}, $cmd."\n".$extra_header;
         }
         $options{'command'} = join("\n\n", @{$new_commands});
     }
-    $self->{'live'}->{'backend_obj'}->do($options{'command'}, \%options);
-    return;
+    my $res = $self->{'live'}->{'backend_obj'}->do($options{'command'}, \%options);
+    return $res;
 }
 
 ##########################################################
@@ -589,6 +596,7 @@ sub get_hostgroups {
         }
     }
     $options{'columns'} = $self->_clean_columns("hostgroups", $options{'columns'});
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     return $self->_get_table('hostgroups', \%options);
 }
 
@@ -610,6 +618,7 @@ sub get_hostgroup_names {
         return(\@keys, 'uniq');
     }
     $options{'columns'} = [qw/name/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $data = $self->_get_hash_table('hostgroups', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
 
@@ -728,6 +737,7 @@ sub get_service_names {
     return($options{'data'}, 'uniq') if($options{'data'});
 
     $options{'columns'} = [qw/description/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $class = $self->_get_class('services', \%options);
     if($class->apply_filter('servicenames')) {
         my $rows = $class->hashref_array();
@@ -768,6 +778,7 @@ sub get_servicegroups {
         }
     }
     $options{'columns'} = $self->_clean_columns("servicegroups", $options{'columns'});
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     return $self->_get_table('servicegroups', \%options);
 }
 
@@ -789,6 +800,7 @@ sub get_servicegroup_names {
         return(\@keys, 'uniq');
     }
     $options{'columns'} = [qw/name/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $data = $self->_get_hash_table('servicegroups', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
@@ -1027,6 +1039,7 @@ sub get_timeperiods {
         }
     }
     $options{'columns'} = $self->_clean_columns("timeperiods", $options{'columns'});
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
 
     return $self->_get_table('timeperiods', \%options);
 }
@@ -1049,6 +1062,7 @@ sub get_timeperiod_names {
         return(\@keys, 'uniq');
     }
     $options{'columns'} = [qw/name/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $data = $self->_get_hash_table('timeperiods', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
     unless(wantarray) {
@@ -1078,6 +1092,7 @@ sub get_commands {
         }
     }
     $options{'columns'} = $self->_clean_columns("commands", $options{'columns'});
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     return $self->_get_table('commands', \%options);
 }
 
@@ -1150,6 +1165,7 @@ sub get_contact_names {
         return(\@keys, 'uniq');
     }
     $options{'columns'} = [qw/name/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $data = $self->_get_hash_table('contacts', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
 
@@ -1177,6 +1193,7 @@ sub get_contactgroup_names {
         return(\@keys, 'uniq');
     }
     $options{'columns'} = [qw/name/];
+    $options{'options'}->{wrapped_json} = $self->{'lmd_optimizations'};
     my $data = $self->_get_hash_table('contactgroups', 'name', \%options);
     my $keys = defined $data ? [keys %{$data}] : [];
 

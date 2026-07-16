@@ -1689,6 +1689,7 @@ sub _do_on_peers {
         _debug('livestatus (no lmd): '.$function.': '.join(', ', @{$get_results_for})) if Thruk::Base->debug;
         ($result, $type, $totalsize, $err) = $self->_get_result($get_results_for, $function, $arg, $force_serial);
     }
+
     local $ENV{'THRUK_USE_LMD'} = "" if $skip_lmd;
     my $con_errors = 0;
     for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
@@ -1725,12 +1726,17 @@ sub _do_on_peers {
     }
 
     &timing_breakpoint('_get_result: '.$function);
+    if($function eq 'send_command') {
+        if(!$err) {
+            $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
+        }
+    }
     if(($num_selected_backends > 0 && !defined $result) || $err) {
         if(!$err) {
-            $err = join("\n", map { Thruk::Utils::Filter::peer_name($_).": ".$c->stash->{'failed_backends'}->{$_} } sort keys %{$c->stash->{'failed_backends'}});
+            $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
         }
         # this means, this is a connection error -> debug log only
-        if($con_errors > 0 && $con_errors == $num_selected_backends) {
+        if(($con_errors > 0 && $con_errors == $num_selected_backends) || $function eq 'send_command') {
             _debug($err);
             _debug2(Carp::longmess("backend error"));
             my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
@@ -2020,7 +2026,7 @@ returns result for given function using lmd
 =cut
 
 sub _get_result_lmd {
-    my($self,$peers, $function, $arg) = @_;
+    my($self, $peers, $function, $arg) = @_;
     my ($totalsize, $result, $type) = (0, []);
     my $c  = $Thruk::Globals::c;
     my $t1 = [gettimeofday];
@@ -2117,8 +2123,10 @@ sub _get_result_lmd_with_retries {
     }
 
     # catch command errors
-    if($function eq 'send_command' && (!$err || $err =~ m/^\d+:\s/mx)) {
-        return($result, $type, $totalsize, $err);
+    if($function eq 'send_command') {
+        if(!$err || $err =~ m/^\d+:\s/mx) {
+            return($result, $type, $totalsize, $err);
+        }
     }
 
     if($err && !$c->stash->{'lmd_ok'}) {
@@ -2376,8 +2384,10 @@ sub _merge_answer {
             $return = {} unless ref $return eq 'HASH';
             my $tmp = $data->{$key};
             map {
-                $tmp->{$_}->{'peer_key'} = $key;
-                $tmp->{$_}->{'peer_name'} = $name;
+                if(ref $tmp->{$_} eq 'HASH') {
+                    $tmp->{$_}->{'peer_key'} = $key;
+                    $tmp->{$_}->{'peer_name'} = $name;
+                }
             } keys %{$data->{$key}};
             $return = { %{$return}, %{$data->{$key} } };
         }
@@ -3221,6 +3231,21 @@ sub caching_query {
 
     $c->stats->profile(end => "caching_query: ".$function);
     return($res);
+}
+
+########################################
+sub _join_failed_backends {
+    my($failed_backends, $get_results_for) = @_;
+
+    my @res;
+    for my $key (@{$get_results_for}) {
+        next unless $failed_backends->{$key};
+
+        push @res, Thruk::Utils::Filter::peer_name($key).": ".$failed_backends->{$key};
+    }
+
+    return unless scalar @res > 0;
+    return join("\n", @res);
 }
 
 ########################################

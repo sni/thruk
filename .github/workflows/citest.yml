@@ -19,7 +19,7 @@ jobs:
   citest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: perl -V
         run: perl -V
@@ -68,7 +68,7 @@ jobs:
 
       - name: restore cache files
         id: thruk-test-cache-restore
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ${{ env.THRUK_TEST_MODULES_CACHE }}
@@ -103,7 +103,7 @@ jobs:
       - name: save updated cache back
         if: ${{ github.event_name == 'push' && github.repository == 'sni/thruk' && github.ref == 'refs/heads/main' }}
         id: thruk-test-cache-save
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ${{ env.THRUK_TEST_MODULES_CACHE }}

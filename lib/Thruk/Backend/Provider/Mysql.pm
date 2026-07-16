@@ -428,7 +428,7 @@ sub get_logs {
     } else {
         if($options{'pager'}) {
             $pager_limit = $options{'pager'}->{'entries'} * $options{'pager'}->{'page'};
-            $limit = ' LIMIT '.$pager_limit;
+            $limit = ' LIMIT '.$pager_limit if $pager_limit > 0;
         }
     }
     $limit = ' LIMIT 10000000' unless $limit; # not using a limit makes mysql not use an index

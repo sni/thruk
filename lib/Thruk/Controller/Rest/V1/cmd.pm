@@ -253,33 +253,47 @@ sub _rest_get_external_command {
         }
     }
 
-    if($cmd->{'name'} eq 'del_downtime') {
+    # reduce downtime del commands to applicable backends
+    if($cmd->{'name'} eq 'del_downtime' || $cmd->{'name'} eq 'del_host_downtime') {
         $commands = {};
-        my $id   = $c->req->parameters->{'downtime_id'};
-        if(defined $description) {
-            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+        my $options = {};
+        $options->{backend}  = $backends if defined $backends;
+        $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'downtimes' ), id => $c->req->parameters->{'downtime_id'} ];
+        if(!defined $description || $cmd->{'name'} eq 'del_host_downtime') {
+            push @{$options->{'filter'}}, service_description => undef;
+        }
+        if(defined $name)        { push @{$options->{'filter'}}, host_name           => $name; }
+        if(defined $description) { push @{$options->{'filter'}}, service_description => $description; }
+
+        my $data = $c->db->get_downtimes(%{$options});
+        for my $d (@{$data}) {
+            $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
+            if($d->{'service_description'}) {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_DOWNTIME;%d", time(), $d->{'id'});
-            }
-        } else {
-            my $data = $c->db->get_downtimes(filter => [{ host_name => $name, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+            } else {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_DOWNTIME;%d", time(), $d->{'id'});
             }
         }
     }
 
-    if($cmd->{'name'} eq 'del_comment') {
+    # reduce comment del commands to applicable backends
+    if($cmd->{'name'} eq 'del_comment' || $cmd->{'name'} eq 'del_host_comment') {
         $commands = {};
-        my $id   = $c->req->parameters->{'comment_id'};
-        if(defined $description) {
-            my $data = $c->db->get_comments(filter => [{ host_name => $name, service_description => $description, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+        my $options = {};
+        $options->{backend}  = $backends if defined $backends;
+        $options->{'filter'} = [ Thruk::Utils::Auth::get_auth_filter( $c, 'comments' ), id => $c->req->parameters->{'comment_id'} ];
+        if(!defined $description || $cmd->{'name'} eq 'del_host_comment') {
+            push @{$options->{'filter'}}, service_description => undef;
+        }
+        if(defined $name)        { push @{$options->{'filter'}}, host_name           => $name; }
+        if(defined $description) { push @{$options->{'filter'}}, service_description => $description; }
+
+        my $data = $c->db->get_comments(%{$options});
+        for my $d (@{$data}) {
+            $commands->{$d->{'peer_key'}} = [] unless defined $commands->{$d->{'peer_key'}};
+            if($d->{'service_description'}) {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_SVC_COMMENT;%d", time(), $d->{'id'});
-            }
-        } else {
-            my $data = $c->db->get_comments(filter => [{ host_name => $name, id => $id }], backend => $backends);
-            for my $d (@{$data}) {
+            } else {
                 push @{$commands->{$d->{'peer_key'}}}, sprintf("COMMAND [%d] DEL_HOST_COMMENT;%d", time(), $d->{'id'});
             }
         }
@@ -288,7 +302,36 @@ sub _rest_get_external_command {
     Thruk::Controller::cmd::add_remove_comments_commands_from_disabled_commands($c, $commands, $cmd->{'nr'}, $name, $description);
     Thruk::Controller::cmd::bulk_send($c, $commands);
     if($c->stash->{'last_command_error'}) {
-        return({ 'message' => 'sending command failed', 'error' => $c->stash->{'last_command_error'}, code => 400, commands => join("\n", @{$c->stash->{'last_command_lines'}}) });
+        my $data = {
+            'message'   => 'sending command failed',
+            'error'     => $c->stash->{'last_command_error'},
+            'code'      => 400,
+            'commands'  => join("\n", @{$c->stash->{'last_command_lines'}}),
+        };
+        if($c->stash->{'failed_backends'} && scalar keys %{$c->stash->{'failed_backends'}} > 0) {
+            $data->{'failed_backends'} = $c->stash->{'failed_backends'};
+
+            # did some commands succeed?
+            if((scalar keys %{$c->stash->{'failed_backends'}}) < (scalar keys %{$commands})) {
+                $data->{'message'} = sprintf('sending command failed on %d of %d sites', (scalar keys %{$c->stash->{'failed_backends'}}), (scalar keys %{$commands}));
+            }
+
+            # set code from backend response
+            for my $key (sort keys %{$c->stash->{'failed_backends'}}) {
+                my $msg = $c->stash->{'failed_backends'}->{$key};
+                if($msg =~ m/^(^\d+):/mx) {
+                    my $code = $1;
+                    if($code > $data->{'code'}) {
+                        $data->{'code'} = $code;
+                    }
+                }
+            }
+        }
+
+        return $data;
+    }
+    if(scalar @{$c->stash->{'last_command_lines'} // []} == 0) {
+        return({ 'message' => 'sending command failed', 'error' => "cannot send command, affected backend list is empty.", code => 400 });
     }
     return({ 'message' => 'Command successfully submitted', commands => join("\n", @{$c->stash->{'last_command_lines'} // []}) });
 }

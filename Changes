@@ -4,6 +4,11 @@ next:
           - fix mouse glitch on quick command menu (#1502)
           - Teams:
             - fix authentication by unexposed custom variables
+          - add role specific config overrrides
+          - improve search performance
+          - fix recurring downtimes added multiple times if some backends were down
+          - Agents:
+            - switch to password by env
 
 3.28     Thu Apr  9 19:18:58 CEST 2026
           - thruk_local.d settings overrule cgi.cfg values
