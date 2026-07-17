@@ -5,7 +5,7 @@
 <div class="flexrow 2xl:justify-between">
   [% PROCESS _infobox.tt %]
 
-  <form action="extinfo.cgi" method="POST" class="min-w-[420px] max-w-[550px] w-full">
+  <form action="extinfo.cgi" method="POST" class="min-w-[420px] w-max max-w-full">
     <div class="card w-full">
       <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
       <input type="hidden" name="nr" value="[% rd.file | html %]">
@@ -125,12 +125,13 @@
           <tr>
             <th class="align-top">Schedule</th>
             <td colspan=2>
-              <table id="cron_entries">
+              [% PROCESS _cron_schedule_tz_header.tt %]
+              <table id="cron_entries" data-show-schedule-tz="1" data-cron-tz="[% c.config._server_timezone | html %]">
                 [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
-                [% PROCESS _cron_edit.tt nr = 0 %]
+                [% PROCESS _cron_edit.tt nr = 0 show_schedule_tz = 1 can_edit = can_edit %]
                 [% FOREACH cr = rd.schedule %]
                     [% nr = loop.index + 1 %]
-                    [% PROCESS _cron_edit.tt %]
+                    [% PROCESS _cron_edit.tt show_schedule_tz = 1 can_edit = can_edit %]
                 [% END %]
                 [% IF can_edit %]
                   <tr>
@@ -189,12 +190,11 @@
 </div>
 
 <script>
-  <!--
-    [%+ IF rd.schedule.size == 0 +%]
-    add_cron_row('cron_entries');
-    [%+ END +%]
-    update_recurring_type_select('type_select');
-  -->
-  </script>
+  [%+ IF rd.schedule.size == 0 +%]
+  add_cron_row('cron_entries');
+  [%+ END +%]
+  init_cron_schedule_tz();
+  update_recurring_type_select('type_select');
+</script>
 
 [% PROCESS _footer.tt %]
