@@ -101,7 +101,7 @@
 [% IF show_schedule_tz %]
 <tr id="send_pane_preview_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
   <td colspan="3" class="text-sm opacity-90" style="padding-top: 0.15rem;">
-    <div id="cron_tz_preview_[% nr %]" role="note"></div>
+    <div id="cron_tz_preview_[% nr %]"></div>
   </td>
   <td></td>
 </tr>
