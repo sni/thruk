@@ -1,0 +1,10 @@
+[%# Schedule TZ notice — cron runs in _server_timezone, not browser local time %]
+<div class="text-sm mb-1 space-y-0.5" id="cron_schedule_tz_info" role="note">
+  <div class="whitespace-nowrap">
+    <i class="uil uil-info-circle"></i>
+    Schedule runs in server timezone (<strong>[% c.config._server_timezone | html %]</strong>) &mdash; cron time, not your browser clock.
+  </div>
+  <div class="pl-5 text-textlight" id="cron_schedule_tz_dayhint" style="display: none;">
+    Weekdays follow the server calendar; near midnight the day may differ in your browser.
+  </div>
+</div>
