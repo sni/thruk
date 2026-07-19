@@ -103,7 +103,7 @@ sub _quote {
     if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
         return $val;
     }
-    $val =~ s/'/\\''/gmx;
+    $val =~ s/'/''/gmx;
     return "'".$val."'";
 }
 
