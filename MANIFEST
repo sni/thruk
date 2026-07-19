@@ -3192,6 +3192,7 @@ templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_common_js_files.tt
 templates/_cron_edit.tt
+templates/_cron_schedule_tz_header.tt
 templates/_csv_export.tt
 templates/_customvar_box.tt
 templates/_db_stats.tt

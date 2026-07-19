@@ -8,7 +8,7 @@
       <option value="cust"[% IF cr.type == 'cust' %] selected[% END %]>custom</option>
     </select>
   </td>
-  <td>
+  <td[% IF show_schedule_tz %] style="white-space: normal;"[% END %]>
     <div id="div_send_month_[% nr %]">
       on day
       <select name="send_day_[% nr %]"[% IF !can_edit %] disabled[% END %]>
@@ -70,21 +70,24 @@
       <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); escape_html(cr.cust); END %]" class="w-full" placeholder="minute hour dom month dow   (cron syntax)"[% IF !can_edit %] disabled[% END %]>
     </div>
   </td>
-  <td id="hour_select_[% nr %]">
+  <td id="hour_select_[% nr %]" class="whitespace-nowrap">
     at
-    <select name="send_hour_[% nr %]"[% IF !can_edit %] disabled[% END %]>
+    <select name="send_hour_[% nr %]" id="send_hour_[% nr %]"[% IF !can_edit %] disabled[% END %]>
       [% hour = 0 %]
       [% WHILE hour < 24 %]
       <option value="[% hour %]"[% IF cr.hour == hour %] selected[% END %]>[% sprintf("%02s", hour) %]</option>
       [% hour = hour + 1 %]
       [% END %]
-    </select>:<select name="send_minute_[% nr %]"[% IF !can_edit %] disabled[% END %]>
+    </select>:<select name="send_minute_[% nr %]" id="send_minute_[% nr %]"[% IF !can_edit %] disabled[% END %]>
       [% min = 0 %]
       [% WHILE min < 60 %]
       <option value="[% min %]"[% IF cr.minute == min %] selected[% END %]>[% sprintf("%02s", min) %]</option>
       [% min = min + 1 %]
       [% END %]
     </select>
+    [% IF show_schedule_tz %]
+    <span class="text-sm ml-1 opacity-80" id="cron_tz_suffix_[% nr %]">[% c.config._server_timezone | html %]</span>
+    [% END %]
   </td>
   <td [% IF can_edit %]class='hoverable clickable w-5 px-1 rounded' onclick="delete_cron_row(this); return false;"[% END %]>
     [% IF can_edit %]<i class="uil uil-times"></i>[% END %]
@@ -95,3 +98,11 @@
     </script>
   </td>
 </tr>
+[% IF show_schedule_tz %]
+<tr id="send_pane_preview_[% nr %]"[% IF nr == 0 %] style="display:none"[% END %]>
+  <td colspan="3" class="text-sm opacity-90" style="padding-top: 0.15rem;">
+    <div id="cron_tz_preview_[% nr %]"></div>
+  </td>
+  <td></td>
+</tr>
+[% END %]
