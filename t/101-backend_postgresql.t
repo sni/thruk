@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More tests => 73;
+use Test::More tests => 75;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -310,6 +310,13 @@ test_filter(
     [{ 'host_name' => 'localhost' }],
     " WHERE l.host_id = 1",
 );
+test_filter(
+    'single quote escape',
+    [{ 'name' => "test'value" }],
+    " WHERE name = 'test''value'",
+);
+
+is($m->_quote("test'value"), "'test''value'", "quote escaping single quote");
 
 #####################################################################
 # SUBS
