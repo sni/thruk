@@ -769,6 +769,9 @@ sub _logcache_stats_types {
         for my $t (@{$types}) {
             $total += $t->{'total'};
         }
+        for my $t (@{$types}) {
+            $t->{'procent'} = $total ? ($t->{'total'} / $total) * 100 : 0;
+        }
         push @result, {
             key    => $key,
             name   => $peer->{'name'},
