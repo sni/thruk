@@ -495,6 +495,9 @@ sub _sql_regex_operator {
 sub _db_table_stats {
     my($self, $dbh, $prefix) = @_;
     my($index_size, $data_size, $items, $status, $msg);
+    if(!$self->_has_log_table($dbh, $prefix)) {
+        return(0, 0, 0, {}, "logcache not yet created");
+    }
     eval {
         my $res = $dbh->selectall_arrayref(
             "SELECT

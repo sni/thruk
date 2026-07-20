@@ -514,6 +514,9 @@ sub _sql_regex_operator {
 sub _db_table_stats {
     my($self, $dbh, $prefix) = @_;
     my($index_size, $data_size, $items, $status, $msg);
+    if(!$self->_has_log_table($dbh, $prefix)) {
+        return(0, 0, 0, {}, "logcache not yet created");
+    }
     eval {
         my $res = $dbh->selectall_arrayref("SELECT SUM(index_length) as index_size, SUM(data_length) as data_size, SUM(table_rows) as items FROM information_schema.TABLES WHERE table_schema=Database() AND table_name LIKE '".$prefix."_%'", { Slice => {} });
         if($res && $res->[0]) {
