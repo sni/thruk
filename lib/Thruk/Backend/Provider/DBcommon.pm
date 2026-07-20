@@ -788,10 +788,10 @@ sub _log_removeunused {
     my $driver = $self->_driver_name();
     $c->stats->profile(begin => $driver."::_log_removeunused");
 
-    my $backends = $self->_log_stats($c);
+    my @backends = $self->_log_stats($c);
     # get first logcache dbh
     my $peer;
-    for my $b (@{$backends}) {
+    for my $b (@backends) {
         next unless $b->{'enabled'};
         $peer = $c->db->get_peer_by_key($b->{'key'});
         last;
@@ -806,7 +806,7 @@ sub _log_removeunused {
 
     # gather backend ids
     my $backends_hash = {};
-    for my $b (@{$backends}) {
+    for my $b (@backends) {
         next unless $b->{'enabled'};
         $backends_hash->{$b->{'key'}} = 1;
     }
