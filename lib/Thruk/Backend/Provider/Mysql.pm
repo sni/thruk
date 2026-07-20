@@ -466,7 +466,15 @@ sub _enable_index {
 
 ##########################################################
 
-sub _sql_extra_columns { return ', SUBSTRING_INDEX(l.message, \': \', 1) as plugin_output' }
+sub _sql_extra_columns {
+    return ',
+            (CASE
+                WHEN l.type = "HOST NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 4), ";", -1)
+                WHEN l.type = "SERVICE NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 5), ";", -1)
+                ELSE ""
+            END) as command_name,
+            SUBSTRING_INDEX(l.message, \': \', 1) as plugin_output';
+}
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
