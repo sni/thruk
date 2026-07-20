@@ -442,7 +442,13 @@ sub _enable_index {
 ##########################################################
 
 sub _sql_extra_columns {
-    return ", split_part(l.message, ': ', 1) as plugin_output";
+    return ',
+            (CASE
+                WHEN l.type = \'HOST NOTIFICATION\' THEN split_part(l.message, \';\', 4)
+                WHEN l.type = \'SERVICE NOTIFICATION\' THEN split_part(l.message, \';\', 5)
+                ELSE \'\'
+            END) as command_name,
+            split_part(l.message, \': \', 1) as plugin_output';
 }
 
 sub _sql_coalesce {
