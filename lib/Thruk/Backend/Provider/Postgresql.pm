@@ -1,4 +1,4 @@
-package Thruk::Backend::Provider::Mysql;
+package Thruk::Backend::Provider::Postgresql;
 
 use warnings;
 use strict;
@@ -15,11 +15,11 @@ use parent 'Thruk::Backend::Provider::DBcommon';
 
 =head1 NAME
 
-Thruk::Backend::Provider::Mysql - connection provider for Mysql connections
+Thruk::Backend::Provider::Postgresql - connection provider for Postgresql connections
 
 =head1 DESCRIPTION
 
-connection provider for Mysql connections
+connection provider for Postgresql connections
 
 =head1 METHODS
 
@@ -28,10 +28,10 @@ connection provider for Mysql connections
 ## no lint
 # backward-compat aliases so callers using the package-variable form still work
 { no warnings 'once'; ## no critic (ProhibitNoWarnings)
-*Thruk::Backend::Provider::Mysql::cache_version = \$Thruk::Backend::Provider::DBcommon::cache_version;
-*Thruk::Backend::Provider::Mysql::db_types      = \$Thruk::Backend::Provider::DBcommon::db_types;
-*Thruk::Backend::Provider::Mysql::db_classes     = \$Thruk::Backend::Provider::DBcommon::db_classes;
-*Thruk::Backend::Provider::Mysql::tables         = \@Thruk::Backend::Provider::DBcommon::tables;
+*Thruk::Backend::Provider::Postgresql::cache_version = \$Thruk::Backend::Provider::DBcommon::cache_version;
+*Thruk::Backend::Provider::Postgresql::db_types      = \$Thruk::Backend::Provider::DBcommon::db_types;
+*Thruk::Backend::Provider::Postgresql::db_classes     = \$Thruk::Backend::Provider::DBcommon::db_classes;
+*Thruk::Backend::Provider::Postgresql::tables         = \@Thruk::Backend::Provider::DBcommon::tables;
 }
 ## use lint
 
@@ -48,12 +48,12 @@ sub new {
     my $options = $peer_config->{'options'};
     confess('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
-    $options->{'name'} = 'mysql' unless defined $options->{'name'};
+    $options->{'name'} = 'postgresql' unless defined $options->{'name'};
     if(!defined $options->{'peer_key'}) {
         confess('please provide peer_key');
     }
     my($dbhost, $dbport, $dbuser, $dbpass, $dbname, $dbsock);
-    if($options->{'peer'} =~ m/^mysql:\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
+    if($options->{'peer'} =~ m/^(?:postgresql|postgres):\/\/(.*?)(|:.*?)@([^:]+)(|:.*?)\/([^\/]*?)$/mx) {
         $dbuser = $1;
         $dbpass = $2;
         $dbhost = $3;
@@ -66,7 +66,7 @@ sub new {
             $dbhost = 'localhost';
         }
     } else {
-        die('Mysql connection must match this form: mysql://user:password@host:port/dbname');
+        die('Postgresql connection must match this form: postgresql://user:password@host:port/dbname');
     }
 
     my $self = {
@@ -87,12 +87,12 @@ sub new {
 ##########################################################
 # DB-specific driver identification
 
-sub _driver_name { return 'Mysql' }
-sub _db_handle_name { return 'mysql' }
-sub _quote_char { return '`' }
+sub _driver_name { return 'Postgresql' }
+sub _db_handle_name { return 'postgres' }
+sub _quote_char { return '"' }
 
 ##########################################################
-# DB-specific quoting
+# PostgreSQL-specific quoting
 
 sub _quote {
     my($self, $val) = @_;
@@ -103,15 +103,14 @@ sub _quote {
     if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
         return $val;
     }
-    $val =~ s/'/\\'/gmx;
+    $val =~ s/'/''/gmx;
     return "'".$val."'";
 }
 
 ##########################################################
-# MySQL backslash quoting (used in LIKE patterns)
+# PostgreSQL does not need backslash quoting in LIKE
 sub _quote_backslash {
     my($self, $val) = @_;
-    $val =~ s/\\/\\\\/gmx;
     return $val;
 }
 
@@ -124,7 +123,7 @@ try to connect to database and return database handle
 =cut
 sub _dbh {
     my($self) = @_;
-    if(!defined $self->{'mysql'} || $self->{'mysql'}->ping()) {
+    if(!defined $self->{'postgres'} || !$self->{'postgres'}->ping()) {
         &timing_breakpoint('connecting '.$self->{'dbname'}.' '.($self->{'dbsock'} || $self->{'dbhost'}).($self->{'dbport'} ? ':'.$self->{'dbport'} : ''));
         if(!$self->{'modules_loaded'}) {
             load DBI;
@@ -132,33 +131,39 @@ sub _dbh {
             load Encode, qw/encode_utf8/;
             $self->{'modules_loaded'} = 1;
         }
-        my $dsn = "DBI:mysql:database=".$self->{'dbname'}.";host=".$self->{'dbhost'};
+        my $dsn = "DBI:Pg:dbname=".$self->{'dbname'};
+        if($self->{'dbsock'}) {
+            my $dir = $self->{'dbsock'};
+            if($dir =~ m|^(.*)/[^/]+$|mx) {
+                $dir = $1;
+            }
+            $dsn .= ";host=".$dir;
+        } elsif($self->{'dbhost'}) {
+            $dsn .= ";host=".$self->{'dbhost'};
+        }
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
-        $dsn .= ";mysql_socket=".$self->{'dbsock'} if $self->{'dbsock'};
-        $dsn .= ";mysql_ssl=0";
-        $self->{'mysql'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, mysql_enable_utf8 => 1, mysql_local_infile => 1});
-        $self->{'mysql'}->do("SET NAMES utf8 COLLATE utf8_bin");
-        $self->{'mysql'}->do("SET myisam_stats_method=nulls_ignored");
+        $self->{'postgres'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, pg_enable_utf8 => 1});
+        $self->{'postgres'}->do("SET client_encoding TO 'UTF8'");
         &timing_breakpoint('connected');
     }
-    return $self->{'mysql'};
+    return $self->{'postgres'};
 }
 
 ##########################################################
-# MySQL-specific auto-increments
+# PostgreSQL-specific auto-increments via sequences
 
 sub _get_autoincrements {
     my($self, $dbh, $prefix) = @_;
-    my $auto_increments = $dbh->selectall_hashref(
-        'SELECT
-            TABLE_NAME,
-            AUTO_INCREMENT
-         FROM
-            INFORMATION_SCHEMA.TABLES
-         WHERE
-            TABLE_SCHEMA = Database()
-            AND TABLE_NAME LIKE "%'.$prefix.'_%"
-        ', 'TABLE_NAME');
+    my $auto_increments = {};
+    for my $tbl (qw/host service contact/) {
+        my $seq_name = "${prefix}_${tbl}_${tbl}_id_seq";
+        # check if sequence exists
+        my $has_seq = $dbh->selectrow_array("SELECT 1 FROM pg_class WHERE relname = ?", undef, $seq_name);
+        if($has_seq) {
+            my($next_val) = $dbh->selectrow_array("SELECT COALESCE(last_value + CASE WHEN is_called THEN 1 ELSE 0 END, 1) FROM \"$seq_name\"");
+            $auto_increments->{$prefix.'_'.$tbl} = { 'AUTO_INCREMENT' => $next_val };
+        }
+    }
     return($auto_increments);
 }
 
@@ -169,15 +174,13 @@ sub _check_index {
     $c->stats->profile(begin => "update index statistics");
     _debugs("running check/analyse...");
 
-    my $data = $dbh->selectall_hashref("SHOW INDEXES FROM `".$prefix."_log`", "Key_name");
-    if($data && $data->{'host_id'}) {
-        if(exists $data->{'host_id'}->{'Cardinality'} && !defined $data->{'host_id'}->{'Cardinality'}) {
-            _warn("table index was disabled, enabling...");
-            $self->_enable_index($dbh, $prefix);
-            _warn("done.");
-        }
-        my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM `".$prefix."_host`")};
-        if(!$hostcount || !$data->{'host_id'}->{'Cardinality'} || $data->{'host_id'}->{'Cardinality'} < $hostcount * 5) {
+    # PostgreSQL: check if host_id index exists and has stats
+    my $has_index = eval {
+        $dbh->selectrow_array("SELECT 1 FROM pg_indexes WHERE tablename = ? AND indexname LIKE '%host%'", undef, $prefix."_log");
+    };
+    if($has_index) {
+        my($hostcount) = @{$dbh->selectcol_arrayref("SELECT COUNT(*) as total FROM \"" . $prefix . "_host\"")};
+        if(!$hostcount) {
             $c->stats->profile(end => "update index statistics");
             _debug("not required");
             return;
@@ -185,8 +188,7 @@ sub _check_index {
     }
 
     for my $table (@{$self->tables()}) {
-        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
-        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
+        $dbh->do("ANALYZE \"" . $prefix . "_" . $table . "\"");
     }
     _debug("done");
     $c->stats->profile(end => "update index statistics");
@@ -200,31 +202,21 @@ sub _check_db_fs {
 
     _debug2("[%s] checking required disk space", $prefix);
 
-    # fetch mysql datadir
+    # fetch pg data_directory
     my $dbh = $self->_dbh();
-    my $res  = $dbh->selectall_arrayref("SHOW VARIABLES LIKE 'datadir'", { Slice => {} });
-    if(scalar @{$res} != 1) {
-        _debug2("[%s] cannot fetch datadir variable.", $prefix);
+    my $res;
+    eval {
+        $res = $dbh->selectall_arrayref("SHOW data_directory", { Slice => {} });
+    };
+    if($@ || !defined $res || scalar @{$res} != 1) {
+        _debug2("[%s] cannot fetch data_directory variable.", $prefix);
         return 1;
     }
-    my $datadir = $res->[0]->{'Value'};
+    my $datadir = $res->[0]->{'data_directory'};
 
-    # fetch mysql hostname
-    $res  = $dbh->selectall_arrayref('SELECT @@hostname', { Slice => {} });
-    if(scalar @{$res} != 1) {
-        _debug2("[%s] cannot fetch hostname variable.", $prefix);
-        return 1;
-    }
-    my $dbhost = $res->[0]->{'@@hostname'};
-
-    _debug("[%s] db runs on %s with datadir %s", $prefix, $dbhost, $datadir);
-
-    chomp(my $hostname = Thruk::Utils::IO::cmd("hostname"));
-    chomp(my $fqdn     = Thruk::Utils::IO::cmd("hostname --fqdn"));
-
-    # not on the same host, no chance to access the filesystem
-    if($dbhost ne $hostname && $dbhost ne $fqdn) {
-        _debug2("[%s] database is not on the same host, cannot check filesystem. (%s != %s)", $prefix, $dbhost, $fqdn);
+    my $dbhost = $self->{'dbhost'};
+    if($dbhost && $dbhost ne 'localhost' && $dbhost ne '127.0.0.1' && $dbhost !~ m|^/|mx) {
+        _debug2("[%s] database is not local, cannot check filesystem.", $prefix);
         return 1;
     }
 
@@ -267,84 +259,84 @@ sub _get_create_schema {
     my($self, $prefix) = @_;
     my @statements = (
     # contact
-        "DROP TABLE IF EXISTS `".$prefix."_contact`",
-        "CREATE TABLE `".$prefix."_contact` (
-          contact_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_contact\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_contact\" (
+          contact_id serial,
           name varchar(150) NOT NULL,
           PRIMARY KEY (contact_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        )",
 
     # contact_host_rel
-        "DROP TABLE IF EXISTS `".$prefix."_contact_host_rel`",
-        "CREATE TABLE `".$prefix."_contact_host_rel` (
-          contact_id mediumint(9) unsigned NOT NULL,
-          host_id mediumint(9) unsigned NOT NULL,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_contact_host_rel\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_contact_host_rel\" (
+          contact_id int NOT NULL,
+          host_id int NOT NULL,
           PRIMARY KEY (contact_id,host_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        )",
 
     # contact_service_rel
-        "DROP TABLE IF EXISTS `".$prefix."_contact_service_rel`",
-        "CREATE TABLE `".$prefix."_contact_service_rel` (
-          contact_id mediumint(9) unsigned NOT NULL,
-          service_id mediumint(9) unsigned NOT NULL,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_contact_service_rel\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_contact_service_rel\" (
+          contact_id int NOT NULL,
+          service_id int NOT NULL,
           PRIMARY KEY (contact_id,service_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        )",
 
     # host
-        "DROP TABLE IF EXISTS `".$prefix."_host`",
-        "CREATE TABLE `".$prefix."_host` (
-          host_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_host\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_host\" (
+          host_id serial,
           host_name varchar(150) NOT NULL,
           PRIMARY KEY (host_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        )",
 
     # log
-        "DROP TABLE IF EXISTS `".$prefix."_log`",
-        "CREATE TABLE IF NOT EXISTS `".$prefix."_log` (
-          log_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-          time int(11) unsigned NOT NULL,
-          class tinyint(4) unsigned NOT NULL,
-          type enum('CURRENT SERVICE STATE','CURRENT HOST STATE','SERVICE NOTIFICATION','HOST NOTIFICATION','SERVICE ALERT','HOST ALERT','SERVICE EVENT HANDLER','HOST EVENT HANDLER','EXTERNAL COMMAND','PASSIVE SERVICE CHECK','PASSIVE HOST CHECK','SERVICE FLAPPING ALERT','HOST FLAPPING ALERT','SERVICE DOWNTIME ALERT','HOST DOWNTIME ALERT','LOG ROTATION','INITIAL HOST STATE','INITIAL SERVICE STATE','TIMEPERIOD TRANSITION') DEFAULT NULL,
-          state tinyint(4) unsigned DEFAULT NULL,
-          state_type enum('HARD','SOFT') DEFAULT NULL,
-          contact_id mediumint(9) unsigned DEFAULT NULL,
-          host_id mediumint(9) unsigned DEFAULT NULL,
-          service_id mediumint(9) unsigned DEFAULT NULL,
-          message mediumtext NOT NULL,
-          PRIMARY KEY (log_id),
-          KEY time (time),
-          KEY host_id (host_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci PACK_KEYS=1",    # using utf8_bin here would break case-insensitive rlike queries
+        "DROP TABLE IF EXISTS \"" . $prefix . "_log\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_log\" (
+          log_id bigserial,
+          time int NOT NULL,
+          class int NOT NULL,
+          type varchar(50) DEFAULT NULL,
+          state int DEFAULT NULL,
+          state_type varchar(10) DEFAULT NULL,
+          contact_id int DEFAULT NULL,
+          host_id int DEFAULT NULL,
+          service_id int DEFAULT NULL,
+          message text NOT NULL,
+          PRIMARY KEY (log_id)
+        )",
+        "CREATE INDEX \"" . $prefix . "_log_time_idx\" ON \"" . $prefix . "_log\" (time)",
+        "CREATE INDEX \"" . $prefix . "_log_host_idx\" ON \"" . $prefix . "_log\" (host_id)",
 
     # service
-        "DROP TABLE IF EXISTS `".$prefix."_service`",
-        "CREATE TABLE `".$prefix."_service` (
-          service_id mediumint(9) unsigned NOT NULL AUTO_INCREMENT,
-          host_id mediumint(9) unsigned NOT NULL,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_service\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_service\" (
+          service_id serial,
+          host_id int NOT NULL,
           service_description varchar(150) NOT NULL,
-          PRIMARY KEY (service_id),
-          KEY host_id (host_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+          PRIMARY KEY (service_id)
+        )",
+        "CREATE INDEX \"" . $prefix . "_service_host_idx\" ON \"" . $prefix . "_service\" (host_id)",
 
     # status
-        "DROP TABLE IF EXISTS `".$prefix."_status`",
-        "CREATE TABLE `".$prefix."_status` (
-          status_id smallint(6) unsigned NOT NULL AUTO_INCREMENT,
+        "DROP TABLE IF EXISTS \"" . $prefix . "_status\" CASCADE",
+        "CREATE TABLE \"" . $prefix . "_status\" (
+          status_id serial,
           name varchar(150) NOT NULL,
           value varchar(150) DEFAULT NULL,
           PRIMARY KEY (status_id)
-        ) DEFAULT CHARSET=utf8 COLLATE=utf8_bin",
+        )",
 
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(1, 'last_update', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(2, 'update_pid', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(3, 'last_reorder', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(4, 'cache_version', '".$Thruk::Backend::Provider::DBcommon::cache_version."')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(5, 'reorder_duration', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(6, 'update_duration', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(7, 'last_compact', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(8, 'compact_duration', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(9, 'compact_till', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(10,'lock_mode', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(1, 'last_update', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(2, 'update_pid', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(3, 'last_reorder', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(4, 'cache_version', '".$Thruk::Backend::Provider::DBcommon::cache_version."')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(5, 'reorder_duration', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(6, 'update_duration', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(7, 'last_compact', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(8, 'compact_duration', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(9, 'compact_till', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(10,'lock_mode', '')",
     );
     return \@statements;
 }
@@ -353,19 +345,19 @@ sub _get_create_schema {
 
 sub _lock_table_share {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLES `'.$prefix.'_status` READ');
+    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN SHARE MODE');
     return;
 }
 
 sub _lock_table_exclusive {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLES `'.$prefix.'_status` WRITE');
+    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN EXCLUSIVE MODE');
     return;
 }
 
 sub _release_write_locks {
-    my($self, $dbh) = @_;
-    $dbh->do('UNLOCK TABLES');
+    my($self, undef) = @_;
+    # no-op on PostgreSQL; locks are released on commit/rollback
     return;
 }
 
@@ -374,14 +366,11 @@ sub _release_write_locks {
 sub _update_status {
     my($self, $dbh, $prefix, $status_id, $name, $val, $val2) = @_;
     $val2 //= $val;
-    if(defined $val && $val =~ m/^\d+$/mx) {
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES($status_id,'$name','$val') ON DUPLICATE KEY UPDATE value='$val2'");
-    }
-    elsif(defined $val) {
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES($status_id,'$name',".$dbh->quote($val).") ON DUPLICATE KEY UPDATE value=".$dbh->quote($val2));
+    if(defined $val) {
+        $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES($status_id,'$name',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $val, $val2);
     }
     else {
-        $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES($status_id,'$name',NULL) ON DUPLICATE KEY UPDATE value=NULL");
+        $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES($status_id,'$name',NULL) ON CONFLICT (status_id) DO UPDATE SET value=NULL");
     }
     return;
 }
@@ -390,11 +379,12 @@ sub _update_status {
 
 sub _finish_update {
     my($self, $c, $dbh, $prefix, $duration) = @_;
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(6,'update_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','') ON DUPLICATE KEY UPDATE value=''");
-    $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    my $now = time();
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',NULL) ON CONFLICT (status_id) DO UPDATE SET value=NULL");
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(6,'update_duration',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $duration, $duration);
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(10,'lock_mode','') ON CONFLICT (status_id) DO UPDATE SET value=''");
+    # no-op on PostgreSQL
     $dbh->commit || return;
     return 1;
 }
@@ -407,35 +397,27 @@ sub _db_optimize_tables {
 
     if($disk_space_ok) {
         my $t1 = [gettimeofday];
-        _infos("update %s logs table order...", $prefix);
+        _infos("update %s logs table order (clustering)...", $prefix);
         $dbh = $peer->logcache->_dbh; # reconnect
-        $dbh->do("ALTER TABLE `".$prefix."_log` ORDER BY time");
+        eval {
+            $dbh->do("CLUSTER \"" . $prefix . "_log\" USING \"" . $prefix . "_log_time_idx\"");
+        };
+        if ($@) {
+            _warn("clustering failed: $@");
+        }
         $dbh->commit || confess $dbh->errstr;
         _info("done. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
     }
 
-    unless($c->config->{'logcache_pxc_strict_mode'}) {
-        # repair / optimize tables
-        $dbh = $peer->logcache->_dbh; # reconnect
-
-        _debug("optimizing / repairing tables");
-        for my $table (@{$self->tables()}) {
-            my $t1 = [gettimeofday];
-            _infos('maintain table %20s...', $table);
-            _infos(', check...');
-            my $res = $dbh->selectall_arrayref("CHECK TABLE `".$prefix."_".$table.'`', { Slice => {} });
-            if(!$res || !$res->[0] || $res->[0]->{"Msg_text"} ne 'OK') {
-                _infos('running repair, check returned: %s', $res->[0]->{"Msg_text"});
-                $dbh->do("REPAIR TABLE `".$prefix."_".$table.'`');
-            }
-            if($disk_space_ok && $table ne 'log') { # log table is optimized by the alter table order by... already
-                _infos(', optimize...');
-                $dbh->do("OPTIMIZE TABLE `".$prefix."_".$table.'`');
-            }
-            _infos(', analyze...');
-            $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
-            _info("OK. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
-        }
+    # maintain tables (analyze)
+    $dbh = $peer->logcache->_dbh; # reconnect
+    _debug("analyzing tables");
+    for my $table (@{$self->tables()}) {
+        my $t1 = [gettimeofday];
+        _infos('maintain table %20s...', $table);
+        _infos(', analyze...');
+        $dbh->do("ANALYZE \"" . $prefix . "_" . $table . "\"");
+        _info("OK. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
     }
     return;
 }
@@ -443,23 +425,16 @@ sub _db_optimize_tables {
 ##########################################################
 
 sub _disable_index {
-    my($self, $dbh, $prefix) = @_;
-    &timing_breakpoint('_import_peer_logfiles disable index');
-    $dbh->do('SET foreign_key_checks = 0');
-    $dbh->do('SET unique_checks = 0');
-    $dbh->do('ALTER TABLE `'.$prefix.'_log` DISABLE KEYS');
+    my($self, undef, undef) = @_;
+    # no-op on PostgreSQL
     return;
 }
 
 sub _enable_index {
     my($self, $dbh, $prefix) = @_;
     &timing_breakpoint('_import_peer_logfiles enable index');
-    $dbh->do('SET foreign_key_checks = 1');
-    $dbh->do('SET unique_checks = 1');
-    $dbh->do('ALTER TABLE `'.$prefix.'_log` ENABLE KEYS');
     for my $table (@{$self->tables()}) {
-        $dbh->do("ANALYZE TABLE `".$prefix."_".$table.'`');
-        $dbh->do("CHECK TABLE `".$prefix."_".$table.'`');
+        $dbh->do("ANALYZE \"" . $prefix . "_" . $table . "\"");
     }
     return;
 }
@@ -469,50 +444,54 @@ sub _enable_index {
 sub _sql_extra_columns {
     return ',
             (CASE
-                WHEN l.type = "HOST NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 4), ";", -1)
-                WHEN l.type = "SERVICE NOTIFICATION" THEN SUBSTRING_INDEX(SUBSTRING_INDEX(l.message, ";", 5), ";", -1)
-                ELSE ""
+                WHEN l.type = \'HOST NOTIFICATION\' THEN split_part(l.message, \';\', 4)
+                WHEN l.type = \'SERVICE NOTIFICATION\' THEN split_part(l.message, \';\', 5)
+                ELSE \'\'
             END) as command_name,
-            SUBSTRING_INDEX(l.message, \': \', 1) as plugin_output';
+            split_part(l.message, \': \', 1) as plugin_output';
 }
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
-    return "IFNULL($col, $default)";
+    return "COALESCE($col, $default)";
 }
 
 sub _sql_show_indexes {
     my($self, $prefix) = @_;
-    return "SHOW INDEXES FROM `".$prefix."_log`";
+    return "SELECT indexname, indexdef FROM pg_indexes WHERE tablename = '".$prefix."_log'";
 }
 
 sub _sql_show_tables {
     my($self) = @_;
-    return 'SHOW TABLES';
+    return "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'";
 }
 
 sub _sql_tables_exist {
     my($self, $prefix) = @_;
-    return ('SHOW TABLES LIKE "'.$prefix.'\_%"', []);
+    my $escaped = $prefix.'\\_%';
+    return ("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name LIKE ?", [$escaped]);
 }
 
 sub _sql_insert_on_conflict {
     my($self) = @_;
-    return '';
+    return ' ON CONFLICT DO NOTHING';
 }
 
 sub _sql_drop_table_cascade {
     my($self) = @_;
-    return '';
+    return ' CASCADE';
 }
 
 sub _sql_regex_operator {
     my($self, $op, $val) = @_;
-    if($op eq '~' || $op eq '~~') {
-        return 'RLIKE '.$self->_quote($val);
+    if($op eq '~~') {
+        return '~* '.$self->_quote($val);
+    }
+    if($op eq '~') {
+        return '~ '.$self->_quote($val);
     }
     if($op eq '!~~') {
-        return 'NOT RLIKE '.$self->_quote($val);
+        return '!~* '.$self->_quote($val);
     }
     return '= '.$self->_quote($val);
 }
@@ -526,13 +505,25 @@ sub _db_table_stats {
         return(0, 0, 0, {}, "logcache not yet created");
     }
     eval {
-        my $res = $dbh->selectall_arrayref("SELECT SUM(index_length) as index_size, SUM(data_length) as data_size, SUM(table_rows) as items FROM information_schema.TABLES WHERE table_schema=Database() AND table_name LIKE '".$prefix."_%'", { Slice => {} });
+        my $res = $dbh->selectall_arrayref(
+            "SELECT
+                SUM(pg_indexes_size(c.oid)) as index_size,
+                SUM(pg_table_size(c.oid)) as data_size,
+                SUM(reltuples) as items
+             FROM pg_class c
+             JOIN pg_namespace n ON n.oid = c.relnamespace
+             WHERE n.nspname = 'public'
+             AND c.relname LIKE ?
+             AND c.relkind = 'r'",
+            { Slice => {} },
+            $prefix.'_%',
+        );
         if($res && $res->[0]) {
             $index_size = $res->[0]->{'index_size'};
             $data_size  = $res->[0]->{'data_size'};
             $items      = $res->[0]->{'items'};
         }
-        $status = $dbh->selectall_hashref("SELECT name, value FROM `".$prefix."_status`", 'name');
+        $status = $dbh->selectall_hashref("SELECT name, value FROM \"" . $prefix . "_status\"", 'name');
         $status->{'cache_version'}->{'value'} //= '';
     };
     if($@) {
@@ -546,24 +537,24 @@ sub _db_table_stats {
 
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
-    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'_log"')};
+    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ?", undef, $prefix.'_log')};
     return scalar @tables >= 1 ? 1 : 0;
 }
 
 sub _get_all_table_names {
     my($self, $dbh) = @_;
-    return $dbh->selectcol_arrayref('SHOW TABLES');
+    return $dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
 }
 
 sub _use_load_data_infile {
-    my($self, $mode) = @_;
-    return $mode == Thruk::Backend::Provider::DBcommon::MODE_IMPORT() ? 1 : 0;
+    # PostgreSQL does not support LOAD DATA LOCAL INFILE
+    return 0;
 }
 
 ##########################################################
 sub _get_log_host_auth {
     my($self,$dbh, $prefix, $contact) = @_;
-    my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM `".$prefix."_host` h, `".$prefix."_contact_host_rel` chr, `".$prefix."_contact` c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ".$dbh->quote($contact))};
+    my @hosts = @{$dbh->selectall_arrayref("SELECT h.host_name FROM \"" . $prefix . "_host\" h, \"" . $prefix . "_contact_host_rel\" chr, \"" . $prefix . "_contact\" c WHERE h.host_id = chr.host_id AND c.contact_id = chr.contact_id AND c.name = ?", undef, $contact)};
     my $hosts_lookup = {};
     for my $h (@hosts) { $hosts_lookup->{$h->[0]} = 1; }
     return $hosts_lookup;
@@ -576,35 +567,35 @@ sub _get_log_service_auth {
     # Select all Services where the host is allowed by contact
     my $sql1 = "SELECT h.host_name, s.service_description
                FROM
-                 `".$prefix."_service` s,
-                 `".$prefix."_host` h,
-                 `".$prefix."_contact_host_rel` chr,
-                 `".$prefix."_contact` c1,
-                 `".$prefix."_contact_service_rel` csr
+                 \"" . $prefix . "_service\" s,
+                 \"" . $prefix . "_host\" h,
+                 \"" . $prefix . "_contact_host_rel\" chr,
+                 \"" . $prefix . "_contact\" c1,
+                 \"" . $prefix . "_contact_service_rel\" csr
                WHERE
                  s.host_id = h.host_id
                  AND h.host_id = chr.host_id
                  AND c1.contact_id = chr.contact_id
                  AND s.service_id = csr.service_id
-                 AND c1.name = ".$dbh->quote($contact)
+                 AND c1.name = ?"
                ;
     # Select all Services which are directly allowed by contact
     my $sql2 = "SELECT h.host_name, s.service_description
                FROM
-                 `".$prefix."_service` s,
-                 `".$prefix."_host` h,
-                 `".$prefix."_contact_host_rel` chr,
-                 `".$prefix."_contact` c1,
-                 `".$prefix."_contact_service_rel` csr
+                 \"" . $prefix . "_service\" s,
+                 \"" . $prefix . "_host\" h,
+                 \"" . $prefix . "_contact_host_rel\" chr,
+                 \"" . $prefix . "_contact\" c1,
+                 \"" . $prefix . "_contact_service_rel\" csr
                WHERE
                  s.host_id = h.host_id
                  AND h.host_id = chr.host_id
                  AND c1.contact_id = csr.contact_id
                  AND s.service_id = csr.service_id
-                 AND c1.name = ".$dbh->quote($contact)
+                 AND c1.name = ?"
                 ;
-    my $services1        = $dbh->selectall_arrayref($sql1);
-    my $services2        = $dbh->selectall_arrayref($sql2);
+    my $services1        = $dbh->selectall_arrayref($sql1, undef, $contact);
+    my $services2        = $dbh->selectall_arrayref($sql2, undef, $contact);
     # Make them unique
     my $services_lookup = {};
     for my $s (@{$services1}) { $services_lookup->{$s->[0]}->{$s->[1]} = 1; }
@@ -785,7 +776,7 @@ sub get_contact_totals_stats {
 sub _import_logs {
     my($self, $c, $mode, $backends, $blocksize, $options) = @_;
     my $files = $options->{'files'} || [];
-    $c->stats->profile(begin => "Mysql::_import_logs($mode)");
+    $c->stats->profile(begin => "Postgresql::_import_logs($mode)");
 
     my $forcestart;
     if($options->{'start'}) {
@@ -876,7 +867,7 @@ sub _import_logs {
         unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
 
-    $c->stats->profile(end => "Mysql::_import_logs($mode)");
+    $c->stats->profile(end => "Postgresql::_import_logs($mode)");
     return($backend_count, $log_count, $errors);
 }
 
@@ -950,7 +941,7 @@ sub _update_logcache {
             _debug($error);
             $error = $short_err;
         }
-        _cronerror('logcache '.$mode.' failed: '._strip_line($error)); # don't fill the log with errors from cronjobs
+        _cronerror('logcache '.$mode.' failed: '._strip_line($error));
         die($error);
     }
 
@@ -988,8 +979,8 @@ sub _check_lock {
     # check if there is already a update / import running
     my $skip          = 0;
     eval {
-        $self->_lock_table_share($dbh, $prefix) unless $c->config->{'logcache_pxc_strict_mode'};
-        my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
+        $self->_lock_table_share($dbh, $prefix);
+        my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM "'.$prefix.'_status" WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
                 _info("WARNING: logcache update already running with pid ".$pids[0]);
@@ -997,7 +988,8 @@ sub _check_lock {
             }
         }
     };
-    $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    # PostgreSQL: transaction abort on lock failure; rollback before checking error
+    eval { $dbh->rollback; } if $@;
     if($@) {
         _debug($@);
         return;
@@ -1006,12 +998,13 @@ sub _check_lock {
         return;
     }
 
-    $self->_lock_table_exclusive($dbh, $prefix) unless $c->config->{'logcache_pxc_strict_mode'};
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$."  ) ON DUPLICATE KEY UPDATE value=".$$);
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','".$mode."') ON DUPLICATE KEY UPDATE value='".$mode."'");
+    $self->_lock_table_exclusive($dbh, $prefix);
+    my $now = time();
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $$, $$);
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(10,'lock_mode',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $mode, $mode);
     $dbh->commit || confess $dbh->errstr;
-    $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
+    # no-op on PostgreSQL for lock release
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
         our $global_lock_created = 1;
@@ -1057,8 +1050,8 @@ sub _update_logcache_auth {
     # update hosts
     my($hosts) = $peer->{'class'}->get_hosts(columns => [qw/name contacts/]);
     _debugs("hosts: ");
-    my $stm = "INSERT INTO `".$prefix."_contact_host_rel` (contact_id, host_id) VALUES";
-    $dbh->do("TRUNCATE TABLE `".$prefix."_contact_host_rel`");
+    my $stm = "INSERT INTO \"" . $prefix . "_contact_host_rel\" (contact_id, host_id) VALUES";
+    $dbh->do("TRUNCATE TABLE \"" . $prefix . "_contact_host_rel\"");
     my $count = 0;
     for my $host (@{$hosts}) {
         my $host_id = $self->_host_lookup($host_lookup, $host->{'name'}, $dbh, $prefix);
@@ -1075,8 +1068,8 @@ sub _update_logcache_auth {
 
     # update services
     _debugs("services: ");
-    $dbh->do("TRUNCATE TABLE `".$prefix."_contact_service_rel`");
-    $stm = "INSERT INTO `".$prefix."_contact_service_rel` (contact_id, service_id) VALUES";
+    $dbh->do("TRUNCATE TABLE \"" . $prefix . "_contact_service_rel\"");
+    $stm = "INSERT INTO \"" . $prefix . "_contact_service_rel\" (contact_id, service_id) VALUES";
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description contacts/]);
     $count = 0;
     for my $service (@{$services}) {
@@ -1103,14 +1096,14 @@ sub _update_logcache_auth {
 sub _get_host_lookup {
     my($self, $dbh, $peer, $prefix, $noupdate) = @_;
 
-    my $sth = $dbh->prepare("SELECT host_id, host_name FROM `".$prefix."_host`");
+    my $sth = $dbh->prepare("SELECT host_id, host_name FROM \"" . $prefix . "_host\"");
     $sth->execute;
     my $hosts_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $hosts_lookup->{$r->[1]} = $r->[0]; }
     return $hosts_lookup if $noupdate;
 
     my($hosts) = $peer->{'class'}->get_hosts(columns => [qw/name/]);
-    my $stm = "INSERT INTO `".$prefix."_host` (host_name) VALUES";
+    my $stm = "INSERT INTO \"" . $prefix . "_host\" (host_name) VALUES";
     my @values;
     for my $h (@{$hosts}) {
         next if defined $hosts_lookup->{$h->{'name'}};
@@ -1130,14 +1123,14 @@ sub _get_host_lookup {
 sub _get_service_lookup {
     my($self, $dbh, $peer, $prefix, $hosts_lookup, $noupdate, $auto_increments, $foreign_key_stash) = @_;
 
-    my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM `".$prefix."_service` s, `".$prefix."_host` h WHERE s.host_id = h.host_id");
+    my $sth = $dbh->prepare("SELECT s.service_id, h.host_name, s.service_description FROM \"" . $prefix . "_service\" s, \"" . $prefix . "_host\" h WHERE s.host_id = h.host_id");
     $sth->execute;
     my $services_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $services_lookup->{$r->[1]}->{$r->[2]} = $r->[0]; }
     return $services_lookup if $noupdate;
 
     my($services) = $peer->{'class'}->get_services(columns => [qw/host_name description/]);
-    my $stm = "INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES";
+    my $stm = "INSERT INTO \"" . $prefix . "_service\" (host_id, service_description) VALUES";
     my @values;
     for my $s (@{$services}) {
         next if defined $services_lookup->{$s->{'host_name'}}->{$s->{'description'}};
@@ -1158,14 +1151,14 @@ sub _get_service_lookup {
 sub _get_contact_lookup {
     my($self, $dbh, $peer, $prefix, $noupdate) = @_;
 
-    my $sth = $dbh->prepare("SELECT contact_id, name FROM `".$prefix."_contact`");
+    my $sth = $dbh->prepare("SELECT contact_id, name FROM \"" . $prefix . "_contact\"");
     $sth->execute;
     my $contact_lookup = {};
     for my $r (@{$sth->fetchall_arrayref()}) { $contact_lookup->{$r->[1]} = $r->[0]; }
     return $contact_lookup if $noupdate;
 
     my($contacts) = $peer->{'class'}->get_contacts(columns => [qw/name/]);
-    my $stm = "INSERT INTO `".$prefix."_contact` (name) VALUES";
+    my $stm = "INSERT INTO \"" . $prefix . "_contact\" (name) VALUES";
     my @values;
     for my $c (@{$contacts}) {
         next if defined $contact_lookup->{$c->{'name'}};
@@ -1196,7 +1189,7 @@ sub _host_lookup {
         return $id;
     }
 
-    $dbh->do("INSERT INTO `".$prefix."_host` (host_name) VALUES(".$dbh->quote($host_name).")");
+    $dbh->do("INSERT INTO \"" . $prefix . "_host\" (host_name) VALUES(?)", undef, $host_name);
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $host_lookup->{$host_name} = $id;
 
@@ -1221,7 +1214,7 @@ sub _service_lookup {
         return $id;
     }
 
-    $dbh->do("INSERT INTO `".$prefix."_service` (host_id, service_description) VALUES(".$host_id.", ".$dbh->quote($service_description).")");
+    $dbh->do("INSERT INTO \"" . $prefix . "_service\" (host_id, service_description) VALUES(?, ?)", undef, $host_id, $service_description);
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $service_lookup->{$host_name}->{$service_description} = $id;
 
@@ -1243,7 +1236,7 @@ sub _contact_lookup {
         return $id;
     }
 
-    $dbh->do("INSERT INTO `".$prefix."_contact` (name) VALUES(".$dbh->quote($contact_name).")");
+    $dbh->do("INSERT INTO \"" . $prefix . "_contact\" (name) VALUES(?)", undef, $contact_name);
     $id = $dbh->last_insert_id(undef, undef, undef, undef);
     $contact_lookup->{$contact_name} = $id;
 

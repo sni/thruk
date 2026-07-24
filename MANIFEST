@@ -70,7 +70,9 @@ lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/ConfigOnly.pm
 lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
+lib/Thruk/Backend/Provider/DBcommon.pm
 lib/Thruk/Backend/Provider/Mysql.pm
+lib/Thruk/Backend/Provider/Postgresql.pm
 lib/Thruk/Base.pm
 lib/Thruk/CheckThrukRest.pm
 lib/Thruk/Config.pm
@@ -2451,6 +2453,7 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mysql.t
 t/100-backend_mysql_utf8.t
+t/101-backend_postgresql.t
 t/100-backend_shinken.t
 t/100-cli-check_thruk_rest.t
 t/100-cli-examples-dups.t

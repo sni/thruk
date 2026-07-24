@@ -34,6 +34,7 @@ $Thruk::Backend::Peer::Provider = [
           'Thruk::Backend::Provider::ConfigOnly',
           'Thruk::Backend::Provider::HTTP',
           'Thruk::Backend::Provider::Mysql',
+          'Thruk::Backend::Provider::Postgresql',
 ];
 $Thruk::Backend::Peer::ProviderLoaded = {
           'livestatus' => 'Thruk::Backend::Provider::Livestatus',
@@ -250,10 +251,10 @@ sub _initialise_peer {
     # log cache?
     my $logcache = $peer_config->{'logcache'} // $thruk_config->{'logcache'};
     if($logcache && ($peer_config->{'type'} eq 'livestatus' || $peer_config->{'type'} eq 'http')) {
-        if($logcache !~ m/^mysql/mxi) {
-            die("no or unknown type in logcache connection: ".$logcache);
-        } else {
+        if($logcache =~ m/^(?:mysql|postgresql|postgres):/mxi) {
             $self->{'logcache'} = $logcache;
+        } else {
+            die("no or unknown type in logcache connection: ".$logcache.". Expected mysql:// or postgresql://");
         }
     }
 
@@ -273,12 +274,22 @@ sub logcache {
     my($self) = @_;
     return($self->{'_logcache'}) if $self->{'_logcache'};
     if($self->{'logcache'}) {
-        if(!defined $Thruk::Backend::Peer::ProviderLoaded->{'Mysql'}) {
-            require Thruk::Backend::Provider::Mysql;
-            Thruk::Backend::Provider::Mysql->import;
-            $Thruk::Backend::Peer::ProviderLoaded->{'Mysql'} = 1;
+        my $provider_class;
+        if($self->{'logcache'} =~ m/^mysql/mxi) {
+            $provider_class = 'Thruk::Backend::Provider::Mysql';
+        } elsif($self->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi) {
+            $provider_class = 'Thruk::Backend::Provider::Postgresql';
+        } else {
+            die("unknown logcache type in: ".$self->{'logcache'});
         }
-        $self->{'_logcache'} = Thruk::Backend::Provider::Mysql->new({options => {
+        my $provider_key = $provider_class;
+        $provider_key    =~ s/.*:://mx;
+        if(!defined $Thruk::Backend::Peer::ProviderLoaded->{$provider_key}) {
+            require Module::Load;
+            Module::Load::load($provider_class);
+            $Thruk::Backend::Peer::ProviderLoaded->{$provider_key} = 1;
+        }
+        $self->{'_logcache'} = $provider_class->new({options => {
                                                 peer     => $self->{'logcache'},
                                                 peer_key => $self->{'key'},
                                             }});
