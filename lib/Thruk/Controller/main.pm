@@ -224,18 +224,29 @@ sub index {
     }
 
     ############################################################################
-    # host and service problems
+    # host and service problems (as the linked status.cgi: hoststatustypes=12, hostprops=42)
+    # unhandled host problems:
+    #  * down or unreachable
+    #  * not acknowledged
+    #  * not in downtime
+    #  * active checks enabled
     my $problemhosts    = $c->db->get_hosts(
-        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ],
-        columns    => ['name','state','plugin_output','last_hard_state_change'],
-        sort       => { ASC => 'last_hard_state_change' },
+        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'active_checks_enabled' => 1 ],
+        columns    => ['name','state','plugin_output','last_state_change'],
+        sort       => { ASC => 'last_state_change' },
         limit      => 5,
         debug_hint => 'host problems',
      );
+    # unhandled service problems:
+    #  * not acknowledged
+    #  * not in downtime
+    #  * on a host which is up
+    #  * not acknowledged
+    #  * not in downtime
     my $problemservices = $c->db->get_services(
-        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ],
-        columns    => ['host_name','description','state','plugin_output','last_hard_state_change'],
-        sort       => { ASC => 'last_hard_state_change' },
+        filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'scheduled_downtime_depth' => 0, 'host_state' => 0, 'host_acknowledged' => 0, 'host_scheduled_downtime_depth' => 0 ],
+        columns    => ['host_name','description','state','plugin_output','last_state_change'],
+        sort       => { ASC => 'last_state_change' },
         limit      => 5,
         debug_hint => 'service problems',
     );

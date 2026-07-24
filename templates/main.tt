@@ -220,11 +220,16 @@
           </thead>
           <tbody>
             [% FOR h = problemhosts %]
+              [% IF h.state == 1 %]
+                [% hoststate = 'DOWN' %]
+              [% ELSIF h.state == 2 %]
+                [% hoststate = 'UNREACHABLE' %]
+              [% END %]
             <tr>
               <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.name | html %]</a></td>
-              <td class="flex justify-center"><div class="badge DOWN">DOWN</div></td>
+              <td class="flex justify-center"><div class="badge [% hoststate %]">[% hoststate %]</div></td>
               <td class="truncate w-1/2 max-w-0">[% h.plugin_output %]</td>
-              <td>[% duration(date.now - h.last_hard_state_change, 6) %]</td>
+              <td>[% duration(date.now - h.last_state_change, 6) %]</td>
             </tr>
             [% END %]
             [% IF problemhosts.size == 0 %]
@@ -241,7 +246,7 @@
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
-        <h3><a class="link" href="status.cgi?host=all&type=detail&hostprops=10&hoststatustypes=3&serviceprops=42&servicestatustypes=28">Unhandled Service Problems</a></h3>
+        <h3><a class="link" href="status.cgi?host=all&type=detail&hostprops=10&hoststatustypes=3&serviceprops=10&servicestatustypes=28">Unhandled Service Problems</a></h3>
       </div>
       <div class="overflow-x-auto">
         <table class="cellspacing-x">
@@ -268,7 +273,7 @@
               <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% s.description | html %]</a></td>
               <td class="flex justify-center"><div class="badge [% state %]">[% state %]</div></td>
               <td class="truncate w-1/2 max-w-0">[% s.plugin_output %]</td>
-              <td>[% duration(date.now - s.last_hard_state_change, 6) %]</td>
+              <td>[% duration(date.now - s.last_state_change, 6) %]</td>
             </tr>
             [% END %]
             [% IF problemservices.size == 0 %]
