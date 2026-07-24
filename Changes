@@ -2,6 +2,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
           - fix mouse glitch on quick command menu (#1502)
+          - fix host state on main page (#1515)
           - Teams:
             - fix authentication by unexposed custom variables
           - add role specific config overrrides
