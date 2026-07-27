@@ -337,6 +337,7 @@ sub _get_create_schema {
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(8, 'compact_duration', '')",
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(9, 'compact_till', '')",
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(10,'lock_mode', '')",
+        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(11,'peer_name', '')",
     );
     return \@statements;
 }
@@ -380,10 +381,12 @@ sub _update_status {
 sub _finish_update {
     my($self, $c, $dbh, $prefix, $duration) = @_;
     my $now = time();
+    my $peer_name = Thruk::Utils::Filter::peer_name($self->{'peer_config'}->{'peer_key'});
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',NULL) ON CONFLICT (status_id) DO UPDATE SET value=NULL");
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(6,'update_duration',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $duration, $duration);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(10,'lock_mode','') ON CONFLICT (status_id) DO UPDATE SET value=''");
+    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(11,'peer_name',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $peer_name, $peer_name);
     # no-op on PostgreSQL
     $dbh->commit || return;
     return 1;
