@@ -260,6 +260,12 @@ check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
         --warning=total:20:100
         "/services/totals"
 
+    - multiple queries can use values of previous query:
+      check_thruk_rest \
+        --template="{EXITCODE:[% RAW2.0.state %]}[% state2text(RAW2.0.state) %] - [% RAW2.0.name %][% dump(macros) %]" \
+        '{"ip": "127.0.0.1"}' \
+        '/hosts?columns=name,state&address={1:ip}'
+
     - show active session using renamed aggregation functions
       check_thruk_rest \
         -o '{STATUS} - There are {sessions} active sessions.' \

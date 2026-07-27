@@ -819,7 +819,10 @@ Send multiple endpoints at once:
 
   %> thruk r "/hosts/totals" "/services/totals"
 
-See more examples and additional help at https://thruk.org/documentation/rest.html
+See more examples and additional help at:
+
+- https://thruk.org/documentation/rest.html
+- https://thruk.org/documentation/check_thruk_rest.html
 
 =cut
 
