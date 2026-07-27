@@ -2532,6 +2532,7 @@ t/610-scenario-lmd_federation_e2e.t
 t/610-scenario-lmd_federation_multitier_e2e.t
 t/610-scenario-logfile_cache_http.t
 t/610-scenario-logfile_cache_icinga2_ido_e2e.t
+t/610-scenario-logfile_cache_postgres.t
 t/610-scenario-omd_debian_e2e.t
 t/610-scenario-reports.t
 t/610-scenario-rest_api.t
