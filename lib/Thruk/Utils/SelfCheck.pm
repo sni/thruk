@@ -554,7 +554,14 @@ sub _logcache_checks  {
         $details .= sprintf("  - no old tables found in logcache\n");
     } else {
         for my $key (sort keys %{$to_remove}) {
-            $details .= sprintf('  - old logcache table %s could be removed. (hint: run `thruk logcache removeunused`)'."\n", $key);
+            # try to find name from status table
+            my $name = $to_remove->{$key};
+            if($name && $name ne "1") {
+                $name = sprintf("%s (%s)", $key, $name);
+            } else {
+                $name = $key;
+            }
+            $details .= sprintf('  - old logcache table %s could be removed. (hint: run `thruk logcache removeunused`)'."\n", $name);
             $errors++;
         }
     }

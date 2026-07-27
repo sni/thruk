@@ -804,30 +804,40 @@ sub _log_removeunused {
     my $dbh  = $peer->logcache->_dbh();
     my $table_names = $self->_get_all_table_names($dbh);
     my $res = {};
-    for my $t (@{$table_names}) { $res->{$t} = {}; }
+    for my $t (@{$table_names}) {
+        if($t =~ m/^(.*?)_(status|log)/mx) {
+            my $key = $1;
+            $res->{$key} = 1 unless $res->{$key};
+        }
+        if($t =~ m/^(.*?)_status/mx) {
+            my $key = $1;
+            # fetch name
+            my $table_status = $self->_quote_table($key."_status");
+            my @names = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 11 LIMIT 1')};
+            $res->{$key} = $names[0] if scalar @names > 0;
+        }
+    }
 
     # gather backend ids
-    my $backends_hash = {};
     for my $b (@backends) {
-        next unless $b->{'enabled'};
-        $backends_hash->{$b->{'key'}} = 1;
+        delete $res->{$b};
     }
+
     # find tables without a backend
-    for my $tbl (keys %{$res}) {
-        my $key = $tbl;
-        $key =~ s/_.*$//gmx;
-        delete $backends_hash->{$key};
+    for my $key (@{$c->stash->{'backends'}}) {
+        delete $res->{$key};
     }
+
     if($print_only) {
         $c->stats->profile(end => $driver."::_log_removeunused");
-        return($backends_hash);
+        return($res);
     }
 
     my $removed = 0;
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
-    for my $key (keys %{$backends_hash}) {
-        for my $tbl (keys %{$res}) {
+    for my $key (keys %{$res}) {
+        for my $tbl (keys %{$table_names}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
             $dbh->do("DROP TABLE " . $self->_quote_table($tbl) . $cascade);
