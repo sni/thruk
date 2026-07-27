@@ -1,0 +1,50 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "install perl postgres dbd"
+    include_role:
+      name: yum_apt_retry
+    vars:
+      rpm:
+        - perl-DBD-Pg
+      creates:
+        - "/usr/lib64/perl5/vendor_perl/DBD/Pg.pm"
+
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        PNP4NAGIOS=off
+
+  - name: copy demo files
+    copy:
+      src:  "/root/{{ item.src }}"
+      dest: "/omd/sites/demo/{{ item.dst }}"
+      owner: demo
+      group: demo
+    loop:
+      - { src: 'test.cfg',         dst: 'etc/naemon/conf.d/' }
+
+
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/thruk_local.conf
+      dest: /omd/sites/demo/etc/thruk/thruk_local.conf
+      owner: demo
+      group: demo

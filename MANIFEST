@@ -68,9 +68,9 @@ lib/Thruk/Backend/Peer.pm
 lib/Thruk/Backend/Pool.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/ConfigOnly.pm
+lib/Thruk/Backend/Provider/DBcommon.pm
 lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
-lib/Thruk/Backend/Provider/DBcommon.pm
 lib/Thruk/Backend/Provider/Mysql.pm
 lib/Thruk/Backend/Provider/Postgresql.pm
 lib/Thruk/Base.pm
@@ -2453,7 +2453,6 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mysql.t
 t/100-backend_mysql_utf8.t
-t/101-backend_postgresql.t
 t/100-backend_shinken.t
 t/100-cli-check_thruk_rest.t
 t/100-cli-examples-dups.t
@@ -2467,6 +2466,7 @@ t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
+t/101-backend_postgresql.t
 t/101-cli-thruk.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
@@ -3057,6 +3057,18 @@ t/scenarios/logfile_cache_icinga2_ido_e2e/t/300-controller_showlog.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/t/400-postgres.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk.conf
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk_local.conf
+t/scenarios/logfile_cache_postgres/docker-compose.yml
+t/scenarios/logfile_cache_postgres/Makefile
+t/scenarios/logfile_cache_postgres/omd/Dockerfile
+t/scenarios/logfile_cache_postgres/omd/playbook.yml
+t/scenarios/logfile_cache_postgres/omd/test.cfg
+t/scenarios/logfile_cache_postgres/omd/thruk_local.conf
+t/scenarios/logfile_cache_postgres/README.md
+t/scenarios/logfile_cache_postgres/t/100-logcache.t
+t/scenarios/logfile_cache_postgres/t/300-controller_extinfo.t
+t/scenarios/logfile_cache_postgres/t/300-controller_notifications.t
+t/scenarios/logfile_cache_postgres/t/300-controller_showlog.t
+t/scenarios/logfile_cache_postgres/t/local/logcache.t
 t/scenarios/Makefile
 t/scenarios/omd_debian_e2e/docker-compose.yml
 t/scenarios/omd_debian_e2e/Makefile
