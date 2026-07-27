@@ -931,8 +931,7 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        require Thruk::Utils::DateTime;
-        $forcestart = Thruk::Utils::DateTime::parse_date($c, $options->{'start'});
+        $forcestart = Thruk::Utils::parse_date($c, $options->{'start'});
     }
 
     # do this in a single transaction if blocksize is undef/0
