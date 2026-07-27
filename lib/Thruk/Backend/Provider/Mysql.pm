@@ -874,8 +874,7 @@ sub _import_logs {
         };
     }
 
-    our $global_lock_created;
-    if($global_lock_created) {
+    if($Thruk::Backend::Provider::DBcommon::global_lock_created) {
         unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
 
@@ -1017,7 +1016,7 @@ sub _check_lock {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        our $global_lock_created = 1;
+        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 

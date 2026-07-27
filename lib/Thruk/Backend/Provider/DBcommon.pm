@@ -73,6 +73,8 @@ use constant {
 
 @Thruk::Backend::Provider::DBcommon::tables = (qw/contact contact_host_rel contact_service_rel host log service status/);
 
+$Thruk::Backend::Provider::DBcommon::global_lock_created = 0;
+
 END {
     # close all connections at the end
     return unless $INC{"DBI.pm"};
@@ -1163,7 +1165,7 @@ sub _db_lock_tables {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        our $global_lock_created = 1;
+        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 
