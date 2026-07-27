@@ -112,7 +112,6 @@ sub _fetch_results {
                 _debug("text data from command line argument:");
                 _debug($opt->{'result'});
                 $c->stats->profile(end => "_fetch_results($printable_url)");
-                next;
             }
             # command line
             elsif($opt->{'command'}) {
@@ -131,7 +130,6 @@ sub _fetch_results {
                 _debug("text data from command line argument:");
                 _debug($opt->{'result'});
                 $c->stats->profile(end => "_fetch_results($printable_url)");
-                next;
             }
             # json arguments
             elsif($url =~ m/^\s*\[.*\]\s*$/mx || $url =~ m/^\s*\{.*\}\s*$/mx) {
@@ -140,7 +138,6 @@ sub _fetch_results {
                 _debug("json data from command line argument:");
                 _debug($opt->{'result'});
                 $c->stats->profile(end => "_fetch_results($printable_url)");
-                next;
             }
             # http/https url
             elsif($url =~ m/^https?:/mx) {
@@ -163,7 +160,6 @@ sub _fetch_results {
                     })."\n";
                 }
                 $c->stats->profile(end => "_fetch_results($printable_url)");
-                next;
             }
             # local file
             elsif(-r $url && -f $url) {
@@ -173,7 +169,6 @@ sub _fetch_results {
                 _debug("json data from local file ".$url.":");
                 _debug($opt->{'result'});
                 $c->stats->profile(end => "_fetch_results($printable_url)");
-                next;
             }
 
             # plus symbols from the command line are probably meant as plus
@@ -181,19 +176,22 @@ sub _fetch_results {
             $url =~ s/\+/%2B/gmx;
         }
 
-        $url =~ s|^/||gmx;
+        if(!defined $opt->{'rc'}) {
+            $url =~ s|^/||gmx;
+            if($opt->{'format'}) {
+                $url = $opt->{'format'}.'/'.$url;
+            }
 
-        if($opt->{'format'}) {
-            $url = $opt->{'format'}.'/'.$url;
+            $c->stats->profile(begin => "_cmd_rest($url)");
+            my $sub_c = $c->sub_request('/r/v1/'.$url, uc($opt->{'method'}), $opt->{'postdata'}, 1);
+            $c->stats->profile(end => "_cmd_rest($url)");
+
+            $opt->{'content_type'} = $sub_c->res->content_type;
+            $opt->{'result'}       = $sub_c->res->body;
+            $opt->{'rc'}           = ($sub_c->res->code == 200 ? 0 : 3);
         }
 
-        $c->stats->profile(begin => "_cmd_rest($url)");
-        my $sub_c = $c->sub_request('/r/v1/'.$url, uc($opt->{'method'}), $opt->{'postdata'}, 1);
-        $c->stats->profile(end => "_cmd_rest($url)");
 
-        $opt->{'content_type'} = $sub_c->res->content_type;
-        $opt->{'result'}       = $sub_c->res->body;
-        $opt->{'rc'}           = ($sub_c->res->code == 200 ? 0 : 3);
         if(!$opt->{'json'}) {
             eval {
                 my $json = decode_json($opt->{'result'});
