@@ -14,6 +14,7 @@ use warnings;
 use strict;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Provider::DBcommon ();
 use Thruk::Constants ':peer_states';
 use Thruk::Utils ();
 use Thruk::Utils::RecurringDowntimes ();
