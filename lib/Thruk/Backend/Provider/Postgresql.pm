@@ -144,6 +144,7 @@ sub _dbh {
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $self->{'postgres'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, pg_enable_utf8 => 1});
         $self->{'postgres'}->do("SET client_encoding TO 'UTF8'");
+        $self->{'postgres'}->do("SET client_min_messages = warning");
         &timing_breakpoint('connected');
     }
     return $self->{'postgres'};
@@ -456,7 +457,7 @@ sub _sql_extra_columns {
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
-    return "COALESCE($col, $default)";
+    return "COALESCE(".$col."::text, $default)";
 }
 
 sub _sql_show_indexes {

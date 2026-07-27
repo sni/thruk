@@ -858,7 +858,7 @@ sub _log_check_inconsistency {
         my $dbh = $peer->logcache->_dbh;
 
         my $table = $self->_quote_table($prefix."_host");
-        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count > 1");
+        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count(host_id) > 1");
         $sth->execute;
         my $num = 0;
         for my $r (@{$sth->fetchall_arrayref()}) {
