@@ -3,6 +3,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
 next:
           - fix mouse glitch on quick command menu (#1502)
           - fix host state on main page (#1515)
+          - fix lock issue when user tries to login with invalid username (GHSA-3p2g-8g6m-r272)
           - Teams:
             - fix authentication by unexposed custom variables
           - add role specific config overrrides
