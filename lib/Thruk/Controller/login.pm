@@ -59,7 +59,7 @@ sub index {
         $logoutref =~ s|&|?|mx;
     }
     # logout redirect must not start with // with could be used to redirect to any domain/url
-    if($logoutref =~ m|^//|mx) {
+    if($logoutref && $logoutref =~ m|^//|mx) {
         undef $logoutref;
     }
 
