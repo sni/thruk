@@ -58,6 +58,10 @@ sub index {
     if($logoutref && $logoutref !~ m/\?/mx) {
         $logoutref =~ s|&|?|mx;
     }
+    # logout redirect must not start with // with could be used to redirect to any domain/url
+    if($logoutref =~ m|^//|mx) {
+        undef $logoutref;
+    }
 
     my $login   = $c->req->parameters->{'login'}    || '';
     my $pass    = $c->req->parameters->{'password'} || '';
