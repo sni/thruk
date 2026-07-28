@@ -9,6 +9,7 @@ use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::LMD ();
+use Thruk::Utils::Log qw/:all/;
 
 use base 'Thruk::Backend::Provider::Base';
 
@@ -972,6 +973,7 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     if(Thruk::Backend::Provider::Base::can_use_logcache($self, \%options)) {
+        _debug("using logcache for query") if Thruk::Base->debug;
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }

@@ -36,7 +36,7 @@ Thruk Controller
 our $VERSION = 1;
 our $rest_paths = [];
 
-my $reserved_query_parameters      = [qw/limit offset sort columns headers backend backends q CSRFtoken background/];
+my $reserved_query_parameters      = [qw/limit offset sort columns headers backend backends q CSRFtoken background logcache/];
 my $aggregation_function_names     = [qw/count sum avg min max uniq/];
 my $disaggregation_function_names  = [qw/as_rows to_rows/];
 my $aggregation_functions          = Thruk::Base::array2hash($aggregation_function_names);
@@ -507,6 +507,9 @@ sub _fetch {
         }
     }
 
+    # disable logcache by request parameter
+    local $ENV{'THRUK_NOLOGCACHE'} = 1 if (defined $c->req->parameters->{'logcache'} && $c->req->parameters->{'logcache'} == 0);
+
     my $data;
     my $found = 0;
     my $request_method = $method || $c->req->method;
@@ -765,7 +768,7 @@ sub _apply_filter {
     my($filter)       = _get_filter($c, $stage);
     my $alias_columns = get_aliased_columns($c);
     if(scalar @{$filter} == 0) {
-        _debug("skipping empty %s filter", $stage != PRE_STATS ? 'post-stats' : 'data');
+        _debug("skipping empty %s filter", $stage != PRE_STATS ? 'post-stats' : 'data') if Thruk::Base->debug;
         return($data);
     }
     my $nr     = 1;
