@@ -810,7 +810,7 @@ sub _omd_update_step2 {
         my $err = $@;
         printf("*** hook_update_post_local rc: %d\n", ($rc//-1));
         if($err) {
-            _info("hook_update_post_local failed: ".$err
+            _info("hook_update_post_local failed: ".$err);
         }
         if($out) {
             chomp($out);
