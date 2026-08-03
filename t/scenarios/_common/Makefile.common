@@ -60,7 +60,7 @@ wait_start_failed_extra:
 test: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) disable_watcher_from_tests
-	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t \
+	cd ../../.. && PERL5LIB=lib PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(0)" $(shell pwd)/t/*.t \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_test \
@@ -72,7 +72,7 @@ test: wait_start
 test_verbose: wait_start
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) disable_watcher_from_tests
-	cd ../../.. && PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t \
+	cd ../../.. && PERL5LIB=lib PERL_DL_NONLAZY=1 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness(1)" $(shell pwd)/t/*.t \
 		|| ( cd $(shell pwd) && $(MAKE) failed_test )
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	$(MAKE) extra_test_verbose \

@@ -144,6 +144,7 @@ sub _dbh {
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $self->{'postgres'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, pg_enable_utf8 => 1});
         $self->{'postgres'}->do("SET client_encoding TO 'UTF8'");
+        $self->{'postgres'}->do("SET client_min_messages TO 'warning'");
         &timing_breakpoint('connected');
     }
     return $self->{'postgres'};
@@ -453,7 +454,7 @@ sub _sql_extra_columns {
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
-    return "COALESCE($col, $default)";
+    return "COALESCE(CAST($col AS text), $default)";
 }
 
 sub _sql_show_indexes {
@@ -537,8 +538,8 @@ sub _db_table_stats {
 
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
-    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ?", undef, $prefix.'_log')};
-    return scalar @tables >= 1 ? 1 : 0;
+    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND (table_name = ? OR table_name = ?)", undef, $prefix.'_log', $prefix.'_status')};
+    return scalar @tables >= 2 ? 1 : 0;
 }
 
 sub _get_all_table_names {
@@ -979,7 +980,7 @@ sub _check_lock {
     # check if there is already a update / import running
     my $skip          = 0;
     eval {
-        $self->_lock_table_share($dbh, $prefix);
+        $self->_lock_table_exclusive($dbh, $prefix);
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM "'.$prefix.'_status" WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -988,17 +989,15 @@ sub _check_lock {
             }
         }
     };
-    # PostgreSQL: transaction abort on lock failure; rollback before checking error
-    eval { $dbh->rollback; } if $@;
     if($@) {
+        eval { $dbh->rollback; };
         _debug($@);
         return;
     }
     if($skip) {
+        eval { $dbh->rollback; };
         return;
     }
-
-    $self->_lock_table_exclusive($dbh, $prefix);
     my $now = time();
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $$, $$);

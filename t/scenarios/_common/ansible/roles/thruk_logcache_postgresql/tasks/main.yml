@@ -1,10 +1,12 @@
 - name: "make sure site {{ site }} is stopped"
   shell: "sudo su - {{ site }} -c 'omd stop'"
-- name: "install Perl DBD::Pg driver for site {{ site }}"
-  shell: "omd config demo change"
-  args:
-    stdin: |
-      POSTGRESQL=on
-      THRUK_LOGCACHE=on
+- name: "install perl postgres dbd"
+  include_role:
+    name: yum_apt_retry
+  vars:
+    rpm:
+      - perl-DBD-Pg
+    creates:
+      - "/usr/lib64/perl5/vendor_perl/DBD/Pg.pm"
 - name: "run initial import to avoid error when cron and playbook runs import simultaneously"
   shell: "sudo su - {{ site }} -c 'omd start core; thruk logcache import -yf; omd stop; omd umount'"

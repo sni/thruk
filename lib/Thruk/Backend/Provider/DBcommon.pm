@@ -271,7 +271,14 @@ sub get_logs {
 
     # check logcache version
     my $table_status = $self->_quote_table($prefix.'_status');
-    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    my @versions;
+    eval {
+        @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    };
+    if($@) {
+        eval { $dbh->rollback; };
+        return;
+    }
     my $cache_ver = $self->cache_version();
     if(scalar @versions < 1 || $versions[0] != $cache_ver) {
         confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0] // '0'));
@@ -704,11 +711,17 @@ sub _log_stats {
             ($index_size, $data_size, $items, $status, $msg) = $self->_db_table_stats($dbh, $key);
             if(!$msg) {
                 (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
-                if($status->{'lock_mode'}->{'value'}) {
-                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $status->{'update_pid'}->{'value'}//'?');
+                my $lock_mode  = $status->{'lock_mode'}->{'value'};
+                my $update_pid = $status->{'update_pid'}->{'value'};
+                if($lock_mode && $update_pid && !kill(0, $update_pid)) {
+                    $lock_mode = '';
+                }
+                if($lock_mode) {
+                    $msg = sprintf("running %s since %s (pid: %s)", $lock_mode, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $update_pid//'?');
                 } else {
                     $msg = "OK";
                 }
+                $status->{'_active_lock_mode'} = $lock_mode;
             }
         }
         push @result, {
@@ -727,7 +740,7 @@ sub _log_stats {
             compact_duration => $status->{'compact_duration'}->{'value'}    // '',
             compact_till     => $status->{'compact_till'}->{'value'}        // '',
             last_entry       => $last_entry                                 // '',
-            mode             => $status->{'lock_mode'}->{'value'}           // '',
+            mode             => $status->{'_active_lock_mode'}              // '',
             status           => $msg,
         };
     }

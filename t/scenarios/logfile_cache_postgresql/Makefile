@@ -1,4 +1,4 @@
-export TEST_POSTGRESQL=postgresql://thruk:thruk@127.0.0.4:65432/thruk
+export TEST_POSTGRESQL=postgresql://thruk:thruk@127.0.0.3:65432/thruk
 
 include ../_common/Makefile.common
 
@@ -17,4 +17,4 @@ extra_test_verbose:
 	docker compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /usr/local/bin/local_test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
 psql:
-	psql -U thruk -h 127.0.0.4 -p 65432 thruk
+	psql -U thruk -h 127.0.0.3 -p 65432 thruk
