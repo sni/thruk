@@ -1,0 +1,29 @@
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.4:60080:80"
+        - "127.0.0.4:60443:443"
+        - "127.0.0.4:60557:6557"
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
+  backend:
+    build: backend/
+    ports: []
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
+  db:
+     image: postgres:18
+     restart: always
+     environment:
+        POSTGRES_USER: thruk
+        POSTGRES_PASSWORD: thruk
+        POSTGRES_DB: thruk
+     ports:
+        - "127.0.0.4:65432:5432"
