@@ -2981,10 +2981,11 @@ t/scenarios/lmd_federation_multitier_e2e/t/103-logcache.t
 t/scenarios/lmd_federation_multitier_e2e/t/104-bp.t
 t/scenarios/lmd_federation_multitier_e2e/t/105-config-tool.t
 t/scenarios/lmd_federation_multitier_e2e/t/106-sections.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/backends.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/configtool.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/node-control.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/10-backends.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/20-rest.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/30-configtool.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/40-logcache.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/50-node-control.t
 t/scenarios/lmd_federation_multitier_e2e/thruk.conf
 t/scenarios/lmd_federation_multitier_e2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier1a/1.tbp

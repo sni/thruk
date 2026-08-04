@@ -1834,12 +1834,12 @@ sub _do_on_peers {
     }
     elsif ( $function eq 'get_hostgroups' ) {
         $result = {} if $num_selected_backends == 0;
-        $data = $self->_merge_hostgroup_answer($result);
+        $data = $self->_merge_hostgroup_servicegroup_answer($result);
         $must_resort = 1;
     }
     elsif ( $function eq 'get_servicegroups' ) {
         $result = {} if $num_selected_backends == 0;
-        $data = $self->_merge_servicegroup_answer($result);
+        $data = $self->_merge_hostgroup_servicegroup_answer($result);
         $must_resort = 1;
     }
     else {
@@ -2419,13 +2419,13 @@ sub _merge_answer {
 }
 
 ##########################################################
-# merge hostgroups and merge 'members' of matching groups
-sub _merge_hostgroup_answer {
+# merge hostgroups or servicegroups and merge 'members' of matching groups
+sub _merge_hostgroup_servicegroup_answer {
     my($self, $data) = @_;
     my $c      = $Thruk::Globals::c;
     my $groups = {};
 
-    $c->stats->profile( begin => "_merge_hostgroup_answer()" );
+    $c->stats->profile( begin => "_merge_hostgroup_servicegroup_answer()" );
 
     # iterate over original peers to retain order
     for my $peer ( @{ $self->get_peers() } ) {
@@ -2442,49 +2442,19 @@ sub _merge_hostgroup_answer {
             }
 
             $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
-            $groups->{ $row->{'name'} }->{'num_hosts'} += $row->{'num_hosts'} if defined $row->{'num_hosts'};
             $groups->{ $row->{'name'} }->{'backends_hash'}->{$key} = $name;
-        }
-    }
 
-    # set backends used
-    for my $group ( values %{$groups} ) {
-        $group->{'peer_name'} = [sort values %{ $group->{'backends_hash'}}];
-        $group->{'peer_key'}  = [sort keys %{ $group->{'backends_hash'}}];
-        delete $group->{'backends_hash'};
-    }
-    my @return = values %{$groups};
-
-    $c->stats->profile( end => "_merge_hostgroup_answer()" );
-
-    return ( \@return );
-}
-
-##########################################################
-# merge servicegroups and merge 'members' of matching groups
-sub _merge_servicegroup_answer {
-    my($self, $data) = @_;
-    my $c      = $Thruk::Globals::c;
-    my $groups = {};
-
-    $c->stats->profile( begin => "_merge_servicegroup_answer()" );
-
-    # iterate over original peers to retain order
-    for my $peer ( @{ $self->get_peers() } ) {
-        my $key  = $peer->peer_key();
-        my $name = $peer->peer_name();
-        next if !defined $data->{$key};
-        confess("not an array ref") if ref $data->{$key} ne 'ARRAY';
-
-        for my $row ( @{ $data->{$key} } ) {
-            if( !defined $groups->{ $row->{'name'} } ) {
-                $groups->{ $row->{'name'} } = $row;
-                $groups->{ $row->{'name'} }->{'backends_hash'} = { $key => $name };
-                next;
+            # merge all numeric attributes
+            for my $attr (sort keys %{$row}) {
+                if($attr =~ m/^num_/mxo) {
+                    $groups->{ $row->{'name'} }->{$attr} = 0 unless defined $groups->{ $row->{'name'} }->{$attr};
+                    $groups->{ $row->{'name'} }->{$attr} += $row->{$attr} // 0;
+                }
+                if($attr =~ m/^worst_/mxo) {
+                    $groups->{ $row->{'name'} }->{$attr} = 0 unless defined $groups->{ $row->{'name'} }->{$attr};
+                    $groups->{ $row->{'name'} }->{$attr} = $row->{$attr} if !defined $groups->{ $row->{'name'} }->{$attr} || $groups->{ $row->{'name'} }->{$attr} < $row->{$attr};
+                }
             }
-
-            $groups->{ $row->{'name'} }->{'members'} = [ @{ $groups->{ $row->{'name'} }->{'members'} }, @{ $row->{'members'} } ] if $row->{'members'};
-            $groups->{$row->{'name'}}->{'backends_hash'}->{$key} = $name;
         }
     }
 
@@ -2494,10 +2464,9 @@ sub _merge_servicegroup_answer {
         $group->{'peer_key'}  = [sort keys %{ $group->{'backends_hash'}}];
         delete $group->{'backends_hash'};
     }
-
     my @return = values %{$groups};
 
-    $c->stats->profile( end => "_merge_servicegroup_answer()" );
+    $c->stats->profile( end => "_merge_hostgroup_servicegroup_answer()" );
 
     return ( \@return );
 }

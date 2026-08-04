@@ -13,6 +13,8 @@ next:
             - switch to password by env
           - Log Cache:
             - add postgres support (#1513)
+          - Rest:
+            - fix merging host/servicegroups response
 
 3.28     Thu Apr  9 19:18:58 CEST 2026
           - thruk_local.d settings overrule cgi.cfg values
