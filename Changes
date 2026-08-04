@@ -4,17 +4,21 @@ next:
           - fix mouse glitch on quick command menu (#1502)
           - fix host state on main page (#1515)
           - fix lock issue when user tries to login with invalid username (GHSA-3p2g-8g6m-r272)
-          - Teams:
-            - fix authentication by unexposed custom variables
           - add role specific config overrrides
           - improve search performance
           - fix recurring downtimes added multiple times if some backends were down
+          - add service time hint when editing crontab based schedules
+          - Teams:
+            - fix authentication by unexposed custom variables
           - Agents:
             - switch to password by env
           - Log Cache:
             - add postgres support (#1513)
           - Rest:
             - fix merging host/servicegroups response
+            - add support for logcache=0 parameter on log based queries
+          - Reports:
+            - adding an Icelandic translation (#1498)
 
 3.28     Thu Apr  9 19:18:58 CEST 2026
           - thruk_local.d settings overrule cgi.cfg values
