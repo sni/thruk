@@ -4742,6 +4742,7 @@ function updateCsvPermanentLink() {
 
 /* compare two objects and print diff
  * returns true if they differ and false if they are equal
+ * does the same as is_deep()
  */
 function obj_diff(o1, o2, prefix) {
     if(prefix == undefined) { prefix = ""; }
@@ -6951,12 +6952,21 @@ function action_menu_close() {
  * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
 *******************************************************************************/
 function parse_perf_data(perfdata) {
-    var matches   = String(perfdata).match(/([^\s]+|'[^']+')=([^\s]*)/gi);
+    perfdata = String(perfdata);
+
+    // strip alternative command name / template
+    perfdata = perfdata.replace(/\s*\[([a-zA-Z\_\-\.\ ]+)\]\s*$/, "");
+
+    // strip error messages of the form [error msg=<nr>]
+    perfdata = perfdata.replace(/\[[^\]]*=[^\]]*\]/g, '');
+
+    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
+    var matches   = perfdata.match(perfRegex);
     var perf_data = [];
     if(!matches) { return([]); }
     for(var nr=0; nr<matches.length; nr++) {
         try {
-            var tmp = matches[nr].split(/=/);
+            var tmp = matches[nr].trim().split(/=/);
             tmp[1] += ';;;;';
             tmp[1]  = tmp[1].replace(/,/g, '.');
             tmp[1]  = tmp[1].replace(/;U;/g, '');

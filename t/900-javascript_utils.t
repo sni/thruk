@@ -18,21 +18,17 @@ ok($jsfiles[0], $jsfiles[0]);
 js_eval_ok($jsfiles[0]);
 
 #################################################
-# tests from javascript_tests file
-my @functions = Thruk::Utils::IO::read('t/data/javascript_tests.js') =~ m/^\s*function\s+(test\w+)/gmx;
-ok(scalar @functions > 0, "read ".(scalar @functions)." functions from javascript_test.js");
-js_eval_ok('t/data/javascript_tests.js');
-for my $f (@functions) {
-    js_is("$f()", '1', "$f()");
-}
+js_eval_extracted('templates/login.tt');
 
 #################################################
-# some more functions
-js_eval_extracted('templates/login.tt');
-@functions = Thruk::Utils::IO::read_as_list('t/data/javascript_tests_login_tt.js') =~ m/^\s*function\s+(test\w+)/gmx;
-js_eval_ok('t/data/javascript_tests_login_tt.js');
-for my $f (@functions) {
-    js_is("$f()", '1', "$f()");
+# tests from javascript_tests file
+for my $file (glob('t/data/javascript_tests_*.js')) {
+    my @functions = Thruk::Utils::IO::read($file) =~ m/^\s*function\s+(test\w+)/gmx;
+    ok(scalar @functions > 0, "read ".(scalar @functions)." functions from $file");
+    js_eval_ok($file);
+    for my $f (@functions) {
+        js_is("$f()", '1', "$f()");
+    }
 }
 
 #################################################
