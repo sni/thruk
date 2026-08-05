@@ -125,17 +125,17 @@ sub finish_servers_list {
         }
     }
 
-    # allow addons to change server list
+    # sort servers by section, host_name, site
+    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
+    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
+
+    # allow addons to change server list (incl. sorting differently)
     for my $mod (@{$modules}) {
         if($mod->can("adjust_server_list")) {
             my($s) = $mod->adjust_server_list($c, $servers);
             $servers = $s if $s;
         }
     }
-
-    # sort servers by section, host_name, site
-    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
-    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
 
     return($servers, $columns);
 }
