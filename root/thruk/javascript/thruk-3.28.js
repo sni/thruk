@@ -3854,6 +3854,19 @@ function do_table_search(preserve_hash) {
     }
     if(preserve_hash) {
         set_hash(value, 2);
+
+        // update for url too in case user hits enter
+        var form = jQuery('#'+table_search_input_id).parents("FORM");
+        if(form && form.length > 0) {
+            form = form[0];
+            var action  = form.action.replace(/\#.*$/, '');
+            var pageUrl = getCurrentUrl(false);
+            var tmp     = pageUrl.split("#", 2);
+            // form uses a same page '#' action
+            if(action == tmp[0]) {
+                form.action = "#"+tmp[1];
+            }
+        }
     }
     value = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
