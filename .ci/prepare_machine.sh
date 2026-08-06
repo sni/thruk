@@ -77,9 +77,9 @@ test -s /etc/apt/trusted.gpg.d/naemon.asc ||
 
 # list of mirrors: https://mirrors.opensuse.org/
 MIRROR_URLS="
-    http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/
-    http://ftp.gwdg.de/pub/opensuse/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/
-    https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/
+    http://download.opensuse.org/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
+    http://ftp.gwdg.de/pub/opensuse/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
+    https://slc-mirror.opensuse.org/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
 "
 for mirror in $MIRROR_URLS; do
     curl -sS --max-time 10 $mirror >/dev/null && \
