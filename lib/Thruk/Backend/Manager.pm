@@ -1221,6 +1221,10 @@ sub _renew_logcache {
         push @{$backends2import}, $key;
     }
 
+    my $forward_url = $c->req->url;
+    $forward_url =~ s/([?&])logcache_update=\d+&?/$1/g;
+    $forward_url =~ s/[?&]$//;
+
     if($c->config->{'logcache_import_command'}) {
         local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});
         local $ENV{'THRUK_LOGCACHE'} = $c->config->{'logcache'};
@@ -1231,7 +1235,7 @@ sub _renew_logcache {
             my $job = Thruk::Utils::External::cmd($c,
                                             { cmd        => $c->config->{'logcache_import_command'},
                                               message    => 'please stand by while your initial logfile cache will be created...',
-                                              forward    => $c->req->url,
+                                              forward    => $forward_url,
                                               nofork     => $noforks,
                                               background => 1,
                                             });
@@ -1254,7 +1258,7 @@ sub _renew_logcache {
             my $job = Thruk::Utils::External::perl($c,
                                              { expr       => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
                                                message    => 'please stand by while your initial logfile cache will be created...',
-                                               forward    => $c->req->url,
+                                               forward    => $forward_url,
                                                backends   => $backends2import,
                                                nofork     => $noforks,
                                                background => 1,
