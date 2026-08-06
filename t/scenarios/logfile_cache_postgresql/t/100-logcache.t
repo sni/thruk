@@ -40,7 +40,7 @@ for my $x (1..90)  {
 
 # import logs
 TestUtils::test_page(
-    'url'     => '/thruk/cgi-bin/showlog.cgi?logcache_update=1',
+    'url'     => '/thruk/cgi-bin/showlog.cgi?logcache_update=1&entries=all',
     'like'    => [],
     'follow'  => 1,
     'waitfor' => 'LOG\ VERSION',
@@ -51,7 +51,7 @@ TestUtils::test_page(
     'like'    => [],
 );
 TestUtils::test_page(
-    'url'    => '/thruk/cgi-bin/showlog.cgi',
+    'url'    => '/thruk/cgi-bin/showlog.cgi?entries=all',
     'like'   => ["Event Log", "LOG VERSION: 2.0", "Local time is"],
 );
 TestUtils::test_page(

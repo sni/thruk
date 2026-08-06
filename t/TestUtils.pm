@@ -308,6 +308,13 @@ sub test_page {
                 my $location = $request->{'_headers'}->{'location'};
                 wait_for_job($location);
                 $request = _request($location, undef, undef, $opts->{'agent'});
+                my $redirects = 0;
+                while(my $loc = $request->{'_headers'}->{'location'}) {
+                    if($loc !~ m/^https?:\/\//gmxo) { $loc = _relative_url($loc, $request->base()->as_string()); }
+                    $request = _request($loc, undef, undef, $opts->{'agent'});
+                    $redirects++;
+                    last if $redirects > 10;
+                }
                 $return->{'content'} = $request->content;
                 if($request->is_error) {
                     fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
@@ -897,6 +904,10 @@ sub make_test_hash {
 #########################
 sub _relative_url {
     my($location, $url) = @_;
+    if($location =~ m|^/|) {
+        my($proto_host) = $url =~ m|^(https?://[^/]+)|;
+        return $proto_host . $location if $proto_host;
+    }
     my $newloc = $url;
     $newloc    =~ s/^(.*\/).*$/$1/gmxo;
     $newloc    .= $location;
@@ -953,11 +964,11 @@ sub _external_request {
     $retry = 1 unless defined $retry;
 
     if($url !~ m/^http/) {
-        $url =~ s#//#/#gmx;
         $url =~ s#^/demo##gmx;
         if($ENV{'PLACK_TEST_EXTERNALSERVER_URI'}) {
             $url = $ENV{'PLACK_TEST_EXTERNALSERVER_URI'}.$url;
         }
+        $url =~ s#(?<!:)//#/#gmx;
     }
 
     our($cookie_jar, $cookie_file);
