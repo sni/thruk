@@ -2,7 +2,7 @@ function test1() {
     var str = 'a=1&b=2&c=3&c=4&d=5&d=6&d=7&e';
     var obj = toQueryParams(str);
     if(str != toQueryString(obj)) {
-        diag("failed: " + str + " != " + toQueryString(obj));
+        console.error("failed: " + str + " != " + toQueryString(obj));
         return 0;
     }
     return 1;
@@ -12,7 +12,7 @@ function test1a() {
     var str = 'a=1&b=&c=3&c=4&d=5&d=6&d=7&e';
     var obj = toQueryParams(str);
     if(str != toQueryString(obj)) {
-        diag("failed: " + str + " != " + toQueryString(obj));
+        console.error("failed: " + str + " != " + toQueryString(obj));
         return 0;
     }
     return 1;
@@ -32,7 +32,7 @@ function test_allowed_frames() {
     for(var i=0; i<tests.length; i++) {
         var t = tests[i];
         if(is_frame_url_allowed(t.url, t.allowed) !== t.expect) {
-            diag("is_frame_url_allowed "+i+" failed for url: "+t.url);
+            console.error("is_frame_url_allowed "+i+" failed for url: "+t.url);
             return 0;
         }
     }
@@ -44,8 +44,8 @@ function test_uriWithI() {
     var url2 = uriWith(url1, {'columns': ["col1", "col2" ]});
     var exp  = "http://localhost:3000/thruk/r/csv/services?columns=col1&columns=col2";
     if(url2 != exp) {
-        diag("expected: " + exp );
-        diag("but got:  " + url2);
+        console.error("expected: " + exp );
+        console.error("but got:  " + url2);
         return 0;
     }
 
@@ -57,16 +57,16 @@ function test_uriWithII() {
     var url2 = uriWith(url1, {'columns': ["col1", "col2" ]});
     var exp  = "http://localhost:3000/thruk/r/csv/services?columns=col1&columns=col2&limit=10";
     if(url2 != exp) {
-        diag("expected: " + exp );
-        diag("but got:  " + url2);
+        console.error("expected: " + exp );
+        console.error("but got:  " + url2);
         return 0;
     }
 
     var url2 = uriWith(url1, {'columns': ["col1" ]}, { 'limit': null });
     var exp  = "http://localhost:3000/thruk/r/csv/services?columns=col1";
     if(url2 != exp) {
-        diag("expected: " + exp );
-        diag("but got:  " + url2);
+        console.error("expected: " + exp );
+        console.error("but got:  " + url2);
         return 0;
     }
 

@@ -1412,7 +1412,7 @@ sub _js_diag_error {
     my($e, $diag) = @_;
 
     if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
-        return unless $ENV{'HARNESS_VERBOSE'};
+        return unless ($ENV{'HARNESS_VERBOSE'} || $ENV{'HARNESS_IS_VERBOSE'});
         diag("not failing on debug ".$e->{'type'}." console message");
     } else {
         fail("got js error");
