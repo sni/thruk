@@ -279,9 +279,13 @@ sub get_logs {
         eval { $dbh->rollback; };
         return;
     }
+    if(scalar @versions < 1) {
+        eval { $dbh->rollback; };
+        return;
+    }
     my $cache_ver = $self->cache_version();
-    if(scalar @versions < 1 || $versions[0] != $cache_ver) {
-        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0] // '0'));
+    if($versions[0] != $cache_ver) {
+        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0]));
     }
 
     # check compact timerange and set a warning flag
@@ -871,7 +875,7 @@ sub _log_check_inconsistency {
         my $dbh = $peer->logcache->_dbh;
 
         my $table = $self->_quote_table($prefix."_host");
-        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count > 1");
+        my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table." group by host_name having count(host_id) > 1");
         $sth->execute;
         my $num = 0;
         for my $r (@{$sth->fetchall_arrayref()}) {
@@ -889,10 +893,13 @@ sub _log_check_inconsistency {
 sub _log_repair_inconsistency {
     my($self, $c, $prefix, $total) = @_;
     my $peer = $c->db->get_peer_by_key($prefix);
+    next unless $peer->{'logcache'};
+    $peer->logcache->reconnect();
     my $dbh  = $peer->logcache->_dbh;
-
     my $table_host = $self->_quote_table($prefix."_host");
-    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count > 1");
+    my $table_log  = $self->_quote_table($prefix."_log");
+
+    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count(host_id) > 1");
     $sth->execute;
 
     my $sp  = length("$total");
@@ -1031,8 +1038,8 @@ sub _import_logs {
             my $statements = $self->_get_create_schema($prefix);
             for my $stm (@{$statements}) {
                 $dbh->do($stm);
+                $dbh->commit();
             }
-            $dbh->commit || confess $dbh->errstr;
             $recreated = 1;
             _info("done");
         } else {
