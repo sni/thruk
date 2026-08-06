@@ -346,13 +346,13 @@ sub _get_create_schema {
 
 sub _lock_table_share {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN SHARE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
 sub _lock_table_exclusive {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN EXCLUSIVE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
@@ -964,9 +964,16 @@ sub _create_tables_if_not_exist {
 sub _create_tables {
     my($self, $dbh, $prefix) = @_;
     for my $stm (@{$self->_get_create_schema($prefix)}) {
-        $dbh->do($stm);
+        eval {
+            $dbh->do($stm);
+            $dbh->commit();
+        };
+        if($@) {
+            my $err = $@;
+            $dbh->rollback();
+            confess("create table statement failed: ".$stm."\nerror: ".$err);
+        }
     }
-    $dbh->commit || confess $dbh->errstr;
     return;
 }
 
