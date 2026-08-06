@@ -289,7 +289,16 @@ function init_page() {
         }
     } catch(err) { console.log(err); }
 
-    jQuery(".autofocus:visible").first().focus();
+    jQuery(".autofocus:visible").first().each(function(i, el) {
+        var autocomplete = jQuery(el).attr("autocomplete");
+        if(autocomplete != "off") {
+            jQuery(el).attr("autocomplete", "off");
+        }
+        jQuery(el).focus();
+        if(autocomplete != "off") {
+            jQuery(el).attr("autocomplete", "on");
+        }
+    });
 }
 
 function cookieSaveScreenSize() {
@@ -347,7 +356,7 @@ function init_deletable_inputs() {
                     }
                 })
             )
-            .on("keyup focus change", function() {
+            .on("keyup focus change input", function() {
                 var This = this;
                 jQuery(This).next("BUTTON").each(function(x, b) {
                     if(jQuery(This).val() == "") {
