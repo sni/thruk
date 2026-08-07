@@ -113,18 +113,19 @@ sub index {
         push @{$filter}, { message => { '!~~' => $exclude_pattern }};
     }
     if($service ne '' && $service ne 'all') {
-        push @{$filter}, {
-                -or => [
-                        { -and => [
-                            $host ? { host_name   => $host } : undef,
-                            { service_description => $service},
-                        ]},
-                        $c->config->{'logcache'} ? {} : { -and => [
-                            {type    => 'EXTERNAL COMMAND' },
-                            {message => { '~~' => '(\s|;)'.($host ? quotemeta($host) : '.*').';'.quotemeta($service).'(;|$)' }},
-                        ]},
-                ],
-        };
+        my @svc_filter = (
+            { -and => [
+                $host ? { host_name   => $host } : undef,
+                { service_description => $service},
+            ]},
+        );
+        if(!$c->stash->{'use_logcache'}) {
+            push @svc_filter, { -and => [
+                {type    => 'EXTERNAL COMMAND' },
+                {message => { '~~' => '(\s|;)'.($host ? quotemeta($host) : '.*').';'.quotemeta($service).'(;|$)' }},
+            ]};
+        }
+        push @{$filter}, { -or => \@svc_filter };
         $backends = Thruk::Utils::get_affected_backends(
             $c->db->get_services(filter => [ [Thruk::Utils::Auth::get_auth_filter($c, 'services')], { host_name => $host, description => $service } ], columns => [qw/host_name/]),
         );

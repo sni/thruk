@@ -1,0 +1,22 @@
+export TEST_POSTGRESQL=postgresql://thruk:thruk@127.0.0.3:65432/thruk
+export THRUK_TEST_AUTH = omdadmin:omd
+export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
+
+include ../_common/Makefile.common
+
+extra_wait_start:
+	for x in $$(seq 120); do \
+	   if [ $$($(THRUK) logcache stats 2>&1 | grep -c failed:) -eq 0 ]; then break; else sleep 0.5; fi; \
+	done
+	$(THRUK) logcache stats
+
+extra_test:
+	$(THRUK) logcache stats | grep " core "
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /usr/local/bin/local_test.sh 0 $(filter-out $@,$(MAKECMDGOALS))
+
+extra_test_verbose:
+	$(THRUK) logcache stats | grep " core "
+	docker compose exec $(DOCKER_COMPOSE_TTY) --user root backend sudo -iu demo /usr/local/bin/local_test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
+
+psql:
+	psql -U thruk -h 127.0.0.3 -p 65432 thruk

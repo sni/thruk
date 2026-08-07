@@ -345,7 +345,6 @@ sub _get_create_schema {
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(8, 'compact_duration', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(9, 'compact_till', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(10,'lock_mode', '')",
-        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(11,'peer_name', '')",
     );
     return \@statements;
 }
@@ -391,12 +390,10 @@ sub _update_status {
 
 sub _finish_update {
     my($self, $c, $dbh, $prefix, $duration) = @_;
-    my $peer_name = Thruk::Utils::Filter::peer_name($self->{'peer_config'}->{'peer_key'});
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',NULL) ON DUPLICATE KEY UPDATE value=NULL");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(6,'update_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','') ON DUPLICATE KEY UPDATE value=''");
-    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(11,'peer_name',".$dbh->quote($peer_name).") ON DUPLICATE KEY UPDATE value=".$dbh->quote($peer_name));
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->commit || return;
     return 1;
@@ -792,7 +789,8 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        $forcestart = Thruk::Utils::parse_date($c, $options->{'start'});
+        require Thruk::Utils::DateTime;
+        $forcestart = Thruk::Utils::DateTime::parse_date($c, $options->{'start'});
     }
 
     my $backend_count = 0;
@@ -873,7 +871,8 @@ sub _import_logs {
         };
     }
 
-    if($Thruk::Backend::Provider::DBcommon::global_lock_created) {
+    our $global_lock_created;
+    if($global_lock_created) {
         unlink($c->config->{'tmp_path'}."/logcache_import.lock");
     }
 
@@ -1015,7 +1014,7 @@ sub _check_lock {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
+        our $global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 
