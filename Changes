@@ -9,6 +9,8 @@ next:
           - fix recurring downtimes added multiple times if some backends were down
           - add service time hint when editing crontab based schedules
           - fix search inputs loosing value when hitting enter
+          - Config Tool:
+            - report invalid boolean object attributes instead of a perl warning
           - Teams:
             - fix authentication by unexposed custom variables
           - Agents:
