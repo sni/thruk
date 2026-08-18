@@ -361,7 +361,7 @@ sub get_sites {
         $options{'columns'} = [qw/
             peer_key peer_name key name addr status bytes_send bytes_received queries
             last_error last_update last_online response_time idling last_query
-            parent section lmd_last_cache_update
+            parent section lmd_last_cache_update flags
             federation_key federation_name federation_addr federation_type federation_version
         /];
         if(defined $options{'extra_columns'}) {

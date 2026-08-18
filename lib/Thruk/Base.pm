@@ -257,10 +257,10 @@ returns true if any of elements is found in list.
 =cut
 
 sub array_contains {
-    my($els, $array) = @_;
+    my($search, $list) = @_;
 
-    for my $el (@{Thruk::Base::list($els)}) {
-        for my $l (@{$array}) {
+    for my $el (@{Thruk::Base::list($search)}) {
+        for my $l (@{$list}) {
             return 1 if $l eq $el;
         }
     }
