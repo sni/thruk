@@ -1594,6 +1594,7 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 |federation_name                   |            |          | contains the real name if using federation
 |federation_type                   |            |          | contains the real backend type if using federation
 |federation_version                |            |          | contains the real backend version if using federation
+|flags                             |            |          | contains the lmd flags for this backend
 |idling                            |            |          | flag if the connection is in idle mode
 |key                               |            |          | primary id of this site
 |last_error                        | time       |          | last error message
