@@ -920,7 +920,7 @@ sub _request {
 
     $url =~ s|^\Qhttp://localhost.local/\E|/|gmx;
     if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $url =~ m/^https?:\/\//mx) {
-        return(_external_request(@_));
+        return(_external_request($url, $start_to, $post, $agent, $method, $file_upload, undef, $headers));
     }
     # add pseudo domain, otherwise cookies from set_cookie() won't work
     $url = 'http://localhost.local'.$url unless $url =~ m|^https?:|mx;
