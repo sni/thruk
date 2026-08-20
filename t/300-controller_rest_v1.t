@@ -126,7 +126,7 @@ for my $url (@{$hash_pages}) {
 for my $url_orig (@{$list_pages}) {
     my $url = $url_orig;
     SKIP: {
-        skip "skipped, logcache is disabled ", 8 if ($url =~ m/logcache/mx && !$config->{'logcache'});
+        skip "skipped, logcache is disabled ", 9 if ($url =~ m/logcache/mx && !$config->{'logcache'});
 
         if($url =~ m/logs/mx) {
             $url .= '?limit=100';
@@ -138,7 +138,8 @@ for my $url_orig (@{$list_pages}) {
             'headers'      => { 'X-Thruk-Output-Metadata-Only' => 'true' }
         );
         my $data = decode_json($page->{'content'});
-        is(ref $data, 'ARRAY', "json result is an array: ".$url);
+        is(ref $data, 'HASH', "json result is a hash: ".$url);
+        is(ref $data->{'meta'}->{'columns'}, 'ARRAY', "json result has columns meta: ".$url);
     };
 }
 
@@ -150,6 +151,7 @@ for my $url (@{$hash_pages}) {
     );
     my $data = decode_json($page->{'content'});
     is(ref $data, 'HASH', "json result is a hash: ".$url);
+    is(ref $data->{'meta'}->{'columns'}, 'ARRAY', "json result has columns meta: ".$url);
 }
 
 ################################################################################
