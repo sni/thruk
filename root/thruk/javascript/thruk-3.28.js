@@ -289,7 +289,16 @@ function init_page() {
         }
     } catch(err) { console.log(err); }
 
-    jQuery(".autofocus:visible").first().focus();
+    jQuery(".autofocus:visible").first().each(function(i, el) {
+        var autocomplete = jQuery(el).attr("autocomplete");
+        if(autocomplete != "off") {
+            jQuery(el).attr("autocomplete", "off");
+        }
+        jQuery(el).focus();
+        if(autocomplete != "off") {
+            jQuery(el).attr("autocomplete", "on");
+        }
+    });
 }
 
 function cookieSaveScreenSize() {
@@ -347,7 +356,7 @@ function init_deletable_inputs() {
                     }
                 })
             )
-            .on("keyup focus change", function() {
+            .on("keyup focus change input", function() {
                 var This = this;
                 jQuery(This).next("BUTTON").each(function(x, b) {
                     if(jQuery(This).val() == "") {
@@ -3552,14 +3561,124 @@ function cron_change_date(id) {
     } else {
         showElement('hour_select_'+nr);
     }
+    cron_schedule_tz_refresh();
+}
+
+/* Cron schedule TZ: HH:MM is server time; optional browser-equivalence preview. */
+function cron_schedule_tz_offset_ms(cronTz, browserTz) {
+    var d, cron, br;
+    if(!cronTz || !browserTz || cronTz === browserTz) {
+        return(0);
+    }
+    try {
+        d    = new Date();
+        cron = new Date(d.toLocaleString('en-US', { timeZone: cronTz }));
+        br   = new Date(d.toLocaleString('en-US', { timeZone: browserTz }));
+        return(Math.round((br.getTime() - cron.getTime()) / 60000) * 60000);
+    } catch(e) {
+        return(0);
+    }
+}
+
+function cron_schedule_tz_pad(n) {
+    n = parseInt(n, 10);
+    return((n < 10 ? '0' : '') + n);
+}
+
+function cron_schedule_tz_refresh() {
+    var tbl, cronTz, browserTz, offsetMs, rows, i, m, nr, type, typeSel, hEl, mEl;
+    var preview, suffix, h, mi, d, hasRows, needsDayHint, infoEl, dayHint;
+    tbl = document.getElementById('cron_entries');
+    if(!tbl || !tbl.getAttribute('data-show-schedule-tz')) {
+        return;
+    }
+    cronTz     = tbl.getAttribute('data-cron-tz') || '';
+    browserTz  = (typeof getBrowserTimezone === 'function' ? getBrowserTimezone() : '') || '';
+    offsetMs   = cron_schedule_tz_offset_ms(cronTz, browserTz);
+    hasRows    = false;
+    needsDayHint = false;
+    rows = tbl.querySelectorAll('tr[id^="send_pane_"]');
+    for(i = 0; i < rows.length; i++) {
+        m = rows[i].id.match(/^send_pane_(\d+)$/);
+        if(!m || rows[i].style.display === 'none' || parseInt(m[1], 10) < 1) {
+            continue;
+        }
+        hasRows = true;
+        nr      = m[1];
+        typeSel = document.getElementById('send_type_' + nr);
+        type    = typeSel ? typeSel.value : '';
+        if(type !== 'day') {
+            needsDayHint = true;
+        }
+        suffix = document.getElementById('cron_tz_suffix_' + nr);
+        if(suffix) {
+            suffix.style.display = (type === 'cust') ? 'none' : '';
+        }
+        preview = document.getElementById('cron_tz_preview_' + nr);
+        if(!preview) {
+            continue;
+        }
+        if(offsetMs === 0 || !browserTz) {
+            preview.style.display = 'none';
+            preview.textContent   = '';
+            continue;
+        }
+        preview.style.display = '';
+        if(type === 'cust') {
+            preview.textContent = 'Custom cron uses server timezone (' + cronTz + ').';
+            continue;
+        }
+        hEl = document.getElementById('send_hour_' + nr);
+        mEl = document.getElementById('send_minute_' + nr);
+        h   = hEl ? parseInt(hEl.value, 10) : 0;
+        mi  = mEl ? parseInt(mEl.value, 10) : 0;
+        d   = new Date();
+        d.setHours(h, mi, 0, 0);
+        d   = new Date(d.getTime() + offsetMs);
+        preview.textContent = cron_schedule_tz_pad(h) + ':' + cron_schedule_tz_pad(mi) +
+            ' server (' + cronTz + ') = ' +
+            cron_schedule_tz_pad(d.getHours()) + ':' + cron_schedule_tz_pad(d.getMinutes()) +
+            ' in your browser (' + browserTz + ')';
+    }
+    infoEl = document.getElementById('cron_schedule_tz_info');
+    if(infoEl) {
+        infoEl.style.display = hasRows ? '' : 'none';
+    }
+    dayHint = document.getElementById('cron_schedule_tz_dayhint');
+    if(dayHint) {
+        dayHint.style.display = (hasRows && needsDayHint) ? '' : 'none';
+    }
+}
+
+function init_cron_schedule_tz() {
+    var tbl = document.getElementById('cron_entries');
+    if(!tbl || !tbl.getAttribute('data-show-schedule-tz') || tbl._cronTzBound) {
+        return;
+    }
+    tbl._cronTzBound = true;
+    tbl.addEventListener('change', function(ev) {
+        if(ev.target && ev.target.name && ev.target.name.match(/^send_(hour|minute|type)_/)) {
+            cron_schedule_tz_refresh();
+        }
+    });
+    cron_schedule_tz_refresh();
 }
 
 /* remove a row */
 function delete_cron_row(el) {
     var row = el;
+    var m, preview;
     /* find first table row */
     while(row.parentNode != undefined && row.tagName != 'TR') { row = row.parentNode; }
+    m = row.id.match(/^send_pane_(\d+)$/);
+    if(m) {
+        preview = document.getElementById('send_pane_preview_' + m[1]);
+        if(preview) {
+            preview.parentNode.deleteRow(preview.rowIndex);
+        }
+    }
     row.parentNode.deleteRow(row.rowIndex);
+    cron_schedule_tz_refresh();
     return false;
 }
 
@@ -3596,6 +3715,21 @@ function add_cron_row(tbl_id) {
     var lastRowNr      = tblBody.rows.length - 1;
     var currentLastRow = tblBody.rows[lastRowNr];
     tblBody.insertBefore(newRow, currentLastRow);
+
+    /* optional TZ preview row (template send_pane_preview_0) */
+    var previewTpl = document.getElementById('send_pane_preview_0');
+    if(previewTpl) {
+        var newPreview = previewTpl.cloneNode(true);
+        replace_ids_and_names(newPreview, new_nr);
+        var previewAll = newPreview.getElementsByTagName('*');
+        for(var pi = -1, pl = previewAll.length; ++pi < pl;) {
+            replace_ids_and_names(previewAll[pi], new_nr);
+        }
+        newPreview.style.display = '';
+        tblBody.insertBefore(newPreview, currentLastRow);
+    }
+
+    cron_change_date('send_type_' + new_nr);
 }
 
 
@@ -3720,6 +3854,19 @@ function do_table_search(preserve_hash) {
     }
     if(preserve_hash) {
         set_hash(value, 2);
+
+        // update for url too in case user hits enter
+        var form = jQuery('#'+table_search_input_id).parents("FORM");
+        if(form && form.length > 0) {
+            form = form[0];
+            var action  = form.action.replace(/\#.*$/, '');
+            var pageUrl = getCurrentUrl(false);
+            var tmp     = pageUrl.split("#", 2);
+            // form uses a same page '#' action
+            if(action == tmp[0]) {
+                form.action = "#"+tmp[1];
+            }
+        }
     }
     value = value.toLowerCase();
     jQuery.each(ids, function(nr, id) {
@@ -4617,6 +4764,7 @@ function updateCsvPermanentLink() {
 
 /* compare two objects and print diff
  * returns true if they differ and false if they are equal
+ * does the same as is_deep()
  */
 function obj_diff(o1, o2, prefix) {
     if(prefix == undefined) { prefix = ""; }
@@ -6826,12 +6974,21 @@ function action_menu_close() {
  * 88          88888888888 88      `8b 88          88888888Y"' d8'          `8b 88 d8'          `8b
 *******************************************************************************/
 function parse_perf_data(perfdata) {
-    var matches   = String(perfdata).match(/([^\s]+|'[^']+')=([^\s]*)/gi);
+    perfdata = String(perfdata);
+
+    // strip alternative command name / template
+    perfdata = perfdata.replace(/\s*\[([a-zA-Z\_\-\.\ ]+)\]\s*$/, "");
+
+    // strip error messages of the form [error msg=<nr>]
+    perfdata = perfdata.replace(/\[[^\]]*=[^\]]*\]/g, '');
+
+    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
+    var matches   = perfdata.match(perfRegex);
     var perf_data = [];
     if(!matches) { return([]); }
     for(var nr=0; nr<matches.length; nr++) {
         try {
-            var tmp = matches[nr].split(/=/);
+            var tmp = matches[nr].trim().split(/=/);
             tmp[1] += ';;;;';
             tmp[1]  = tmp[1].replace(/,/g, '.');
             tmp[1]  = tmp[1].replace(/;U;/g, '');

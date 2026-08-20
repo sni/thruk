@@ -1133,36 +1133,29 @@ return splitted performance data which can be used for tabular display
 sub split_perfdata {
     my($perfdata_str) = @_;
 
+    # strip alternative command name / template
+    $perfdata_str =~ s/\s*\[([a-zA-Z\_\-\.\ ]+)\]\s*$//gmxoi;
+
+    # strip error messages of the form [error msg=<nr>]
+    $perfdata_str =~ s/\[[^\]]*=[^\]]*\]//gmxoi;
+
     return([]) unless $perfdata_str;
 
     my $data = [];
-    my @matches  = $perfdata_str =~ m/([^\s]+|'[^']+')=([^\s]*)/gmxoi;
+    my @matches  = $perfdata_str =~ m/(([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*)/gmxoi;
     my $last_parent = '';
     my $has_parents = 0;
     my $has_warn    = 0;
     my $has_crit    = 0;
     my $has_min     = 0;
     my $has_max     = 0;
-    for(my $x = 0; $x < scalar @matches; $x=$x+2) {
-        my $key = $matches[$x];
-        my $val = $matches[$x+1];
-        my $orig = $key.'='.$val;
+    while(scalar @matches >= 8) {
+        my($orig, $key, $val, $unit, $warn, $crit, $min, $max) = splice(@matches, 0, 8);
         $key =~ s/^'//gmxo;
         $key =~ s/'$//gmxo;
         $val =~ s/,/./gmxo;
-        $val = $val.';;;;';
-        my($var, $unit, $warn, $crit, $min, $max);
-        if($val =~ m/^(\-?[\d\.]+)([^;]*?);([^;]*);([^;]*);([^;]*);([^;]*)/mxo) {
-            ($var, $unit, $warn, $crit, $min, $max) = ($1, $2, $3, $4, $5, $6);
-        }
-        elsif($val =~ m/^U;/mxi) {
-            $var  = 'Unknown';
-            $unit = '';
-            $warn = '';
-            $crit = '';
-            $min  = '';
-            $max  = '';
-        }
+        $orig = Thruk::Base::trim_whitespace($orig);
+        $key  = Thruk::Base::trim_whitespace($key);
 
         # format is described here https://github.com/flackem/check_multi/blob/next/doc/configuration/performance.md
         # in short, labels can be separated by double colons ::
@@ -1183,11 +1176,11 @@ sub split_perfdata {
         }
         $warn =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $warn;
         $crit =~ s/^(\-?[\d\.]+):(\-?[\d\.]+)$/$1-$2/mxo if $crit;
-        if(defined $var) {
+        if(defined $val) {
             my $entry = {
                 'parent'    => $last_parent,
                 'name'      => $key,
-                'value'     => $var,
+                'value'     => $val,
                 'unit'      => $unit,
                 'min'       => $min,
                 'max'       => $max,

@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 use utf8;
 
-plan tests => 31;
+plan tests => 49;
 
 BEGIN {
     use lib('t');
@@ -50,15 +50,53 @@ use_ok('Thruk::Utils::Filter');
     my $txt = '::1rtmin=0.123ms;;;;';
     ok(1, "parsing: ".$txt);
     my($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max) = Thruk::Utils::Filter::split_perfdata($txt);
-    is($has_parents, 1, "no parents");
+    is($has_parents, 1, "has parents");
     is($has_warn, 0, "has warnings");
     is($has_crit, 0, "has crit");
     is($has_min, 0, "has min");
     is($has_max, 0, "has max");
-    is(scalar @{$data}, 1, "found 2 perf label");
+    is(scalar @{$data}, 1, "found 1 perf label");
     is($data->[0]->{'name'}, 'rtmin', "parsed name");
     is($data->[0]->{'value'}, '0.123', "parsed value");
     is($data->[0]->{'unit'}, 'ms', "parsed unit");
+};
+
+###########################################################
+{
+    my $txt = 'rta=U;;;;';
+    ok(1, "parsing: ".$txt);
+    my($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max) = Thruk::Utils::Filter::split_perfdata($txt);
+    is($has_parents, 0, "no parents");
+    is($has_warn, 0, "has warnings");
+    is($has_crit, 0, "has crit");
+    is($has_min, 0, "has min");
+    is($has_max, 0, "has max");
+    is(scalar @{$data}, 1, "found 1 perf label");
+    is($data->[0]->{'name'}, 'rta', "parsed name");
+    is($data->[0]->{'value'}, 'U', "parsed value");
+    is($data->[0]->{'unit'}, '', "parsed unit");
+};
+
+###########################################################
+{
+    my $txt = 'a used=2;:2;:10;1;4 b used=3;:2;:10;1;4c used=4;:2;:10;1;4 [additional information goes here=0] d used=5;:2;:10;1;4 [alternative_command] ';
+    ok(1, "parsing: ".$txt);
+    my($data, $has_parents, $has_warn, $has_crit, $has_min, $has_max) = Thruk::Utils::Filter::split_perfdata($txt);
+    is($has_parents, 0, "no parents");
+    is($has_warn, 1, "has warnings");
+    is($has_crit, 1, "has crit");
+    is($has_min, 1, "has min");
+    is($has_max, 1, "has max");
+    is(scalar @{$data}, 4, "found 2 perf label");
+
+    my $exp  = [
+        {"name" => "a used", "orig" => "a used=2;:2;:10;1;4", "value" => 2, "unit" => "", warn => ":2", crit => ":10", parent => "", "min" => 1, "max" => 4},
+        {"name" => "b used", "orig" => "b used=3;:2;:10;1;4", "value" => 3, "unit" => "", warn => ":2", crit => ":10", parent => "", "min" => 1, "max" => 4},
+        {"name" => "c used", "orig" => "c used=4;:2;:10;1;4", "value" => 4, "unit" => "", warn => ":2", crit => ":10", parent => "", "min" => 1, "max" => 4},
+        {"name" => "d used", "orig" => "d used=5;:2;:10;1;4", "value" => 5, "unit" => "", warn => ":2", crit => ":10", parent => "", "min" => 1, "max" => 4},
+    ];
+
+    is_deeply($data, $exp, "parsed perf data is ok");
 };
 
 ###########################################################

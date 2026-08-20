@@ -595,6 +595,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "class"\ for\ tag\ <html>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <form>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "oninput"\ for\ tag\ <input>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "hidden"\ for\ tag\ <option>/imxo;
         next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
@@ -1417,7 +1418,7 @@ sub _js_diag_error {
     my($e, $diag) = @_;
 
     if($e->{'type'} && ($e->{'type'} eq 'debug' || $e->{'type'} eq 'info')) {
-        return unless $ENV{'HARNESS_VERBOSE'};
+        return unless ($ENV{'HARNESS_VERBOSE'} || $ENV{'HARNESS_IS_VERBOSE'});
         diag("not failing on debug ".$e->{'type'}." console message");
     } else {
         fail("got js error");

@@ -1671,13 +1671,14 @@ lists connected sites. Only available if LMD (`use_lmd`) is enabled.
 |addr                              | string     |          | address of the remote site
 |bytes_received                    | number     | bytes    | total bytes received from this site
 |bytes_send                        | number     | bytes    | total bytes send to this site
-|federation_addr                   | string     |          | contains the real address if using federation
-|federation_key                    | string     |          | contains the real peer key if using federation
-|federation_name                   | string     |          | contains the real name if using federation
-|federation_type                   | string     |          | contains the real backend type if using federation
-|federation_version                | string     |          | contains the real backend version if using federation
-|idling                            | boolean    |          | flag if the connection is in idle mode
-|key                               | string     |          | primary id of this site
+|federation_addr                   |            |          | contains the real address if using federation
+|federation_key                    |            |          | contains the real peer key if using federation
+|federation_name                   |            |          | contains the real name if using federation
+|federation_type                   |            |          | contains the real backend type if using federation
+|federation_version                |            |          | contains the real backend version if using federation
+|flags                             |            |          | contains the lmd flags for this backend
+|idling                            |            |          | flag if the connection is in idle mode
+|key                               |            |          | primary id of this site
 |last_error                        | time       |          | last error message
 |last_online                       | time       |          | timestamp when the site was last time online
 |last_query                        | time       |          | timestamp of the last received query for this site
@@ -2905,4 +2906,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

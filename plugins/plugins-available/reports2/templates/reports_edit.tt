@@ -145,12 +145,13 @@
             <tr>
               <th class="align-top">Schedule</th>
               <td colspan=2 class="p-1">
-                <table id="cron_entries" class="w-full">
+                [% PROCESS _cron_schedule_tz_header.tt %]
+                <table id="cron_entries" class="w-full" data-show-schedule-tz="1" data-cron-tz="[% c.config._server_timezone | html %]">
                   [% cr = { type => 'month', day => 1, week_day => '', hour => 0, minute => 0, cust => '' } %]
-                  [% PROCESS _cron_edit.tt nr=0 can_edit=1 %]
+                  [% PROCESS _cron_edit.tt nr=0 can_edit=1 show_schedule_tz=1 %]
                   [% FOREACH cr = r.send_types %]
-                      [% nr = loop.index + 1 %]
-                      [% PROCESS _cron_edit.tt can_edit=1 %]
+                    [% nr = loop.index + 1 %]
+                    [% PROCESS _cron_edit.tt can_edit=1 show_schedule_tz=1 %]
                   [% END %]
                   <tr>
                     <td colspan=4 onclick="add_cron_row('cron_entries'); return false;" class="min-w-[100px] whitespace-nowrap clickable hoverable rounded">
@@ -205,6 +206,9 @@
 </div>
 
 
+<script>
+  init_cron_schedule_tz();
+</script>
 <script>
 <!--
   var inp = jQuery('SELECT[name=template]');

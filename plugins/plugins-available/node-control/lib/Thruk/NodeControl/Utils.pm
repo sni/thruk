@@ -125,17 +125,17 @@ sub finish_servers_list {
         }
     }
 
-    # allow addons to change server list
+    # sort servers by section, host_name, site
+    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
+    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
+
+    # allow addons to change server list (incl. sorting differently)
     for my $mod (@{$modules}) {
         if($mod->can("adjust_server_list")) {
             my($s) = $mod->adjust_server_list($c, $servers);
             $servers = $s if $s;
         }
     }
-
-    # sort servers by section, host_name, site
-    map { $_->{'section'} = '' if $_->{'section'} eq 'Default' } @{$servers};
-    $servers = Thruk::Backend::Manager::sort_result({}, $servers, ['section', 'peer_name', 'host_name', 'omd_site']);
 
     return($servers, $columns);
 }
@@ -792,9 +792,9 @@ sub _omd_update_step2 {
         my $rc = -1;
         eval {
             $rc = _remote_run_hook($c, $peer, $config->{'hook_update_post'}, $env);
-            printf("*** hook_update_post rc: %d\n", $rc);
         };
         my $err = $@;
+        printf("*** hook_update_post rc: %d\n", ($rc//-1));
         if($err) {
             _info("hook_update_post failed: ".$err);
         }
@@ -806,10 +806,15 @@ sub _omd_update_step2 {
         my($rc, $out);
         eval {
             ($rc, $out) = _local_run_hook($c, $config->{'hook_update_post_local'}, $env);
-            print "*** hook_update_post_local rc: $rc\n";
         };
-        if($@) {
-            _info("hook_update_post_local failed: ".$@);
+        my $err = $@;
+        printf("*** hook_update_post_local rc: %d\n", ($rc//-1));
+        if($err) {
+            _info("hook_update_post_local failed: ".$err);
+        }
+        if($out) {
+            chomp($out);
+            printf("%s\n", $out);
         }
         $post_hooks_failed = 1 if $rc ne '0';
     }

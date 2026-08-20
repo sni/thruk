@@ -14,6 +14,7 @@ use warnings;
 use strict;
 use Time::HiRes qw/gettimeofday tv_interval/;
 
+use Thruk::Backend::Provider::DBcommon ();
 use Thruk::Constants ':peer_states';
 use Thruk::Utils ();
 use Thruk::Utils::RecurringDowntimes ();
@@ -523,18 +524,17 @@ sub _logcache_checks  {
 
     return unless defined $c->config->{'logcache'};
 
-    require Thruk::Backend::Provider::Mysql;
-    Thruk::Backend::Provider::Mysql->import;
+    my $provider = _get_class($c);
 
     my $rc      = 0;
     my $errors  = 0;
-    my @stats     = Thruk::Backend::Provider::Mysql->_log_stats($c);
-    my $to_remove = Thruk::Backend::Provider::Mysql->_log_removeunused($c, 1);
+    my @stats     = $provider->_log_stats($c);
+    my $to_remove = $provider->_log_removeunused($c, 1);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
-        if(($s->{'cache_version'}||0) != $Thruk::Backend::Provider::Mysql::cache_version) {
-            $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, ($s->{'cache_version'}//0), $Thruk::Backend::Provider::Mysql::cache_version);
+        if(($s->{'cache_version'}||0) != $Thruk::Backend::Provider::DBcommon::cache_version) {
+            $details .= sprintf("  - [logcache %s] wrong cache version: %s (expected %s, hint: recreate cache)\n", $s->{'name'}, ($s->{'cache_version'}//0), $Thruk::Backend::Provider::DBcommon::cache_version);
             $errors++;
         }
         if($s->{'last_update'} && $s->{'last_update'} < time() - 1800) {
@@ -555,7 +555,14 @@ sub _logcache_checks  {
         $details .= sprintf("  - no old tables found in logcache\n");
     } else {
         for my $key (sort keys %{$to_remove}) {
-            $details .= sprintf('  - old logcache table %s could be removed. (hint: run `thruk logcache removeunused`)'."\n", $key);
+            # try to find name from status table
+            my $name = $to_remove->{$key};
+            if($name && $name ne "1") {
+                $name = sprintf("%s (%s)", $key, $name);
+            } else {
+                $name = $key;
+            }
+            $details .= sprintf('  - old logcache table %s could be removed. (hint: run `thruk logcache removeunused`)'."\n", $name);
             $errors++;
         }
     }
@@ -585,14 +592,13 @@ sub _logcache_data_check  {
 
     return unless defined $c->config->{'logcache'};
 
-    require Thruk::Backend::Provider::Mysql;
-    Thruk::Backend::Provider::Mysql->import;
+    my $provider = _get_class($c);
 
     my $heal    = $options->{'heal'};
     my $rc      = 0;
     my $errors  = 0;
-    my @stats   = Thruk::Backend::Provider::Mysql->_log_stats($c);
-    my $incons  = Thruk::Backend::Provider::Mysql->_log_check_inconsistency($c, undef, $heal);
+    my @stats   = $provider->_log_stats($c);
+    my $incons  = $provider->_log_check_inconsistency($c, undef, $heal);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
@@ -648,6 +654,35 @@ sub _backends_checks  {
 
     my $msg = sprintf('Backends %s', $rc_codes->{$rc});
     return({sub => 'backends', rc => $rc, msg => $msg, details => $details});
+}
+
+##############################################
+
+sub _get_class {
+    my($c) = @_;
+
+    die("no logcache enabled") unless defined $c->config->{'logcache'};
+
+    my $type = '';
+    $type = 'mysql'      if $c->config->{'logcache'} =~ m/^mysql/mxi;
+    $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
+    if($type eq 'mysql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'}) {
+            require Thruk::Backend::Provider::Mysql;
+            Thruk::Backend::Provider::Mysql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Mysql'} = 1;
+        }
+        return 'Thruk::Backend::Provider::Mysql';
+    } elsif($type eq 'postgresql') {
+        if(!defined $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'}) {
+            require Thruk::Backend::Provider::Postgresql;
+            Thruk::Backend::Provider::Postgresql->import;
+            $Thruk::Backend::Manager::ProviderLoaded->{'Postgresql'} = 1;
+        }
+        return 'Thruk::Backend::Provider::Postgresql';
+    }
+
+    die("unknown db provider: ".$c->config->{'logcache'});
 }
 
 ##############################################

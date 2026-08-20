@@ -68,9 +68,11 @@ lib/Thruk/Backend/Peer.pm
 lib/Thruk/Backend/Pool.pm
 lib/Thruk/Backend/Provider/Base.pm
 lib/Thruk/Backend/Provider/ConfigOnly.pm
+lib/Thruk/Backend/Provider/DBcommon.pm
 lib/Thruk/Backend/Provider/HTTP.pm
 lib/Thruk/Backend/Provider/Livestatus.pm
 lib/Thruk/Backend/Provider/Mysql.pm
+lib/Thruk/Backend/Provider/Postgresql.pm
 lib/Thruk/Base.pm
 lib/Thruk/CheckThrukRest.pm
 lib/Thruk/Config.pm
@@ -2417,6 +2419,7 @@ t/014-Thruk-Utils-Crypt.t
 t/015-Thruk-Utils-APIKeys.t
 t/016-Thruk-Utils-Date.t
 t/017-Thruk-Utils-UserAgent.t
+t/018-Monitoring-Config-Object.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/022-Thruk-Utils-Log.t
@@ -2466,6 +2469,7 @@ t/100-cli-thruk.t
 t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
+t/101-backend_postgresql.t
 t/101-cli-thruk.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
@@ -2531,6 +2535,7 @@ t/610-scenario-lmd_federation_e2e.t
 t/610-scenario-lmd_federation_multitier_e2e.t
 t/610-scenario-logfile_cache_http.t
 t/610-scenario-logfile_cache_icinga2_ido_e2e.t
+t/610-scenario-logfile_cache_postgres.t
 t/610-scenario-omd_debian_e2e.t
 t/610-scenario-reports.t
 t/610-scenario-rest_api.t
@@ -2557,7 +2562,7 @@ t/data/check_thruk_rest/kibana.json
 t/data/check_thruk_rest/nested.json
 t/data/editor_config/thruk.conf
 t/data/javascript_tests.js
-t/data/javascript_tests_login_tt.js
+t/data/javascript_tests_perf_data.js
 t/data/list_reset/thruk.conf
 t/data/list_reset/thruk_local.conf
 t/data/list_reset/thruk_local.d/a.conf
@@ -2979,10 +2984,11 @@ t/scenarios/lmd_federation_multitier_e2e/t/103-logcache.t
 t/scenarios/lmd_federation_multitier_e2e/t/104-bp.t
 t/scenarios/lmd_federation_multitier_e2e/t/105-config-tool.t
 t/scenarios/lmd_federation_multitier_e2e/t/106-sections.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/backends.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/configtool.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/logcache.t
-t/scenarios/lmd_federation_multitier_e2e/t/local/node-control.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/10-backends.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/20-rest.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/30-configtool.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/40-logcache.t
+t/scenarios/lmd_federation_multitier_e2e/t/local/50-node-control.t
 t/scenarios/lmd_federation_multitier_e2e/thruk.conf
 t/scenarios/lmd_federation_multitier_e2e/thruk_local.conf
 t/scenarios/lmd_federation_multitier_e2e/tier1a/1.tbp
@@ -3056,6 +3062,18 @@ t/scenarios/logfile_cache_icinga2_ido_e2e/t/300-controller_showlog.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/t/400-postgres.t
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk.conf
 t/scenarios/logfile_cache_icinga2_ido_e2e/thruk_local.conf
+t/scenarios/logfile_cache_postgres/docker-compose.yml
+t/scenarios/logfile_cache_postgres/Makefile
+t/scenarios/logfile_cache_postgres/omd/Dockerfile
+t/scenarios/logfile_cache_postgres/omd/playbook.yml
+t/scenarios/logfile_cache_postgres/omd/test.cfg
+t/scenarios/logfile_cache_postgres/omd/thruk_local.conf
+t/scenarios/logfile_cache_postgres/README.md
+t/scenarios/logfile_cache_postgres/t/100-logcache.t
+t/scenarios/logfile_cache_postgres/t/300-controller_extinfo.t
+t/scenarios/logfile_cache_postgres/t/300-controller_notifications.t
+t/scenarios/logfile_cache_postgres/t/300-controller_showlog.t
+t/scenarios/logfile_cache_postgres/t/local/logcache.t
 t/scenarios/Makefile
 t/scenarios/omd_debian_e2e/docker-compose.yml
 t/scenarios/omd_debian_e2e/Makefile
@@ -3191,6 +3209,7 @@ templates/_common_js.tt
 templates/_common_js_bugs.tt
 templates/_common_js_files.tt
 templates/_cron_edit.tt
+templates/_cron_schedule_tz_header.tt
 templates/_csv_export.tt
 templates/_customvar_box.tt
 templates/_db_stats.tt

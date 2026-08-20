@@ -58,6 +58,10 @@ sub index {
     if($logoutref && $logoutref !~ m/\?/mx) {
         $logoutref =~ s|&|?|mx;
     }
+    # logout redirect must not start with // with could be used to redirect to any domain/url
+    if($logoutref && $logoutref =~ m|^//|mx) {
+        undef $logoutref;
+    }
 
     my $login   = $c->req->parameters->{'login'}    || '';
     my $pass    = $c->req->parameters->{'password'} || '';
@@ -197,6 +201,12 @@ sub _handle_basic_login {
     # make lowercase username
     $login = lc($login) if $c->config->{'make_auth_user_lowercase'};
 
+    if($login =~ m/\.lock$/mx) {
+        sleep(1);
+        _error("login attempt with invalid user name: %s", $login);
+        return $c->detach_error({msg => "invalid user name", code => 400});
+    }
+
     my $userdata = Thruk::Utils::get_user_data($c, $login);
     if($userdata->{'login'}->{'locked'}) {
         _audit_log("login", sprintf("login attempt for locked account %s on %s from %s%s",
@@ -205,6 +215,7 @@ sub _handle_basic_login {
                                 $c->req->address,
                                 ($c->env->{'HTTP_X_FORWARDED_FOR'} ? ' ('.$c->env->{'HTTP_X_FORWARDED_FOR'}.')' :''),
                         ), $login);
+        sleep(1);
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
     }
 
@@ -249,9 +260,11 @@ sub _handle_basic_login {
         _clean_failed_logins($c);
 
         if($userdata->{'login'}->{'locked'}) {
+            sleep(1);
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?locked&".$referer);
         }
     }
+    sleep(1);
     return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?".$referer);
 }
 

@@ -70,6 +70,10 @@ sub parse {
                     $self->{'conf'}->{$attr} = [];
                 }
             }
+
+            if($field->{'type'} eq 'BOOL' and $value ne '0' and $value ne '1') {
+                push @{$parse_errors}, "invalid boolean value for $attr: '".$value."' in ".Thruk::Utils::Conf::link_obj($self);
+            }
         } elsif(substr($attr, 0, 1) eq '_') {
             $self->{'conf'}->{$attr} = $value;
         } else {
@@ -222,7 +226,7 @@ returns 1 if this is a template
 =cut
 sub is_template {
     my($self) = @_;
-    return 1 if (defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} == 0);
+    return 1 if (defined $self->{'conf'}->{'register'} and $self->{'conf'}->{'register'} eq '0');
     return 1 if $self->get_template_name();
     return 0;
 }
@@ -237,7 +241,7 @@ return the objects template name or undef
 sub get_template_name {
     my($self) = @_;
     # in case there is no name set, use the primary name
-    if(defined $self->{'conf'}->{'register'} && $self->{'conf'}->{'register'} == 0 && !defined $self->{'conf'}->{'name'} && defined $self->{'conf'}->{$self->{'primary_key'}}) {
+    if(defined $self->{'conf'}->{'register'} && $self->{'conf'}->{'register'} eq '0' && !defined $self->{'conf'}->{'name'} && defined $self->{'conf'}->{$self->{'primary_key'}}) {
         return $self->{'conf'}->{$self->{'primary_key'}};
     }
     return $self->{'conf'}->{'name'};
@@ -810,7 +814,7 @@ sub set_name {
     die("no new name!") unless defined $newname;
 
     my $conf = $self->{'conf'};
-    if(defined $conf->{'register'} and $conf->{'register'} == 0) {
+    if(defined $conf->{'register'} and $conf->{'register'} eq '0') {
         $conf->{'name'} = $newname;
         return;
     }

@@ -52,8 +52,8 @@ $m->{'_peer'} = $m;
 # import data
 {
     local $ENV{THRUK_QUIET} = 1;
-    Thruk::Backend::Provider::Mysql::_drop_tables($dbh, $prefix);
-    Thruk::Backend::Provider::Mysql::_create_tables($dbh, $prefix);
+    $m->_drop_tables($dbh, $prefix);
+    $m->_create_tables($dbh, $prefix);
     my($logcount) = $m->_update_logcache($c, $mode, $peer, $dbh, $prefix, $blocksize, $files);
     is($logcount, 10, 'imported all items from '.$files->[0]);
 };
@@ -85,5 +85,5 @@ unlink($file2);
 
 #####################################################################
 # clean up
-Thruk::Backend::Provider::Mysql::_drop_tables($dbh, $prefix);
+$m->_drop_tables($dbh, $prefix);
 $dbh->disconnect();

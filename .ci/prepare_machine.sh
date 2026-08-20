@@ -70,13 +70,22 @@ apt-get -y install \
     wget \
     zlib1g-dev \
 
-# list of mirrors: https://mirrors.opensuse.org/
 mkdir -p /etc/apt/sources.list.d
 test -s /etc/apt/trusted.gpg.d/naemon.asc ||
-    curl -sS "https://download.thruk.org/obs_naemon.asc" -o /etc/apt/trusted.gpg.d/naemon.asc || \
-    curl -sS "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" -o /etc/apt/trusted.gpg.d/naemon.asc
-#echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] http://download.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
-echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] https://slc-mirror.opensuse.org/repositories/home:/naemon:/daily/xUbuntu_$(lsb_release -rs)/ ./" >> /etc/apt/sources.list.d/naemon.list
+    curl -sS --max-time 10 "https://download.thruk.org/obs_naemon.asc" -o /etc/apt/trusted.gpg.d/naemon.asc || \
+    curl -sS --max-time 10 "https://build.opensuse.org/projects/home:naemon/signing_keys/download?kind=gpg" -o /etc/apt/trusted.gpg.d/naemon.asc
+
+# list of mirrors: https://mirrors.opensuse.org/
+MIRROR_URLS="
+    http://download.opensuse.org/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
+    http://ftp.gwdg.de/pub/opensuse/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
+    https://slc-mirror.opensuse.org/repositories/home:/naemon/xUbuntu_$(lsb_release -rs)/
+"
+for mirror in $MIRROR_URLS; do
+    curl -sS --max-time 10 $mirror >/dev/null && \
+        echo "deb [signed-by=/etc/apt/trusted.gpg.d/naemon.asc] $mirror ./" > /etc/apt/sources.list.d/naemon.list && \
+        break
+done
 apt-get -y update
 apt-get -y install naemon-core naemon-livestatus
 chsh -s /bin/bash naemon

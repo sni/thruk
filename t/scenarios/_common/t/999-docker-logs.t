@@ -11,6 +11,7 @@ my @logs = qw(
     /opt/omd/sites/demo/var/log/apache/error_log
     /opt/omd/sites/demo/var/log/thruk.log
     /opt/omd/sites/demo/var/thruk/cron.log
+    /opt/omd/sites/demo/var/log/lmd.log
 );
 my @errors = (
     qr/^(.*\Qsyntax error near unexpected\E.*)$/mx,

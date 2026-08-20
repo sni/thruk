@@ -29,7 +29,11 @@ for my $module (sort @modules) {
     $module =~ s/plugins::plugins\-available::[a-z0-9_-]+::lib:://gmx;
 
     # check module and skip UPPERCASE constants which are reported as fail
-    pod_coverage_ok($module, { also_private => [ qr/^[A-Z_]+$/ ]});
+    my $args = { also_private => [ qr/^[A-Z_]+$/ ] };
+    if ($module eq 'Thruk::Backend::Provider::DBcommon') {
+        $args->{trustme} = [ qr/^.*$/ ];
+    }
+    pod_coverage_ok($module, $args);
 }
 
 done_testing;

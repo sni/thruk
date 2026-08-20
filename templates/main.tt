@@ -220,9 +220,15 @@
           </thead>
           <tbody>
             [% FOR h = problemhosts %]
+              [% hoststate = '' %]
+              [% IF h.state == 1 %]
+                [% hoststate = 'DOWN' %]
+              [% ELSIF h.state == 2 %]
+                [% hoststate = 'UNREACHABLE' %]
+              [% END %]
             <tr>
               <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.name | html %]</a></td>
-              <td class="flex justify-center"><div class="badge DOWN">DOWN</div></td>
+              <td class="flex justify-center"><div class="badge [% hoststate %]">[% hoststate %]</div></td>
               <td class="truncate w-1/2 max-w-0">[% h.plugin_output %]</td>
               <td>[% duration(date.now - h.last_hard_state_change, 6) %]</td>
             </tr>

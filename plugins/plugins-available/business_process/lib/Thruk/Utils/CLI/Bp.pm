@@ -155,7 +155,7 @@ sub cmd {
     if($ENV{'THRUK_CRON'} && $id eq 'all') {
         $lockfile = $c->config->{'tmp_path'}."/bp.lock";
         my $lock = Thruk::Utils::Pidfile::lock($c, $lockfile);
-        _fatalf("Previous business process calculation still running (pid %s). Exiting...", $lock) if $lock;
+        _fatal("Previous business process calculation still running (pid %s). Exiting...", $lock) if $lock;
     }
 
     # set backends to default list, bp result should be deterministic

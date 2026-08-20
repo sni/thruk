@@ -1171,6 +1171,7 @@ sub _process_perf_info_logcache_details {
 
     my $peer_key = $c->req->parameters->{'logcachedetails'};
     my $peer     = $c->db->get_peer_by_key($peer_key);
+    $peer_key    = $peer->{'key'}; # in case lookup was by name
     if(!$peer) {
         Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'no such backend' });
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/extinfo.cgi?type=4");

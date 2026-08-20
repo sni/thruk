@@ -9,6 +9,7 @@ use Monitoring::Livestatus::Class::Lite ();
 use Thruk::Timer qw/timing_breakpoint/;
 use Thruk::Utils ();
 use Thruk::Utils::LMD ();
+use Thruk::Utils::Log qw/:all/;
 
 use base 'Thruk::Backend::Provider::Base';
 
@@ -360,7 +361,7 @@ sub get_sites {
         $options{'columns'} = [qw/
             peer_key peer_name key name addr status bytes_send bytes_received queries
             last_error last_update last_online response_time idling last_query
-            parent section lmd_last_cache_update
+            parent section lmd_last_cache_update flags
             federation_key federation_name federation_addr federation_type federation_version
         /];
         if(defined $options{'extra_columns'}) {
@@ -972,6 +973,7 @@ returns logfile entries
 sub get_logs {
     my($self, %options) = @_;
     if(Thruk::Backend::Provider::Base::can_use_logcache($self, \%options)) {
+        _debug("using logcache for query") if Thruk::Base->debug;
         $options{'collection'} = 'logs_'.$self->peer_key();
         return $self->{'_peer'}->logcache->get_logs(%options);
     }
