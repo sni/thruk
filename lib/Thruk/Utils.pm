@@ -4231,6 +4231,10 @@ Short error might be undef for unknown errors.
 =cut
 sub extract_connection_error {
     my($err) = @_;
+
+    # remove lmd prefix
+    $err =~ s%^\Qpeer is down: \E%%gmx;
+
     if($err =~ m|(failed\s+to\s+connect.*?)\s+at\s+|smx) {
         return($1, $err);
     }
@@ -4268,6 +4272,14 @@ sub extract_connection_error {
     }
 
     if($err =~ m|^(.*\d+\Q: cannot send command, peer is down\E)|smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m%^((re|)connecting\.\.\.)%smx) {
+        return($1, $err);
+    }
+
+    if($err =~ m%^(network read: read error:.*)%smx) {
         return($1, $err);
     }
 

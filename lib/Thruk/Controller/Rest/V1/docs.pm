@@ -1680,6 +1680,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "contains the lmd flags for this backend",
+     "name": "flags",
+     "type": "",
+     "unit": ""
+    },
+    {
      "description": "flag if the connection is in idle mode",
      "name": "idling",
      "type": "",

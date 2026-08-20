@@ -2146,7 +2146,7 @@ sub _update_obj_in_index {
 
     if($found || defined $primary) {
         # by type
-        if(!defined $obj->{'conf'}->{'register'} || $obj->{'conf'}->{'register'} != 0) {
+        if(!defined $obj->{'conf'}->{'register'} || $obj->{'conf'}->{'register'} ne '0') {
             push @{$objects->{'bytype'}->{$obj->{'type'}}}, $obj->{'id'};
         }
     }

@@ -17,15 +17,15 @@ for my $svc (split/\n/mx, $services) {
         $index++;
         my $logfiles_printed = {};
         ok(1, sprintf("%s_%d - %s", $svc, $index, $cont));
-        my($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
+        my($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps -efl");
         next unless $rc == 0;
 
         my $matcher = qr/^(.*?)perl.*defunct/mx;
 
         if($log =~ $matcher) {
-            # found zombies, wait 3 seconds to disappear
-            sleep(3);
-            ($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps auxww");
+            # found zombies, wait some seconds to disappear (renewing perl processes is a normal process in mod_fcgi)
+            sleep(10);
+            ($rc, $log) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont ps -efl");
             next unless $rc == 0;
         }
 
@@ -35,9 +35,9 @@ for my $svc (split/\n/mx, $services) {
             for my $line (split/\n/mx, $log) {
                 if($line =~ $matcher) {
                     my $line_details = [];
-                    my($usr, $pid) = split(/\s+/, $1);
+                    my($f, $s, $uid, $pid) = split(/\s+/, $1);
                     my $still_exists = 1;
-                    for my $cmd ("ls -la /proc/$pid/", "cat /proc/$pid/cmdline", "cat /proc/$pid/environ") {
+                    for my $cmd ("ls -la /proc/$pid/", "cat /proc/$pid/cmdline | xargs -0 echo", "cat /proc/$pid/environ", "cat /proc/$pid/status", "cat /proc/$pid/maps", "stat /proc/$pid") {
                         push @{$line_details}, "%> ".$cmd;
                         my(undef, $output) = Thruk::Utils::IO::cmd("docker exec -t --user root $cont $cmd 2>&1");
                         push @{$line_details}, $output;
@@ -54,7 +54,7 @@ for my $svc (split/\n/mx, $services) {
             }
             if($found) {
                 fail(sprintf("%s_%d: has perl zombies", $svc, $index));
-                diag("#> ps auxww");
+                diag("#> ps -efl");
                 diag($log);
                 diag(join("\n", @{$details}));
             }

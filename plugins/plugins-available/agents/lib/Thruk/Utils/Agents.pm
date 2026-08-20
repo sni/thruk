@@ -784,7 +784,7 @@ sub remove_orphaned_agent_templates {
     for my $hst (@{$result}) {
         next unless $hst->{'type'} eq 'host';
         next unless defined $hst->{'obj'}->{'conf'}->{'register'};
-        next unless $hst->{'obj'}->{'conf'}->{'register'} == 0;
+        next unless $hst->{'obj'}->{'conf'}->{'register'} eq '0';
         next unless $hst->{'obj'}->{'conf'}->{'name'} =~ m/^agent\-/mx;
         $c->{'obj_db'}->delete_object($hst->{'obj'});
     }

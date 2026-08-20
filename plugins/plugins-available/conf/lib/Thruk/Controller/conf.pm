@@ -1901,7 +1901,7 @@ sub _get_context_object {
                     push @newobjs, $o if $o->is_template();
                 }
                 if($templates == 2) {
-                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} || $o->{'conf'}->{'register'} != 0;
+                    push @newobjs, $o if !defined $o->{'conf'}->{'register'} || $o->{'conf'}->{'register'} ne '0';
                 }
             }
             @{$objs} = @newobjs;

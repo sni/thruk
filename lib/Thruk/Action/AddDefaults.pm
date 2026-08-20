@@ -1469,6 +1469,14 @@ sub check_federation_peers {
             $c->db->pool->peer_add($subpeer);
             $parent->{'disabled'} = HIDDEN_LMD_PARENT;
             $changed++;
+        } else {
+            my $peer = $c->db->peers->{$key};
+            if($row->{'flags'} && Thruk::Base::array_contains('MultiBackend', $row->{'flags'})) {
+                if(($peer->{'disabled'}//'') ne HIDDEN_LMD_PARENT) {
+                    $changed++;
+                }
+                $peer->{'disabled'} = HIDDEN_LMD_PARENT;
+            }
         }
     }
     # remove exceeding backends
@@ -1478,7 +1486,7 @@ sub check_federation_peers {
         next unless $peer->{'active'};
         if(!$peer->{'federation'}) {
             if(!$existing->{$key}) {
-                _warn("peer key not found, recheck lmd config: %s(%s)", $peer->{'name'}, $key);
+                _warn("peer key not found, recheck lmd config: %s (id: %s)", $peer->{'name'}, $key);
                 $check_lmd_config = 1; # got unknown peer key, recheck lmd config
             }
             next;
