@@ -931,7 +931,7 @@ returns all config files
 |mtime                             | time       |          | unix timestamp of last modification
 |path                              | string     |          | filesystem path
 |peer_key                          | string     |          | id as defined in Thruk::Backend component configuration
-|readonly                          | string     |          | readonly flag
+|readonly                          | boolean    |          | readonly flag
 |===========================================
 
 

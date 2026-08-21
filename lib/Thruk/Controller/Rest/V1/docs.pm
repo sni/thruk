@@ -566,7 +566,7 @@ __DATA__
     {
      "description": "readonly flag",
      "name": "readonly",
-     "type": "string",
+     "type": "boolean",
      "unit": ""
     }
    ]
