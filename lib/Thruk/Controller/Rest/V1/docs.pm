@@ -1976,31 +1976,31 @@ __DATA__
     {
      "description": "contains the real address if using federation",
      "name": "federation_addr",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
      "description": "contains the real peer key if using federation",
      "name": "federation_key",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
      "description": "contains the real name if using federation",
      "name": "federation_name",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
      "description": "contains the real backend type if using federation",
      "name": "federation_type",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
      "description": "contains the real backend version if using federation",
      "name": "federation_version",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
@@ -2012,13 +2012,13 @@ __DATA__
     {
      "description": "flag if the connection is in idle mode",
      "name": "idling",
-     "type": "boolean",
+     "type": "",
      "unit": ""
     },
     {
      "description": "primary id of this site",
      "name": "key",
-     "type": "string",
+     "type": "",
      "unit": ""
     },
     {
@@ -4835,6 +4835,30 @@ __DATA__
  "/thruk/stats": {
   "GET": {
    "columns": [
+    {
+     "description": "business process calculation duration in seconds",
+     "name": "business_process_duration_seconds",
+     "type": "number",
+     "unit": "s"
+    },
+    {
+     "description": "timestamp of last business process calculation",
+     "name": "business_process_last_update",
+     "type": "time",
+     "unit": ""
+    },
+    {
+     "description": "total number of business processes",
+     "name": "business_process_total",
+     "type": "",
+     "unit": ""
+    },
+    {
+     "description": "total number of worker processes used to calculate business processes",
+     "name": "business_process_worker_total",
+     "type": "",
+     "unit": ""
+    },
     {
      "description": "total number of active thruk sessions (active during the last 5 minutes)",
      "name": "sessions_active_5min_total",
