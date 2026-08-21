@@ -133,8 +133,8 @@ clears the thruk cache. The scenario `extra_clean` removes the files that
   - `var/tmp/naemon/`
   - the marker `thruk_local.conf` (only if it was created by this scenario)
 
-so the repository root is pristine again. A developer's own `thruk_local.conf`
-is never touched.
+and restores any repo-root `thruk_local.conf` that `pre_prepare` had moved
+aside (see below), so the repository root is back to its original state.
 
 ### 2. `make prepare`
 
@@ -144,10 +144,13 @@ is never touched.
      `t/scenarios/_common` if not already built.
   2. `pre_prepare` - installs the scenario `thruk_local.conf` into the
      repository root as `thruk_local.d/docs-scenario.conf`. If the repository
-     root has no non-empty `thruk_local.conf` yet, a minimal marker file is
-     created (the doc_rest test gates on `-s 'thruk_local.conf'`); an existing
-     developer config is left untouched. At this point `var/tmp/naemon` does
-     not exist yet; the config only references its future location.
+     root already has a non-empty `thruk_local.conf` (e.g. a developer config,
+     or the one `make citest` copies from `t/ci/thruk_local.conf`), it is moved
+     aside to `thruk_local.conf.docs-backup` so no other backend peers interfere
+     with the tests; a minimal marker `thruk_local.conf` is then created (the
+     doc_rest test gates on `-s 'thruk_local.conf'`). The backup is restored by
+     `extra_clean`. At this point `var/tmp/naemon` does not exist yet; the
+     config only references its future location.
   3. `docker compose build` - builds the `omd` image.
   4. `mkdir -p var/tmp && chmod 777` - creates the shared writable directory.
   5. `docker compose up -d` - starts the container. On boot, ansible runs
@@ -253,11 +256,12 @@ which updates `docs/documentation/rest.asciidoc`,
 ## Notes
 
   - `thruk_local.d/`, `var/tmp/naemon` and the marker `thruk_local.conf` are
-    git-ignored and removed by `make clean` (`extra_clean`). The scenario
-    never overwrites or deletes an existing developer `thruk_local.conf`; it
-    is loaded alongside `thruk_local.d/docs-scenario.conf`. Note that if a
-    developer config defines its own backend peer, both peers are loaded and
-    the single-backend `wait_start` check will fail (nothing is destroyed).
+    git-ignored and removed by `make clean` (`extra_clean`). Any existing
+    repo-root `thruk_local.conf` (developer config or the one copied by
+    `make citest`) is moved aside to `thruk_local.conf.docs-backup` during the
+    run so only the scenario backend is active, and is restored again by
+    `extra_clean`. In the unlikely event of a crash before `make clean`, the
+    backup file is left behind (harmless and git-ignored).
   - `core_conf` uses a relative path on purpose: all test processes run with
     CWD = repo root, so the scenario works from any checkout location.
   - The scenario does not export `PLACK_TEST_EXTERNALSERVER_URI` on purpose:
