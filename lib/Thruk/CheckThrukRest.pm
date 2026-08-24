@@ -239,7 +239,7 @@ check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
 
 =head1 EXAMPLES
 
-    - notifiy if more than 80 hosts are down
+    - notify if more than 80 hosts are down
       check_thruk_rest -w down:80 -c down:100 /hosts/totals
 
     - advanced monitoring plugin:
@@ -265,6 +265,12 @@ check_thruk_rest returns 0 on OK, 1 on Warning, 2 on Critical and 3 on Unknown
         --template="{EXITCODE:[% RAW2.0.state %]}[% state2text(RAW2.0.state) %] - [% RAW2.0.name %][% dump(macros) %]" \
         '{"ip": "127.0.0.1"}' \
         '/hosts?columns=name,state&address={1:ip}'
+
+    - multiple queries can use values of previous query also by template toolkit syntax:
+      check_thruk_rest \
+        --template="[% RAW2.rc %] - [% RAW2.output %]" \
+        --command 'echo 127.0.0.1' \
+        --string '[% IF RAW1.rc == 0 %]command worked: [% RAW1.output %][% ELSE %]command failed: [% IF RAW1.rc %][% END %]'
 
     - show active session using renamed aggregation functions
       check_thruk_rest \

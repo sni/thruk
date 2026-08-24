@@ -20,6 +20,7 @@ next:
           - Rest:
             - fix merging host/servicegroups response
             - add support for logcache=0 parameter on log based queries
+            - check_thruk_rest: add support for template toolkit syntax in the url itself
           - Reports:
             - adding an Icelandic translation (#1498)
 
