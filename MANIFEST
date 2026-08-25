@@ -2454,8 +2454,7 @@ t/099-Perl-Critic.t
 t/100-backend_icinga.t
 t/100-backend_mysql.t
 t/100-backend_mysql_utf8.t
-t/101-backend_postgresql.t
-t/101-backend_postgresql_utf8.t
+t/100-backend_shinken.t
 t/100-cli-check_thruk_rest.t
 t/100-cli-examples-dups.t
 t/100-cli-examples-query2testobjects.t
@@ -2469,6 +2468,7 @@ t/100-model_Thruk.t
 t/100-scripts.t
 t/100-themes.t
 t/101-backend_postgresql.t
+t/101-backend_postgresql_utf8.t
 t/101-cli-thruk.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
