@@ -1499,11 +1499,11 @@ return string for given numerical state
 sub state2text {
     my($nr) = @_;
     return unless defined $nr;
-    if($nr == 0) { return 'OK'; }
-    if($nr == 1) { return 'WARNING'; }
-    if($nr == 2) { return 'CRITICAL'; }
-    if($nr == 3) { return 'UNKNOWN'; }
-    if($nr == 4) { return 'PENDING'; }
+    if($nr eq "0") { return 'OK'; }
+    if($nr eq "1") { return 'WARNING'; }
+    if($nr eq "2") { return 'CRITICAL'; }
+    if($nr eq "3") { return 'UNKNOWN'; }
+    if($nr eq "4") { return 'PENDING'; }
     return;
 }
 

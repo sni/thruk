@@ -94,6 +94,13 @@ sub _fetch_results {
         # replace variables in the url, ex.: from previous queries
         unshift(@{$opts}, {}); # add empty totals up front to not mix up order
         $url =~ s/\{([^\}]+)\}/&_replace_output($1, $opts, {}, 1)/gemx;
+
+        # Support template toolkit syntax in the url itself ( if url starts with [%... )
+        # But for security reasons only from the command line
+        if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} && $url =~ m/^\s*\[%/mx) {
+            $url = _replace_url_template($url, $opts);
+        }
+
         shift @{$opts};
 
         # Support local files and remote urls as well.
@@ -469,19 +476,9 @@ sub _create_output {
 
     $totals = _calculate_data_totals($result, $totals);
     unshift(@{$result}, $totals);
-    my $macros = {
-        STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
-    };
 
-    $macros->{RAW} = $result->[0]->{'json'} // $result->[0]->{'result'} // '';
-    my $x = 0;
-    for my $r (@{$result}) {
-        $macros->{'RAW'.$x} = $r->{'json'} // $r->{'result'} // '';
-        $x++;
-    }
-    $macros->{RC}       = $rc;
+    my $macros = _build_tt_macros($rc, $result);
     $macros->{PERFDATA} = _append_performance_data($opt, $result);
-
     _debug("output macros:");
     _debug($macros);
 
@@ -536,6 +533,53 @@ sub _create_output {
     }
     $output .= "\n";
     return($output, $rc);
+}
+
+##############################################
+# replace template toolkit syntax in the url
+sub _replace_url_template {
+    my($url, $opts) = @_;
+
+    my $txt = "".$url;
+    my $tpl = \$txt;
+
+    my $macros = _build_tt_macros(-1, $opts);
+    _debug("url macros:");
+    _debug($macros);
+
+    my $output = "";
+    my $settings = Thruk::Config::get_toolkit_config();
+    $settings->{'RELATIVE'}    = 1;
+    $settings->{'ABSOLUTE'}    = 1;
+    $settings->{'PRE_CHOMP'}   = 1;
+    $settings->{'POST_CHOMP'}  = 1;
+    $settings->{'TRIM'}        = 1;
+    my $tt = Template->new($settings);
+    $tt->process($tpl, $macros, \$output) || die("failed to process template ".$tpl.": ".$tt->error());
+
+    _debug("url after tt replace:");
+    _debug("%s", $output);
+
+    return $output;
+}
+
+##############################################
+sub _build_tt_macros {
+    my($rc, $result) = @_;
+
+    my $macros = {
+        STATUS => Thruk::Utils::Filter::state2text($rc) // 'UNKNOWN',
+    };
+
+    $macros->{RAW} = $result->[0]->{'json'} // $result->[0]->{'result'} // '';
+    my $x = 0;
+    for my $r (@{$result}) {
+        $macros->{'RAW'.$x} = $r->{'json'} // $r->{'result'} // '';
+        $x++;
+    }
+    $macros->{RC} = $rc;
+
+    return $macros;
 }
 
 ##############################################
@@ -637,8 +681,10 @@ sub _calculate_data_totals {
         for my $key (sort keys %{$r->{'json'}}) {
             if(!defined $totals->{'json'}->{$key}) {
                 $totals->{'json'}->{$key} = $r->{'json'}->{$key};
-            } else {
+            } elsif(looks_like_number($r->{'json'}->{$key})) {
                 $totals->{'json'}->{$key} += $r->{'json'}->{$key};
+            } else {
+                $totals->{'json'}->{$key} = $r->{'json'}->{$key};
             }
         }
         push @{$perfunits}, @{$r->{'perfunit'}}    if $r->{'perfunit'};

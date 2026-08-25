@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 55;
+plan tests => 59;
 
 use_ok("MIME::Base64");
 
@@ -109,6 +109,15 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd     => "/thruk/script/check_thruk_rest --template=\"OK - There are [% RAW.output %] files in /tmp\" --command \"ls -la /tmp | wc -l\"",
         like => ["/^OK - There are \\d+ files in \/tmp/"],
+    });
+};
+
+###########################################################
+# using input data from a command via template toolkit
+{
+    TestUtils::test_command({
+        cmd     => "/thruk/script/check_thruk_rest --template='[% RAW2.rc %] - [% RAW2.output %]' --command 'echo 127.0.0.1' --string '[% IF RAW1.rc == 0 %]command worked: [% RAW1.output %][% ELSE %]command failed: [% RAW1.rc %][% END %]'",
+        like => ["/^0 - command worked: 127.0.0.1/"],
     });
 };
 
