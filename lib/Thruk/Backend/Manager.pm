@@ -1222,8 +1222,8 @@ sub _renew_logcache {
     }
 
     my $forward_url = $c->req->url;
-    $forward_url =~ s/([?&])logcache_update=\d+&?/$1/g;
-    $forward_url =~ s/[?&]$//;
+    $forward_url =~ s/([?&])logcache_update=\d+&?/$1/gmx;
+    $forward_url =~ s/[?&]$//gmx;
 
     if($c->config->{'logcache_import_command'}) {
         local $ENV{'THRUK_BACKENDS'} = join(';', @{$get_results_for});

@@ -1,3 +1,5 @@
+export TEST_POSTGRESQL = postgresql://thruk:thruk@127.0.0.3:65432/thruk
+
 include ../_common/Makefile.common
 
 export THRUK_TEST_AUTH               = omdadmin:omd

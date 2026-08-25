@@ -284,7 +284,6 @@ sub logcache {
         }
         my $provider_key = $provider_class;
         $provider_key    =~ s/.*:://mx;
-        $provider_key    =~ s/.*:://;
         if(!defined $Thruk::Backend::Peer::ProviderLoaded->{$provider_key}) {
             require Module::Load;
             Module::Load::load($provider_class);

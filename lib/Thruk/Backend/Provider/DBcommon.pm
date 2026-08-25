@@ -73,6 +73,8 @@ use constant {
 
 @Thruk::Backend::Provider::DBcommon::tables = (qw/contact contact_host_rel contact_service_rel host log service status/);
 
+$Thruk::Backend::Provider::DBcommon::global_lock_created = 0;
+
 END {
     # close all connections at the end
     return unless $INC{"DBI.pm"};
@@ -725,7 +727,6 @@ sub _log_stats {
                 } else {
                     $msg = "OK";
                 }
-                $status->{'_active_lock_mode'} = $lock_mode;
             }
         }
         push @result, {
@@ -833,6 +834,8 @@ sub _log_removeunused {
         $key =~ s/_.*$//gmx;
         delete $backends_hash->{$key};
     }
+
+
     if($print_only) {
         $c->stats->profile(end => $driver."::_log_removeunused");
         return($backends_hash);
@@ -842,7 +845,7 @@ sub _log_removeunused {
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$backends_hash}) {
-        for my $tbl (keys %{$res}) {
+        for my $tbl (keys %{$table_names}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
             $dbh->do("DROP TABLE " . $self->_quote_table($tbl) . $cascade);
@@ -893,12 +896,9 @@ sub _log_check_inconsistency {
 sub _log_repair_inconsistency {
     my($self, $c, $prefix, $total) = @_;
     my $peer = $c->db->get_peer_by_key($prefix);
-    next unless $peer->{'logcache'};
-    $peer->logcache->reconnect();
+    return unless $peer->{'logcache'};
     my $dbh  = $peer->logcache->_dbh;
     my $table_host = $self->_quote_table($prefix."_host");
-    my $table_log  = $self->_quote_table($prefix."_log");
-
     my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count(host_id) > 1");
     $sth->execute;
 
@@ -939,8 +939,7 @@ sub _import_logs {
 
     my $forcestart;
     if($options->{'start'}) {
-        require Thruk::Utils::DateTime;
-        $forcestart = Thruk::Utils::DateTime::parse_date($c, $options->{'start'});
+        $forcestart = Thruk::Utils::parse_date($c, $options->{'start'});
     }
 
     # do this in a single transaction if blocksize is undef/0
@@ -1183,7 +1182,7 @@ sub _db_lock_tables {
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 
     if(($mode eq 'import' || $ENV{'THRUK_CRON'}) && !-f $c->config->{'tmp_path'}."/logcache_import.lock") {
-        our $global_lock_created = 1;
+        $Thruk::Backend::Provider::DBcommon::global_lock_created = 1;
         Thruk::Utils::IO::write($c->config->{'tmp_path'}."/logcache_import.lock", $$);
     }
 
