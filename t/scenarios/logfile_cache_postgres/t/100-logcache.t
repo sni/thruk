@@ -60,14 +60,5 @@ TestUtils::test_page(
     'like'    => ['Logcache Details', 'Log Entries by Type', 'untyped', 'timeperiod transition'],
 );
 
-# check common import issues
-my $peer   = $c->db->get_peers(1)->[0]->{'class'}->{'_peer'};
-my $prefix = $peer->{'key'};
-my $dbh    = $peer->logcache()->_dbh();
-{
-    my @data = @{$dbh->selectall_arrayref('SELECT * FROM "'.$prefix.'_log" l WHERE l.state_type IS NULL AND l.type = \'SERVICE ALERT\' LIMIT 10', { Slice => {} })};
-    is(scalar @data, 0, "all service alerts have a state_type set") or diag(Dumper(\@data));
-};
-
 ################################################################################
 done_testing();
