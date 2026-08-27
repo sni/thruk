@@ -59,6 +59,12 @@
     line: "    MaxProcesses 3 \\"
     regexp: 'MaxProcesses'
 
+- name: make check_disk check more tolerant to avoid false positives in tests
+  lineinfile:
+    dest: /omd/versions/default/share/doc/naemon/example.cfg
+    line: "  check_command                  check_local_disk!0.02%!0.01%!/"
+    regexp: '^.*check_command.*check_local_disk!.*!.*!/'
+
 - name: "create demo script"
   copy:
     dest: /usr/local/bin/demo
