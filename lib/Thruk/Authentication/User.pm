@@ -118,7 +118,7 @@ sets attributes based on livestatus data
 
 =cut
 sub set_dynamic_attributes {
-    my($self, $c, $skip_db_access,$roles, $force_roles) = @_;
+    my($self, $c, $skip_db_access, $roles, $force_roles) = @_;
     return $self if $ENV{'THRUK_BASH_COMP'};
     $c->stats->profile(begin => "User::set_dynamic_attributes");
 
@@ -160,16 +160,18 @@ sub set_dynamic_attributes {
         Thruk::Action::AddDefaults::set_enabled_backends($c, $prev_backends);
     }
 
+    my $cache;
     if($use_cached) {
         _debug("using cached user data") if Thruk::Base->verbose;
-        my $cache = $c->cache->get->{'users'};
+        $cache = Thruk::Utils::get_user_data($c, $username);
         $data = {};
         if(ref $cache eq 'HASH') {
-            $data = $cache->{$username} || {};
+            $data = $cache->{'login_cache'} || {};
         }
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
+        $cache->{'login_cache'} = $data;
     }
     $self->_apply_user_data($c, $data);
 
@@ -183,7 +185,9 @@ sub set_dynamic_attributes {
     $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     if(!$skip_db_access && !$roles) {
-        $c->cache->set('users', $username, $data);
+        $cache = Thruk::Utils::get_user_data($c, $username) unless defined $cache;
+        $cache->{'login_cache'} = $data;
+        Thruk::Utils::store_user_data($c, $cache, $username);
     }
 
     $self->{'roles_restriction'} = $roles if defined $roles;
