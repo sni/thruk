@@ -984,7 +984,7 @@ sub finalize_request {
         if($inject || $save_for_later) {
             # inject current page stats into html
             $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report(), totals => $c->stats->{'totals'}});
-            if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
+            if($c->stash->{'db_profiles'} && $c->check_user_roles('authorized_for_debug_profiles')) {
                 $c->add_profile(Thruk::Utils::render_db_profile($c, 'Req '.$Thruk::Globals::COUNT.' DB', $c->stash->{'db_profiles'}));
             }
             if($Thruk::Globals::tt_profiling) {
