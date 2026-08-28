@@ -2668,6 +2668,7 @@ t/scenarios/_common/Makefile
 t/scenarios/_common/Makefile.common
 t/scenarios/_common/t/999-docker-logs.t
 t/scenarios/_common/t/999-perl-zombies.t
+t/scenarios/agents-plugin/create_agents.sh
 t/scenarios/agents-plugin/docker-compose.yml
 t/scenarios/agents-plugin/http-backend/agents.cfg
 t/scenarios/agents-plugin/http-backend/Dockerfile
