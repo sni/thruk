@@ -39,9 +39,6 @@ TestUtils::test_command({
         like   => ['/cache cleared/'],
     });
     TestUtils::test_command({
-        cmd    => '/usr/bin/env rm -f var/thruk/users/*',
-    });
-    TestUtils::test_command({
         cmd    => '/usr/bin/env omd reload apache',
         like   => ['/Reloading apache/'],
     });
@@ -50,6 +47,9 @@ TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
         like   => ['/\{\}/'],
         unlike => ['/testuser2/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env rm -f var/thruk/users/*',
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env cat var/thruk/users/*',
