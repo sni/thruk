@@ -12,9 +12,11 @@
           [% ELSIF profile_user.roles_from_profile.exists(r) %](from user profile)
           [% ELSIF profile_user.roles_from_cgi_cfg.exists(r) %](from cgi.cfg)
           [% ELSIF profile_user.roles_from_session.exists(r) %](from session)
-          [% ELSIF r == "read_only" %][% IF !profile_user.can_submit_commands %](from contacts can_submit_commands)[% END %]
-          [% ELSIF r != "admin" && has_admin %](from admin role)
-          [% ELSIF r == "admin" %](from role system_commands and<br>role configuration_information)
+          [% ELSIF r == "authorized_for_read_only" %][% IF !profile_user.can_submit_commands %](from contacts can_submit_commands)[% END %]
+          [% ELSIF r != "authorized_for_admin" && has_admin %](from admin role)
+          [% ELSIF r == "authorized_for_admin" %](from role system_commands and<br>role configuration_information)
+          [% ELSE %]
+            (no idea for: [% r %])
           [% END %]
         </td>
       </tr>
