@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 42;
+plan tests => 52;
 
 ###########################################################
 # test thruks script path
@@ -39,6 +39,9 @@ TestUtils::test_command({
         like   => ['/cache cleared/'],
     });
     TestUtils::test_command({
+        cmd    => '/usr/bin/env rm -f var/thruk/users/*',
+    });
+    TestUtils::test_command({
         cmd    => '/usr/bin/env omd reload apache',
         like   => ['/Reloading apache/'],
     });
@@ -47,6 +50,12 @@ TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
         like   => ['/\{\}/'],
         unlike => ['/testuser2/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env cat var/thruk/users/*',
+        unlike => ['/testuser2/'],
+        errlike=> ['/No such file or directory/'],
+        exit   => 1,
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env curl -s -H "X-Thruk-Auth-Key: '.$data->{'private_key'}.'" -X POST http://localhost/demo/thruk/r/hosts/localhost/cmd/schedule_forced_host_check',
@@ -60,7 +69,11 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
-        like   => ['/global/', '/testgroup2/'],
+        like   => ['/global/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env cat var/thruk/users/*',
+        like   => ['/testgroup2/'],
     });
     unlink($data->{'file'});
 }
