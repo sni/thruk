@@ -95,6 +95,7 @@ if(!$@) {
     my $config = Thruk::Config::set_config_env();
     ok($config, "parsed config from ".$ENV{'THRUK_CONFIG'});
     is_deeply($config->{'cookie_auth_domain'}, 'test.local', "parsing cookie domain from thruk_local.d");
+    is($config->{'all_problems_link'}, '/thruk/cgi-bin/status.cgi?style=combined', "parsing all_problems_link from thruk_local.d");
 };
 
 ####################################################
