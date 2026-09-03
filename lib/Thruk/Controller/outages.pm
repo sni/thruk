@@ -30,22 +30,32 @@ sub index {
 
     return unless Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_DEFAULTS);
 
-    my $outages = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
-                                                    state => 1,
-                                                    childs => { '!=' => undef },
-                                                  ]);
+    my $outages = $c->db->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),
+                                                 state   => 1,
+                                                 childs  => { '!=' => undef },
+                                               ],
+                                    columns => [qw/name last_state_change/],
+                                   );
 
     if(defined $outages and scalar @{$outages} > 0) {
         my $hostcomments = {};
-        my $tmp = $c->db->get_comments(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'), service_description => undef ]);
+        my $tmp = $c->db->get_comments(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'),
+                                                    { service_description => undef },
+                                                    { '-or' => [ map { { host_name => $_->{'name'} } } @{$outages} ] },
+                                                  ],
+                                       columns => [qw/host_name/],
+                                      );
         for my $com (@{$tmp}) {
             $hostcomments->{$com->{'host_name'}} = 0 unless defined $hostcomments->{$com->{'host_name'}};
             $hostcomments->{$com->{'host_name'}}++;
-
         }
 
-        my $tmp2 = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ] );
+        my $tmp2 = $c->db->get_hosts(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts') ],
+                                     columns => [qw/name childs num_services/],
+                                    );
         my $all_hosts = Thruk::Base::array2hash($tmp2, 'name');
+
+        my $count_subtree = _subtree_sizes($all_hosts);
         for my $host (@{$outages}) {
 
             # get number of comments
@@ -53,7 +63,7 @@ sub index {
             $host->{'comment_count'} = $hostcomments->{$host->{'name'}} if defined $hostcomments->{$host->{'name'}};
 
             # count number of affected hosts / services
-            my($affected_hosts,$affected_services) = _count_affected_hosts_and_services($c, $host->{'name'}, $all_hosts);
+            my($affected_hosts, $affected_services) = $count_subtree->($host->{'name'});
             $host->{'affected_hosts'}    = $affected_hosts;
             $host->{'affected_services'} = $affected_services;
 
@@ -76,30 +86,46 @@ sub index {
 }
 
 ##########################################################
-# create the status details page
-sub _count_affected_hosts_and_services {
-    my($c, $host, $all_hosts ) = @_;
+# returns a memoized function counting the number of affected hosts and services for a given host by walking its child tree.
+sub _subtree_sizes {
+    my($all_hosts) = @_;
 
-    my $affected_hosts    = 0;
-    my $affected_services = 0;
+    my %affected_hosts;
+    my %affected_services;
+    my %state; # 1 = currently being explored, 2 = finished
 
-    return(0,0) if !defined $all_hosts->{$host};
+    my $count;
 
-    if(defined $all_hosts->{$host}->{'childs'} and $all_hosts->{$host}->{'childs'} ne '') {
-        for my $child (@{$all_hosts->{$host}->{'childs'}}) {
-            my($child_affected_hosts,$child_affected_services) = _count_affected_hosts_and_services($c, $child, $all_hosts);
-            $affected_hosts    += $child_affected_hosts;
-            $affected_services += $child_affected_services;
+    # returns tuple in the tree that starts with host: affected_hosts , affected_services
+    $count = sub {
+        my($host) = @_;
+        my $row = $all_hosts->{$host};
+        return(0, 0) unless defined $row;
+        return(0, 0) if $state{$host} and $state{$host} == 1;
+        return($affected_hosts{$host}, $affected_services{$host}) if $state{$host} and $state{$host} == 2;
+
+        $state{$host} = 1;
+        if(defined $row->{'childs'} and ref $row->{'childs'} eq 'ARRAY') {
+            for my $child (@{$row->{'childs'}}) {
+                my($child_affected_hosts, $child_affected_services) = $count->($child);
+                $affected_hosts{$host}    += $child_affected_hosts;
+                $affected_services{$host} += $child_affected_services;
+            }
         }
-    }
 
-    # add number of directly affected hosts
-    $affected_hosts++;
+        # add number of directly affected hosts after exploring children
+        $affected_hosts{$host}++;
 
-    # add number of directly affected services
-    $affected_services += $all_hosts->{$host}->{'num_services'};
+        # add number of directly affected services after exploring children
+        $affected_services{$host} += $row->{'num_services'} || 0;
 
-    return($affected_hosts, $affected_services);
+        # mark this host as finished i.e its results can be read directly
+        $state{$host} = 2;
+
+        return($affected_hosts{$host}, $affected_services{$host});
+    };
+
+    return($count);
 }
 
 1;
