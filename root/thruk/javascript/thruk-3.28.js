@@ -6982,7 +6982,7 @@ function parse_perf_data(perfdata) {
     // strip error messages of the form [error msg=<nr>]
     perfdata = perfdata.replace(/\[[^\]]*=[^\]]*\]/g, '');
 
-    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
+    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([a-zA-Z\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
     var matches   = perfdata.match(perfRegex);
     var perf_data = [];
     if(!matches) { return([]); }
