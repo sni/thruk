@@ -95,6 +95,7 @@ lib/Thruk/Controller/Rest/V1/broadcast.pm
 lib/Thruk/Controller/Rest/V1/cluster.pm
 lib/Thruk/Controller/Rest/V1/cmd.pm
 lib/Thruk/Controller/Rest/V1/docs.pm
+lib/Thruk/Controller/Rest/V1/livestatus_docs.pm
 lib/Thruk/Controller/Rest/V1/logcache.pm
 lib/Thruk/Controller/Rest/V1/outages.pm
 lib/Thruk/Controller/Rest/V1/recurring_downtimes.pm
@@ -2366,6 +2367,7 @@ script/thruk_server.pl
 script/thruk_set_standard_header
 script/thruk_update.sh
 script/thruk_update_docs_rest.pl
+script/thruk_update_livestatus_docs.pl
 script/thruk_version.sh
 SECURITY.md
 ssi/extinfo-header.ssi-tickets
@@ -2529,6 +2531,7 @@ t/610-scenario-cluster_e2e.t
 t/610-scenario-cluster_fixed_e2e.t
 t/610-scenario-config_tool.t
 t/610-scenario-cookie_auth_ldap_e2e.t
+t/610-scenario-docs.t
 t/610-scenario-lmd_federation_e2e.t
 t/610-scenario-lmd_federation_multitier_e2e.t
 t/610-scenario-logfile_cache_http.t
@@ -2959,6 +2962,16 @@ t/scenarios/cookie_auth_ldap_e2e/omd/test.cfg
 t/scenarios/cookie_auth_ldap_e2e/omd/test.sh
 t/scenarios/cookie_auth_ldap_e2e/thruk.conf
 t/scenarios/cookie_auth_ldap_e2e/thruk_local.conf
+t/scenarios/docs/docker-compose.yml
+t/scenarios/docs/omd/Dockerfile
+t/scenarios/docs/omd/playbook.yml
+t/scenarios/docs/omd/test.cfg
+t/scenarios/docs/omd/testuser.cfg
+t/scenarios/docs/README.md
+t/scenarios/docs/t/095-doc_coverage.t
+t/scenarios/docs/t/095-doc_rest.t
+t/scenarios/docs/t/095-doc_roles_coverage.t
+t/scenarios/docs/thruk_local.conf
 t/scenarios/lmd_federation_e2e/docker-compose.yml
 t/scenarios/lmd_federation_e2e/docker_tc.sh
 t/scenarios/lmd_federation_e2e/lmd.ini

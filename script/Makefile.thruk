@@ -62,6 +62,7 @@ version:
 docs:
 	script/thruk_update_docs.sh
 	script/thruk_update_docs_rest.pl
+	script/thruk_update_livestatus_docs.pl
 	$(MAKE) docs_check_thruk_rest
 
 docs_check_thruk_rest:
