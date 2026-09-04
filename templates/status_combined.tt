@@ -80,7 +80,7 @@
     <div class="mainTableFooter">
       <div class="textPager font-medium leading-7 whitespace-nowrap">
         [% IF hosts_limit_hit %]
-          <a href="[% uri_with(c, 'show_all_hosts' => '1' ) %]"><span class="textALERT">Limit of [% hosts.size %] matching hosts reached, click to show all.</span></a>
+          <a href="[% hosts_show_all_url | html %]"><span class="textALERT">Limit of [% hosts.size %] matching hosts reached, click to show all matching hosts.</span></a>
         [% ELSE %]
           [% hosts.size %] of [% hosts.size %] Matching Host Entries Displayed
         [% END %]
@@ -138,7 +138,7 @@
     <div class="mainTableFooter">
       <div class="textPager font-medium leading-7 whitespace-nowrap">
         [% IF services_limit_hit %]
-        <a href="[% uri_with(c, 'show_all_services' => '1' ) %]"><span class="alerttext">Limit of [% services.size %] matching services reached, click to show all.</span></a>
+        <a href="[% services_show_all_url | html %]"><span class="alerttext">Limit of [% services.size %] matching services reached, click to show all matching services.</span></a>
         [% ELSE %]
           [% services.size %] of [% services.size %] Matching Service Entries Displayed
         [% END %]

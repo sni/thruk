@@ -3,6 +3,7 @@ package Thruk::Controller::status;
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
+use URI ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();
@@ -1219,6 +1220,9 @@ sub _process_combined_page {
     my(undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'svc_');
     return 1 if $c->stash->{'has_error'};
 
+    my $problems_limit = $c->config->{'problems_limit'};
+    my $limit          = ($view_mode eq 'html' && $problems_limit) ? $problems_limit + 1 : undef;
+
     # services
     my $sorttype   = $c->req->parameters->{'sorttype_svc'}   || 1;
     my $sortoption = $c->req->parameters->{'sortoption_svc'} || 1;
@@ -1252,6 +1256,9 @@ sub _process_combined_page {
     $c->stash->{'svc_orderby'}  = $sortoptions->{$sortoption}->[1];
     $c->stash->{'svc_orderdir'} = $order;
 
+    my $backend_order = $order;
+    if($sortoption eq "6") { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+
     my $extra_svc_columns = [];
     my $extra_hst_columns = [];
     if($c->config->{'use_lmd_core'} && $c->stash->{'show_long_plugin_output'} ne 'inline' && $view_mode eq 'html') {
@@ -1264,11 +1271,11 @@ sub _process_combined_page {
     push @{$extra_svc_columns}, 'contacts' if ( grep ( /^contacts$/ixm , @{Thruk::Base::list($selected_svc_columns)} ) );
 
     my $services = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
-                                         sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                         sort   => { $backend_order => $sortoptions->{$sortoption}->[0] },
                                          extra_columns => $extra_svc_columns,
+                                         ($limit && !$c->req->parameters->{'show_all_services'} ? (limit => $limit) : ()),
                                        );
     $c->stash->{'services'} = $services;
-    if( $sortoption eq "6" and defined $services ) { @{ $c->stash->{'services'} } = reverse @{ $c->stash->{'services'} }; }
 
 
     # hosts
@@ -1303,12 +1310,15 @@ sub _process_combined_page {
     $c->stash->{'hst_orderdir'} = $order;
     push @{$extra_hst_columns}, 'contacts' if ( grep ( /^contacts$/ixm , @{Thruk::Base::list($selected_hst_columns)} ) );
 
+    $backend_order = $order;
+    if($sortoption == 6) { $backend_order = $order eq 'ASC' ? 'DESC' : 'ASC'; }
+
     my $hosts = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                   sort   => { $order => $sortoptions->{$sortoption}->[0] },
+                                   sort   => { $backend_order => $sortoptions->{$sortoption}->[0] },
                                    extra_columns => $extra_hst_columns,
+                                   ($limit && !$c->req->parameters->{'show_all_hosts'} ? (limit => $limit) : ()),
                                  );
     $c->stash->{'hosts'} = $hosts;
-    if( $sortoption == 6 and defined $hosts ) { @{ $c->stash->{'hosts'} } = reverse @{ $c->stash->{'hosts'} }; }
 
     $c->stash->{'hosts_limit_hit'}    = 0;
     $c->stash->{'services_limit_hit'} = 0;
@@ -1341,15 +1351,18 @@ sub _process_combined_page {
         };
         return $c->render(json => $json);
     } else {
-        if($c->config->{problems_limit}) {
-            if(scalar @{$c->stash->{'hosts'}} > $c->config->{problems_limit} && !$c->req->parameters->{'show_all_hosts'}) {
+        if($problems_limit) {
+            if(scalar @{$c->stash->{'hosts'}} > $problems_limit && !$c->req->parameters->{'show_all_hosts'}) {
                 $c->stash->{'hosts_limit_hit'}    = 1;
-                $c->stash->{'hosts'}              = [splice(@{$c->stash->{'hosts'}}, 0, $c->config->{problems_limit})];
+                $c->stash->{'hosts'}              = [splice(@{$c->stash->{'hosts'}}, 0, $problems_limit)];
             }
-            if(scalar @{$c->stash->{'services'}} > $c->config->{problems_limit} && !$c->req->parameters->{'show_all_services'}) {
+            if(scalar @{$c->stash->{'services'}} > $problems_limit && !$c->req->parameters->{'show_all_services'}) {
                 $c->stash->{'services_limit_hit'} = 1;
-                $c->stash->{'services'}           = [splice(@{$c->stash->{'services'}}, 0, $c->config->{problems_limit})];
+                $c->stash->{'services'}           = [splice(@{$c->stash->{'services'}}, 0, $problems_limit)];
             }
+            # point to the paginated detail tables instead of rendering all rows here
+            $c->stash->{'hosts_show_all_url'}    = _combined_show_all_url($c, 'hst_', 'hostdetail') if $c->stash->{'hosts_limit_hit'};
+            $c->stash->{'services_show_all_url'} = _combined_show_all_url($c, 'svc_', 'detail')    if $c->stash->{'services_limit_hit'};
         }
     }
 
@@ -1357,6 +1370,43 @@ sub _process_combined_page {
     Thruk::Utils::Status::set_audio_file($c);
 
     return 1;
+}
+
+##########################################################
+# create a 'show all' url for a limited table on the combined page.
+# The combined page uses its own filter prefixes (hst_/svc_) while the paginated hostdetail/detail pages use the dfl_ prefix
+sub _combined_show_all_url {
+    my($c, $from_prefix, $to_style) = @_;
+
+    my $uri     = URI->new('status.cgi');
+    my @new_param;
+    my $base    = $c->stash->{'original_uri'} ? URI->new($c->stash->{'original_uri'}) : $c->req->uri;
+    my @old_param = $base->query_form();
+    while(my $key = shift @old_param) {
+        my $value = shift @old_param;
+        next if $key eq '_';
+        next if $key eq 'style';
+        next if $key =~ m/^show_all_(hosts|services)$/mx;
+        next if $key =~ m/^(sorttype|sortoption)(_hst|_svc)?$/mx;
+        next if $key eq 'entries' || $key eq 'page' || $key eq 'jump';
+        # translate column params of this table, drop column params of the other one
+        if($from_prefix eq 'hst_') {
+            next if $key eq 'service_columns';
+            $key = 'dfl_columns' if $key eq 'host_columns';
+        } else {
+            next if $key eq 'host_columns';
+            $key = 'dfl_columns' if $key eq 'service_columns';
+        }
+        # drop filters which belong to the other tables
+        next if $key =~ m/^(?:hst|svc|dfl|ovr|grd)_/mx && $key !~ m/^\Q$from_prefix\E/mx;
+        # switch table filters to the prefix used by the target pages
+        $key =~ s/^\Q$from_prefix\E/dfl_/mx if $key =~ m/^\Q$from_prefix\E/mx;
+        next if !defined $value || $value eq '';
+        push @new_param, $key, $value;
+    }
+    push @new_param, 'style', $to_style;
+    $uri->query_form(@new_param);
+    return($uri->as_string());
 }
 
 ##########################################################
