@@ -41,7 +41,6 @@ sub index {
         my $hostcomments = {};
         my $tmp = $c->db->get_comments(filter  => [ Thruk::Utils::Auth::get_auth_filter($c, 'comments'),
                                                     { service_description => undef },
-                                                    { '-or' => [ map { { host_name => $_->{'name'} } } @{$outages} ] },
                                                   ],
                                        columns => [qw/host_name/],
                                       );
