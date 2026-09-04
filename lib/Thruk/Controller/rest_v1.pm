@@ -487,6 +487,7 @@ sub _fetch {
 
     # load plugin paths
     if(!$c->config->{'_rest_paths_loaded'}) {
+        $c->stats->profile(begin => "_fetch: loading modules");
         $c->config->{'_rest_paths_loaded'} = 1;
         my $input_files = [glob(join(" ", (
                             $c->config->{'plugin_path'}."/plugins-enabled/*/lib/Thruk/Controller/Rest/V1/*.pm",
@@ -501,10 +502,13 @@ sub _fetch {
             my $err = $@;
             if($err) {
                 _error($err);
+                $c->stats->profile(end => "_fetch: loading modules");
+                $c->stats->profile(end => "_fetch");
                 return({ 'message' => 'error loading '.$pkg_name.' rest submodule', code => 500, 'description' => $@ });
             }
 
         }
+        $c->stats->profile(end => "_fetch: loading modules");
     }
 
     # disable logcache by request parameter
@@ -538,7 +542,7 @@ sub _fetch {
             delete $c->req->parameters->{'CSRFtoken'};
             delete $c->req->body_parameters->{'CSRFtoken'};
             @matches = map { uri_unescape($_, ) } @matches;
-            $c->stats->profile(comment => $path);
+            $c->stats->profile(comment => sprintf("rest path: %s", $path));
             my $sub_name = Thruk::Base->verbose ? Thruk::Utils::code2name($function) : '';
             if($roles && !$c->user->check_user_roles($roles)) {
                 $data = { 'message' => 'not authorized', 'description' => 'this path requires certain roles: '.join(', ', @{$roles}), code => 403 };
