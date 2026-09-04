@@ -27,6 +27,7 @@ TestUtils::test_command({
     cmd     => '/thruk/support/reschedule_all_checks.sh',
     like    => ['/successfully submitted/'],
 });
+sleep(2);
 # then disable checks to avoid log changes that break tests
 TestUtils::test_command({
     cmd     => "/usr/bin/env thruk r -d '' /system/cmd/stop_executing_host_checks",

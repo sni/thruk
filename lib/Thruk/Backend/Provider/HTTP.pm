@@ -523,7 +523,8 @@ sub get_logs {
     }
 
     # just because we don't cache, doesn't mean our remote site is not allowed to cache
-    delete $options{'nocache'};
+    # but when importing logcache, nocache must be preserved so remote site fetches from monitoring core
+    # delete $options{'nocache'};
     @options = %options;
 
     my $use_file = 0;
@@ -798,7 +799,8 @@ sub _get_logs_start_end {
     }
 
     # just because we don't cache, doesn't mean our remote site is not allowed to cache
-    delete $options{'nocache'};
+    # but when get_logs_start_end_no_filter requests raw timestamps for logcache import, nocache must be preserved
+    # delete $options{'nocache'};
     @options = %options;
 
     my $res = $self->_req('_get_logs_start_end', \@options);

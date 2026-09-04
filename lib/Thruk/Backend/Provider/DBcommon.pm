@@ -273,10 +273,21 @@ sub get_logs {
 
     # check logcache version
     my $table_status = $self->_quote_table($prefix.'_status');
-    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    my @versions;
+    eval {
+        @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    };
+    if($@) {
+        eval { $dbh->rollback; };
+        return;
+    }
+    if(scalar @versions < 1) {
+        eval { $dbh->rollback; };
+        return;
+    }
     my $cache_ver = $self->cache_version();
-    if(scalar @versions < 1 || $versions[0] != $cache_ver) {
-        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0] // '0'));
+    if($versions[0] != $cache_ver) {
+        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0]));
     }
 
     # check compact timerange and set a warning flag
@@ -706,8 +717,13 @@ sub _log_stats {
             ($index_size, $data_size, $items, $status, $msg) = $self->_db_table_stats($dbh, $key);
             if(!$msg) {
                 (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
-                if($status->{'lock_mode'}->{'value'}) {
-                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $status->{'update_pid'}->{'value'}//'?');
+                my $lock_mode  = $status->{'lock_mode'}->{'value'};
+                my $update_pid = $status->{'update_pid'}->{'value'};
+                if($lock_mode && $update_pid && !kill(0, $update_pid)) {
+                    $lock_mode = '';
+                }
+                if($lock_mode) {
+                    $msg = sprintf("running %s since %s (pid: %s)", $lock_mode, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $update_pid//'?');
                 } else {
                     $msg = "OK";
                 }
@@ -729,7 +745,7 @@ sub _log_stats {
             compact_duration => $status->{'compact_duration'}->{'value'}    // '',
             compact_till     => $status->{'compact_till'}->{'value'}        // '',
             last_entry       => $last_entry                                 // '',
-            mode             => $status->{'lock_mode'}->{'value'}           // '',
+            mode             => $status->{'_active_lock_mode'}              // '',
             status           => $msg,
         };
     }
@@ -804,39 +820,31 @@ sub _log_removeunused {
     my $dbh  = $peer->logcache->_dbh();
     my $table_names = $self->_get_all_table_names($dbh);
     my $res = {};
-    for my $t (@{$table_names}) {
-        if($t =~ m/^(.*?)_(status|log)/mx) {
-            my $key = $1;
-            $res->{$key} = 1 unless $res->{$key};
-        }
-        if($t =~ m/^(.*?)_status/mx) {
-            my $key = $1;
-            # fetch name
-            my $table_status = $self->_quote_table($key."_status");
-            my @names = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 11 LIMIT 1')};
-            $res->{$key} = $names[0] if scalar @names > 0;
-        }
-    }
+    for my $t (@{$table_names}) { $res->{$t} = {}; }
 
     # gather backend ids
+    my $backends_hash = {};
     for my $b (@backends) {
-        delete $res->{$b};
+        next unless $b->{'enabled'};
+        $backends_hash->{$b->{'key'}} = 1;
+    }
+    # find tables without a backend
+    for my $tbl (keys %{$res}) {
+        my $key = $tbl;
+        $key =~ s/_.*$//gmx;
+        delete $backends_hash->{$key};
     }
 
-    # find tables without a backend
-    for my $key (@{$c->stash->{'backends'}}) {
-        delete $res->{$key};
-    }
 
     if($print_only) {
         $c->stats->profile(end => $driver."::_log_removeunused");
-        return($res);
+        return($backends_hash);
     }
 
     my $removed = 0;
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
-    for my $key (keys %{$res}) {
+    for my $key (keys %{$backends_hash}) {
         for my $tbl (keys %{$table_names}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
@@ -888,10 +896,10 @@ sub _log_check_inconsistency {
 sub _log_repair_inconsistency {
     my($self, $c, $prefix, $total) = @_;
     my $peer = $c->db->get_peer_by_key($prefix);
+    return unless $peer->{'logcache'};
     my $dbh  = $peer->logcache->_dbh;
-
     my $table_host = $self->_quote_table($prefix."_host");
-    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count > 1");
+    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count(host_id) > 1");
     $sth->execute;
 
     my $sp  = length("$total");
@@ -1029,8 +1037,8 @@ sub _import_logs {
             my $statements = $self->_get_create_schema($prefix);
             for my $stm (@{$statements}) {
                 $dbh->do($stm);
+                $dbh->commit();
             }
-            $dbh->commit || confess $dbh->errstr;
             $recreated = 1;
             _info("done");
         } else {

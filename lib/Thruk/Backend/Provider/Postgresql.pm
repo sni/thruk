@@ -46,7 +46,7 @@ sub new {
     my($class, $peer_config) = @_;
 
     my $options = $peer_config->{'options'};
-    confess('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
+    confess('need at least one peer. Minimal options are <options>peer = postgresql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     $options->{'name'} = 'postgresql' unless defined $options->{'name'};
     if(!defined $options->{'peer_key'}) {
@@ -144,7 +144,7 @@ sub _dbh {
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $self->{'postgres'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, pg_enable_utf8 => 1});
         $self->{'postgres'}->do("SET client_encoding TO 'UTF8'");
-        $self->{'postgres'}->do("SET client_min_messages = warning");
+        $self->{'postgres'}->do("SET client_min_messages TO 'warning'");
         &timing_breakpoint('connected');
     }
     return $self->{'postgres'};
@@ -338,7 +338,6 @@ sub _get_create_schema {
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(8, 'compact_duration', '')",
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(9, 'compact_till', '')",
         "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(10,'lock_mode', '')",
-        "INSERT INTO \"" . $prefix . "_status\" (status_id, name, value) VALUES(11,'peer_name', '')",
     );
     return \@statements;
 }
@@ -347,13 +346,13 @@ sub _get_create_schema {
 
 sub _lock_table_share {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN SHARE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
 sub _lock_table_exclusive {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN EXCLUSIVE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
@@ -382,12 +381,10 @@ sub _update_status {
 sub _finish_update {
     my($self, $c, $dbh, $prefix, $duration) = @_;
     my $now = time();
-    my $peer_name = Thruk::Utils::Filter::peer_name($self->{'peer_config'}->{'peer_key'});
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',NULL) ON CONFLICT (status_id) DO UPDATE SET value=NULL");
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(6,'update_duration',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $duration, $duration);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(10,'lock_mode','') ON CONFLICT (status_id) DO UPDATE SET value=''");
-    $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(11,'peer_name',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $peer_name, $peer_name);
     # no-op on PostgreSQL
     $dbh->commit || return;
     return 1;
@@ -457,7 +454,7 @@ sub _sql_extra_columns {
 
 sub _sql_coalesce {
     my($self, $col, $default) = @_;
-    return "COALESCE(".$col."::text, $default)";
+    return "COALESCE(CAST($col AS text), $default)";
 }
 
 sub _sql_show_indexes {
@@ -541,8 +538,8 @@ sub _db_table_stats {
 
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
-    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ?", undef, $prefix.'_log')};
-    return scalar @tables >= 1 ? 1 : 0;
+    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND (table_name = ? OR table_name = ?)", undef, $prefix.'_log', $prefix.'_status')};
+    return scalar @tables >= 2 ? 1 : 0;
 }
 
 sub _get_all_table_names {
@@ -965,9 +962,16 @@ sub _create_tables_if_not_exist {
 sub _create_tables {
     my($self, $dbh, $prefix) = @_;
     for my $stm (@{$self->_get_create_schema($prefix)}) {
-        $dbh->do($stm);
+        eval {
+            $dbh->do($stm);
+            $dbh->commit();
+        };
+        if($@) {
+            my $err = $@;
+            $dbh->rollback();
+            confess("create table statement failed: ".$stm."\nerror: ".$err);
+        }
     }
-    $dbh->commit || confess $dbh->errstr;
     return;
 }
 
@@ -981,7 +985,7 @@ sub _check_lock {
     # check if there is already a update / import running
     my $skip          = 0;
     eval {
-        $self->_lock_table_share($dbh, $prefix);
+        $self->_lock_table_exclusive($dbh, $prefix);
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM "'.$prefix.'_status" WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -990,17 +994,15 @@ sub _check_lock {
             }
         }
     };
-    # PostgreSQL: transaction abort on lock failure; rollback before checking error
-    eval { $dbh->rollback; } if $@;
     if($@) {
+        eval { $dbh->rollback; };
         _debug($@);
         return;
     }
     if($skip) {
+        eval { $dbh->rollback; };
         return;
     }
-
-    $self->_lock_table_exclusive($dbh, $prefix);
     my $now = time();
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $$, $$);
