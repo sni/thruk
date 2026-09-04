@@ -534,7 +534,7 @@ sub _fetch {
             if($request_method ne 'GET' && !Thruk::Utils::check_csrf($c, 1)) {
                 # make csrf protection mandatory for anything other than GET requests
                 return({
-                    'message'     => 'invalid or no csfr token',
+                    'message'     => 'invalid or no csrf token',
                     'code'        => 403,
                     'failed'      => Cpanel::JSON::XS::true,
                 });
