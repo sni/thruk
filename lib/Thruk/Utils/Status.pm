@@ -3353,6 +3353,19 @@ sub try_host_only_filter {
     return unless ($params->{'s0_op'}   && $params->{'s0_op'}   eq '~');      # full text regex filter
     return if     defined $params->{'s1_type'}; # there is only one search
 
+    if(    $params->{'quicksearch'}
+       and defined $params->{'s0_value'}
+       and $params->{'s0_value'} eq ''
+    ) {
+        return Thruk::Utils::Filter::uri_with($c, {
+            's0_op'                       => undef,
+            's0_type'                     => undef,
+            's0_value'                    => undef,
+            'add_default_service_filter'  => undef,
+            'quicksearch'                 => undef,
+        }, 1);
+    }
+
     my $name = $params->{'s0_value'};
     if(!Thruk::Utils::is_valid_regular_expression(undef, $name)) {
         return;
