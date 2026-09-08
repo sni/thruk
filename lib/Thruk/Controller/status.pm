@@ -3,7 +3,6 @@ package Thruk::Controller::status;
 use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
-use URI ();
 
 use Thruk::Action::AddDefaults ();
 use Thruk::Backend::Manager ();

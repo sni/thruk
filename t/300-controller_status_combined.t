@@ -4,6 +4,8 @@ use Cpanel::JSON::XS qw/decode_json/;
 use Test::More;
 use URI::Escape qw/uri_escape/;
 
+use Thruk ();
+
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
     use lib('t');
