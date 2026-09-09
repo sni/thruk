@@ -464,7 +464,14 @@ sub write_lmd_config {
         $site_config .= "noconfigtool   = 1\n" if($peer->{'peer_config'}->{'configtool'} && $peer->{'peer_config'}->{'configtool'}->{'disable'});
         if($peer->{'peer_config'}->{'lmd_options'}) {
             for my $key (sort keys %{$peer->{'peer_config'}->{'lmd_options'}}) {
-                $site_config .= sprintf("%-14s = %s\n", $key, $peer->{'peer_config'}->{'lmd_options'}->{$key});
+                my $val = $peer->{'peer_config'}->{'lmd_options'}->{$key};
+                if($val =~ m/^\[/mx) {
+                    # list values must not be quoted
+                    $site_config .= sprintf("%-14s = %s\n", $key, $val);
+                } else {
+                    # but other values must be quoted
+                    $site_config .= sprintf("%-14s = \"%s\"\n", $key, $val);
+                }
             }
         }
         $site_config .= "\n";
