@@ -6982,6 +6982,9 @@ function parse_perf_data(perfdata) {
     // strip error messages of the form [error msg=<nr>]
     perfdata = perfdata.replace(/\[[^\]]*=[^\]]*\]/g, '');
 
+    // add safe guard, more than 100000 characters are probably no valid performance data
+    if(perfdata.length > 100000) { return([]); }
+
     var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([a-zA-Z\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
     var matches   = perfdata.match(perfRegex);
     var perf_data = [];
