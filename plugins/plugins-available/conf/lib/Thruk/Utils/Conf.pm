@@ -126,9 +126,7 @@ sub set_object_model {
     }
 
     if($c->{'obj_db'}->{'cached'}) {
-        $c->stats->profile(begin => "check_files_changed($refresh)");
         $c->{'obj_db'}->check_files_changed($refresh);
-        $c->stats->profile(end => "check_files_changed($refresh)");
     }
 
     $c->{'obj_db'}->{'errors'} = Thruk::Base::array_uniq(Thruk::Base::list($c->{'obj_db'}->{'errors'}));
