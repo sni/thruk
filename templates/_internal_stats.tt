@@ -5,7 +5,7 @@
     <div class="bar flex relative" style="height: 12px; width: 100px;">
       <div style="height: 12px; background: var(--stats-time-backend); width: [% sprintf("%d", total_backend_waited / total * 200) %]px"></div>
       <div style="height: 12px; background: var(--stats-time-view); width: [% sprintf("%d", total_render_waited / total * 200) %]px"></div>
-      <div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", (time_total - total_backend_waited - total_render_waited) / total * 200) %]px"></div>
+      <div style="height: 12px; background: var(--stats-time-controller); width: [% sprintf("%d", (total_controller_waited) / total * 200) %]px"></div>
       [% IF total_backend_queries > 0 %]<div class="absolute opacity-80 bg-transparent right-1 top-0 leading-3">Queries: [% total_backend_queries %]</div>[% END %]
     </div>
   </div>
@@ -50,9 +50,9 @@
         </tr>
         <tr>
           <td class="pr-1">Controller</td>
-          <td class="pr-1"><div class="w-3 h-3 rounded-full" style="background: var(--stats-time-controler);"></div></td>
-          <td>[% time_controler = time_total - total_backend_waited - total_render_waited;  sprintf("%.3f", time_controler) %]s</td>
-          <td>([% perc = time_controler / time_total * 100; sprintf("%.0f", perc) %]%)</td>
+          <td class="pr-1"><div class="w-3 h-3 rounded-full" style="background: var(--stats-time-controller);"></div></td>
+          <td>[% sprintf("%.3f", total_controller_waited) %]s</td>
+          <td>([% perc = total_controller_waited / time_total * 100; sprintf("%.0f", perc) %]%)</td>
           <td>
             [%# add detailed drill down into sub tasks of controller #%]
             [%
@@ -72,7 +72,7 @@
                 [% IF perc_io   > 0 %]<div style="height: 12px; background: var(--stats-time-io); width: [% sprintf("%d", perc_io) %]px" title="disk io"></div>[% END %]
                 [% IF perc_lock > 0 %]<div style="height: 12px; background: var(--stats-time-locks); width: [% sprintf("%d", perc_lock) %]px" title="io locks"></div>[% END %]
                 [% IF perc_cmds > 0 %]<div style="height: 12px; background: var(--stats-time-cmds); width: [% sprintf("%d", perc_cmds) %]px" title="external commands"></div>[% END %]
-                [% IF perc_ctrl > 0 %]<div style="height: 12px; background: var(--stats-time-controler); width: [% sprintf("%d", perc_ctrl) %]px" title="controller"></div>[% END %]
+                [% IF perc_ctrl > 0 %]<div style="height: 12px; background: var(--stats-time-controller); width: [% sprintf("%d", perc_ctrl) %]px" title="controller"></div>[% END %]
               </div>
             </div>
           </td>

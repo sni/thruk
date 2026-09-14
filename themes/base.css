@@ -151,7 +151,7 @@
   --button-disabled-bg:       var(--color-gray-200);
 
   --stats-time-backend:       var(--color-sky-400);
-  --stats-time-controler:     var(--color-yellow-400);
+  --stats-time-controller:    var(--color-yellow-400);
   --stats-time-io:            var(--color-lime-500);
   --stats-time-locks:         var(--color-rose-400);
   --stats-time-cmds:          var(--color-indigo-500);
@@ -1842,6 +1842,11 @@ TABLE.db-profile {
     >TR.active > TD {
       background-color: var(--row-selected-even-bg) !important;
     }
+  }
+}
+DIV.profiles {
+  .legend {
+    @apply w-3 h-3 flex float-right m-[3px];
   }
 }
 
