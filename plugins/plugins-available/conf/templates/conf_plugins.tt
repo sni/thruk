@@ -1,4 +1,7 @@
-﻿[% PROCESS _header.tt %]
+﻿[% PROCESS _header.tt
+                      css=["plugins/${plugin_name}/conf-${fileversion}.css"]
+                      js=["plugins/${plugin_name}/conf-${fileversion}.js"]
+%]
 [% PROCESS _message.tt %]
 
 <form action="conf.cgi" method="POST" class="mt-5 flexcol 2xl:mx-auto w-fit h-[calc(100%-50px)]">

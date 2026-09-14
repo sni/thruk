@@ -954,8 +954,8 @@ sub finalize_request {
 
     my $elapsed = tv_interval($c->stash->{'time_begin'});
     $c->stats->profile(end => "finalize_request");
-    $c->set_stats_common_totals();
     $c->stash->{'time_total'} = $elapsed;
+    $c->set_stats_common_totals();
 
     my $h = Plack::Util::headers($res->[1]);
     my($url) = ($c->req->url =~ m#.*?/thruk/(.*)#mxo);
@@ -984,7 +984,7 @@ sub finalize_request {
         if($inject || $save_for_later) {
             # inject current page stats into html
             $c->add_profile({name => 'Req '.$Thruk::Globals::COUNT, html => $c->stats->report_html(), text => $c->stats->report(), totals => $c->stats->{'totals'}});
-            if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
+            if($c->stash->{'db_profiles'} && $c->check_user_roles('authorized_for_debug_profiles')) {
                 $c->add_profile(Thruk::Utils::render_db_profile($c, 'Req '.$Thruk::Globals::COUNT.' DB', $c->stash->{'db_profiles'}));
             }
             if($Thruk::Globals::tt_profiling) {
@@ -1108,12 +1108,16 @@ adds common statistics
 sub set_stats_common_totals {
     my($c) = @_;
     my @totals = ();
-    push @totals, { '*total backend queries'          => $c->stash->{'total_backend_queries'} } if $c->stash->{'total_backend_queries'} > 0;
-    push @totals, { '*total time waited on backends'  => $c->stash->{'total_backend_waited'}  } if $c->stash->{'total_backend_waited'}  > 0;
-    push @totals, { '*total time waited on rendering' => $c->stash->{'total_render_waited'}   } if $c->stash->{'total_render_waited'}   > 0;
-    push @totals, { '*total time waited on io'        => $c->stash->{'total_io_time'}         } if $c->stash->{'total_io_time'} > 0;
-    push @totals, { '*total time waited on io locks'  => $c->stash->{'total_io_lock'}         } if $c->stash->{'total_io_lock'} > 0;
-    push @totals, { '*total time waited on ext cmd'   => $c->stash->{'total_io_cmd'}          } if $c->stash->{'total_io_cmd'}  > 0;
+
+    $c->stash->{'total_controller_waited'} = $c->stash->{'time_total'} - $c->stash->{'total_backend_waited'} - $c->stash->{'total_render_waited'};
+
+    push @totals, { '*total backend queries'           => $c->stash->{'total_backend_queries'}   } if $c->stash->{'total_backend_queries'} > 0;
+    push @totals, { '*total time waited on backends'   => $c->stash->{'total_backend_waited'}    } if $c->stash->{'total_backend_waited'}  > 0;
+    push @totals, { '*total time waited on rendering'  => $c->stash->{'total_render_waited'}     } if $c->stash->{'total_render_waited'}   > 0;
+    push @totals, { '*total time waited on controller' => $c->stash->{'total_controller_waited'} } if $c->stash->{'total_controller_waited'}  > 0;
+    push @totals, { '*total time waited on io'         => $c->stash->{'total_io_time'}           } if $c->stash->{'total_io_time'} > 0;
+    push @totals, { '*total time waited on io locks'   => $c->stash->{'total_io_lock'}           } if $c->stash->{'total_io_lock'} > 0;
+    push @totals, { '*total time waited on ext cmd'    => $c->stash->{'total_io_cmd'}            } if $c->stash->{'total_io_cmd'}  > 0;
 
     $c->stats->totals(@totals);
     return;
@@ -1153,7 +1157,7 @@ sub add_profile {
 }
 
 ###################################################
-# returns true if request is using ssl/tls
+# combines profile totals from multiple profiles
 sub _combine_profile_totals {
     my($stash) = @_;
 
@@ -1170,13 +1174,14 @@ sub _combine_profile_totals {
 
     return unless $num > 1;
 
-    $stash->{'total_backend_queries'} = $combined->{'*total backend queries'}          // 0;
-    $stash->{'total_backend_waited'}  = $combined->{'*total time waited on backends'}  // 0;
-    $stash->{'total_render_waited'}   = $combined->{'*total time waited on rendering'} // 0;
-    $stash->{'total_io_time'}         = $combined->{'*total time waited on io'}        // 0;
-    $stash->{'total_io_lock'}         = $combined->{'*total time waited on io locks'}  // 0;
-    $stash->{'total_io_cmd'}          = $combined->{'*total time waited on ext cmd'}   // 0;
-    $stash->{'time_total'}            = $combined->{'*total time'}                     // 0;
+    $stash->{'total_backend_queries'}   = $combined->{'*total backend queries'}          // 0;
+    $stash->{'total_backend_waited'}    = $combined->{'*total time waited on backends'}  // 0;
+    $stash->{'total_render_waited'}     = $combined->{'*total time waited on rendering'} // 0;
+    $stash->{'total_io_time'}           = $combined->{'*total time waited on io'}        // 0;
+    $stash->{'total_io_lock'}           = $combined->{'*total time waited on io locks'}  // 0;
+    $stash->{'total_io_cmd'}            = $combined->{'*total time waited on ext cmd'}   // 0;
+    $stash->{'time_total'}              = $combined->{'*total time'}                     // 0;
+    $stash->{'total_controller_waited'} = $stash->{'time_total'} - $stash->{'total_backend_waited'} - $stash->{'total_render_waited'};
 
     for my $p (@{$stash->{'page_profiles'}}) {
         next unless $p->{'totals'};

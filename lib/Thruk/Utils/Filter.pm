@@ -1519,11 +1519,11 @@ return string for given numerical host state
 sub hoststate2text {
     my($nr) = @_;
     return unless defined $nr;
-    if($nr == 0) { return 'UP'; }
-    if($nr == 1) { return 'DOWN'; }
-    if($nr == 2) { return 'UNREACHABLE'; }
-    if($nr == 3) { return 'UNKNOWN'; }
-    if($nr == 4) { return 'PENDING'; }
+    if($nr eq "0") { return 'UP'; }
+    if($nr eq "1") { return 'DOWN'; }
+    if($nr eq "2") { return 'UNREACHABLE'; }
+    if($nr eq "3") { return 'UNKNOWN'; }
+    if($nr eq "4") { return 'PENDING'; }
     return;
 }
 

@@ -55,6 +55,7 @@
                     <input type='hidden' name='s0_op' value='~' />
                     <input type='hidden' name='s0_type' value='search' />
                     <input type='hidden' name='add_default_service_filter' value='1' />
+                    <input type='hidden' name='quicksearch' value='1' />
                     <input type='search' name='s0_value' class="deletable autosubmit headersearch js-autoexpand js-suggest-advanced" id="header-search" placeholder="search..." />
                     <input type='search' name='q' onfocus="initAutoCompleteQuery(this, queryCodeCompletions)" class="w-48 js-advancedfilter" placeholder="advanced search..." autocomplete="off" style="display: none;" disabled />
                   </fieldset>

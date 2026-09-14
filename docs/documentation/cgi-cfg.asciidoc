@@ -221,7 +221,16 @@ overwrite status icon sets and background images in panorama view dashboards.
 
 ex.:
 
-  authorized_for_panorama_view_media_manager= = thrukadmin
+  authorized_for_panorama_view_media_manager = thrukadmin
+
+
+=== authorized_for_debug_profiles
+A comma-delimited list of usernames that have the permission to show
+extended information in the debug profiles, ex.: livestatus queries.
+
+ex.:
+
+  authorized_for_debug_profiles = thrukadmin
 
 
 === authorized_for_reports

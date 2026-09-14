@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 15;
+plan tests => 17;
 
 ###########################################################
 # test thruks script path
@@ -19,10 +19,12 @@ TestUtils::test_command({
 
 ###########################################################
 TestUtils::test_command({
-    cmd    => '/usr/bin/env thruk r "/hostgroups?name=all"',
-    like   => [
+    cmd     => '/usr/bin/env thruk r "/hostgroups?name=all"',
+    waitfor => '"worst_service_state"\ :\ 3', # might take a while till summary attributes will be updated
+    maxwait => 60,
+    like    => [
             '/"num_hosts" : 7,/',
-            '/"num_services" : 14,/',
+            '/"num_services" : 21,/',
             '/"worst_service_state" : 3/',
     ],
 });

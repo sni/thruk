@@ -840,7 +840,7 @@ sub save_profile {
     $file =~ s/profile\.html/profile.json/gmx;
     Thruk::Utils::IO::json_lock_store($file, { totals => $c->stats->{'totals'}});
 
-    if($c->stash->{'db_profiles'} && $c->user && $c->user->check_user_roles('admin')) {
+    if($c->stash->{'db_profiles'} && $c->check_user_roles('authorized_for_debug_profiles')) {
         $file =~ s/profile\.json/profile.db/gmx;
         my $db_profile = Thruk::Utils::render_db_profile($c, 'Job '.$ENV{'THRUK_JOB_ID'}.' DB', $c->stash->{'db_profiles'});
         Thruk::Utils::IO::json_lock_store($file, $db_profile, { pretty => 1 });

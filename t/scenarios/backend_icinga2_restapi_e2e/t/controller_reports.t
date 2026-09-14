@@ -1,0 +1,1 @@
+../../../../plugins/plugins-available/reports2/t/controller_reports.t

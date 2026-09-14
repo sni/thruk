@@ -30,13 +30,19 @@ Utilities to handle oauth login
 =cut
 sub handle_oauth_login {
     my($c, $referer, $cookie_path, $cookie_domain) = @_;
+
+    $c->stats->profile(begin => "handle_oauth_login");
+
     my $auth_folder = $c->config->{'var_path'}."/oauth/";
     my $loginpage_uri = $c->req->uri;
     $loginpage_uri->query_form([]);
     $loginpage_uri->query_keywords([]);
     $loginpage_uri = $loginpage_uri->as_string();
 
-    return(_send_error($c, $c->req->parameters)) if $c->req->parameters->{'error'};
+    if($c->req->parameters->{'error'}) {
+        $c->stats->profile(end => "handle_oauth_login");
+        return(_send_error($c, $c->req->parameters));
+    }
 
     my $code  = $c->req->parameters->{'code'};
     my $state = $c->req->parameters->{'state'};
@@ -44,16 +50,19 @@ sub handle_oauth_login {
     if($code && $state) {
         _cleanup_oauth_files($auth_folder, 600);
         if(Thruk::Base::check_for_nasty_filename($state)) {
+            $c->stats->profile(end => "handle_oauth_login");
             return $c->detach_error({msg => "oauth state contains invalid characters.", code => 400});
         }
         _debug(sprintf("oauth login step2: code:%s state:%s", $code, $state)) if Thruk::Base->debug;
         my $data = Thruk::Utils::IO::json_lock_retrieve($auth_folder."/".$state.".json");
         if(!$data || !defined $data->{'oauth'}) {
+            $c->stats->profile(end => "handle_oauth_login");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?expired&".$referer);
         }
         # exchange code into token
         my $auth = $c->config->{'auth_oauth'}->{'provider'}->[$data->{'oauth'}];
         if(!$auth) {
+            $c->stats->profile(end => "handle_oauth_login");
             return $c->detach_error({msg => "oauth provider not found", code => 500, debug_information => { oauth => $data->{'oauth'} }});
         }
         my $ua = Thruk::UserAgent->new({}, $c->config);
@@ -79,11 +88,14 @@ sub handle_oauth_login {
             $token_data->{'code_verifier'} = $data->{'pkce_code'};
             delete $token_data->{'client_secret'}; # client secret is not required when using pkce
         }
+        $c->stats->profile(begin => "handle_oauth_login: post token");
         my $res = $ua->post($auth->{'token_url'}, $token_data);
+        $c->stats->profile(end => "handle_oauth_login: post token");
         _debug_http_response($res) if Thruk::Base->trace;
         unlink($auth_folder."/".$state.".json");
         my $token = _get_json($c, $res);
         if(!$token || !$token->{"access_token"}) {
+            $c->stats->profile(end => "handle_oauth_login");
             return $c->detach_error({msg => "cannot exchange oauth token", code => 500, debug_information => { res => $res }});
         }
 
@@ -96,14 +108,18 @@ sub handle_oauth_login {
         my($login, $teams);
         if ($auth->{'api_url'}) {
             _debug(sprintf("oauth login step2: fetching user id from: %s", $auth->{'api_url'})) if Thruk::Base->debug;
+            $c->stats->profile(begin => "handle_oauth_login: get api url");
             $res = $ua->get($auth->{'api_url'});
+            $c->stats->profile(end => "handle_oauth_login: get api url");
             _debug_http_response($res) if Thruk::Base->trace;
             my $userinfo = _get_json($c, $res);
             if(!$userinfo) {
+                $c->stats->profile(end => "handle_oauth_login");
                 return $c->detach_error({msg => "cannot fetch oauth user details", code => 500, debug_information => { res => $res }});
             }
             ($login, $teams) = _extract_login($auth, $userinfo);
             if(!defined $login) {
+                $c->stats->profile(end => "handle_oauth_login");
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
             }
         } else {
@@ -119,7 +135,9 @@ sub handle_oauth_login {
             my $id_token;
             if ($auth->{'jwks_url'}) {
                 _debug(sprintf("oauth login step2: get jwks from: %s", $auth->{'jwks_url'})) if Thruk::Base->debug;
+                $c->stats->profile(begin => "handle_oauth_login: get jwks url");
                 $res = $ua->get($auth->{'jwks_url'});
+                $c->stats->profile(end => "handle_oauth_login: get jwks url");
                 _debug_http_response($res) if Thruk::Base->trace;
                 my $jwks = _get_json($c, $res);
                 $id_token = decode_jwt(token => $token->{'id_token'}, kid_keys => $jwks);
@@ -131,6 +149,7 @@ sub handle_oauth_login {
             }
             ($login, $teams) = _extract_login($auth, $id_token);
             if(!defined $login) {
+                $c->stats->profile(end => "handle_oauth_login");
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { token => $token, id_token => $id_token }});
             }
         }
@@ -141,16 +160,19 @@ sub handle_oauth_login {
             Thruk::Utils::IO::cmd($c->config->{'cookie_auth_login_hook'}.' >/dev/null 2>&1');
         }
         _debug(sprintf("oauth login step2: login successful as user: %s", $login)) if Thruk::Base->verbose;
+        $c->stats->profile(end => "handle_oauth_login");
         return(Thruk::Controller::login::login_successful($c, $login, $session, ($data->{'referer'}//$referer), $cookie_domain, "oauth: ".($auth->{'id'}//$auth->{'login'}//$auth->{'name'})));
     }
 
     # oauth login flow, step 1
     my $id = $c->req->parameters->{'oauth'};
     if(!defined $id) {
+        $c->stats->profile(end => "handle_oauth_login");
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?problem&".$referer);
     }
     my $auth = $c->config->{'auth_oauth'}->{'provider'}->[$id];
     if(!$auth) {
+        $c->stats->profile(end => "handle_oauth_login");
         return $c->detach_error({msg => "oauth provider not found", code => 400});
     }
     # redirect to auth url
@@ -183,6 +205,7 @@ sub handle_oauth_login {
     _cleanup_oauth_files($auth_folder, 600);
     my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, $login_data, 1, $auth->{'auth_url'}, 1);
     _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
+    $c->stats->profile(end => "handle_oauth_login");
     return $c->redirect_to($oauth_login_url);
 }
 

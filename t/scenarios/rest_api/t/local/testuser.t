@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 41;
+plan tests => 44;
 
 ###########################################################
 # test thruks script path
@@ -46,7 +46,11 @@ TestUtils::test_command({
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env thruk cache dump',
-        like   => ['/global/', '/testgroup/', '/admin/'],
+        like   => ['/global/'],
+    });
+    TestUtils::test_command({
+        cmd    => '/usr/bin/env cat var/thruk/users/*',
+        like   => ['/testgroup/', '/admin/'],
     });
     TestUtils::test_command({
         cmd    => '/usr/bin/env curl -s -u testuser:testuser http://localhost/demo/thruk/r/services/localhost/Disk%20%2F/config',

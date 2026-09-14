@@ -335,6 +335,7 @@ sub set_object_model {
 
     confess("no peer key set") unless $peer_key;
 
+    $c->stash->{'obj_model_changed'} = 0;
     $c->stash->{'param_backend'} = $peer_key;
     delete $c->{'obj_db'};
     my $rc = Thruk::Utils::Conf::set_object_model($c, undef, $peer_key);
@@ -359,6 +360,10 @@ sub set_object_model {
         _error(join("\n", @{$c->{'obj_db'}->{'errors'}}));
         die(sprintf("failed to initialize objects of peer %s", $peer_key));
     }
+
+    Thruk::Utils::Conf::store_model_retention($c, $c->stash->{'param_backend'}) if $c->stash->{'obj_model_changed'};
+    $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
+
     return 1;
 }
 

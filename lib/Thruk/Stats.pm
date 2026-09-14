@@ -220,7 +220,14 @@ sub _format_html_row {
     if($row->{'stack'}) {
         $onclick = "onclick='jQuery(\".pstack_details, .pstack_more\").css(\"display\",\"none\"); jQuery(\".pstack_expand\").css(\"display\",\"\"); toggleElement(\"pstack_".$id."\")'";
     }
-    $output .= "<td class='whitespace-pre ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.($fullname ne $name ? " title='$fullname'" : "").">".$name."</td>\n";
+    my $legend = '';
+    my $name_prefix = '';
+    my $name_style = '';
+    if($name eq 'total time waited on backends')   { $legend = '<div class="legend" style="background: var(--stats-time-backend);"></div>'; }
+    elsif($name eq 'total time waited on rendering')  { $legend = '<div class="legend" style="background: var(--stats-time-view);"></div>'; }
+    elsif($name eq 'total time waited on controller') { $legend = '<div class="legend" style="background: var(--stats-time-controller);"></div>'; }
+    elsif($name =~ /^total\ time\ /mx) { $name_style = "margin-left: 5px"; $name_prefix = " &bull; "; }
+    $output .= "<td class='whitespace-pre ".$name_style." ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.($fullname ne $name ? " title='$fullname'" : "").">".$name_prefix.$name.$legend."</td>\n";
     $output .= "<td class='text-right'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 0) {

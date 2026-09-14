@@ -939,6 +939,7 @@ sub _bulk_send_backend {
         Thruk::Utils::set_message($c, 'fail_message', "sending command failed: ".$err);
         return;
     }
+    # clean affected backends from process info cache
     my $cached_proc = $c->cache->get->{'global'} || {};
     for my $key (split(/,/mx, $backends)) {
         delete $cached_proc->{'processinfo'}->{$key};

@@ -3833,6 +3833,9 @@ function add_form_row(el, row_num_to_clone) {
 /* filter table content by search field */
 var table_search_input_id, table_search_table_ids, table_search_timer;
 var table_search_cb = {};
+/* in-flight full-row fetch per table and the latest search value to apply
+   once the (single) pending response arrives */
+var table_search_load = {};
 function table_search(input_id, table_ids, nodelay, preserve_hash) {
     table_search_input_id  = input_id;
     table_search_table_ids = table_ids;
@@ -3899,6 +3902,14 @@ function do_table_search_table(id, table, value, preserve_hash) {
     if(preserve_hash && window.pager && window.pager.entries < window.pager.total_items && !table.dataset["origUrl"]) {
         var origUrl = ""+window.location.href;
         var url = uriWith(window.location.href, {'entries': 'all'});
+        /* if a full-row fetch is already in flight for this table, do not
+           start another one; just remember the latest search value so the
+           pending response is filtered with the newest input */
+        var ctx = table_search_load[id];
+        if(ctx) {
+            ctx.value = value;
+            return;
+        }
         var origTable = table;
         var container = jQuery('<div class="relative"><\/div>');
         jQuery(table.parentNode).prepend(container);
@@ -3907,13 +3918,24 @@ function do_table_search_table(id, table, value, preserve_hash) {
         jQuery(origTable).addClass('disabled');
         var spinner = jQuery('<div class="spinner absolute top-0 left-0 z-30"><\/div>');
         jQuery(container).prepend(spinner);
-        jQuery(tableLoc).load(url+" #"+id, {}, function(text, status, req) {
-            if(status == "error") {
-                origTable.removeClass('disabled');
-                container.remove();
-                spinner.remove();
-                thruk_xhr_error("loading data failed: ", text, status, req);
-            } else {
+        ctx = table_search_load[id] = { value: value };
+        jQuery.ajax({
+            url: url,
+            dataType: "html",
+            success: function(html) {
+                table_search_load[id] = null;
+                var found = jQuery('<div>').append(jQuery.parseHTML(html)).find('#'+id);
+                if(!found.length) {
+                    origTable.removeClass('disabled');
+                    container.remove();
+                    spinner.remove();
+                    thruk_xhr_error("loading data failed: element #"+id+" not found");
+                    return;
+                }
+                /* use the latest search value, it may have changed while
+                   this request was in flight */
+                value = ctx.value;
+                tableLoc.html(found);
                 table = document.getElementById(id);
                 table.dataset["search"]  = value;
                 table.dataset["origUrl"] = origUrl;
@@ -3924,6 +3946,13 @@ function do_table_search_table(id, table, value, preserve_hash) {
                 spinner.remove();
                 tableLoc.removeClass('hidden');
                 table_search_post(id);
+            },
+            error: function(req, status) {
+                table_search_load[id] = null;
+                origTable.removeClass('disabled');
+                container.remove();
+                spinner.remove();
+                thruk_xhr_error("loading data failed: ", status, status, req);
             }
         });
         return;
@@ -6982,7 +7011,10 @@ function parse_perf_data(perfdata) {
     // strip error messages of the form [error msg=<nr>]
     perfdata = perfdata.replace(/\[[^\]]*=[^\]]*\]/g, '');
 
-    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([\pL\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
+    // add safe guard, more than 100000 characters are probably no valid performance data
+    if(perfdata.length > 100000) { return([]); }
+
+    var perfRegex = new RegExp(/([^=]+)=(U|[\d\.\,\-]+)([a-zA-Z\/\%]*);?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-\:\~\@]*)?;?([\d\.\,\-]*)?;?([\d\.\,\-]*)?;?\s*/g);
     var matches   = perfdata.match(perfRegex);
     var perf_data = [];
     if(!matches) { return([]); }

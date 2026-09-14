@@ -102,6 +102,7 @@ sub index {
         if($keywords eq 'logout') {
             _invalidate_current_session($c, $cookie_path, "user logout");
             Thruk::Utils::set_message( $c, 'success_message', 'logout successful' );
+            $c->stats->profile(end => "login::index");
             return $c->redirect_to($logoutref) if $logoutref;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
@@ -111,6 +112,7 @@ sub index {
             if($has_query && $referer && $referer =~ m%/thruk/%mx) {
                 sleep(3); # delay a bit
                 $referer = '/'.$referer if $referer !~ m|^/|mx;
+                $c->stats->profile(end => "login::index");
                 return $c->redirect_to($referer);
             }
             Thruk::Utils::set_message( $c, 'fail_message', 'session has expired' );
@@ -130,6 +132,7 @@ sub index {
         }
         elsif($keywords eq 'setsession') {
             $c->authenticate();
+            $c->stats->profile(end => "login::index");
             return $c->redirect_to($referer) if $referer;
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
         }
@@ -138,6 +141,7 @@ sub index {
     # simply redirect if already authenticated, but only if it looks like a valid url
     if($has_query && $referer && $referer =~ m%/thruk/%mx && $c->cookies('thruk_auth') && $c->authenticate()) {
         $referer = '/'.$referer if $referer !~ m|^/|mx;
+        $c->stats->profile(end => "login::index");
         return $c->redirect_to($referer);
     }
 
@@ -155,15 +159,18 @@ sub index {
     }
     if($c->req->parameters->{'state'} || (defined $c->req->parameters->{'oauth'} && $c->req->parameters->{'oauth'} ne "")) {
         require Thruk::Utils::OAuth;
+        $c->stats->profile(end => "login::index");
         return(Thruk::Utils::OAuth::handle_oauth_login($c, $referer, $cookie_path, $cookie_domain));
     }
 
     if(defined $c->req->parameters->{'login'} && $login eq '') {
         Thruk::Utils::set_message( $c, 'fail_message', 'Missing credentials' );
+        $c->stats->profile(end => "login::index");
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi");
     }
 
     if($login ne '') {
+        $c->stats->profile(end => "login::index");
         return(_handle_basic_login($c, $login, $pass, $referer, $cookie_path, $cookie_domain));
     }
 
@@ -174,9 +181,9 @@ sub index {
     }
     $c->stash->{'cookie_domain'} = $cookie_domain;
 
-    $c->stats->profile(end => "login::index");
-
     $c->res->code(401);
+
+    $c->stats->profile(end => "login::index");
 
     if(($query && $query =~ m|/thruk/r/|mx) || $c->want_json_response()) {
         # respond with json error for the rest api

@@ -1403,6 +1403,9 @@ returns path of last http address/thruk instance in chain
 sub get_remote_thruk_url_path {
     my($c, $id, $full) = @_;
     my $peer = $c->db->get_peer_by_key($id);
+
+    return("") if $peer->is_icinga2_restv1();
+
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {

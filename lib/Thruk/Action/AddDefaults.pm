@@ -409,9 +409,11 @@ sub add_defaults {
         # Role adjustments
         for my $r (sort @{$c->user->{'roles'}}) {
             my $role = "$r";
+            # with authorized_for_ prefix
             if($c->config->{'Role'}->{$role}) {
                 push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Role'}->{$role};
             }
+            # without authorized_for_ prefix
             $role =~ s|^authorized_for_||gmx;
             if($c->config->{'Role'}->{$role}) {
                 push @{$c->stash->{'usr_config_adjustments'}}, $c->config->{'Role'}->{$role};

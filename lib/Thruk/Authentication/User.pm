@@ -118,7 +118,7 @@ sets attributes based on livestatus data
 
 =cut
 sub set_dynamic_attributes {
-    my($self, $c, $skip_db_access,$roles, $force_roles) = @_;
+    my($self, $c, $skip_db_access, $roles, $force_roles) = @_;
     return $self if $ENV{'THRUK_BASH_COMP'};
     $c->stats->profile(begin => "User::set_dynamic_attributes");
 
@@ -160,16 +160,18 @@ sub set_dynamic_attributes {
         Thruk::Action::AddDefaults::set_enabled_backends($c, $prev_backends);
     }
 
+    my $cache;
     if($use_cached) {
         _debug("using cached user data") if Thruk::Base->verbose;
-        my $cache = $c->cache->get->{'users'};
+        $cache = Thruk::Utils::get_user_data($c, $username);
         $data = {};
         if(ref $cache eq 'HASH') {
-            $data = $cache->{$username} || {};
+            $data = $cache->{'login_cache'} || {};
         }
         if($data->{'contactgroups'} && ref $data->{'contactgroups'} eq 'HASH') {
             $data->{'contactgroups'} = [sort keys %{$data->{'contactgroups'}}];
         }
+        $cache->{'login_cache'} = $data;
     }
     $self->_apply_user_data($c, $data);
 
@@ -183,7 +185,9 @@ sub set_dynamic_attributes {
     $self->{'roles'} = [ sort @{Thruk::Base::array_uniq($self->{'roles'})} ];
 
     if(!$skip_db_access && !$roles) {
-        $c->cache->set('users', $username, $data);
+        $cache = Thruk::Utils::get_user_data($c, $username) unless defined $cache;
+        $cache->{'login_cache'} = $data;
+        Thruk::Utils::store_user_data($c, $cache, $username);
     }
 
     $self->{'roles_restriction'} = $roles if defined $roles;
@@ -406,7 +410,12 @@ sub is_locked {
 =cut
 
 sub can_choose_role {
-    my($self, $role) = @_;
+    my($self, $r) = @_;
+
+    # ensure role uses the authorized_for_ prefix
+    my $role = "$r";
+    $role =~ s|^authorized_for_||gmx;
+    $role =    "authorized_for_".$role;
 
     return 1 if $role eq 'authorized_for_read_only';
 
@@ -431,22 +440,25 @@ sub can_choose_role {
 =cut
 
 sub check_user_roles {
-    my($self, $role) = @_;
-    if(ref $role eq 'ARRAY') {
-        for my $r (@{$role}) {
-            if(!$self->check_user_roles($r)) {
+    my($self, $roles) = @_;
+    if(ref $roles eq 'ARRAY') {
+        for my $el (@{$roles}) {
+            if(!$self->check_user_roles($el)) {
                 return(0);
             }
         }
         return(1);
     }
+
+    # ensure role uses the authorized_for_ prefix
+    my $role = "$roles";
+    $role =~ s|^authorized_for_||gmx;
+    $role =    "authorized_for_".$role;
+
     my @found = grep(/^\Q$role\E$/mx, @{$self->{'roles'}});
     return 1 if scalar @found >= 1;
 
-    if($role eq 'admin') {
-        if($self->check_user_roles('authorized_for_admin')) {
-            return(1);
-        }
+    if($role eq 'authorized_for_admin') {
         # for historical reasons (there was no explicit admin role in the past) any user with both, the
         # - authorized_for_system_commands and
         # - authorized_for_configuration_information
@@ -881,7 +893,7 @@ sub _expand_teams {
         if($role_data->{'roles'}) {
             for my $i (@{$role_data->{'roles'}}) {
                 my $r = "$i";
-                $r =~ s/^authorized_for_//gmx;
+                $r =~ s/^authorized_for_//gmx; # ensure roles have the authorized_for_ prefix
                 $r = "authorized_for_".$r;
                 $self->{'roles_from_teams'}->{$r} = [] unless defined $self->{'roles_from_teams'}->{$r};
                 push @{$self->{'roles_from_teams'}->{$r}}, $t;

@@ -1261,7 +1261,7 @@ sub _split_value {
     my($line) = @_;
 
     # split by equal sign regex
-    if($line =~ m/^\s*(\S+)\s*=\s*(.*?)\s*$/mxo) {
+    if($line =~ m/^\s*(\S+?)\s*=\s*(.*?)\s*$/mxo) {
         return($1, $2);
     }
 
