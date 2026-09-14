@@ -16,3 +16,5 @@ services:
         POSTGRES_PASSWORD: thruk
         POSTGRES_DB: thruk
         POSTGRES_USER: thruk
+     ports:
+        - "127.0.0.3:65432:5432"

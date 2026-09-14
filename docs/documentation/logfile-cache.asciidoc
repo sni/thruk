@@ -228,3 +228,112 @@ logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=
 -------
 
 For postgres database replace the literal 'mysql' with 'postgres' in the command above.
+
+
+=== PostgreSQL
+{% include new_since.ad version="3.20" %}
+Thruk supports PostgreSQL as an alternative logcache backend to MySQL/MariaDB.
+The PostgreSQL provider follows the same interface as the MySQL provider, so all
+logcache CLI actions (import, update, clean, compact, stats, authupdate) work
+identically.
+
+==== Configuration
+
+You will need to specify your PostgreSQL connection string in your
+thruk_local.conf. Make sure the user and database exist beforehand — the
+tables will be created automatically on first use.
+
+thruk_local.conf:
+-------
+  logcache = postgresql://username:password@localhost:5432/thruk_logs
+-------
+
+[TIP]
+.create PostgreSQL user and database
+=======
+ #> psql -U postgres
+ postgres=# CREATE USER thruk WITH PASSWORD '****';
+ postgres=# CREATE DATABASE thruk_logs OWNER thruk;
+ postgres=# GRANT ALL PRIVILEGES ON DATABASE thruk_logs TO thruk;
+=======
+
+If Thruk runs on the same host as PostgreSQL and you want to use a Unix
+socket instead of TCP, provide the socket directory as the host:
+
+-------
+  logcache = postgresql://thruk:password@/var/run/postgresql/thruk_logs
+-------
+
+==== Differences from the MySQL Provider
+
+[NOTE]
+====
+* *Bulk imports*: MySQL uses `LOAD DATA LOCAL INFILE` for fast bulk inserts.
+  PostgreSQL falls back to extended INSERT statements. For very large initial
+  imports this can be slower. Consider running the import in batches with
+  `thruk -a logcache import --local -v` during off-peak hours, or use the
+  PostgreSQL `COPY` command for a custom import pipeline if needed.
+
+* *Locking*: `_release_write_locks()` is a no-op under PostgreSQL because
+  PostgreSQL releases row-level locks automatically at transaction commit or
+  rollback — no explicit unlock step is required.
+
+* *Transaction recovery*: If a lock attempt fails, Thruk issues an explicit
+  `ROLLBACK` so that the connection is cleanly returned to idle state before
+  retrying. This is required by PostgreSQL's strict transaction semantics.
+====
+
+==== Performance Tuning
+
+For a dedicated logcache PostgreSQL instance, consider the following settings in
+`postgresql.conf`:
+
+-------
+  # Allow PostgreSQL to use more RAM for sorting/hashing large log imports.
+  # A good starting point is 25% of total system RAM.
+  shared_buffers = 512MB
+
+  # Per-operation sort/hash memory. Set higher for large log imports that
+  # involve GROUP BY or ORDER BY across millions of rows.
+  work_mem = 64MB
+
+  # Helps the query planner choose better index scan plans.
+  # Typically 50–75% of total system RAM.
+  effective_cache_size = 2GB
+
+  # Tune autovacuum more aggressively for tables that receive frequent inserts
+  # and deletes (the log tables grow and shrink during clean/compact cycles).
+  autovacuum_vacuum_scale_factor = 0.01
+  autovacuum_analyze_scale_factor = 0.005
+-------
+
+After large initial imports, run `ANALYZE` manually to update planner
+statistics before query-heavy operations:
+
+-------
+  %> psql -U thruk thruk_logs -c "ANALYZE;"
+-------
+
+==== Example Cronjobs
+
+The cronjob schedule is identical to the MySQL setup — only the
+`logcache optimize` command is not applicable (PostgreSQL does not have a
+direct equivalent of `OPTIMIZE TABLE`; autovacuum handles this automatically).
+
+-------
+  THRUK_CRON=1
+
+  # update logcache data
+  */5 * * * * $OMD_ROOT/bin/thruk -a logcache update     >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # update authentication data in our logcache
+  0   2 * * * $OMD_ROOT/bin/thruk -a logcache authupdate >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # clean logfiles from cache after default duration (thruk.conf: logcache_clean_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache clean      >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  # compact logfiles from cache after default duration (thruk.conf: logcache_compact_duration)
+  0   1 * * * $OMD_ROOT/bin/thruk -a logcache compact    >>$OMD_ROOT/var/log/thruk.log 2>&1
+
+  THRUK_CRON=0
+-------
