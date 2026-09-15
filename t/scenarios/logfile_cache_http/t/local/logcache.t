@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 166;
+plan tests => 180;
 
 ###########################################################
 # test thruks script path
@@ -70,6 +70,25 @@ TestUtils::test_command({
         cmd     => "/usr/bin/env thruk r '/logs?limit=1&contact_name[ne]='",
     });
 };
+
+###########################################################
+# test thruk logcache commands
+{
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk logcache update -q",
+        like    => ['/OK\ \-\ imported\ \d+\ log\ items\ from\ 1\ site/'],
+    });
+
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk logcache stats",
+        like    => ['/demo/', '/OK/', qr(\QLast Update\E)],
+    });
+
+    TestUtils::test_command({
+        cmd     => "/usr/bin/env thruk logcache optimize -f -q",
+        like    => [qr(\QOK - optimized logcache for 1 site in\E)],
+    });
+}
 
 ###########################################################
 # some more /logs rest calls
