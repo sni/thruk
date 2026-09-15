@@ -1,1 +1,1 @@
-../../../logfile_cache_http/t/local/logcache.t
+/thruk/t/scenarios/logfile_cache_http/t/local/logcache.t
