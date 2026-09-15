@@ -934,7 +934,6 @@ sub update {
 
     $self->{'stats'}->profile(begin => "M::C::update()") if defined $self->{'stats'};
 
-    $self->{'needs_commit'} = 0;
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0;
 
@@ -942,6 +941,9 @@ sub update {
     $self->_set_config();
     $self->_set_files();
     $self->_read_objects();
+
+    # update "need_commit" flag when pending changes were merged
+    $self->get_changed_files();
 
     $self->{'stats'}->profile(end => "M::C::update()") if defined $self->{'stats'};
 
