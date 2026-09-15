@@ -326,6 +326,12 @@ sub _rest_get_external_command {
                     }
                 }
             }
+
+            # allow overriding exit code for partial errors, only some backends down
+            if($c->config->{'rest_skip_command_partial_errors'}) {
+                $data->{'code'}    = 200;
+                $data->{'warning'} = delete $data->{'error'};
+            }
         }
 
         return $data;
