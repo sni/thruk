@@ -1133,6 +1133,9 @@ sub _update_logcache_optimize {
     my $disk_space_ok = $self->_check_db_fs($c, $peer, $prefix);
     $self->_db_optimize_tables($c, $peer, $prefix, $disk_space_ok);
 
+    # the optimize reconnects, get an updated dbh handle
+    $dbh = $peer->logcache->_dbh;
+
     my $duration = time() - $start;
     $self->_update_status($dbh, $prefix, 3, 'last_reorder', time());
     $self->_update_status($dbh, $prefix, 5, 'reorder_duration', $duration);
