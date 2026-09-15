@@ -1743,11 +1743,14 @@ sub _do_on_peers {
     }
 
     &timing_breakpoint('_get_result: '.$function);
+
     if($function eq 'send_command') {
         if(!$err) {
             $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
         }
     }
+
+    # some backends failed, set a warning message but continue
     if(($num_selected_backends > 0 && !defined $result) || $err) {
         if(!$err) {
             $err = _join_failed_backends($c->stash->{'failed_backends'}, $get_results_for);
@@ -1764,6 +1767,7 @@ sub _do_on_peers {
             _warn(Carp::longmess("internal backend error"));
         }
         $c->stash->{'backend_error'} = $err;
+        # command not send to some backends is fatal
         if($function eq 'send_command'
             || $c->stash->{backend_errors_handling} == DIE
             || ($ENV{'THRUK_MODE'}//'') eq 'TEST'
