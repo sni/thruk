@@ -153,7 +153,9 @@ sub _get_files {
       if(-d $entry) {
         push @{$files}, @{_get_files($entry)};
       } else {
-        push @{$files}, $entry if $entry =~ m/\.(pl|pm|t)$/;
+        if($entry =~ m/\.(pl|pm|t)$/ && !-l $entry) {
+          push @{$files}, $entry;
+        }
       }
     }
   }

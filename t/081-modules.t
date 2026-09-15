@@ -43,6 +43,7 @@ for my $file (@files) {
 ################################################################################
 sub check_modules {
     my($file) = @_;
+
     my $hashsum = Thruk::Utils::Crypt::hexdigest($scripthash.Thruk::Utils::IO::read($file));
     if($cache->{$file} && $cache->{$file} eq $hashsum) {
         ok(1, sprintf("%s - cached", $file));

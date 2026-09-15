@@ -1273,7 +1273,7 @@ sub all_perl_files {
                 push @files, $file;
                 next;
             }
-            my $content = &read($file);
+            my $content = -r $file ? &read($file) : '';
 
             if($content =~ m%\#\!(/usr|)/bin/perl%mx || $content =~ m|\Qexec perl -x\E|mx) {
                 push @files, $file;
