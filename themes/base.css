@@ -1849,6 +1849,9 @@ DIV.profiles {
     @apply w-3 h-3 flex float-right m-[3px];
   }
 }
+#stats_details {
+  @apply pb-[30px];
+}
 
 /*******************************************************************************
 * minimal mode
