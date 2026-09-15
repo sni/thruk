@@ -2383,15 +2383,16 @@ ex.:
   require_comments_for_disable_cmds = 1
 
 
-=== rest_skip_command_partial_errors
+=== rest_commands_ignore_partial_errors
 
-When sending commands to multiple backends, might fail on some backends but
-succeed on others. This option allows you to skip partial errors. If set, the
-result will be 200 OK if at least one command has been successfully delivered.
+When sending commands to multiple backends, they might fail on some backends
+but succeed on others. This option allows you to ignore partial errors. If
+set, the result will be 200 OK if at least one command has been successfully
+delivered.
 
 ex.:
 
-  rest_skip_command_partial_errors = 0
+  rest_commands_ignore_partial_errors = 0
 
 
 

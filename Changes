@@ -22,7 +22,7 @@ next:
             - fix merging host/servicegroups response
             - add support for logcache=0 parameter on log based queries
             - check_thruk_rest: add support for template toolkit syntax in the url itself
-            - add option require_comments_for_disable_cmds to skip errors when at least one command succeded
+            - add option rest_commands_ignore_partial_errors to ignore errors when at least one command succeded
           - Reports:
             - adding an Icelandic translation (#1498)
 
