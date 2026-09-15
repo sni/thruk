@@ -440,6 +440,7 @@ sub _db_optimize_tables {
             _info("OK. (duration: %s)", Thruk::Utils::Filter::duration(tv_interval($t1), 6));
         }
     }
+
     return;
 }
 
@@ -969,6 +970,8 @@ sub _create_tables_if_not_exist {
     $self->_create_tables($dbh, $prefix);
     return 1;
 }
+
+##########################################################
 
 sub _create_tables {
     my($self, $dbh, $prefix) = @_;
