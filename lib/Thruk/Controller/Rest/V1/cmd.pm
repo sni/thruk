@@ -486,7 +486,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/del_all_host_comments.html for details.
 
 # REST PATH: POST /hosts/<name>/cmd/del_comment
-# Removes downtime by id for this host.
+# Removes comment by id for this host.
 #
 # Required arguments:
 #
@@ -892,7 +892,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/change_retry_svc_check_interval.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
-# Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+# Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperiod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
 #
 # Required arguments:
 #
@@ -929,7 +929,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/del_all_svc_comments.html for details.
 
 # REST PATH: POST /services/<host>/<service>/cmd/del_comment
-# Removes downtime by id for this service.
+# Removes comment by id for this service.
 #
 # Required arguments:
 #
@@ -1483,7 +1483,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/enable_contact_host_notifications.html for details.
 
 # REST PATH: POST /contacts/<name>/cmd/enable_contact_svc_notifications
-# Disables service notifications for a particular contact.
+# Enables service notifications for a particular contact.
 #
 # This command does not require any arguments.
 #
@@ -1592,7 +1592,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/enable_flap_detection.html for details.
 
 # REST PATH: POST /system/cmd/enable_host_freshness_checks
-# Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
+# Enables freshness checks of all hosts on a program-wide basis. Individual hosts that have freshness checks disabled will not be checked for freshness.
 #
 # This command does not require any arguments.
 #
@@ -1650,7 +1650,7 @@ __DATA__
 # See https://www.naemon.io/documentation/developer/externalcommands/restart_program.html for details.
 
 # REST PATH: POST /system/cmd/save_state_information
-# Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention
+# Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention information is saved before the Naemon process shuts down and (potentially) at regularly scheduled intervals. This command allows you to force Naemon to save this information to the state retention file immediately. This does not affect the current status information in the Naemon process.
 #
 # This command does not require any arguments.
 #
@@ -1776,7 +1776,7 @@ __DATA__
   "disable_contact_host_notifications":{"args":[],"docs":"Disables host notifications for a particular contact.","name":"disable_contact_host_notifications","nr":-1,"required":[]},
   "disable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"disable_contact_svc_notifications","nr":-1,"required":[]},
   "enable_contact_host_notifications":{"args":[],"docs":"Enables host notifications for a particular contact.","name":"enable_contact_host_notifications","nr":-1,"required":[]},
-  "enable_contact_svc_notifications":{"args":[],"docs":"Disables service notifications for a particular contact.","name":"enable_contact_svc_notifications","nr":-1,"required":[]}
+  "enable_contact_svc_notifications":{"args":[],"docs":"Enables service notifications for a particular contact.","name":"enable_contact_svc_notifications","nr":-1,"required":[]}
 },
 "hostgroups":{
   "disable_hostgroup_host_checks":{"args":[],"name":"disable_hostgroup_host_checks","nr":"68","required":[]},
@@ -1807,7 +1807,7 @@ __DATA__
   "change_retry_host_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular host.","name":"change_retry_host_check_interval","nr":-1,"required":["interval"]},
   "del_active_host_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this host.","name":"del_active_host_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_host_comments":{"args":[],"name":"del_all_host_comments","nr":"20","required":[]},
-  "del_comment":{"args":["comment_id"],"docs":"Removes downtime by id for this host.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
+  "del_comment":{"args":["comment_id"],"docs":"Removes comment by id for this host.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
   "del_downtime":{"args":["downtime_id"],"docs":"Removes downtime by id for this host.","name":"del_downtime","nr":-1,"required":["downtime_id"],"thrukcmd":1},
   "delay_host_notification":{"args":["notification_time"],"name":"delay_host_notification","nr":"10","required":["notification_time"]},
   "disable_all_notifications_beyond_host":{"args":[],"name":"disable_all_notifications_beyond_host","nr":"27","required":[]},
@@ -1868,12 +1868,12 @@ __DATA__
   "change_max_svc_check_attempts":{"args":["attempts"],"docs":"Changes the maximum number of check attempts (retries) for a particular service.","name":"change_max_svc_check_attempts","nr":-1,"required":["attempts"]},
   "change_normal_svc_check_interval":{"args":["interval"],"docs":"Changes the normal (regularly scheduled) check interval for a particular service","name":"change_normal_svc_check_interval","nr":-1,"required":["interval"]},
   "change_retry_svc_check_interval":{"args":["interval"],"docs":"Changes the retry check interval for a particular service.","name":"change_retry_svc_check_interval","nr":-1,"required":["interval"]},
-  "change_svc_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_timeperiod","nr":-1,"required":["timeperiod"]},
+  "change_svc_check_timeperiod":{"args":["timeperiod"],"docs":"Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperiod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_check_timeperiod","nr":-1,"required":["timeperiod"]},
   "change_svc_modattr":{"args":[],"name":"change_svc_modattr","nr":"155","required":[]},
   "change_svc_notification_timeperiod":{"args":["timeperiod"],"docs":"Changes the service notification timeperiod to what is specified by the 'notification_timeperiod' option. The 'notification_timeperiod' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.","name":"change_svc_notification_timeperiod","nr":-1,"required":["timeperiod"]},
   "del_active_service_downtimes":{"args":[],"docs":"Removes all currently active downtimes for this service.","name":"del_active_service_downtimes","nr":-1,"required":[],"thrukcmd":1},
   "del_all_svc_comments":{"args":[],"name":"del_all_svc_comments","nr":"21","required":[]},
-  "del_comment":{"args":["comment_id"],"docs":"Removes downtime by id for this service.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
+  "del_comment":{"args":["comment_id"],"docs":"Removes comment by id for this service.","name":"del_comment","nr":-1,"required":["comment_id"],"thrukcmd":1},
   "del_downtime":{"args":["downtime_id"],"docs":"Removes downtime by id for this service.","name":"del_downtime","nr":-1,"required":["downtime_id"],"thrukcmd":1},
   "delay_svc_notification":{"args":["notification_time"],"name":"delay_svc_notification","nr":"9","required":["notification_time"]},
   "disable_passive_svc_checks":{"args":[],"name":"disable_passive_svc_checks","nr":"40","required":[]},
@@ -1908,7 +1908,7 @@ __DATA__
   "disable_service_freshness_checks":{"args":[],"docs":"Disables freshness checks of all services on a program-wide basis.","name":"disable_service_freshness_checks","nr":-1,"required":[]},
   "enable_event_handlers":{"args":[],"name":"enable_event_handlers","nr":"41","required":[]},
   "enable_flap_detection":{"args":[],"name":"enable_flap_detection","nr":"61","required":[]},
-  "enable_host_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_host_freshness_checks","nr":-1,"required":[]},
+  "enable_host_freshness_checks":{"args":[],"docs":"Enables freshness checks of all hosts on a program-wide basis. Individual hosts that have freshness checks disabled will not be checked for freshness.","name":"enable_host_freshness_checks","nr":-1,"required":[]},
   "enable_notifications":{"args":[],"name":"enable_notifications","nr":"12","required":[]},
   "enable_performance_data":{"args":[],"name":"enable_performance_data","nr":"82","required":[]},
   "enable_service_freshness_checks":{"args":[],"docs":"Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.","name":"enable_service_freshness_checks","nr":-1,"required":[]},
@@ -1916,7 +1916,7 @@ __DATA__
   "read_state_information":{"args":[],"docs":"Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care.","name":"read_state_information","nr":-1,"required":[]},
   "restart_process":{"args":[],"name":"restart_process","nr":"13","required":[]},
   "restart_program":{"args":[],"docs":"Restarts the Naemon process.","name":"restart_program","nr":-1,"required":[]},
-  "save_state_information":{"args":[],"docs":"Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention","name":"save_state_information","nr":-1,"required":[]},
+  "save_state_information":{"args":[],"docs":"Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention information is saved before the Naemon process shuts down and (potentially) at regularly scheduled intervals. This command allows you to force Naemon to save this information to the state retention file immediately. This does not affect the current status information in the Naemon process.","name":"save_state_information","nr":-1,"required":[]},
   "shutdown_process":{"args":[],"name":"shutdown_process","nr":"14","required":[]},
   "shutdown_program":{"args":[],"docs":"Shuts down the Naemon process.","name":"shutdown_program","nr":-1,"required":[]},
   "start_accepting_passive_host_checks":{"args":[],"name":"start_accepting_passive_host_checks","nr":"90","required":[]},
