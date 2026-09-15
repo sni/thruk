@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 6;
+    plan tests => 7;
 }
 
 BEGIN {
@@ -40,4 +40,10 @@ use_ok('Thruk::Context');
     local $ENV{'OMD_SITE'} = "thruk";
     my $pathinfo = Thruk::Context::translate_request_path("/thruk/cgi-bin/tac.cgi", {product_prefix => 'thruk'});
     is($pathinfo, "/thruk/cgi-bin/tac.cgi", "pathinfo for /thruk/cgi-bin/tac.cgi with omd site named thruk");
+};
+
+{
+    local $ENV{'OMD_SITE'} = "demo";
+    my $pathinfo = Thruk::Context::translate_request_path("/demo/thruk/r/hosts", {product_prefix => 'thruk'});
+    is($pathinfo, "/thruk/r/hosts", "pathinfo for /thruk/r/hosts");
 };

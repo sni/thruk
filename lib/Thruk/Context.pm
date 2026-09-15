@@ -60,7 +60,12 @@ sub new {
         $env->{'SCRIPT_URL'} = $1;
     }
     # get path from script url if possible, request uri gets encoding wrong: /Disk%20%252F/ vs. /Disk %2F/ for "Disk /" url part
-    my $path_info         = translate_request_path($env->{'SCRIPT_URL'} || $env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $config, $env);
+    my $path_info = translate_request_path($env->{'SCRIPT_URL'} || $env->{'REQUEST_URI'} || $env->{'PATH_INFO'}, $config, $env);
+    # FastCGI mappings for the rest api include the REST path in SCRIPT_NAME.
+    # PATH_INFO already contains that path, so remove it from SCRIPT_NAME. Otherwise c->req->url would print the path part twice
+    if($path_info =~ m|^/thruk/r/|mx && $env->{'SCRIPT_NAME'}) {
+        $env->{'SCRIPT_NAME'} =~ s|\Q$path_info\E$||mx;
+    }
     $env->{'PATH_INFO'}   = $path_info;
     $env->{'REQUEST_URI'} = $path_info;
 
