@@ -390,6 +390,10 @@ sub do_filter {
         }
         $prefix = 'dfl_' unless $prefix ne '';
         $c->stash->{'searches'}->{$prefix} = $searches;
+
+        # add global filter from totals links
+        ($hostfilter, $servicefilter) = _append_totals_filter($c, $hostfilter, $servicefilter);
+
         return($servicefilter, $servicefilter, $servicefilter, $servicefilter, $c->stash->{'has_service_filter'});
     }
 
@@ -442,6 +446,17 @@ sub do_filter {
     }
 
     # add global filter from totals links
+    ($hostfilter, $servicefilter) = _append_totals_filter($c, $hostfilter, $servicefilter);
+
+    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
+}
+
+##############################################
+
+# adds global filter from totals links
+sub _append_totals_filter {
+
+    my($c, $hostfilter, $servicefilter) = @_;
     if($c->stash->{'servicestatustypes'}) {
         my(undef, undef, $f) = get_service_statustype_filter($c->stash->{'servicestatustypes'});
         $servicefilter = { '-and' => [ $servicefilter, $f ] };
@@ -462,7 +477,7 @@ sub do_filter {
         $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
     }
 
-    return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
+    return($hostfilter, $servicefilter);
 }
 
 ##############################################
