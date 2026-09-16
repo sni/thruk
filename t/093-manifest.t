@@ -27,10 +27,12 @@ SKIP: {
         }
 
         if($line =~ m/No such file: (.*)$/) {
-            if( -l $1) {
-              pass("$1 is a symlink");
+            my $file = $1;
+            if( -l $file) {
+              pass("$file is a symlink");
             } else {
-              fail("$1 does not exist!");
+              diag($line);
+              fail("$file: ".$!);
             }
             next;
         }
