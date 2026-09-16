@@ -392,7 +392,7 @@ sub do_filter {
         $c->stash->{'searches'}->{$prefix} = $searches;
 
         # add global filter from totals links
-        ($hostfilter, $servicefilter) = _append_totals_filter($c, $hostfilter, $servicefilter);
+        ($hostfilter, $servicefilter) = _append_totals_filter($params, $hostfilter, $servicefilter);
 
         return($servicefilter, $servicefilter, $servicefilter, $servicefilter, $c->stash->{'has_service_filter'});
     }
@@ -446,7 +446,7 @@ sub do_filter {
     }
 
     # add global filter from totals links
-    ($hostfilter, $servicefilter) = _append_totals_filter($c, $hostfilter, $servicefilter);
+    ($hostfilter, $servicefilter) = _append_totals_filter($params, $hostfilter, $servicefilter);
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
 }
@@ -456,23 +456,23 @@ sub do_filter {
 # adds global filter from totals links
 sub _append_totals_filter {
 
-    my($c, $hostfilter, $servicefilter) = @_;
-    if($c->stash->{'servicestatustypes'}) {
-        my(undef, undef, $f) = get_service_statustype_filter($c->stash->{'servicestatustypes'});
+    my($params, $hostfilter, $servicefilter) = @_;
+    if($params->{'servicestatustypes'}) {
+        my(undef, undef, $f) = get_service_statustype_filter($params->{'servicestatustypes'});
         $servicefilter = { '-and' => [ $servicefilter, $f ] };
     }
-    if($c->stash->{'serviceprops'}) {
-        my(undef, undef, $f) = get_service_prop_filter($c->stash->{'serviceprops'});
+    if($params->{'serviceprops'}) {
+        my(undef, undef, $f) = get_service_prop_filter($params->{'serviceprops'});
         $servicefilter = { '-and' => [ $servicefilter, $f ] };
     }
 
-    if($c->stash->{'hoststatustypes'}) {
-        my(undef, undef, $hf, $sf) = get_host_statustype_filter($c->stash->{'hoststatustypes'});
+    if($params->{'hoststatustypes'}) {
+        my(undef, undef, $hf, $sf) = get_host_statustype_filter($params->{'hoststatustypes'});
         $servicefilter = { '-and' => [ $servicefilter, $sf ] };
         $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
     }
-    if($c->stash->{'hostprops'}) {
-        my(undef, undef, $hf, $sf) = get_host_prop_filter($c->stash->{'hostprops'});
+    if($params->{'hostprops'}) {
+        my(undef, undef, $hf, $sf) = get_host_prop_filter($params->{'hostprops'});
         $servicefilter = { '-and' => [ $servicefilter, $sf ] };
         $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
     }

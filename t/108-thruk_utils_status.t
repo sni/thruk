@@ -4,7 +4,7 @@ use Cpanel::JSON::XS ();
 use Test::More;
 use utf8;
 
-plan tests => 73;
+plan tests => 75;
 
 BEGIN {
     use lib('t');
@@ -334,4 +334,26 @@ for my $b (@{$broken}) {
     my $enc2 = $json->encode($optimized);
     ok($enc ne $enc2, "query can be optimized");
     is_deeply($optimized, $exp, "optimized query is correct");
+};
+
+################################################################################
+# test advanced filter with totals filter link
+{
+    my $params = {
+        'q'     => 'host = test',
+        'style' => 'detail',
+    };
+    my(undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'dfl_', $params);
+    my $exp = [ { 'host_name' => { '=' => 'test' } } ];
+    is_deeply($servicefilter, $exp, "service filter is correct");
+
+    # add parameter from totals link
+    $params->{'servicestatustypes'} = 16;
+    (undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'dfl_', $params);
+    my $exp = { '-and' => [
+               [ { 'host_name' => { '=' => 'test' } } ],
+               { '-and' => { 'has_been_checked' => 1, 'state' => 2 } },
+    ] };
+
+    is_deeply($servicefilter, $exp, "service filter is correct");
 };
