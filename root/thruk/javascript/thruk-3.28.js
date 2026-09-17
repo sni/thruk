@@ -9392,6 +9392,7 @@ var ajax_search = {
     search_for_cb   : undefined,
     show_results_cb : undefined,
     refresh_data_cb : undefined,
+    cur_request     : null,
 
     /* initialize search
      *
@@ -9846,15 +9847,24 @@ var ajax_search = {
             return;
         }
 
+        // cancel any previous in-flight search request
+        if(ajax_search.cur_request) {
+            ajax_search.cur_request.abort();
+            ajax_search.cur_request = null;
+        }
+
         // fill data store
-        jQuery.ajax({
+        ajax_search.cur_request = jQuery.ajax({
             url: ajax_search.cur_search_url,
             data: {
                 limit: ajax_search.limit,
                 query: ajax_search.initialized_q
             },
             type: 'POST',
-            success: function(data) {
+            success: function(data, status, jqXHR) {
+                // ignore responses from cancelled/overwritten requests
+                if(ajax_search.cur_request != jqXHR) { return; }
+                ajax_search.cur_request = null;
                 ajax_search.updating=false;
                 ajax_search.base = data;
                 var panel = document.getElementById(ajax_search.result_pan);
@@ -9864,6 +9874,15 @@ var ajax_search = {
                 ajax_search.autoopen = true;
             },
             error: function(jqXHR, textStatus, errorThrown) {
+                // ignore aborted requests (cancelled by a newer search)
+                ajax_search.updating=false;
+                ajax_search.initialized = false;
+                if(textStatus == 'abort') {
+                    if(ajax_search.cur_request == jqXHR) { ajax_search.cur_request = null; }
+                    return;
+                }
+                if(ajax_search.cur_request != jqXHR) { return; }
+                ajax_search.cur_request = null;
                 if(thrukState.unloading) {
                     ajax_search.hide_results(null, 1);
                     return;
@@ -9872,9 +9891,7 @@ var ajax_search = {
                 if(ajax_search.error == undefined || ajax_search.error == "") {
                     ajax_search.error = "server unavailable";
                 }
-                ajax_search.updating=false;
                 ajax_search.show_results([]);
-                ajax_search.initialized = false;
             }
         });
     },
@@ -9964,6 +9981,12 @@ var ajax_search = {
 
         var panel = document.getElementById(ajax_search.result_pan);
         if(!panel) { return; }
+
+        // cancel any in-flight search request
+        if(ajax_search.cur_request) {
+            ajax_search.cur_request.abort();
+            ajax_search.cur_request = null;
+        }
         /* delay hiding a little moment, otherwise the click
          * on the suggestion would be cancel as the panel does
          * not exist anymore

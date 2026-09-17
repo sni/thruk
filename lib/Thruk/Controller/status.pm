@@ -410,7 +410,7 @@ sub _process_raw_request {
 ##########################################################
 # check for search results
 sub _process_search_request {
-    my( $c ) = @_;
+    my($c) = @_;
 
     # search pattern is in host param
     my $host = $c->req->parameters->{'host'};
