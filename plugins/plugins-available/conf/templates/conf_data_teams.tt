@@ -27,7 +27,7 @@
 
   <div class="flexrow flex-nowrap gap-5">
     [% IF show_team %]
-      <form action="conf.cgi" method="POST" autocomplete="off" onsubmit="removeTemplateRows(this); setFormBtnSpinner(this)">
+      <form action="conf.cgi" method="POST" autocomplete="off" onsubmit="flattenBackends(this); removeTemplateRows(this); setFormBtnSpinner(this)">
         [% IF !scripted %]
         <input type="submit" name="send" value="save" style="display:none">
         [% END %]
@@ -152,6 +152,8 @@
                   IF !p.exists("hosts");            p.hosts            = [];  END;
                   IF !p.exists("hosts_op");         p.hosts_op         = "="; END;
                   IF !p.exists("with_services");    p.with_services    = 0;   END;
+                  IF !p.exists("with_backends");    p.with_backends    = 0;   END;
+                  IF !p.exists("backends");         p.backends         = [];  END;
                   IF !p.exists("services");         p.services         = [];  END;
                   IF !p.exists("services_op");      p.services_op      = "="; END;
                   IF !p.exists("hst_custom_var");   p.hst_custom_var   = "";  END;
@@ -361,6 +363,37 @@
                         </td>
                         <td></td>
                       </tr>
+                      [% IF backends.size > 1 %]
+                      <tr>
+                        <th class="pl-3">Sites</th>
+                        <td colspan="2">
+                          <div class="flexrow flex-nowrap gap-1">
+                            <select name="with_backends" class="w-[164px] js-check-backends-visibility" onchange="check_backends_visibility(this)" [% IF scripted %]disabled[% END %]>
+                              <option value="0"[% IF  p.with_backends == '0' %] selected[% END %]>on all backends</option>
+                              <option value="1"[% IF  p.with_backends == '1' %] selected[% END %]>on specific backends</option>
+                            </select>
+                            <input type="hidden" name="backends" value="[% p.backends.join(",") %]">
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                      <tr class="js-backends-hide">
+                        <th class="pl-3"></th>
+                        [% IF backends.size > 10 %]
+                          <td colspan=2>
+                          [% PROCESS _backends_select_multi.tt param_name='backends_list' selected_backends=p.backends can_edit=1 %]
+                          </td>
+                        [% ELSIF backends.size > 1 %]
+                          <td colspan=2>
+                            <select name="backends_list" multiple class="mt-1 w-56" style="min-width: 180px;">
+                              [% FOREACH b = backends %]
+                              <option value="[% b | html %]"[% FOREACH rb = p.backends %][% IF rb == b %] selected[% END %][% END %]>[% backend_detail.$b.name %]</option>
+                              [% END %]
+                            </select>
+                          </td>
+                        [% END %]
+                      </tr>
+                      [% END %]
                     </table>
                   </td>
                 </tr>
@@ -467,11 +500,41 @@ function check_services_visibility(select) {
   });
 }
 
+function check_backends_visibility(select) {
+  var table = jQuery(select).closest('table');
+  jQuery(table).find('.js-backends-disable').each(function() {
+    if(select.value == '0') {
+      jQuery(this).prop('disabled', true);
+    } else {
+      jQuery(this).prop('disabled', false);
+    }
+  });
+
+  jQuery(table).find('.js-backends-hide').each(function() {
+    if(select.value == '0') {
+      jQuery(this).addClass('hidden');
+    } else {
+      jQuery(this).removeClass('hidden');
+    }
+  });
+}
+
+function flattenBackends(form) {
+  var fields = jQuery(form).find('[name=backends]');
+  jQuery(form).find('[name=backends_list]').each(function(i, el) {
+    var backends = jQuery(el).val();
+    fields[i].value = backends.join(',');
+  });
+}
+
 [% IF !scripted %]
   jQuery(document).ready(function() {
     // update initial visibility
     jQuery(".js-check-service-visibility").each(function(i, el) {
       check_services_visibility(el);
+    });
+    jQuery(".js-check-backends-visibility").each(function(i, el) {
+      check_backends_visibility(el);
     });
   });
 [% END %]

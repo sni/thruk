@@ -874,6 +874,8 @@ sub _parse_teams_permission {
         svc_commands
         allowed_commands
         show_command_line
+        with_backends
+        backends
     /;
 
     for my $attr (@attributes) {
@@ -883,7 +885,7 @@ sub _parse_teams_permission {
                 push @{$permisssions}, {};
             }
             my $value = $values->[$i];
-            if($attr eq 'hostgroups' || $attr eq 'hosts' || $attr eq 'services') {
+            if($attr eq 'hostgroups' || $attr eq 'hosts' || $attr eq 'services' || $attr eq 'backends') {
                 $value = Thruk::Base::comma_separated_list($value);
             }
             $permisssions->[$i]->{$attr} = $value;
