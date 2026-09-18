@@ -642,6 +642,8 @@ sub get_services {
     my($self, %options) = @_;
     return($options{'data'}) if($options{'data'});
 
+    my $explicit_limit = $options{'options'}->{'limit'};
+
     # optimized naemon with wrapped_json output
     if($self->{'lmd_optimizations'} || $self->{'naemon_optimizations'}) {
         $self->_optimized_for_wrapped_json(\%options, "services");
@@ -703,7 +705,7 @@ sub get_services {
         if(ref $filter eq 'HASH') {
             my @keys = keys %{$filter};
             if(scalar @keys == 1 && $keys[0] eq 'host_name') {
-                delete $options{'options'}->{'limit'};
+                delete $options{'options'}->{'limit'} unless $explicit_limit;
             }
         }
         $options{'filter'} = [$filter];

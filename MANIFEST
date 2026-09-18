@@ -2503,6 +2503,7 @@ t/300-controller_rest_v1.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
 t/300-controller_status.t
+t/300-controller_status_combined.t
 t/300-controller_summary.t
 t/300-controller_tac.t
 t/300-controller_test.t
