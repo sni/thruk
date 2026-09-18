@@ -665,7 +665,7 @@ sub wait_for_job {
         $job = $url;
     }
     elsif($url =~ m/proxy\.cgi\/([^\/]+)\/.*cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        $job = $1;
+        $job = $2;
         $joburl = $url.'&json=1';
     }
     elsif($url =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
@@ -690,7 +690,7 @@ sub wait_for_job {
             }
         };
         my $end = [gettimeofday];
-        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds');
+        is($data->{'is_running'}, 0, 'url job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds');
         alarm(0);
         return;
     }
@@ -711,7 +711,7 @@ sub wait_for_job {
     };
     alarm(0);
     my $end = [gettimeofday];
-    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds')
+    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'local job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
                             scalar `uptime`,
                             scalar `ps -efl`,
