@@ -2618,12 +2618,16 @@ sub restart_later {
 
     _info("thruk restarting in 1sec with cmd: ".$cmd);
     require Thruk::Utils::External;
-    return(Thruk::Utils::External::cmd($c, {
-        'cmd'        => "sleep 1 ; ".$cmd."; sleep 1",
-        'forward'    => $redirect,
-        'initwait'   => 0,
-        'message'    => $msg,
+    my $jobid = (Thruk::Utils::External::cmd($c, {
+        'cmd'         => $cmd,
+        'forward'     => $redirect,
+        'background'  => 1,
+        'message'     => $msg,
+        'initwait'    => 0,
+        'delayed'     => 1,
     }));
+
+    return $c->redirect_to("job.cgi?job=".$jobid.'&initwait=0');
 }
 
 

@@ -42,6 +42,7 @@ use Thruk::Views::ToolkitRenderer ();
             no_shell     => "wrap command in a shell unless no_shell is set"
             env          => hash with extra environment variables
             show_output  => show console with output
+            delayed      => if true, does not start the job right away, wait for a trigger (from the job wait page)
         }
     );
 
@@ -76,6 +77,14 @@ sub cmd {
     return $parent_res if $is_parent;
 
     _init_child_process($c, $dir, $id, $conf);
+    if($conf->{'delayed'}) {
+        # wait up to 60s for job page trigger
+        my $until = time() + 60;
+        while(time() < $until) {
+            last if -e $dir."/go";
+            sleep(1);
+        }
+    }
     $cmd = $cmd.'; echo $? > '.$dir."/rc" unless $conf->{'no_shell'};
     exec($cmd) or exit(1); # just to be sure
 }
@@ -366,7 +375,7 @@ sub read_job {
     my $cmd   =  Thruk::Utils::IO::saferead($job_dir.'/start')    // '';
     my $pid   =  Thruk::Utils::IO::saferead($job_dir.'/pid')      // '';
     if($cmd) {
-        $cmd =~ s%^\d+\n%%gmx;
+        $cmd =~ s%^[\d\.]+\n%%gmx;
         $cmd =~ s%^\$VAR1\s*=\s*%%gmx;
         $cmd =~ s%\n$%%gmx;
     }
@@ -475,16 +484,16 @@ sub get_status {
 
 =head2 get_json_status
 
-  get_json_status($c, $id)
+  get_json_status($c, $id, [$job_data])
 
 return json status of a job
 
 =cut
 sub get_json_status {
-    my($c, $id) = @_;
+    my($c, $id, $job) = @_;
     confess("got no id") unless $id;
 
-    my $job = read_job($c, $id);
+    $job = read_job($c, $id) unless defined $job;
     return unless $job;
 
     my $json = {};
@@ -633,22 +642,31 @@ sub job_page {
         return;
     }
 
+    my $job_data = read_job($c, $job);
+    if($job_data && $job_data->{'cmd'} && $job_data->{'cmd'} =~ /'delayed'/mx) {
+        # create go file
+        my $job_dir = $c->config->{'var_path'}.'/jobs/'.$job;
+        my $go_file = $job_dir."/go";
+        -e $go_file || Thruk::Utils::IO::touch($go_file);
+    }
+
     if($cancel) {
         cancel($c, $job);
-        return get_json_status($c, $job);
+        return get_json_status($c, $job, $job_data);
     }
 
     if($json) {
-        return get_json_status($c, $job);
+        return get_json_status($c, $job, $job_data);
     }
 
-    my($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output) = get_status($c, $job);
+    my($is_running,$time,$percent,$message,$forward,$remaining,$user,$show_output) = get_status($c, $job, $job_data);
     return $c->detach('/error/index/22') unless defined $is_running;
 
+    my $initwait = $c->req->parameters->{'initwait'} // 3;
     if(!$show_output) {
         # try to directly serve the request if it takes less than 3 seconds
-        if(!defined $c->req->parameters->{'initwait'} || $c->req->parameters->{'initwait'} > 0) {
-            $is_running = wait_for_job($c, $job, $c->req->parameters->{'initwait'} // 3) if $is_running;
+        if($initwait > 0) {
+            $is_running = wait_for_job($c, $job, $initwait) if $is_running;
         }
     }
 
