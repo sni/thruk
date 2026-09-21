@@ -475,12 +475,16 @@ sub replace_block {
     if(-f $file) {
         $content = Thruk::Utils::IO::read($file);
     }
+    my $orig = $content;
 
     ## no critic
     unless($content =~ s/$start.*?$end/$string/sxi) {
         $content .= "\n\n".$string;
     }
     ## use critic
+
+    # do not rewrite file unless it has changed
+    return 1 if $orig eq $content;
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
     print $fh $content;
