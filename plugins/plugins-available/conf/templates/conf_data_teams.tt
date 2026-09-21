@@ -363,7 +363,7 @@
                         </td>
                         <td></td>
                       </tr>
-                      [% IF backends.size > 1 %]
+                      [% IF backends.size > 1 && has_lmd %]
                       <tr>
                         <th class="pl-3">Sites</th>
                         <td colspan="2">

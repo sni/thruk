@@ -927,7 +927,7 @@ sub single_search {
         $filter->{'type'} = 'search' unless defined $filter->{'type'};
 
         # resolve search prefix
-        if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
+        if($filter->{'type'} eq 'search' && defined $filter->{'value'} && $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
             if($1 eq 'ho') { $filter->{'type'} = 'host';         }
             if($1 eq 'hg') { $filter->{'type'} = 'hostgroup';    }
             if($1 eq 'se') { $filter->{'type'} = 'service';      }
@@ -1275,6 +1275,10 @@ sub single_search {
                                         };
                 }
             }
+        }
+        elsif ( $filter->{'type'} eq 'backend' && $c->stash->{'has_lmd'} ) {
+            push @hostfilter,          { peer_key => { $op => $value } };
+            push @servicefilter,       { peer_key => { $op => $value } };
         }
         else {
             if($filter->{'type'} ne '') {
