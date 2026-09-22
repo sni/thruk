@@ -2,26 +2,8 @@
 [% long_plugin_output = remove_html_comments(obj.long_plugin_output) %]
 [% escape_output      = thruk_escape_html_tags(obj, escape_html_tags) %]
 
-[% IF !escape_output && long_plugin_output %]
-[% long_plugin_output_html = plugin_output_as_html(maybe_pre(long_plugin_output)) %]
-<script>
-  if(typeof thrukPluginOutputFrameLoaded !== 'function') {
-    window.thrukPluginOutputFrameLoaded = function(frame) {
-      try {
-        var doc = frame.contentDocument;
-        if(doc && doc.documentElement) {
-          var h = Math.max(doc.documentElement.scrollHeight, (doc.body ? doc.body.scrollHeight : 0));
-          if(h > 0) { frame.style.height = h + 'px'; }
-        }
-      } catch(e) {}
-      if(typeof setPluginOutputOverflowSize === 'function') { setPluginOutputOverflowSize(); }
-    };
-  }
-</script>
-[% END %]
-
 [% IF obj.has_been_checked == 0 %]obj has not been checked yet[% END %]
 [% IF escape_output %][% nl2br(escape_html(plugin_output)) | replace_links | replace_copy_paste %][% ELSE %][% plugin_output | replace_links | replace_copy_paste %][% END %]
 [% IF long_plugin_output %]
-  <br>[% IF escape_output %][% nl2br(maybe_pre(escape_html(long_plugin_output))) | replace_links | replace_copy_paste %][% ELSE %]<iframe class="plugin_output_frame" sandbox="allow-same-origin" style="width:100%;border:0;display:block;" srcdoc="[% long_plugin_output_html | html %]" onload="thrukPluginOutputFrameLoaded(this)"></iframe>[% END %]
+  <br>[% IF escape_output %][% nl2br(maybe_pre(escape_html(long_plugin_output))) | replace_links | replace_copy_paste %][% ELSE %][% plugin_output_as_html(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste %][% END %]
 [% END %]
