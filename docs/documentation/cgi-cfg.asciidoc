@@ -66,9 +66,25 @@ ex.:
 === escape_html_tags
 Determines whether html output from plugins is escaped or not.
 
+This can be overridden for a single host or service with the
+`_THRUK_ESCAPE_HTML_TAGS` custom variable. A value of `0` renders the plugin
+output as raw html, a value of `1` keeps it escaped. A service value takes
+precedence over a host value.
+
+NOTE: Disabling escaping renders plugin output without sanitizing it. Only use
+this for plugins you trust. Plugin HTML is rendered inside a sandboxed iframe,
+so plugin CSS cannot affect the rest of the interface and plugin Javascript is
+not executed.
+
 ex.:
 
   escape_html_tags = 1
+
+  # render raw html plugin output for a single service
+  define service {
+    ...
+    _THRUK_ESCAPE_HTML_TAGS 0
+  }
 
 
 === action_url_target
