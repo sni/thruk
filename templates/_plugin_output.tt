@@ -1,4 +1,4 @@
-[% plugin_output      = remove_html_comments(obj.plugin_output) %]
+﻿[% plugin_output      = remove_html_comments(obj.plugin_output) %]
 [% long_plugin_output = remove_html_comments(obj.long_plugin_output) %]
 [% escape_output      = thruk_escape_html_tags(obj, escape_html_tags) %]
 
