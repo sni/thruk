@@ -237,6 +237,29 @@ sub nl2br {
     return $string;
 }
 
+##############################################
+
+=head2 plugin_output_as_html
+
+  my $string = plugin_output_as_html($string);
+
+formats plugin output for unescaped html rendering. Naemon stores
+multiline output with escaped newlines (\\n), which are restored to
+real newlines when the output already contains html tags, so html is
+not corrupted by injected <br>. Plain text output gets its newlines
+converted to <br> instead.
+
+=cut
+sub plugin_output_as_html {
+    my $string = shift;
+    if($string =~ m/<[a-zA-Z\/!][^>]*>/mx) {
+        $string =~ s/\\n/\n/gmx;
+        $string =~ s/\r//gmx;
+        return $string;
+    }
+    return nl2br($string);
+}
+
 
 ##############################################
 
@@ -2023,6 +2046,37 @@ sub _obj_name {
         return($name) if defined $name;
     }
     return;
+}
+
+########################################
+
+=head2 thruk_escape_html_tags
+
+  thruk_escape_html_tags($obj, [$default])
+
+returns 1 if the plugin output of this host/service has to be escaped
+and 0 if it may be rendered as raw html.
+
+The THRUK_ESCAPE_HTML_TAGS custom variable of the object itself
+overrides $default, which usually is the global escape_html_tags
+setting. Only the values "0" and "1" are recognized, any other value
+keeps $default.
+
+=cut
+sub thruk_escape_html_tags {
+    my($obj, $default) = @_;
+    $default = 1 unless defined $default;
+
+    return $default unless ref $obj eq 'HASH';
+
+    my $custom_vars = Thruk::Utils::get_custom_vars(undef, $obj, '', 0, 0);
+    my $custom      = $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'};
+    return $default unless defined $custom;
+
+    return 0 if $custom eq "0";
+    return 1 if $custom eq "1";
+
+    return($default);
 }
 
 ########################################
