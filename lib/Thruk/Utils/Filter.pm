@@ -2057,19 +2057,25 @@ sub _obj_name {
 returns 1 if the plugin output of this host/service has to be escaped
 and 0 if it may be rendered as raw html.
 
-The THRUK_ESCAPE_HTML_TAGS custom variable overrides $default, which
-usually is the global escape_html_tags setting. A value on the service
-takes precedence over a value on the host.
+The THRUK_ESCAPE_HTML_TAGS custom variable of the object itself
+overrides $default, which usually is the global escape_html_tags
+setting. Only the values "0" and "1" are recognized, any other value
+keeps $default.
 
 =cut
 sub thruk_escape_html_tags {
     my($obj, $default) = @_;
     $default = 1 unless defined $default;
-    # custom variables are either "1" or "0"
-    my $value = _obj_name($obj, ['_THRUK_ESCAPE_HTML_TAGS'], '');
-    $value = _obj_name($obj, ['_THRUK_ESCAPE_HTML_TAGS'], 'host_') unless defined $value;
-    return($value ? 1 : 0) if defined $value;
-    return($default ? 1 : 0);
+
+    my $value = $default;
+    if(ref $obj eq 'HASH') {
+        my $custom_vars = Thruk::Utils::get_custom_vars(undef, $obj, '', 0, 0);
+        if(defined $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'}) {
+            my $custom = $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'};
+            $value = $custom eq "0" ? 0 : ($custom eq "1" ? 1 : $default);
+        }
+    }
+    return($value);
 }
 
 ########################################
