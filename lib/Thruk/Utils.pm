@@ -850,55 +850,26 @@ sub get_exposed_custom_vars {
 
 =head2 get_custom_vars
 
-  get_custom_vars($c, $obj, [$prefix], [$add_host])
+  get_custom_vars($c, $obj, [$prefix], [$add_host], [$add_action_menu])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
     my($c, $data, $prefix, $add_host, $add_action_menu) = @_;
-    $prefix = '' unless defined $prefix;
-    $add_action_menu = 1 unless defined $add_action_menu;
+    $prefix          = '' unless defined $prefix;
+    $add_host        = 0  unless defined $add_host;
+    $add_action_menu = 1  unless defined $add_action_menu;
 
-    my %hash;
-    if($data->{'custom_variables'}) {
-        if(ref $data->{'custom_variables'} eq 'ARRAY') {
-            my $normalized = {};
-            for my $cv (@{$data->{'custom_variables'}}) {
-                if(ref $cv eq 'ARRAY' && scalar @{$cv} == 2) {
-                    $normalized->{$cv->[0]} = $cv->[1];
-                }
-            }
-            $data->{'custom_variables'} = $normalized;
-        }
-        for my $key (keys %{$data->{'custom_variables'}}) {
-            $hash{$key} = $data->{'custom_variables'}->{$key};
-        }
-    }
-
-    if(   defined $data
-      and defined $data->{$prefix.'custom_variable_names'}
-      and defined $data->{$prefix.'custom_variable_values'}
-      and ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
-    {
-        # merge custom variables into a hash
-        @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
-    }
-
-    if($add_host
-      and defined $data
-      and defined $data->{'host_custom_variable_names'}
-      and defined $data->{'host_custom_variable_values'}
-      and ref $data->{'host_custom_variable_names'} eq 'ARRAY')
-    {
-        for(my $x = 0; $x < scalar @{$data->{'host_custom_variable_names'}}; $x++) {
-            my $key = $data->{'host_custom_variable_names'}->[$x];
-            $hash{"HOST".$key} = $data->{'host_custom_variable_values'}->[$x];
-        }
-    }
+    _normalize_custom_vars($data, $prefix);
 
     # add action menu from apply rules
-    if($add_action_menu && $c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+    if($add_action_menu
+        && $c
+        && $c->config->{'action_menu_apply'}
+        && !$data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU'}
+        && !$data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU_CHECKED'}
+    ) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (@{Thruk::Base::list($c->config->{'action_menu_apply'}->{$menu})}) {
@@ -906,27 +877,85 @@ sub get_custom_vars {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
                     ## no critic
                     if($test =~ m/$pattern/) {
-                    ## use critic
-                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        $data->{'custom_variables'}->{$prefix.'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
+                    ## use critic
                 }
                 elsif($data->{$prefix.'name'}) {
                     my $test = $data->{$prefix.'name'}.';';
                     ## no critic
                     if($test =~ m/$pattern/) {
-                    ## use critic
-                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        $data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
+                    ## use critic
                 }
             }
         }
+
+        $data->{$prefix.'custom_variables'}->{THRUK_ACTION_MENU_CHECKED} = 1;
+    }
+
+    # return early when not merging more attributes
+    if(!$add_host) {
+        return $data->{$prefix.'custom_variables'};
+    }
+
+    # clone hash when adding more attributes
+    my %hash;
+    for my $key (sort keys %{$data->{$prefix.'custom_variables'}}) {
+        $hash{$key} = $data->{$prefix.'custom_variables'}->{$key};
+    }
+
+    # add host values
+    _normalize_custom_vars($data, "_host");
+    for my $key (sort keys %{$data->{'host_custom_variables'}}) {
+        $hash{"HOST".$key} = $data->{'host_custom_variables'}->{$key};
     }
 
     return \%hash;
 }
 
+########################################
+# normalize custom variables so they can be accessed by $data->{$prefix.'custom_variables'}->{$name}
+sub _normalize_custom_vars {
+    my($data, $prefix) = @_;
+    $prefix = '' unless defined $prefix;
+
+    if(defined $data && $data->{$prefix.'custom_variables'} && ref $data->{$prefix.'custom_variables'} eq 'HASH') {
+        return;
+    }
+
+    # convert custom variables from array
+    if(defined $data && $data->{$prefix.'custom_variables'}) {
+        if(ref $data->{$prefix.'custom_variables'} eq 'ARRAY') {
+            my $normalized = {};
+            for my $cv (@{$data->{$prefix.'custom_variables'}}) {
+                if(ref $cv eq 'ARRAY' && scalar @{$cv} == 2) {
+                    $normalized->{$cv->[0]} = $cv->[1];
+                }
+            }
+            $data->{$prefix.'custom_variables'} = $normalized;
+        }
+    }
+
+    # merge custom variables from names / values
+    if(   defined $data
+       && defined $data->{$prefix.'custom_variable_names'}
+       && defined $data->{$prefix.'custom_variable_values'}
+       && ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
+    {
+        # merge custom variables into a hash
+        my $normalized = {};
+        @{$normalized}{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+        $data->{$prefix.'custom_variables'} = $normalized;
+    }
+
+    $data->{$prefix.'custom_variables'} = {} unless defined $data->{$prefix.'custom_variables'};
+
+    return;
+}
 
 ########################################
 
