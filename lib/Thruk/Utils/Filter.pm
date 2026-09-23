@@ -2067,15 +2067,16 @@ sub thruk_escape_html_tags {
     my($obj, $default) = @_;
     $default = 1 unless defined $default;
 
-    my $value = $default;
-    if(ref $obj eq 'HASH') {
-        my $custom_vars = Thruk::Utils::get_custom_vars(undef, $obj, '', 0, 0);
-        if(defined $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'}) {
-            my $custom = $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'};
-            $value = $custom eq "0" ? 0 : ($custom eq "1" ? 1 : $default);
-        }
-    }
-    return($value);
+    return $default unless ref $obj eq 'HASH';
+
+    my $custom_vars = Thruk::Utils::get_custom_vars(undef, $obj, '', 0, 0);
+    my $custom      = $custom_vars->{'THRUK_ESCAPE_HTML_TAGS'};
+    return $default unless defined $custom;
+
+    return 0 if $custom eq "0";
+    return 1 if $custom eq "1";
+
+    return($default);
 }
 
 ########################################

@@ -68,8 +68,7 @@ Determines whether html output from plugins is escaped or not.
 
 This can be overridden for a single host or service with the
 `_THRUK_ESCAPE_HTML_TAGS` custom variable. A value of `0` renders the plugin
-output as raw html, a value of `1` keeps it escaped. A service value takes
-precedence over a host value.
+output as raw html, a value of `1` keeps it escaped.
 
 NOTE: Disabling escaping renders plugin output without sanitizing it and
 inserts it directly into the page. Only use this for plugins you trust. It can
