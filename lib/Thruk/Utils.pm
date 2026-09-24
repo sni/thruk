@@ -3635,21 +3635,24 @@ sub clean_regex {
 
 =head2 get_timezone_data
 
-    get_timezone_data()
+    get_timezone_data($c, [$add_server], [$force])
 
-returns list of available timezones
+    $add_server: adds "Server Setting" to list
+    $force:      force recreating tz data cache
+
+returns list of available timezones.
 
 =cut
 sub get_timezone_data {
-    my($c, $add_server) = @_;
+    my($c, $add_server, $force) = @_;
 
     $c->stats->profile(begin => "get_timezone_data");
     my $timezones = [];
     require Thruk::Utils::Cache;
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(int(time()/600)*600, "%Y-%m-%d %H:%M");
-    if(defined $data && $data->{'timestamp'} eq $timestamp) {
+    my $timestamp = Thruk::Utils::format_date(int(time()/3600)*3600, "%Y-%m-%d %H:%M");
+    if(!$force && defined $data && $data->{'timestamp'} eq $timestamp) {
         $timezones = $data->{'timezones'};
     } else {
         require Date::Manip::TZ;
