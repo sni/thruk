@@ -1161,8 +1161,22 @@ sub _cmd_raw {
 
     # passthrough livestatus results if possible (even without LMD)
     if($function eq '_raw_query' && $c->req->headers->{'accept'} && $c->req->headers->{'accept'} =~ m/application\/livestatus/mx) {
-        if(ref $res eq 'ARRAY' && $res->[1] == 0) {
-            $c->res->body($res->[2]);
+        if(ref $res eq 'ARRAY') {
+            # result ok
+            if(($res->[1]//-1) == 0) {
+                $c->res->body($res->[2]);
+            }
+            # error
+            elsif(defined $res->[3]) {
+                my $err = $res->[3];
+                my($short_err, undef) = Thruk::Utils::extract_connection_error($err);
+                if($short_err) {
+                    _warn($err);
+                    $c->res->body($short_err."\n");
+                } else {
+                    $c->res->body($err);
+                }
+            }
             $c->{'rendered'} = 1;
             return;
         }

@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 15;
+plan tests => 29;
 
 ###########################################################
 # test thruks script path
@@ -34,6 +34,21 @@ TestUtils::test_command({
     TestUtils::test_command({
         cmd     => "/thruk/script/thruk rest -m POST -d ".$postdata." remote.cgi",
         like    => ["/output/", '/"200/', "/-naemon/", '/"version"/'],
+        exit    => 0,
+    });
+
+    # and via curl
+    TestUtils::test_command({
+        cmd     => "/usr/bin/curl -ks -d \"$postdata\" https://localhost/demo/thruk/cgi-bin/remote.cgi",
+        like    => ["/output/", '/"200/', "/-naemon/", '/"version"/'],
+        exit    => 0,
+    });
+
+    # and via curl and accept header
+    TestUtils::test_command({
+        cmd     => "/usr/bin/curl -ks -d \"$postdata\" -H \"accept: application/livestatus\" https://localhost/demo/thruk/cgi-bin/remote.cgi",
+        like    => ['/^200/', "/-naemon/"],
+        unlike  => ["/output/", '/"version"/'],
         exit    => 0,
     });
 };
