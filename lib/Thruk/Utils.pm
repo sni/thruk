@@ -3647,14 +3647,40 @@ sub get_timezone_data {
     my($c, $add_server, $force) = @_;
 
     $c->stats->profile(begin => "get_timezone_data");
-    my $timezones = [];
+
+    my $timezones;
+
     require Thruk::Utils::Cache;
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
     my $timestamp = Thruk::Utils::format_date(int(time()/3600)*3600, "%Y-%m-%d %H:%M");
-    if(!$force && defined $data && $data->{'timestamp'} eq $timestamp) {
-        $timezones = $data->{'timezones'};
-    } else {
+    if(defined $data) {
+        if($data->{'timestamp'} ne $timestamp) {
+            require Thruk::Utils::External;
+
+            # check if update already running
+            # and start update in background otherwise
+            if($data->{'update_job'}) {
+                if(!Thruk::Utils::External::is_running($c, $data->{'update_job'}, 1)) {
+                    delete $data->{'update_job'};
+                    $cache->set('timezones', $data);
+                }
+            } elsif(!$force) {
+                # start update in background
+                my $job = Thruk::Utils::External::perl($c, {
+                    expr       => 'Thruk::Utils::get_timezone_data($c, undef, 1)',
+                    allow      => 'all',
+                    background => 1,
+                });
+                $data->{'update_job'} = $job;
+                $cache->set('timezones', $data);
+            }
+        }
+        $timezones = $data->{'timezones'} unless $force;
+    }
+
+    if(!defined $timezones) {
+        $timezones = [];
         require Date::Manip::TZ;
         my $tz  = Date::Manip::TZ->new();
         # https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/TZ.pod#$date
