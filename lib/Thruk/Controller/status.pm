@@ -1755,7 +1755,7 @@ sub _long_plugin_output {
     my $host    = $c->req->parameters->{'host'};
     my $service = $c->req->parameters->{'service'};
 
-	my $columns = [qw/has_been_checked plugin_output long_plugin_output/];
+	my $columns = [qw/has_been_checked plugin_output long_plugin_output custom_variable_names custom_variable_values/];
     my $objs;
     if($service) {
         $objs = $c->db->get_services(
