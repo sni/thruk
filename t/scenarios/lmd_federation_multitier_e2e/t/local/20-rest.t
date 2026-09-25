@@ -20,12 +20,18 @@ TestUtils::test_command({
 ###########################################################
 TestUtils::test_command({
     cmd     => '/usr/bin/env thruk r "/hostgroups?name=all"',
-    waitfor => '"worst_service_state"\ :\ 3', # might take a while till summary attributes will be updated
+    # every host has an always-CRITICAL service and Naemon's ranking is
+    # OK < WARN < UNKNOWN < CRIT, so worst_service_state is deterministically 2.
+    waitfor => [
+            '"num_hosts"\ :\ 7,',
+            '"num_services"\ :\ 21,',
+            '"worst_service_state"\ :\ 2',
+    ],
     maxwait => 60,
     like    => [
             '/"num_hosts" : 7,/',
             '/"num_services" : 21,/',
-            '/"worst_service_state" : 3/',
+            '/"worst_service_state" : 2/',
     ],
 });
 

@@ -48,7 +48,7 @@ for my $hst (sort keys %{$ids}) {
         'method' => 'POST',
         'like'   => [ 'Command successfully submitted' ],
     );
-    my @svc = qw/Ping Load Unknown/;
+    my @svc = qw/Ping Load Critical/;
     if($hst eq 'tier3c') {
         @svc = qw/ping4 disk/;
     }
