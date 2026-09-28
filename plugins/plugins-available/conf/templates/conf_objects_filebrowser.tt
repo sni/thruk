@@ -165,7 +165,7 @@
               jQuery.each(paths, function(index, dir) {
                   if(dir != '') {
                       dirs += dir + "\/";
-                      html += " <a class='link' href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/ <\/a>";
+                      html += "<a class='link' href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/<\/a>";
                   }
               });
               return html;
