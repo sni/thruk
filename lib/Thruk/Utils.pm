@@ -4450,7 +4450,7 @@ sub _enhance_histou_url {
     $url = $url.'&hideLogo=1';
 
     # ensure backslashes are correctly escaped
-    $url =~ s/\\/\\\\/g;
+    $url =~ s/\\/\\\\/gmx;
 
     return($url);
 }
