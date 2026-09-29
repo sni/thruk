@@ -120,17 +120,18 @@
               [% long_plugin_output = remove_html_comments(h.long_plugin_output) %]
             [% END %]
             [% orig_plugin_output = plugin_output %]
-            [% IF escape_html_tags %]
+            [% escape_output = thruk_escape_html_tags(h, escape_html_tags) %]
+            [% IF escape_output %]
               [% long_plugin_output = escape_html(long_plugin_output) %]
               [% plugin_output      = escape_html(plugin_output) %]
             [% END %]
             <td class='plugin_output status col_plugin_output truncate w-1/2 max-w-xs'
               [% IF long_plugin_output and show_long_plugin_output == 'popup' %]
                 [% IF on_demand_long_plugin_output %]
-                  onclick="return(show_plugin_output_popup(this, '[% escape_js(h.name) %]', '', '[% escape_js(h.peer_key) %]', [% IF escape_html_tags %]true[% ELSE %]false[% END %], { 'width': 600 }));"
+                  onclick="return(show_plugin_output_popup(this, '[% escape_js(h.name) %]', '', '[% escape_js(h.peer_key) %]', [% IF escape_output %]true[% ELSE %]false[% END %], { 'width': 600 }));"
                 [% ELSE %]
                   onclick="return(overcard({ 'bodyCls': 'p-2', 'body': this.abbr, 'caption': '[% escape_html(escape_js(_host(h))) %]', 'width': 600 }));"
-                  abbr="[% plugin_output | replace_links | replace_copy_paste | escape_html %]&lt;br&gt;[% maybe_pre(long_plugin_output) | nl2br | replace_links | replace_copy_paste | escape_html %]"
+                  abbr="[% plugin_output | replace_links | replace_copy_paste | escape_html %]&lt;br&gt;[% IF escape_output %][% maybe_pre(long_plugin_output) | nl2br | replace_links | replace_copy_paste | escape_html %][% ELSE %][% plugin_output_as_html(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste | escape_html %][% END %]"
                 [% END %]
               [% END %]
             >
@@ -143,7 +144,7 @@
                   </div>
                 [% END %]
                 [% IF long_plugin_output and show_long_plugin_output == 'inline' %]
-                  <br>[% nl2br(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste %]
+                  <br>[% IF escape_output %][% nl2br(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste %][% ELSE %][% plugin_output_as_html(maybe_pre(long_plugin_output)) | replace_links | replace_copy_paste %][% END %]
                 [% END %]
                 <div>
                   [% PROCESS _perfdata_table add_link="1" state=h.state plugin_output=orig_plugin_output perfdata=h.perf_data check_command=h.check_command hst=h.name svc="_HOST_" pnp_url=get_pnp_url(c, h, 1) %]
