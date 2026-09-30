@@ -1165,7 +1165,9 @@ remove a file from the config
 =cut
 sub file_delete {
     my($self, $file, $rebuild) = @_;
-    $rebuild                = 1 unless defined $rebuild;
+    $rebuild = 1 unless defined $rebuild;
+    # remember the previous state, so it can be restored on undelete
+    $file->{'changed_before_delete'} = $file->{'changed'} unless $file->{'deleted'};
     $file->{'deleted'}      = 1;
     $file->{'changed'}      = 1;
     $self->{'needs_commit'} = 1;
@@ -1189,10 +1191,10 @@ sub file_undelete {
     my $file    = shift;
     my $rebuild = shift;
 
-    $rebuild                = 1 unless defined $rebuild;
-    $file->{'deleted'}      = 0;
-    $file->{'changed'}      = 1;
-    $self->{'needs_commit'} = 1;
+    $rebuild = 1 unless defined $rebuild;
+    $file->{'deleted'} = 0;
+    $file->{'changed'} = delete $file->{'changed_before_delete'} // 0;
+    $self->get_changed_files();
 
     $self->_rebuild_index() if $rebuild;
     return;

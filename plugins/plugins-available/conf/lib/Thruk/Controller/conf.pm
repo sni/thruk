@@ -2086,7 +2086,7 @@ sub _object_revert {
         if(defined $oldobj) {
             $c->stash->{'obj_model_changed'} = 1;
             $c->{'obj_db'}->update_object($obj, Thruk::Utils::IO::dclone($oldobj->{'conf'}), join("\n", @{$oldobj->{'comments'}}));
-            Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' reverted successfully' );
+            Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' staged for revert' );
         } else {
             Thruk::Utils::set_message( $c, 'fail_message', 'Cannot revert new objects, you can just delete them.' );
         }
@@ -2106,7 +2106,7 @@ sub _object_disable {
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->stash->{'obj_model_changed'} = 1;
-    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' disabled successfully' );
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' staged for disabling' );
 
     # store log message
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
@@ -2130,7 +2130,7 @@ sub _object_enable {
     $obj->{'file'}->{'changed'}      = 1;
     $c->{'obj_db'}->{'needs_commit'} = 1;
     $c->stash->{'obj_model_changed'} = 1;
-    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' enabled successfully' );
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' staged for enabling' );
 
     # create log message
     $c->{'obj_db'}->{'logs'} = [] unless $c->{'obj_db'}->{'logs'};
@@ -2205,7 +2205,7 @@ sub _object_delete {
                                 $obj->get_name(),
     );
 
-    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' removed successfully' );
+    Thruk::Utils::set_message( $c, 'success_message', ucfirst($obj->get_type()).' staged for removal' );
     return $c->redirect_to('conf.cgi?sub=objects&type='.$obj->get_type());
 }
 
@@ -2255,7 +2255,7 @@ sub _object_save {
     }
 
     if(scalar @{$obj->{'file'}->{'errors'}} > 0) {
-        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' changed with errors', $obj->{'file'}->{'errors'} );
+        Thruk::Utils::set_message( $c, 'fail_message', ucfirst($c->stash->{'type'}).' staged for '.($new ? 'creation' : 'change').' with errors', $obj->{'file'}->{'errors'} );
         return; # return, otherwise details would not be displayed
     }
 
@@ -2265,7 +2265,7 @@ sub _object_save {
         $c->{'obj_db'}->_rebuild_index();
         Thruk::Utils::set_message( $c, 'fail_message', sprintf('%s %s without a name', ucfirst($c->stash->{'type'}), $new ? 'created' : 'changed'));
     } else {
-        Thruk::Utils::set_message( $c, 'success_message', sprintf('%s %s successfully', ucfirst($c->stash->{'type'}), $new ? 'created' : 'changed'));
+        Thruk::Utils::set_message( $c, 'success_message', sprintf('%s staged for %s', ucfirst($c->stash->{'type'}), $new ? 'creation' : 'change'));
     }
 
     if($c->req->parameters->{'referer'}) {
@@ -2276,7 +2276,7 @@ sub _object_save {
     if(!$new && $c->stash->{'data_name'} ne $old_obj->get_name()) {
         my $other_refs = _get_non_config_tool_references($c, $old_obj);
         if(scalar keys %{$other_refs} > 0) {
-            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' saved successfully. Please check external references.' );
+            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' staged for change. Please check external references.' );
             $c->stash->{object} = $old_obj;
             _list_references($c, $old_obj);
             $c->stash->{'show_incoming'} = 0;
@@ -2299,7 +2299,7 @@ sub _object_move {
         my $new_file = $c->req->parameters->{'newfile'};
         my $file     = get_context_file($c, $obj, $new_file);
         if(defined $file and $c->{'obj_db'}->move_object($obj, $file)) {
-            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' moved successfully' );
+            Thruk::Utils::set_message( $c, 'success_message', ucfirst($c->stash->{'type'}).' \''.$obj->get_name().'\' staged for move' );
         }
 
         # create log message
@@ -2422,21 +2422,66 @@ sub _object_new {
 
 
 ##########################################################
+# resolve selected file browser entries into config file objects.
+# entries can be files or folders, folder paths end with a slash.
+sub _get_selected_files {
+    my($c, $files) = @_;
+
+    my @selected;
+    my $seen      = {};
+    my $all_files = $c->{'obj_db'}->get_files();
+    for my $filename (@{$files}) {
+        next unless defined $filename and $filename ne '';
+
+        # folder selected, take all files below it
+        if($filename =~ m/\/$/mx) {
+            for my $file (@{$all_files}) {
+                next unless defined $file->{'display'};
+                next unless $file->{'display'} =~ m/^\Q$filename\E/mx;
+                push @selected, $file unless $seen->{$file}++;
+            }
+            next;
+        }
+
+        my $file = $c->{'obj_db'}->get_file_by_path($filename);
+        if ( (defined $file) and (!$seen->{$file}++) ) {
+            push @selected, $file;
+        }
+    }
+
+    return \@selected;
+}
+
+
+##########################################################
 sub _file_delete {
     my($c) = @_;
 
     my $path = $c->req->parameters->{'path'} || '';
     $path    =~ s/^\#//gmx;
 
-    my $files = $c->req->parameters->{'files'};
-    for my $filename (ref $files eq 'ARRAY' ? @{$files} : ($files) ) {
-        my $file = $c->{'obj_db'}->get_file_by_path($filename);
-        if(defined $file) {
-            $c->{'obj_db'}->file_delete($file);
+    my $files    = Thruk::Base::list($c->req->parameters->{'files'});
+    my $staged   = 0;
+    my $readonly = 0;
+    for my $file (@{_get_selected_files($c, $files)}) {
+        if($file->readonly()) {
+            $readonly++;
+            next;
         }
+        $c->{'obj_db'}->file_delete($file);
+        $staged++;
     }
 
-    Thruk::Utils::set_message( $c, 'success_message', 'File(s) deleted successfully' );
+    if($staged > 0) {
+        $c->stash->{'obj_model_changed'} = 1;
+        my $msg = sprintf('%d file%s staged for deletion', $staged, $staged == 1 ? '' : 's');
+        $msg   .= sprintf(', %d readonly file%s skipped', $readonly, $readonly == 1 ? '' : 's') if $readonly;
+        Thruk::Utils::set_message( $c, 'success_message', $msg );
+    } else {
+        my $msg = $readonly ? 'No files staged for deletion, all selected files are readonly' : 'No files selected for deletion';
+        Thruk::Utils::set_message( $c, 'fail_message', $msg );
+    }
+
     return $c->redirect_to('conf.cgi?sub=objects&action=browser#'.$path);
 }
 
@@ -2448,15 +2493,28 @@ sub _file_undelete {
     my $path = $c->req->parameters->{'path'} || '';
     $path    =~ s/^\#//gmx;
 
-    my $files = $c->req->parameters->{'files'};
-    for my $filename (ref $files eq 'ARRAY' ? @{$files} : ($files) ) {
-        my $file = $c->{'obj_db'}->get_file_by_path($filename);
-        if(defined $file) {
-            $c->{'obj_db'}->file_undelete($file);
+    my $files   = Thruk::Base::list($c->req->parameters->{'files'});
+    my $staged  = 0;
+    my $skipped = 0;
+    for my $file (@{_get_selected_files($c, $files)}) {
+        # only files currently staged for deletion can be restored
+        if(!$file->{'deleted'}) {
+            $skipped++;
+            next;
         }
+        $c->{'obj_db'}->file_undelete($file);
+        $staged++;
     }
 
-    Thruk::Utils::set_message( $c, 'success_message', 'File(s) recoverd successfully' );
+    if($staged > 0) {
+        $c->stash->{'obj_model_changed'} = 1;
+        my $msg = sprintf('%d file%s staged for restore', $staged, $staged == 1 ? '' : 's');
+        $msg   .= sprintf(', %d unchanged file%s skipped', $skipped, $skipped == 1 ? '' : 's') if $skipped;
+        Thruk::Utils::set_message( $c, 'success_message', $msg );
+    } else {
+        Thruk::Utils::set_message( $c, 'fail_message', 'No files staged for deletion in the selection' );
+    }
+
     return $c->redirect_to('conf.cgi?sub=objects&action=browser#'.$path);
 }
 
@@ -2481,15 +2539,15 @@ sub _file_save {
         if(scalar @{$file->{'errors'}} > 0) {
             Thruk::Utils::set_message( $c,
                                       'fail_message',
-                                      'File '.$c->stash->{'file_name'}.' changed with errors',
+                                      'File '.$c->stash->{'file_name'}.' staged for '.($file->{'is_new_file'} ? 'creation' : 'change').' with errors',
                                       $file->{'errors'},
                                     );
         } else {
-            Thruk::Utils::set_message( $c, 'success_message', 'File '.$c->stash->{'file_name'}.' changed successfully' );
+            Thruk::Utils::set_message( $c, 'success_message', 'File '.$c->stash->{'file_name'}.' staged for '.($file->{'is_new_file'} ? 'creation' : 'change') );
         }
     }
     elsif(_is_extra_file($filename, $c->config->{'Thruk::Plugin::ConfigTool'}->{'edit_files'})) {
-        Thruk::Utils::set_message( $c, 'success_message', 'File '.$filename.' changed successfully' );
+        Thruk::Utils::set_message( $c, 'success_message', 'File '.$filename.' saved successfully' );
         Thruk::Utils::IO::write($filename, $content);
         if(defined $c->req->parameters->{'backlink'}) {
             return $c->redirect_to($c->req->parameters->{'backlink'});
