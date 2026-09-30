@@ -486,7 +486,7 @@ sub _extract_top_data {
                 my @proc = split(/\s+/mxo, $line, 12);
                 next unless $proc[11];
                 next if $proc[0] eq 'PID';
-                next if $filter && $filter != $proc[0];
+                next if $filter && $filter ne $proc[0];
                 next if $proc[0] !~ m/^\d+/mx;
                 my $key = 'other';
                 for (@{$pattern}) {

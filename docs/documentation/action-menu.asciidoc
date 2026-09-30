@@ -104,7 +104,7 @@ link:cli.html#_environment-variables[CLI Environment] page.
 Since version 2.24 you can use javascript to dynamically create menus. Basically you create a file ending on `.js` in your `action_menus` folder.
 The first function will be called and expected to return a json structure with the actual menu.
 
-Althought the first function will be called to generate the menu, the file
+Although the first function will be called to generate the menu, the file
 may contain multiple functions, for example to generate submenus.
 
 The first function in the file must return an array of (link:configuration.html#action_menu_items[action_menu_items]). The menu

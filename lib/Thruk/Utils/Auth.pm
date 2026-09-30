@@ -289,10 +289,20 @@ sub permissions_filter {
 
     my(@hst_filter, @svc_filter);
     for my $p (@matched) {
+        my $peer_filter = undef;
+        if(($p->{'with_backends'}//0) == 1) {
+            for my $b (@{$p->{'backends'}}) {
+                $peer_filter = {
+                            'type'  => 'backend',
+                            'op'    => '=',
+                            'value' => $b,
+                };
+            }
+        }
         if($type eq 'services') {
             for my $s (@{$p->{'services'}}) {
                 my $search = {
-                    text_filter => [{
+                    text_filter => [$peer_filter, {
                         'type'  => 'service',
                         'op'    => $p->{'services_op'} || '=',
                         'value' => $s,
@@ -305,7 +315,7 @@ sub permissions_filter {
             }
             if($p->{'svc_custom_var'}) {
                 my $search = {
-                    text_filter => [{
+                    text_filter => [$peer_filter, {
                         'type'    => 'custom variable',
                         'op'      => $p->{'svc_custom_op'} || '=',
                         'value'   => $p->{'svc_custom_val'},
@@ -320,7 +330,7 @@ sub permissions_filter {
         }
         for my $hg (@{$p->{'hostgroups'}}) {
             my $search = {
-                text_filter => [{
+                text_filter => [$peer_filter, {
                     'type'  => 'hostgroup',
                     'op'    => $p->{'hostgroups_op'} || '=',
                     'value' => $hg,
@@ -333,7 +343,7 @@ sub permissions_filter {
         }
         for my $h (@{$p->{'hosts'}}) {
             my $search = {
-                text_filter => [{
+                text_filter => [$peer_filter, {
                     'type'  => 'host',
                     'op'    => $p->{'hosts_op'} || '=',
                     'value' => $h,
@@ -346,7 +356,7 @@ sub permissions_filter {
         }
         if($p->{'hst_custom_var'}) {
             my $search = {
-                text_filter => [{
+                text_filter => [$peer_filter, {
                     'type'    => 'custom variable',
                     'op'      => $p->{'hst_custom_op'} || '=',
                     'value'   => $p->{'hst_custom_val'},

@@ -932,7 +932,8 @@ update objects config
 sub update {
     my ( $self ) = @_;
 
-    $self->{'needs_commit'} = 0;
+    $self->{'stats'}->profile(begin => "M::C::update()") if defined $self->{'stats'};
+
     $self->{'needs_update'} = 0;
     $self->{'last_changed'} = 0;
 
@@ -940,6 +941,12 @@ sub update {
     $self->_set_config();
     $self->_set_files();
     $self->_read_objects();
+
+    # update "need_commit" flag when pending changes were merged
+    $self->get_changed_files();
+
+    $self->{'stats'}->profile(end => "M::C::update()") if defined $self->{'stats'};
+
     return 1;
 }
 
@@ -954,8 +961,11 @@ update objects config
 
 =cut
 sub check_files_changed {
-    my $self   = shift;
-    my $reload = shift || 0;
+    my($self, $reload) = @_;
+
+    $reload //= 0;
+
+    $self->{'stats'}->profile(begin => "M::C::check_files_changed($reload)") if defined $self->{'stats'};
 
     my $errors1 = scalar @{$self->{'errors'}};
 
@@ -979,8 +989,10 @@ sub check_files_changed {
     if($reload or $self->{'needs_index_update'}) {
         $self->{'needs_update'} = 0;
         $self->update();
+        $self->{'obj_model_changed'} = 1;
     }
 
+    $self->{'stats'}->profile(end => "M::C::check_files_changed($reload)") if defined $self->{'stats'};
     return 1;
 }
 
@@ -1153,7 +1165,9 @@ remove a file from the config
 =cut
 sub file_delete {
     my($self, $file, $rebuild) = @_;
-    $rebuild                = 1 unless defined $rebuild;
+    $rebuild = 1 unless defined $rebuild;
+    # remember the previous state, so it can be restored on undelete
+    $file->{'changed_before_delete'} = $file->{'changed'} unless $file->{'deleted'};
     $file->{'deleted'}      = 1;
     $file->{'changed'}      = 1;
     $self->{'needs_commit'} = 1;
@@ -1177,10 +1191,10 @@ sub file_undelete {
     my $file    = shift;
     my $rebuild = shift;
 
-    $rebuild                = 1 unless defined $rebuild;
-    $file->{'deleted'}      = 0;
-    $file->{'changed'}      = 1;
-    $self->{'needs_commit'} = 1;
+    $rebuild = 1 unless defined $rebuild;
+    $file->{'deleted'} = 0;
+    $file->{'changed'} = delete $file->{'changed_before_delete'} // 0;
+    $self->get_changed_files();
 
     $self->_rebuild_index() if $rebuild;
     return;
@@ -1726,8 +1740,13 @@ sub _set_coretype {
 ##########################################################
 sub _read_objects {
     my ( $self ) = @_;
+    $self->{'stats'}->profile(begin => "M::C::_read_objects()") if defined $self->{'stats'};
+
     $self->_set_objects_from_files();
     $self->_rebuild_index();
+
+    $self->{'stats'}->profile(end => "M::C::_read_objects()") if defined $self->{'stats'};
+
     return;
 }
 
@@ -1808,6 +1827,8 @@ sub _set_files {
 sub _get_files {
     my ($self, $discard_changes) = @_;
 
+    $self->{'stats'}->profile(begin => "M::C::_get_files()") if defined $self->{'stats'};
+
     my @files;
     my %index;
     my $filenames = $self->_get_files_names();
@@ -1829,6 +1850,8 @@ sub _get_files {
             warn('got no valid file for: '.$filename);
         }
     }
+
+    $self->{'stats'}->profile(end => "M::C::_get_files()") if defined $self->{'stats'};
 
     return(\@files, \%index);
 }

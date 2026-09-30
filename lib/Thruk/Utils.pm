@@ -850,55 +850,26 @@ sub get_exposed_custom_vars {
 
 =head2 get_custom_vars
 
-  get_custom_vars($c, $obj, [$prefix], [$add_host])
+  get_custom_vars($c, $obj, [$prefix], [$add_host], [$add_action_menu])
 
 return custom variables in a hash
 
 =cut
 sub get_custom_vars {
     my($c, $data, $prefix, $add_host, $add_action_menu) = @_;
-    $prefix = '' unless defined $prefix;
-    $add_action_menu = 1 unless defined $add_action_menu;
+    $prefix          = '' unless defined $prefix;
+    $add_host        = 0  unless defined $add_host;
+    $add_action_menu = 1  unless defined $add_action_menu;
 
-    my %hash;
-    if($data->{'custom_variables'}) {
-        if(ref $data->{'custom_variables'} eq 'ARRAY') {
-            my $normalized = {};
-            for my $cv (@{$data->{'custom_variables'}}) {
-                if(ref $cv eq 'ARRAY' && scalar @{$cv} == 2) {
-                    $normalized->{$cv->[0]} = $cv->[1];
-                }
-            }
-            $data->{'custom_variables'} = $normalized;
-        }
-        for my $key (keys %{$data->{'custom_variables'}}) {
-            $hash{$key} = $data->{'custom_variables'}->{$key};
-        }
-    }
-
-    if(   defined $data
-      and defined $data->{$prefix.'custom_variable_names'}
-      and defined $data->{$prefix.'custom_variable_values'}
-      and ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
-    {
-        # merge custom variables into a hash
-        @hash{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
-    }
-
-    if($add_host
-      and defined $data
-      and defined $data->{'host_custom_variable_names'}
-      and defined $data->{'host_custom_variable_values'}
-      and ref $data->{'host_custom_variable_names'} eq 'ARRAY')
-    {
-        for(my $x = 0; $x < scalar @{$data->{'host_custom_variable_names'}}; $x++) {
-            my $key = $data->{'host_custom_variable_names'}->[$x];
-            $hash{"HOST".$key} = $data->{'host_custom_variable_values'}->[$x];
-        }
-    }
+    _normalize_custom_vars($data, $prefix);
 
     # add action menu from apply rules
-    if($add_action_menu && $c && $c->config->{'action_menu_apply'} && !$hash{'THRUK_ACTION_MENU'}) {
+    if($add_action_menu
+        && $c
+        && $c->config->{'action_menu_apply'}
+        && !$data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU'}
+        && !$data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU_CHECKED'}
+    ) {
         APPLY:
         for my $menu (sort keys %{$c->config->{'action_menu_apply'}}) {
             for my $pattern (@{Thruk::Base::list($c->config->{'action_menu_apply'}->{$menu})}) {
@@ -906,27 +877,85 @@ sub get_custom_vars {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
                     ## no critic
                     if($test =~ m/$pattern/) {
-                    ## use critic
-                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        $data->{'custom_variables'}->{$prefix.'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
+                    ## use critic
                 }
                 elsif($data->{$prefix.'name'}) {
                     my $test = $data->{$prefix.'name'}.';';
                     ## no critic
                     if($test =~ m/$pattern/) {
-                    ## use critic
-                        $hash{'THRUK_ACTION_MENU'} = $menu;
+                        $data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
+                    ## use critic
                 }
             }
         }
+
+        $data->{$prefix.'custom_variables'}->{THRUK_ACTION_MENU_CHECKED} = 1;
+    }
+
+    # return early when not merging more attributes
+    if(!$add_host) {
+        return $data->{$prefix.'custom_variables'};
+    }
+
+    # clone hash when adding more attributes
+    my %hash;
+    for my $key (sort keys %{$data->{$prefix.'custom_variables'}}) {
+        $hash{$key} = $data->{$prefix.'custom_variables'}->{$key};
+    }
+
+    # add host values
+    _normalize_custom_vars($data, "_host");
+    for my $key (sort keys %{$data->{'host_custom_variables'}}) {
+        $hash{"HOST".$key} = $data->{'host_custom_variables'}->{$key};
     }
 
     return \%hash;
 }
 
+########################################
+# normalize custom variables so they can be accessed by $data->{$prefix.'custom_variables'}->{$name}
+sub _normalize_custom_vars {
+    my($data, $prefix) = @_;
+    $prefix = '' unless defined $prefix;
+
+    if(defined $data && $data->{$prefix.'custom_variables'} && ref $data->{$prefix.'custom_variables'} eq 'HASH') {
+        return;
+    }
+
+    # convert custom variables from array
+    if(defined $data && $data->{$prefix.'custom_variables'}) {
+        if(ref $data->{$prefix.'custom_variables'} eq 'ARRAY') {
+            my $normalized = {};
+            for my $cv (@{$data->{$prefix.'custom_variables'}}) {
+                if(ref $cv eq 'ARRAY' && scalar @{$cv} == 2) {
+                    $normalized->{$cv->[0]} = $cv->[1];
+                }
+            }
+            $data->{$prefix.'custom_variables'} = $normalized;
+        }
+    }
+
+    # merge custom variables from names / values
+    if(   defined $data
+       && defined $data->{$prefix.'custom_variable_names'}
+       && defined $data->{$prefix.'custom_variable_values'}
+       && ref $data->{$prefix.'custom_variable_names'} eq 'ARRAY')
+    {
+        # merge custom variables into a hash
+        my $normalized = {};
+        @{$normalized}{@{$data->{$prefix.'custom_variable_names'}}} = @{$data->{$prefix.'custom_variable_values'}};
+        $data->{$prefix.'custom_variables'} = $normalized;
+    }
+
+    $data->{$prefix.'custom_variables'} = {} unless defined $data->{$prefix.'custom_variables'};
+
+    return;
+}
 
 ########################################
 
@@ -1403,6 +1432,9 @@ returns path of last http address/thruk instance in chain
 sub get_remote_thruk_url_path {
     my($c, $id, $full) = @_;
     my $peer = $c->db->get_peer_by_key($id);
+
+    return("") if $peer->is_icinga2_restv1();
+
     confess("got no peer for id: ".$id) unless $peer;
     my $url = "";
     if($peer->{'fed_info'} && $peer->{'fed_info'}->{'addr'}) {
@@ -2615,12 +2647,16 @@ sub restart_later {
 
     _info("thruk restarting in 1sec with cmd: ".$cmd);
     require Thruk::Utils::External;
-    return(Thruk::Utils::External::cmd($c, {
-        'cmd'        => "sleep 1 ; ".$cmd."; sleep 1",
-        'forward'    => $redirect,
-        'initwait'   => 0,
-        'message'    => $msg,
+    my $jobid = (Thruk::Utils::External::cmd($c, {
+        'cmd'         => $cmd,
+        'forward'     => $redirect,
+        'background'  => 1,
+        'message'     => $msg,
+        'initwait'    => 0,
+        'delayed'     => 1,
     }));
+
+    return $c->redirect_to("job.cgi?job=".$jobid.'&initwait=0');
 }
 
 
@@ -3599,23 +3635,52 @@ sub clean_regex {
 
 =head2 get_timezone_data
 
-    get_timezone_data()
+    get_timezone_data($c, [$add_server], [$force])
 
-returns list of available timezones
+    $add_server: adds "Server Setting" to list
+    $force:      force recreating tz data cache
+
+returns list of available timezones.
 
 =cut
 sub get_timezone_data {
-    my($c, $add_server) = @_;
+    my($c, $add_server, $force) = @_;
 
     $c->stats->profile(begin => "get_timezone_data");
-    my $timezones = [];
+
+    my $timezones;
+
     require Thruk::Utils::Cache;
     my $cache = Thruk::Utils::Cache->new($c->config->{'var_path'}.'/timezones.cache');
     my $data  = $cache->get('timezones');
-    my $timestamp = Thruk::Utils::format_date(int(time()/600)*600, "%Y-%m-%d %H:%M");
-    if(defined $data && $data->{'timestamp'} eq $timestamp) {
-        $timezones = $data->{'timezones'};
-    } else {
+    my $timestamp = Thruk::Utils::format_date(int(time()/3600)*3600, "%Y-%m-%d %H:%M");
+    if(defined $data) {
+        if($data->{'timestamp'} ne $timestamp) {
+            require Thruk::Utils::External;
+
+            # check if update already running
+            # and start update in background otherwise
+            if($data->{'update_job'}) {
+                if(!Thruk::Utils::External::is_running($c, $data->{'update_job'}, 1)) {
+                    delete $data->{'update_job'};
+                    $cache->set('timezones', $data);
+                }
+            } elsif(!$force) {
+                # start update in background
+                my $job = Thruk::Utils::External::perl($c, {
+                    expr       => 'Thruk::Utils::get_timezone_data($c, undef, 1)',
+                    allow      => 'all',
+                    background => 1,
+                });
+                $data->{'update_job'} = $job;
+                $cache->set('timezones', $data);
+            }
+        }
+        $timezones = $data->{'timezones'} unless $force;
+    }
+
+    if(!defined $timezones) {
+        $timezones = [];
         require Date::Manip::TZ;
         my $tz  = Date::Manip::TZ->new();
         # https://metacpan.org/pod/distribution/Date-Manip/lib/Date/Manip/TZ.pod#$date
@@ -4383,6 +4448,9 @@ sub _enhance_histou_url {
     }
 
     $url = $url.'&hideLogo=1';
+
+    # ensure backslashes are correctly escaped
+    $url =~ s/\\/\\\\/gmx;
 
     return($url);
 }

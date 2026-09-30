@@ -9,7 +9,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 73;
+plan tests => 74;
 
 ###########################################################
 # verify that we use the correct thruk binary
@@ -112,6 +112,6 @@ TestUtils::test_command({
 # extract text from image and check for a valid graph
 TestUtils::test_command({
     cmd     => '/usr/bin/env tesseract tmp/test.png -',
-    like    => ['/Home/', '/Dashboards/', '/Ping/', '/test/', '/acknowledgement/'],
+    like    => ['/Bookmarks/', '/Dashboards/', '/Ping/', '/test/', '/acknowledgement/', '/Administration/'],
     errlike => undef,
 });

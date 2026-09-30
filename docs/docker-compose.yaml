@@ -3,7 +3,7 @@ services:
     image: sni/thruk_org
     build:
       context: ./.thruk_org
-    command: jekyll serve --trace --watch
+    command: make -C /srv/jekyll server
     ports:
       - "4000:4000"
     volumes:

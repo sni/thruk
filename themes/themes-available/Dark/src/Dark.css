@@ -148,7 +148,7 @@
   --button-disabled-bg:       #555;
 
   --stats-time-backend:       var(--color-sky-600);
-  --stats-time-controler:     var(--color-yellow-600);
+  --stats-time-controller:    var(--color-yellow-600);
   --stats-time-io:            var(--color-lime-600);
   --stats-time-locks:         var(--color-rose-500);
   --stats-time-cmds:          var(--color-indigo-600);

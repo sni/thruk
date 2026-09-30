@@ -15,7 +15,7 @@ use strict;
 use Carp qw/confess longmess/;
 use Cpanel::JSON::XS ();
 use Cwd qw/abs_path/;
-use Errno qw(EEXIST);
+use Errno qw(EEXIST EACCES);
 use Fcntl qw/:DEFAULT :flock :mode SEEK_SET/;
 use File::Copy qw/move copy/;
 use IO::Select ();
@@ -460,6 +460,10 @@ sub file_lock {
                     $retrys = 0; # start over...
                 }
             }
+        }
+        # permission error, no need to retry
+        if($!{EACCES}) {
+            last;
         }
         sleep(0.1);
     }
@@ -1273,7 +1277,7 @@ sub all_perl_files {
                 push @files, $file;
                 next;
             }
-            my $content = &read($file);
+            my $content = -r $file ? &read($file) : '';
 
             if($content =~ m%\#\!(/usr|)/bin/perl%mx || $content =~ m|\Qexec perl -x\E|mx) {
                 push @files, $file;

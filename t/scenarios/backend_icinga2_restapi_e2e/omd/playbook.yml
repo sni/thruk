@@ -1,0 +1,48 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=icinga2
+        LIVESTATUS_TCP=on
+        GRAFANA=on
+        NAGFLUX=on
+        PNP4NAGIOS=off
+        INFLUXDB=off
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo
+  - copy:
+      src: /root/more_hosts.conf
+      dest: /omd/sites/demo/etc/icinga2/conf.d/more_hosts.conf
+      owner: demo
+      group: demo
+  - name: disable icinga2 livestatus
+    shell: sudo su - demo -c "icinga2 feature disable livestatus"
+  - name: disable icinga2 compatlog
+    shell: sudo su - demo -c "icinga2 feature disable compatlog"
+  - name: enable icinga2 api
+    shell: sudo su - demo -c "icinga2 feature enable api"
+  - name: run icinga2 api setup
+    shell: sudo su - demo -c "icinga2 api setup"
+  - name: enable api commands
+    lineinfile:
+      path: /omd/sites/demo/etc/icinga2/features-enabled/api.conf
+      regexp: "accept_commands"
+      line: "  accept_commands = true"
+  - name: set api password
+    lineinfile:
+      path: /omd/sites/demo/etc/icinga2/conf.d/api-users.conf
+      regexp: "password ="
+      line: '  password = "test"'
+
+

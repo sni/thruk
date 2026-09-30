@@ -145,6 +145,25 @@ sub is_local {
 
 ##########################################################
 
+=head2 is_icinga2_restv1
+
+returns true if backend is based on icinga2 rest api v1
+
+=cut
+
+sub is_icinga2_restv1 {
+    my($self) = @_;
+
+    return unless $self->{'peer_config'};
+    return unless $self->{'peer_config'}->{'lmd_options'};
+    return unless $self->{'peer_config'}->{'lmd_options'}->{'flags'};
+    return 1 if $self->{'peer_config'}->{'lmd_options'}->{'flags'} =~ m/icinga2-restv1/mxi;
+
+    return;
+}
+
+##########################################################
+
 =head2 create_backend
 
   create_backend()
@@ -313,6 +332,8 @@ sub get_http_fallback_peer {
     my($self) = @_;
     return($self->{'_http_fallback_peer'}) if exists $self->{'_http_fallback_peer'};
     $self->{'_http_fallback_peer'} = undef;
+
+    return($self->{'_http_fallback_peer'}) if $self->is_icinga2_restv1();
 
     # check if there is any http source set
     for my $src (@{$self->peer_list()}, @{$self->peer_list_fallback()}) {

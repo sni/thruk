@@ -666,7 +666,7 @@ sub wait_for_job {
         $job = $url;
     }
     elsif($url =~ m/proxy\.cgi\/([^\/]+)\/.*cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        $job = $1;
+        $job = $2;
         $joburl = $url.'&json=1';
     }
     elsif($url =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
@@ -691,7 +691,7 @@ sub wait_for_job {
             }
         };
         my $end = [gettimeofday];
-        is($data->{'is_running'}, 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds');
+        is($data->{'is_running'}, 0, 'url job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds');
         alarm(0);
         return;
     }
@@ -712,7 +712,7 @@ sub wait_for_job {
     };
     alarm(0);
     my $end = [gettimeofday];
-    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds')
+    is(Thruk::Utils::External::_is_running(undef, $jobdir), 0, 'local job '.$job.' is finished in '.(sprintf("%.3f", tv_interval($start, $end))).' seconds')
         or diag(sprintf("uptime: %s\n\nps:\n%s\n\njobs:\n%s\n",
                             scalar `uptime`,
                             scalar `ps -efl`,
@@ -771,12 +771,12 @@ sub test_command {
         local $test->{'exit'}    = undef;
         local $test->{'like'}    = '/.*/';
         local $test->{'errlike'} = '/.*/';
-        my $expr = '';
-        my $end  = $start + $duration;
-        ok(1, "waiting for $waitfor to appear till ".(scalar localtime $end));
+        my @exprs  = @{ _list($waitfor) };
+        my $expr   = join(' ', @exprs);
+        my $end    = $start + $duration;
+        ok(1, "waiting for $expr to appear till ".(scalar localtime $end));
         while($now <= $end) {
             alarm(15);
-            $expr = $waitfor;
             my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
             $test->{'test_cmd'} = $t;
             eval {
@@ -786,16 +786,31 @@ sub test_command {
             alarm(0);
             $stdout = Thruk::Utils::Encode::decode_any(scalar $t->stdout);
 
-            if($waitfor =~ m/^\!/) {
+            my $matched = 0;
+            my $msg     = '';
+            if(scalar @exprs > 1) {
+                # every pattern must be present in the same response
+                $matched = 1;
+                for my $e (@exprs) {
+                    if($stdout !~ m/$e/mx) { $matched = 0; last; }
+                }
+                $msg = "content $expr found after ".($now - $start)."seconds";
+            }
+            elsif($waitfor =~ m/^\!/) {
                 $expr =~ s/^\!//mx;
                 if($stdout !~ m/$expr/mx) {
-                    ok(1, "content ".$expr." disappeared after ".($now - $start)."seconds");
-                    $found = 1;
-                    last;
+                    $matched = 1;
+                    $msg     = "content ".$expr." disappeared after ".($now - $start)."seconds";
                 }
             }
-            elsif($stdout =~ m/$waitfor/mx) {
-                ok(1, "content ".$expr." found after ".($now - $start)."seconds");
+            else {
+                if($stdout =~ m/$waitfor/mx) {
+                    $matched = 1;
+                    $msg     = "content $expr found after ".($now - $start)."seconds";
+                }
+            }
+            if($matched) {
+                ok(1, $msg);
                 $found = 1;
                 last;
             }

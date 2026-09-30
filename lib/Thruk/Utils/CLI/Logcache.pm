@@ -73,19 +73,19 @@ END {
 =cut
 sub cmd {
     my($c, $action, $commandoptions, undef, $src, $global_options) = @_;
-    $c->stats->profile(begin => "_cmd_import_logs($action)");
 
     if(!$c->check_user_roles('authorized_for_admin')) {
         return("ERROR - authorized_for_admin role required", 1);
     }
 
     my $mode = shift @{$commandoptions};
+    return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless $mode;
 
     if(!defined $c->config->{'logcache'}) {
         return("FAILED - logcache is not enabled\n", 1);
     }
 
-    return(Thruk::Utils::CLI::get_submodule_help(__PACKAGE__)) unless $mode;
+    $c->stats->profile(begin => "_cmd_logcache($mode)");
 
     ## no critic
     my $terminal_attached = -t 0 ? 1 : 0;
@@ -232,14 +232,14 @@ sub cmd {
 
     if($mode eq 'stats') {
         my $stats = $provider_class->_log_stats($c);
-        $c->stats->profile(end => "_cmd_import_logs($action)");
+        $c->stats->profile(end => "_cmd_logcache($mode)");
         Thruk::Backend::Manager::close_logcache_connections($c);
         return($stats, 0);
     }
     elsif($mode eq 'removeunused') {
         my $stats= $provider_class->_log_removeunused($c);
         Thruk::Backend::Manager::close_logcache_connections($c);
-        $c->stats->profile(end => "_cmd_import_logs($action)");
+        $c->stats->profile(end => "_cmd_logcache($mode)");
         return($stats."\n", 0);
     } else {
         my $worker_num = 1;
@@ -274,7 +274,7 @@ sub cmd {
                 my($log_count, $plugin_ref_count, $err) = (0, 0);
                 eval {
                     my(undef, $loc_log_count, $errors) = $provider_class->_import_logs($c, $mode, $backend, $blocksize, $opt);
-                    $c->stats->profile(end => "_cmd_import_logs($action)");
+                    $c->stats->profile(end => "_cmd_logcache($mode)");
                     if($mode eq 'clean' || $mode eq 'compact') {
                         $plugin_ref_count += $loc_log_count->[1];
                         $log_count        += $loc_log_count->[0];

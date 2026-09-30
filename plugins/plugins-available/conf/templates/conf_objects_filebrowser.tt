@@ -23,8 +23,8 @@
         <a class="button w-12" href="#" onclick="jQuery('INPUT[name=files]').prop('checked', false); return false;">none</a>
         <select name="action" onChange="jQuery('#path').attr('value', location.hash); this.form.submit()">
           <option>--- please select action ---</option>
-          <option value="deletefiles">delete selected files</option>
-          <option value="undeletefiles">undelete selected files</option>
+          <option value="deletefiles">delete selected files and folders</option>
+          <option value="undeletefiles">undelete selected files and folders</option>
         </select>
       </div>
     </div>
@@ -165,7 +165,7 @@
               jQuery.each(paths, function(index, dir) {
                   if(dir != '') {
                       dirs += dir + "\/";
-                      html += " <a class='link' href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/ <\/a>";
+                      html += "<a class='link' href='#"+ dirs +"' onclick='setdir(\""+ dirs +"\")'>" + dir + "\/<\/a>";
                   }
               });
               return html;

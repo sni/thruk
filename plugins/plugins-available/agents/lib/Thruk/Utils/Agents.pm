@@ -359,6 +359,9 @@ sub set_object_model {
         _error(join("\n", @{$c->{'obj_db'}->{'errors'}}));
         die(sprintf("failed to initialize objects of peer %s", $peer_key));
     }
+
+    $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
+
     return 1;
 }
 

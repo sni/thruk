@@ -390,6 +390,10 @@ sub do_filter {
         }
         $prefix = 'dfl_' unless $prefix ne '';
         $c->stash->{'searches'}->{$prefix} = $searches;
+
+        # add global filter from totals links
+        ($hostfilter, $servicefilter) = _append_totals_filter($params, $hostfilter, $servicefilter);
+
         return($servicefilter, $servicefilter, $servicefilter, $servicefilter, $c->stash->{'has_service_filter'});
     }
 
@@ -442,27 +446,38 @@ sub do_filter {
     }
 
     # add global filter from totals links
-    if($c->stash->{'servicestatustypes'}) {
-        my(undef, undef, $f) = get_service_statustype_filter($c->stash->{'servicestatustypes'});
-        $servicefilter = { '-and' => [ $servicefilter, $f ] };
-    }
-    if($c->stash->{'serviceprops'}) {
-        my(undef, undef, $f) = get_service_prop_filter($c->stash->{'serviceprops'});
-        $servicefilter = { '-and' => [ $servicefilter, $f ] };
-    }
-
-    if($c->stash->{'hoststatustypes'}) {
-        my(undef, undef, $hf, $sf) = get_host_statustype_filter($c->stash->{'hoststatustypes'});
-        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
-        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
-    }
-    if($c->stash->{'hostprops'}) {
-        my(undef, undef, $hf, $sf) = get_host_prop_filter($c->stash->{'hostprops'});
-        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
-        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
-    }
+    ($hostfilter, $servicefilter) = _append_totals_filter($params, $hostfilter, $servicefilter);
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
+}
+
+##############################################
+
+# adds global filter from totals links
+sub _append_totals_filter {
+
+    my($params, $hostfilter, $servicefilter) = @_;
+    if($params->{'servicestatustypes'}) {
+        my(undef, undef, $f) = get_service_statustype_filter($params->{'servicestatustypes'});
+        $servicefilter = { '-and' => [ $servicefilter, $f ] };
+    }
+    if($params->{'serviceprops'}) {
+        my(undef, undef, $f) = get_service_prop_filter($params->{'serviceprops'});
+        $servicefilter = { '-and' => [ $servicefilter, $f ] };
+    }
+
+    if($params->{'hoststatustypes'}) {
+        my(undef, undef, $hf, $sf) = get_host_statustype_filter($params->{'hoststatustypes'});
+        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
+        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
+    }
+    if($params->{'hostprops'}) {
+        my(undef, undef, $hf, $sf) = get_host_prop_filter($params->{'hostprops'});
+        $servicefilter = { '-and' => [ $servicefilter, $sf ] };
+        $hostfilter    = { '-and' => [ $hostfilter,    $hf ] };
+    }
+
+    return($hostfilter, $servicefilter);
 }
 
 ##############################################
@@ -912,7 +927,7 @@ sub single_search {
         $filter->{'type'} = 'search' unless defined $filter->{'type'};
 
         # resolve search prefix
-        if($filter->{'type'} eq 'search' and $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
+        if($filter->{'type'} eq 'search' && defined $filter->{'value'} && $filter->{'value'} =~ m/^(ho|hg|se|sg):/mx) {
             if($1 eq 'ho') { $filter->{'type'} = 'host';         }
             if($1 eq 'hg') { $filter->{'type'} = 'hostgroup';    }
             if($1 eq 'se') { $filter->{'type'} = 'service';      }
@@ -1260,6 +1275,10 @@ sub single_search {
                                         };
                 }
             }
+        }
+        elsif ( $filter->{'type'} eq 'backend' && $c->stash->{'has_lmd'} ) {
+            push @hostfilter,          { peer_key => { $op => $value } };
+            push @servicefilter,       { peer_key => { $op => $value } };
         }
         else {
             if($filter->{'type'} ne '') {

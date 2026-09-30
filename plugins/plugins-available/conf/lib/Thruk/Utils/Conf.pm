@@ -126,9 +126,7 @@ sub set_object_model {
     }
 
     if($c->{'obj_db'}->{'cached'}) {
-        $c->stats->profile(begin => "check_files_changed($refresh)");
         $c->{'obj_db'}->check_files_changed($refresh);
-        $c->stats->profile(end => "check_files_changed($refresh)");
     }
 
     $c->{'obj_db'}->{'errors'} = Thruk::Base::array_uniq(Thruk::Base::list($c->{'obj_db'}->{'errors'}));
@@ -150,9 +148,12 @@ sub set_object_model {
     } elsif($refresh) {
         Thruk::Utils::set_message( $c, 'success_message', 'refresh successful');
     }
+    # ex.: new files noticed here, should be stored, otherwise each page refresh would update the same files again
     if($c->{'obj_db'}->{'obj_model_changed'}) {
-        $c->stash->{'obj_model_changed'} = 1;
         delete $c->{'obj_db'}->{'obj_model_changed'};
+
+        store_model_retention($c, $c->stash->{'param_backend'});
+        delete $c->stash->{'obj_model_changed'};
     }
 
     $c->stats->profile(end => "_update_objects_config()");
@@ -474,12 +475,16 @@ sub replace_block {
     if(-f $file) {
         $content = Thruk::Utils::IO::read($file);
     }
+    my $orig = $content;
 
     ## no critic
     unless($content =~ s/$start.*?$end/$string/sxi) {
         $content .= "\n\n".$string;
     }
     ## use critic
+
+    # do not rewrite file unless it has changed
+    return 1 if $orig eq $content;
 
     open(my $fh, ">", $file) or return("cannot update, failed to write to $file: $!");
     print $fh $content;
@@ -671,9 +676,9 @@ sub store_model_retention {
 
     # try to save retention data
     eval {
-        # delete some useless references
-        delete $model->{'configs'}->{$backend}->{'stats'};
-        delete $model->{'configs'}->{$backend}->{'remotepeer'};
+        # do not store some references
+        my $stats = delete $model->{'configs'}->{$backend}->{'stats'};
+        my $rpeer = delete $model->{'configs'}->{$backend}->{'remotepeer'};
         confess("no data") if(!$model->{'configs'}->{$backend} || ref $model->{'configs'}->{$backend} ne 'Monitoring::Config' || scalar keys %{$model->{'configs'}->{$backend}} == 0);
         my $data = {
             'configs'      => {$backend => $model->{'configs'}->{$backend}},
@@ -686,6 +691,8 @@ sub store_model_retention {
         $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
         $c->stash->{'obj_model_changed'} = 0;
         _debug('saved object retention data');
+        $model->{'configs'}->{$backend}->{'stats'}      = $stats if $stats;
+        $model->{'configs'}->{$backend}->{'remotepeer'} = $rpeer if $rpeer;
     };
     if($@) {
         _error($@);
