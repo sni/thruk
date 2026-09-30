@@ -2444,7 +2444,9 @@ sub _get_selected_files {
         }
 
         my $file = $c->{'obj_db'}->get_file_by_path($filename);
-        push @selected, $file if defined $file and !$seen->{$file}++;
+        if ( (defined $file) and (!$seen->{$file}++) ) {
+            push @selected, $file;
+        }
     }
 
     return \@selected;
