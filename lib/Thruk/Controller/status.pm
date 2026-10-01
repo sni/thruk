@@ -1373,39 +1373,45 @@ sub _process_combined_page {
 
 ##########################################################
 # create a 'show all' url for a limited table on the combined page.
-# The combined page uses its own filter prefixes (hst_/svc_) while the paginated hostdetail/detail pages use the dfl_ prefix
+# The combined page uses its own filter prefixes (hst_/svc_) while the paginated
+# hostdetail/detail pages use the dfl_ prefix
 sub _combined_show_all_url {
     my($c, $from_prefix, $to_style) = @_;
 
-    my $uri     = URI->new('status.cgi');
-    my @new_param;
-    my $base    = $c->stash->{'original_uri'} ? URI->new($c->stash->{'original_uri'}) : $c->req->uri;
-    my @old_param = $base->query_form();
+    my $data = {};
+    my $own_columns   = ($from_prefix eq 'hst_') ? 'host_columns'    : 'service_columns';
+    my $other_columns = ($from_prefix eq 'hst_') ? 'service_columns' : 'host_columns';
+
+    my @old_param = $c->req->uri->query_form();
     while(my $key = shift @old_param) {
         my $value = shift @old_param;
-        next if $key eq '_';
-        next if $key eq 'style';
-        next if $key =~ m/^show_all_(hosts|services)$/mx;
-        next if $key =~ m/^(sorttype|sortoption)(_hst|_svc)?$/mx;
-        next if $key eq 'entries' || $key eq 'page' || $key eq 'jump';
-        # translate column params of this table, drop column params of the other one
-        if($from_prefix eq 'hst_') {
-            next if $key eq 'service_columns';
-            $key = 'dfl_columns' if $key eq 'host_columns';
-        } else {
-            next if $key eq 'host_columns';
-            $key = 'dfl_columns' if $key eq 'service_columns';
+        next if $key eq '_' || $key eq 'style';
+
+        # combined page specific params and filters of the other table: drop these
+        if(   $key eq $other_columns
+           || $key =~ m/^show_all_(hosts|services)$/mx
+           || $key =~ m/^(sorttype|sortoption)(_hst|_svc)?$/mx
+           || $key eq 'entries' || $key eq 'page' || $key eq 'jump'
+           || ($key =~ m/^(?:hst|svc|dfl|ovr|grd)_/mx && $key !~ m/^\Q$from_prefix\E/mx)) {
+            $data->{$key} = undef;
+            next;
         }
-        # drop filters which belong to the other tables
-        next if $key =~ m/^(?:hst|svc|dfl|ovr|grd)_/mx && $key !~ m/^\Q$from_prefix\E/mx;
-        # switch table filters to the prefix used by the target pages
-        $key =~ s/^\Q$from_prefix\E/dfl_/mx if $key =~ m/^\Q$from_prefix\E/mx;
-        next if !defined $value || $value eq '';
-        push @new_param, $key, $value;
+
+        # carry from_prefix's tables filter columns over to the prefix of the target page, always dfl_
+        if($key eq $own_columns) {
+            $data->{$own_columns} = undef;
+            push @{$data->{'dfl_columns'}}, $value if defined $value && $value ne '';
+        }
+        elsif($key =~ m/^\Q$from_prefix\E/mx) {
+            my $new_key = $key;
+            $new_key =~ s/^\Q$from_prefix\E/dfl_/mx;
+            $data->{$key} = undef;
+            push @{$data->{$new_key}}, $value if defined $value && $value ne '';
+        }
     }
-    push @new_param, 'style', $to_style;
-    $uri->query_form(@new_param);
-    return($uri->as_string());
+
+    $data->{'style'} = $to_style;
+    return Thruk::Utils::Filter::uri_with($c, $data);
 }
 
 ##########################################################
