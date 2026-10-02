@@ -6578,6 +6578,8 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
                     return(res);
                 });
             }
+        } else if(key == "class") {
+            item.className += ' '+attr;
         } else {
             item[key] = attr;
         }

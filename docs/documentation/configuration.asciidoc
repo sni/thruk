@@ -2522,6 +2522,7 @@ The menu item can have the following attributes:
                         the actionname must be a reference to a command from 'action_menu_actions'.
                         You may use `{% raw %}{{macros}}{% endraw %}` here too. Also javascript: links are valid,
                         for example `javascript:alert('$HOSTNAME$')`.
+     ** `class`         Add css class to link.
      ** `target`        Use '_blank' here to open link in a new window.
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.
