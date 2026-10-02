@@ -62,3 +62,9 @@ Some interesting and useful scenarios are:
 
   - [logfile_cache_icinga2_ido_e2e](logfile_cache_icinga2_ido_e2e/): Logcache with
     a Icinga 2 backend and manual import from a IDO PostgreSQL databases.
+
+### Showcase
+
+  - [showcase_e2e](showcase_e2e/): Customer demo scenario with a Naemon backend,
+    showcasing custom action menus: a restart service action, a form based action
+    menu and a failing action to demo the error handling.

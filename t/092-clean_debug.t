@@ -8,7 +8,7 @@ my $filter = $ARGV[0];
 
 my $cmds = {
   "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/" => {},
-  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/] },
+  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/, qr/sticky.sh/] },
   "grep -nr 'dump\(' templates/ plugins/plugins-available/*/templates" => { exclude => [qr/get_variable\.tt/]},
 };
 

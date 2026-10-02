@@ -1,0 +1,51 @@
+# Showcase Scenario
+
+Customer demo scenario with a Naemon backend, showcasing custom
+action menus.
+
+## Start
+
+    %> make prepare
+
+Thruk is available at `http://127.0.0.4:60080/demo/thruk/` (user `omdadmin`, password `omd`).
+
+## Demo: Action Menus
+
+Open the details page of the `Sticky Logfile` service (host `localhost`):
+
+    http://127.0.0.4:60080/demo/thruk/cgi-bin/extinfo.cgi?type=2&host=localhost&service=Sticky%20Logfile
+
+The service is CRITICAL out of the box and shows two custom action menu icons:
+
+* **Restart Service** (redo icon): triggers a server action which restarts the
+  grafana service of the demo site. A confirmation dialog is shown before the
+  action runs and the script output is displayed as user feedback.
+
+* **Showcase Menu** (dropdown icon):
+  * **Service Note** - a form based action menu. Enter a note and press save,
+    the note is send as server action to `add_note.sh` and saved to
+    `var/thruk/showcase_notes.log` inside the container.
+  * **Open Grafana** - a simple link menu item.
+  * **Trigger Sticky Logfile Check** - (re-)creates the sticky logfile problem
+    of the `Sticky Logfile` service, to demo the full problem lifecycle.
+  * **Reset Sticky Logfile Check** - resets the sticky logfile check of the
+    `Sticky Logfile` service, to demo a problem which can only be resolved by
+    a custom action.
+  * **Trigger Sticky Logfile Check** - creates the sticky logfile problem
+    again, so the demo can be repeated.
+  * **Failing Action** - a server action which always fails, to demo the error
+    handling of action menus.
+
+The menus are applied by the `action_menu_apply` rules in
+`/omd/sites/demo/etc/thruk/thruk_local.d/showcase.conf`, the server actions
+are defined in the `action_menu_actions` section of the same file and the
+menus themselves live in `/omd/sites/demo/etc/thruk/action_menus/`:
+
+* `showcase_menu.json` - a static json menu.
+* `showcase_js_menu.js` - a javascript based menu (applied to all hosts,
+  visible on the host details page) with a dynamic submenu which lists all
+  services of the host by querying the rest api.
+
+## Test
+
+    %> make test

@@ -1,0 +1,21 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: thruk_developer
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        CORE=naemon
+        GRAFANA=on
+  - name: "copy example.cfg"
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+  - name: "install showcase files from skel"
+    shell: rsync -a --chown=demo:demo /root/ansible_dropin/skel/ /omd/sites/demo/

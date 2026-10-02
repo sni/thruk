@@ -1,0 +1,77 @@
+[
+  {
+    "icon": "uil-redo",
+    "title": "Restart Service",
+    "action": "server://showcase_restart",
+    "onclick": "return(confirm('Really restart the service?\\nThis restarts the grafana service of the demo site.'));"
+  },
+  {
+    "icon": "../themes/{{theme}}/images/dropdown.png",
+    "title": "Showcase Menu",
+    "menu": [
+      {
+        "icon": "uil-document-info",
+        "label": "Service Note",
+        "html": "<div class='flexrow gap-1 flex-nowrap'><b>note:</b><input type='text' id='showcase_note_input' style='width:160px' placeholder='service note'><button onclick=\"(function(b){var i=document.getElementById('showcase_note_input');var v=i.value;if(!v){thruk_message(1,'please enter a note');return;}jQuery(b).attr('disabled',true).text('saving...');jQuery.post('status.cgi?serveraction=1&json=1',{link:'server://showcase_note/'+encodeURIComponent(v),host:action_menu_options.host,service:action_menu_options.service,backend:action_menu_options.backend,token:CSRFtoken},function(r){thruk_message(r.rc,r.msg);action_menu_close();});})(this)\">save</button></div>"
+      },
+      "-",
+      {
+        "icon": "uil-link",
+        "label": "Open Grafana",
+        "action": "/demo/grafana/",
+        "target": "_blank"
+      },
+      "-",
+      {
+        "icon": "uil-plus",
+        "label": "Trigger Sticky Logfile Check",
+        "title": "Creates the sticky logfile problem of the 'Sticky Logfile' demo service again",
+        "action": "server://showcase_create"
+      },
+      {
+        "icon": "uil-trash-alt",
+        "label": "Reset Sticky Logfile Check",
+        "title": "Resets the sticky logfile check of the 'Sticky Logfile' demo service",
+        "action": "server://showcase_reset"
+      },
+      "-",
+      {
+        "icon": "uil-exclamation",
+        "label": "Failing Action (demo error)",
+        "title": "This action always fails, to demo the error handling",
+        "action": "server://showcase_fail"
+      },
+      {
+        "icon": "uil-signal",
+        "label": "disabled menu",
+        "title": "This action is disabled",
+        "action": "server://showcase_fail",
+        "disabled": true
+      },
+      {
+        "label": "Custom HTML Menu",
+        "menu": [
+          {
+            "icon": "uil-star",
+            "label": "Service Rating",
+            "html": "<div style='display:flex;align-items:center;gap:8px;width:370px;padding:6px 10px;background:linear-gradient(90deg,#2c3e50,#3498db);border-radius:6px;color:#fff;font-size:13px'><b>rate:</b><select id='showcase_rating_select' style='width:110px'><option value='great'>great</option><option value='ok'>ok</option><option value='bad'>bad</option></select><button onclick=\"(function(b){var s=document.getElementById('showcase_rating_select');jQuery(b).attr('disabled',true).text('saving...');jQuery.post('status.cgi?serveraction=1&json=1',{link:'server://showcase_note/rating: '+s.value,host:action_menu_options.host,service:action_menu_options.service,backend:action_menu_options.backend,token:CSRFtoken},function(r){thruk_message(r.rc,r.msg);action_menu_close();});})(this)\">send</button></div>"
+          },
+          "-",
+          {
+            "icon": "uil-heart",
+            "label": "About",
+            "html": "<div style='padding:6px 10px;font-size:12px;'>fancy <b>html</b> items can render arbitrary <i>markup</i> in the action menu<table style='margin-top:6px;width:100%;text-align:left' class='cellborder'><thead><tr><th scope='col'>Service</th><th scope='col'>Status</th></tr></thead><tbody><tr><td>Grafana</td><td>OK</td></tr><tr><td>Sticky Logfile</td><td>WARNING</td></tr></tbody></table></div>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "icon": "fa-chart-line",
+    "title": "Graph",
+    "action": "/demo/pnp4nagios/index.php/graph?host=localhost&srv=Sticky Logfile&theme=smoothness",
+    "rel":    "/demo/pnp4nagios/index.php/popup?host=localhost&srv=Sticky Logfile&theme=smoothness",
+    "class":  "tips",
+    "target": "_blank"
+  }
+]
