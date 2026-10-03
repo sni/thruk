@@ -36,18 +36,19 @@ my $service_group       = $test_svc->{'groups'}->[0];
 # create example session
 Thruk::Utils::OAuth::store_oauth_session($c, "docs-update", ["example-team"]);
 
+my $root = $c->config->{'project_root'};
 my $cmds = _update_cmds($c);
-_update_docs($c, "docs/documentation/rest.asciidoc", "lib/Thruk/Controller/Rest/V1/docs.pm");
-_update_docs($c, "docs/documentation/rest_commands.asciidoc");
-_update_cmds_list($c, "docs/documentation/commands.html", $cmds);
-unlink('var/cluster/nodes');
+_update_docs($c, $root."/docs/documentation/rest.asciidoc",        $root."/lib/Thruk/Controller/Rest/V1/docs.pm");
+_update_docs($c, $root."/docs/documentation/rest_commands.asciidoc");
+_update_cmds_list($c, $root."/docs/documentation/commands.html", $cmds);
+unlink($c->config->{'var_path'}.'/cluster/nodes');
 $c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
 
 ################################################################################
 sub _update_cmds {
     my($c) = @_;
-    my $output_file = "lib/Thruk/Controller/Rest/V1/cmd.pm";
+    my $output_file = $c->config->{'project_root'}."/lib/Thruk/Controller/Rest/V1/cmd.pm";
     my $content = Thruk::Utils::IO::read($output_file);
     $content =~ s/^__DATA__\n.*$/__DATA__\n/gsmx;
 
@@ -60,7 +61,7 @@ sub _update_cmds {
     my $cmds = {
         'contacts' => {
             'ENABLE_CONTACT_HOST_NOTIFICATIONS'           => {"docs" => "Enables host notifications for a particular contact."},
-            'ENABLE_CONTACT_SVC_NOTIFICATIONS'            => {"docs" => "Disables service notifications for a particular contact."},
+            'ENABLE_CONTACT_SVC_NOTIFICATIONS'            => {"docs" => "Enables service notifications for a particular contact."},
             'DISABLE_CONTACT_SVC_NOTIFICATIONS'           => {"docs" => "Disables service notifications for a particular contact."},
             'DISABLE_CONTACT_HOST_NOTIFICATIONS'          => {"docs" => "Disables host notifications for a particular contact."},
             'CHANGE_CUSTOM_CONTACT_VAR'                   => {"args" => ["name", "value"], "required" => ["name", "value"], "docs" => "Changes the value of a custom contact variable."},
@@ -80,7 +81,7 @@ sub _update_cmds {
         'hosts' => {
             'DEL_ACTIVE_HOST_DOWNTIMES'                   => {"docs" => "Removes all currently active downtimes for this host.", "thrukcmd" => 1 },
             'DEL_DOWNTIME'                                => {"args" => ["downtime_id"], "required" => ["downtime_id"], "docs" => "Removes downtime by id for this host.", "thrukcmd" => 1 },
-            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes downtime by id for this host.", "thrukcmd" => 1 },
+            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes comment by id for this host.", "thrukcmd" => 1 },
             'SET_HOST_NOTIFICATION_NUMBER'                => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular host. A value of 0 indicates that no notification has yet been sent for the current host problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the host is currently in an UP state."},
             'CHANGE_RETRY_HOST_CHECK_INTERVAL'            => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the retry check interval for a particular host."},
             'CHANGE_NORMAL_HOST_CHECK_INTERVAL'           => {"args" => ["interval"], "required" => ["interval"], "docs" => "Changes the normal (regularly scheduled) check interval for a particular host."},
@@ -102,10 +103,10 @@ sub _update_cmds {
         'services' => {
             'DEL_ACTIVE_SERVICE_DOWNTIMES'                => {"docs" => "Removes all currently active downtimes for this service.", "thrukcmd" => 1 },
             'DEL_DOWNTIME'                                => {"args" => ["downtime_id"], "required" => ["downtime_id"], "docs" => "Removes downtime by id for this service.", "thrukcmd" => 1 },
-            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes downtime by id for this service.", "thrukcmd" => 1 },
+            'DEL_COMMENT'                                 => {"args" => ["comment_id"], "required" => ["comment_id"], "docs" => "Removes comment by id for this service.", "thrukcmd" => 1 },
             'SET_SVC_NOTIFICATION_NUMBER'                 => {"args" => ["number"], "required" => ["number"], "docs" => "Sets the current notification number for a particular service. A value of 0 indicates that no notification has yet been sent for the current service problem. Useful for forcing an escalation (based on notification number) or replicating notification information in redundant monitoring environments. Notification numbers greater than zero have no noticeable affect on the notification process if the service is currently in an OK state."},
             'CHANGE_SVC_NOTIFICATION_TIMEPERIOD'          => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the service notification timeperiod to what is specified by the \'notification_timeperiod\' option. The \'notification_timeperiod\' option should be the short name of the timeperiod that is to be used as the service notification timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
-            'CHANGE_SVC_CHECK_TIMEPERIOD'                 => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the check timeperiod for a particular service to what is specified by the \'check_timeperiod\' option. The \'check_timeperiod\' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
+            'CHANGE_SVC_CHECK_TIMEPERIOD'                 => {"args" => ["timeperiod"], "required" => ["timeperiod"], "docs" => "Changes the check timeperiod for a particular service to what is specified by the \'check_timeperiod\' option. The \'check_timeperiod\' option should be the short name of the timeperiod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started."},
             # not implemented in naemon-core
             #'CHANGE_SVC_EVENT_HANDLER'                    => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the event handler command for a particular service to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
             #'CHANGE_SVC_CHECK_COMMAND'                    => {"args" => ["checkcommand"], "required" => ["checkcommand"], "docs" => "Changes the check command for a particular service to be that specified by the \'check_command\' option. The \'check_command\' option specifies the short name of the command that should be used as the new service check command. The command must have been configured in Naemon before it was last (re)started."},
@@ -117,17 +118,17 @@ sub _update_cmds {
         },
         'servicegroups' => {
             'ENABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'      => {"docs" => "Enables the acceptance and processing of passive checks for all services in a particular servicegroup."},
-            'ENABLE_SERViCEGROUP_PASSIVE_HOST_CHECKS'     => {"docs" => "Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
+            'ENABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS'     => {"docs" => "Enables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
             'DISABLE_SERVICEGROUP_PASSIVE_SVC_CHECKS'     => {"docs" => "Disables the acceptance and processing of passive checks for all services in a particular servicegroup."},
             'DISABLE_SERVICEGROUP_PASSIVE_HOST_CHECKS'    => {"docs" => "Disables the acceptance and processing of passive checks for all hosts that have services that are members of a particular service group."},
         },
         'system' => {
             'READ_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to load all current monitoring status information from the state retention file. Normally, state retention information is loaded when the Naemon process starts up and before it starts monitoring. WARNING: This command will cause Naemon to discard all current monitoring status information and use the information stored in state retention file! Use with care."},
             'RESTART_PROGRAM'                             => {"docs" => "Restarts the Naemon process."},
-            'SAVE_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention"},
+            'SAVE_STATE_INFORMATION'                      => {"docs" => "Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention information is saved before the Naemon process shuts down and (potentially) at regularly scheduled intervals. This command allows you to force Naemon to save this information to the state retention file immediately. This does not affect the current status information in the Naemon process."},
             'SHUTDOWN_PROGRAM'                            => {"docs" => "Shuts down the Naemon process."},
             'ENABLE_SERVICE_FRESHNESS_CHECKS'             => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
-            'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness."},
+            'ENABLE_HOST_FRESHNESS_CHECKS'                => {"docs" => "Enables freshness checks of all hosts on a program-wide basis. Individual hosts that have freshness checks disabled will not be checked for freshness."},
             'DISABLE_SERVICE_FRESHNESS_CHECKS'            => {"docs" => "Disables freshness checks of all services on a program-wide basis."},
             'DISABLE_HOST_FRESHNESS_CHECKS'               => {"docs" => "Disables freshness checks of all hosts on a program-wide basis."},
             'CHANGE_GLOBAL_SVC_EVENT_HANDLER'             => {"args" => ["eventhandler"], "required" => ["eventhandler"], "docs" => "Changes the global service event handler command to be that specified by the \'event_handler_command\' option. The \'event_handler_command\' option specifies the short name of the command that should be used as the new service event handler. The command must have been configured in Naemon before it was last (re)started."},
@@ -315,14 +316,17 @@ sub _update_docs {
         Thruk::Utils::LMD::check_changed_lmd_config($c, $c->config);
     }
 
-    my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-    `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
-    `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
-    `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
-    `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
-    `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
-    my $system_api_key = decode_json(`./script/thruk r -d "comment=test" -d "system=1" -d "roles=admin" -d "force_user=test" /thruk/api_keys`);
-    my $api_key = decode_json(`./script/thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
+    my $root = $c->config->{'project_root'};
+    my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths($c);
+    `mkdir -p bp;            cp $root/t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
+    `mkdir -p panorama;      cp $root/t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+    `mkdir -p var/broadcast; cp $root/t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
+    `mkdir -p var/downtimes; cp $root/t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
+    `mkdir -p var/reports;   cp $root/t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    my $system_api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', system => '1', roles => 'admin', force_user => 'test'});
+    die("failed to create system api_key: ".($system_api_key->{'message'} || 'unknown error')."\n") unless $system_api_key && $system_api_key->{'private_key'};
+    my $api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', username => 'restapidocs'});
+    die("failed to create api_key: ".($api_key->{'message'} || 'unknown error')."\n") unless $api_key && $api_key->{'private_key'};
     # fake usage
     Thruk::Utils::IO::json_lock_store($api_key->{'file'}.".stats", { last_used => time(), last_from => "127.0.0.1" });
     # fake error message
@@ -362,6 +366,7 @@ sub _update_docs {
     };
 
     my $content    = Thruk::Utils::IO::read($output_file);
+    my $additional = _parse_additional_attributes($content);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
 
@@ -414,6 +419,9 @@ sub _update_docs {
                 }
             }
             if($keys->{$url}->{$proto}) {
+                if($additional->{$url}->{$proto}) {
+                    $content .= $additional->{$url}->{$proto};
+                }
                 $raw_json->{$url}->{$proto} = { columns => [] };
                 $content .= '[options="header"]'."\n";
                 $content .= "|===========================================\n";
@@ -426,7 +434,7 @@ sub _update_docs {
                     if(!$typ && !$unit) {
                         ($typ, $unit) = Thruk::Controller::rest_v1::guess_field_type($url, $name);
                     }
-                    if($typ && $typ ne 'time' && $typ ne 'number') {
+                    if($typ && $typ ne 'time' && $typ ne 'number' && $typ ne 'boolean' && $typ ne 'string' && $typ ne 'array_of_strings' ) {
                         die("unknown typ in $url ($name): $typ");
                     }
 
@@ -508,6 +516,7 @@ sub _update_cmds_list {
 sub _fetch_keys {
     my($c, $proto, $url, $doc) = @_;
 
+    # These are skipped since they are aliases to other points
     return if $proto ne 'GET';
     return if $doc =~ m/alias|https?:/mxi;
     return if $url eq '/thruk/jobs/<id>/output';
@@ -603,6 +612,9 @@ sub _parse_attribute_docs {
             $proto = $1;
             $url   = $2;
         }
+        # Parses the attributes in the asciidoc table like this:
+        # |host                              | string     |          | host name
+        # |plugin_output                     | string     |          | last plugin output during outage
         if($url && $line =~ m%^\|([^\|]+?)\s*\|([^\|]+?)\s*\|([^\|]+?)\s*\|\s*(.*)$%mx) {
             next if $1 eq 'Attribute';
             $attributes->{$url}->{$proto}->{$1} = [$2, $3, $4];
@@ -613,6 +625,25 @@ sub _parse_attribute_docs {
         }
     }
     return $attributes;
+}
+
+################################################################################
+sub _parse_additional_attributes {
+    my($content) = @_;
+    my $additional = {};
+    my $last_url;
+    my $last_proto;
+    for my $line (split/\n/mx, $content) {
+        if($line =~ m%^===\ (\w+)\ (/.*)$%mx) {
+            $last_url   = $2;
+            $last_proto = $1;
+        }
+        # Beware this line if its present, then add it to description
+        if($line eq 'Additional attributes added by Thruk:') {
+            $additional->{$last_url}->{$last_proto} = $line."\n\n";
+        }
+    }
+    return $additional;
 }
 
 ################################################################################

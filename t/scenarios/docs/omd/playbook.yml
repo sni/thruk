@@ -1,0 +1,40 @@
+---
+- hosts: all
+  roles:
+    - role: common
+    - role: local_tests
+    - role: thruk_developer
+
+  tasks:
+  - name: "omd config change"
+    shell: "omd config demo change"
+    args:
+      stdin: |
+        APACHE_MODE=own
+        PNP4NAGIOS=off
+        LIVESTATUS_TCP=on
+
+  - name: copy demo files
+    copy:
+      src:  "/root/{{ item.src }}"
+      dest: "/omd/sites/demo/{{ item.dst }}"
+      owner: demo
+      group: demo
+    loop:
+      - { src: 'test.cfg',         dst: 'etc/naemon/conf.d/' }
+      - { src: 'testuser.cfg',     dst: 'etc/naemon/conf.d/' }
+
+  - name: copy naemon example.cfg
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
+      owner: demo
+      group: demo
+
+  - shell: echo "testkey" > /omd/sites/demo/var/thruk/secret.key
+
+  - file:
+      path: /omd/sites/demo/var/thruk/secret.key
+      mode: 0600
+      owner: demo
+      group: demo

@@ -230,6 +230,7 @@ sub get_test_hostgroup_cli {
     waitmax         => wait this amount of seconds
     agent           => user agent for requests
     callback        => content callback
+    headers         => additional headers to add to request
   }
 
 =cut
@@ -256,7 +257,7 @@ sub test_page {
         ok($opts->{'url'}, $opts->{'method'}.' '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}));
     }
 
-    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'}, $opts->{'post_file'});
+    my $request = _request($opts->{'url'}, $opts->{'startup_to_url'}, $opts->{'post'}, $opts->{'agent'}, $opts->{'method'}, $opts->{'post_file'}, $opts->{'headers'});
 
     if(defined $opts->{'follow'}) {
         my $redirects = 0;
@@ -925,7 +926,7 @@ sub _relative_url {
 
 #########################
 sub _request {
-    my($url, $start_to, $post, $agent, $method, $file_upload) = @_;
+    my($url, $start_to, $post, $agent, $method, $file_upload, $headers) = @_;
 
     our($cookie_jar, $cookie_file);
     if(!defined $cookie_jar) {
@@ -937,7 +938,7 @@ sub _request {
 
     $url =~ s|^\Qhttp://localhost.local/\E|/|gmx;
     if(defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'} || $url =~ m/^https?:\/\//mx) {
-        return(_external_request(@_));
+        return(_external_request($url, $start_to, $post, $agent, $method, $file_upload, undef, $headers));
     }
     # add pseudo domain, otherwise cookies from set_cookie() won't work
     $url = 'http://localhost.local'.$url unless $url =~ m|^https?:|mx;
@@ -958,6 +959,11 @@ sub _request {
     $request->header("User-Agent" => $agent) if $agent;
     $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
     $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
+    if ($headers && ref $headers eq 'HASH'){
+        for my $k (keys %{$headers})  {
+            $request->header($k , $headers->{$k});
+        }
+    }
     $cookie_jar->add_cookie_header($request);
     my $response = request($request);
     $cookie_jar->extract_cookies($response);
@@ -967,7 +973,7 @@ sub _request {
 
 #########################
 sub _external_request {
-    my($url, $start_to, $post, $agent, $method, $file_upload, $retry) = @_;
+    my($url, $start_to, $post, $agent, $method, $file_upload, $retry, $headers) = @_;
     confess("no url") unless $url;
     $retry = 1 unless defined $retry;
 
@@ -1006,6 +1012,11 @@ sub _external_request {
         $request = _build_post_request($request, $post, $file_upload);
         $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
         $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
+        if ($headers && ref $headers eq 'HASH'){
+            for my $k (keys %{$headers})  {
+                $request->header($k , $headers->{$k});
+            }
+        }
         $cookie_jar->add_cookie_header($request) if $cookie_jar;
         $req = $ua->request($request);
     } else {
@@ -1013,6 +1024,11 @@ sub _external_request {
         $cookie_jar->add_cookie_header($request) if $cookie_jar;
         $request->header('X-Thruk-Auth-Key'  => $ENV{'THRUK_TEST_AUTH_KEY'})  if $ENV{'THRUK_TEST_AUTH_KEY'};
         $request->header('X-Thruk-Auth-User' => $ENV{'THRUK_TEST_AUTH_USER'}) if $ENV{'THRUK_TEST_AUTH_USER'};
+        if ($headers && ref $headers eq 'HASH'){
+            for my $k (keys %{$headers})  {
+                $request->header($k , $headers->{$k});
+            }
+        }
         $req = $ua->request($request);
     }
 

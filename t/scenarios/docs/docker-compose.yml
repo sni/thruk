@@ -1,0 +1,16 @@
+services:
+  omd:
+    build: omd/
+    ports:
+        - "127.0.0.3:60080:80"
+        - "127.0.0.3:60557:6557"
+    environment:
+        - TZ=Europe/Berlin
+    volumes:
+        - ../../../:/thruk:ro
+        - .:/scenario:ro
+        - .:/test:ro
+        - ../../../var/tmp:/var/tmp:rw
+    # required for strace
+    #cap_add:
+    #    - SYS_PTRACE
