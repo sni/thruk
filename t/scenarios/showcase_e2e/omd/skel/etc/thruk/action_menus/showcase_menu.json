@@ -69,8 +69,8 @@
   {
     "icon": "fa-chart-line",
     "title": "Graph",
-    "action": "/demo/pnp4nagios/index.php/graph?host=localhost&srv=Sticky Logfile&theme=smoothness",
-    "rel":    "/demo/pnp4nagios/index.php/popup?host=localhost&srv=Sticky Logfile&theme=smoothness",
+    "action": "/demo/pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$&theme=smoothness",
+    "rel":    "/demo/pnp4nagios/index.php/popup?host=$HOSTNAME$&srv=$SERVICEDESC$&theme=smoothness",
     "class":  "tips",
     "target": "_blank"
   }
