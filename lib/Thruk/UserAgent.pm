@@ -13,8 +13,10 @@ UserAgent wrapper for Thruk
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Cwd qw/abs_path/;
 use HTTP::Request::Common;
 use HTTP::Response ();
+use Time::HiRes qw(gettimeofday tv_interval);
 
 use Thruk::Utils::IO ();
 use Thruk::Utils::Log qw/:all/;
@@ -24,6 +26,8 @@ use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 ## no critic
 $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
 ## use critic
+
+our $cwd = Cwd::getcwd;
 
 ##############################################
 =head1 METHODS
@@ -83,6 +87,7 @@ sub new {
         require LWP::UserAgent;
         my $ua = LWP::UserAgent->new(%{$self});
         $ua->no_proxy('127.0.0.1', 'localhost');
+        _enable_http_profiling($ua);
         return $ua;
     }
     bless($self, $class);
@@ -428,6 +433,54 @@ sub disable_verify_hostname_by_url {
         disable_verify_hostname($ua);
     }
     return;
+}
+
+##############################################
+sub _enable_http_profiling {
+    my($ua) = @_;
+
+    $ua->add_handler(request_send => sub {
+        my $c      = $Thruk::Globals::c;
+        my $caller = _striped_caller_information(1, "Thruk::");
+        my($req) = @_;
+        $req->{_req_sent} = [gettimeofday];
+        $req->{_req_call} = $caller;
+        $c->stats->profile(begin => "http ".$req->method(), debug_hint => $caller, debug_hint_title => "".$req->uri()) if $c;
+        return;
+    });
+
+    $ua->add_handler(response_done => sub {
+        my ($res) = @_;
+        my $c = $Thruk::Globals::c;
+        $res->request->{_req_duration} = tv_interval($res->request->{_req_sent}) if defined $res->request->{_req_sent};
+        $c->stats->profile(end => "http ".$res->request->method()) if $c;
+        return;
+    });
+
+    return;
+}
+
+##############################################
+# return caller str but unwinds stacks until $until is found
+sub _striped_caller_information {
+    my($caller_level, $until) = @_;
+    my @caller = caller($caller_level);
+    while($caller[0] && $caller[0] !~ m%\Q$until\E%mx) {
+        $caller_level++;
+        @caller = caller($caller_level);
+    }
+    @caller = caller(0) unless $caller[0];
+
+    my $path = abs_path($caller[1]) || $caller[1];
+    $path =~ s%^$cwd/%./%gmx;
+    $path =~ s%^/opt/omd/versions/.*?/share/thruk/%./%gmx;
+    $path =~ s%/plugins/plugins-available/%/plug/%gmx;
+    $path =~ s%^\./%%gmx;
+    my $str = sprintf("%s:%d", $path, $caller[2]);
+    if(length $str > 30) {
+        $str = "...".substr($str, -27);
+    }
+    return($str);
 }
 
 1;

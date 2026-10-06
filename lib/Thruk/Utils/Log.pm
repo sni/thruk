@@ -134,15 +134,36 @@ sub _debug2 {
 
 ##############################################
 sub _debug_http_response {
-    my($res) = @_;
-    _debug("request:");
-    _debug(">>>");
-    _debug($res->request->as_string());
-    _debug("<<< end of request");
-    _debug("\n\nresponse:\n");
-    _debug(">>>");
-    _debug($res->as_string());
-    _debug("<<< end of response");
+    my($res, $msg, $loglevel) = @_;
+    my $logger = \&_debug;
+    if($loglevel) {
+        $loglevel = lc($loglevel);
+        $logger = \&_debug if $loglevel eq 'debug';
+        $logger = \&_warn  if $loglevel eq 'warn';
+        $logger = \&_error if $loglevel eq 'error';
+        $logger = \&_info  if $loglevel eq 'info';
+        $logger = \&_trace if $loglevel eq 'trace';
+    }
+    my $start = "";
+    if($res->request->{_req_sent}) {
+        my($seconds, $microseconds) = @{$res->request->{_req_sent}};
+        $start = sprintf("%s,%s",
+            POSIX::strftime("%Y-%m-%d %H:%M:%S", localtime($seconds)),
+            substr(sprintf("%06s", $microseconds), 0, 3),
+        );
+    }
+    &{$logger}("request:%s%s%s",
+        $msg ? " (".$msg.")" : "",
+        $start                         ? sprintf(" (start %s)", $start) : "",
+        $res->request->{_req_duration} ? sprintf(" (duration %.3f s)", $res->request->{_req_duration}) : "",
+    );
+    &{$logger}(">>>");
+    &{$logger}($res->request->as_string());
+    &{$logger}("<<< end of request");
+    &{$logger}("\n\nresponse:\n");
+    &{$logger}(">>>");
+    &{$logger}($res->as_string());
+    &{$logger}("<<< end of response");
 
     return;
 }
@@ -718,7 +739,7 @@ sub reset_logging {
 sub _striped_caller_information {
     my($layout, $message, $category, $priority, $caller_level) = @_;
     my @caller = caller($caller_level);
-    while($caller[0] =~ m/Thruk::Utils::Log/mx) {
+    while($caller[0] && $caller[0] =~ m/Thruk::Utils::Log/mx) {
         $caller_level++;
         @caller = caller($caller_level);
     }

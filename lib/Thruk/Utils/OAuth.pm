@@ -91,7 +91,7 @@ sub handle_oauth_login {
         $c->stats->profile(begin => "handle_oauth_login: post token");
         my $res = $ua->post($auth->{'token_url'}, $token_data);
         $c->stats->profile(end => "handle_oauth_login: post token");
-        _debug_http_response($res) if Thruk::Base->trace;
+        _debug_http_response($res, "post token", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
         unlink($auth_folder."/".$state.".json");
         my $token = _get_json($c, $res);
         if(!$token || !$token->{"access_token"}) {
@@ -111,7 +111,7 @@ sub handle_oauth_login {
             $c->stats->profile(begin => "handle_oauth_login: get api url");
             $res = $ua->get($auth->{'api_url'});
             $c->stats->profile(end => "handle_oauth_login: get api url");
-            _debug_http_response($res) if Thruk::Base->trace;
+            _debug_http_response($res, "api url", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
             my $userinfo = _get_json($c, $res);
             if(!$userinfo) {
                 $c->stats->profile(end => "handle_oauth_login");
@@ -138,7 +138,7 @@ sub handle_oauth_login {
                 $c->stats->profile(begin => "handle_oauth_login: get jwks url");
                 $res = $ua->get($auth->{'jwks_url'});
                 $c->stats->profile(end => "handle_oauth_login: get jwks url");
-                _debug_http_response($res) if Thruk::Base->trace;
+                _debug_http_response($res, "jwks", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
                 my $jwks = _get_json($c, $res);
                 $id_token = decode_jwt(token => $token->{'id_token'}, kid_keys => $jwks);
             } elsif ($auth->{'jwk_key'}) {

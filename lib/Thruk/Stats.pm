@@ -9,6 +9,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Base ();
 use Thruk::Timer qw/timing_breakpoint/;
 
+##############################################
 sub new {
     my($class) = @_;
     my $self = {
@@ -19,6 +20,14 @@ sub new {
     return($self);
 }
 
+##############################################
+#
+# profile()
+#
+# $c->stats->profile(begin   => "name", debug_hint => "optional hint", debug_hint_title => "title" );
+# $c->stats->profile(end     => "name" );
+# $c->stats->profile(comment => "some comment" );
+#
 sub profile {
     my($self, @arg) = @_;
     &timing_breakpoint($arg[1], undef, 1) if $arg[0] eq 'end';
@@ -31,11 +40,14 @@ sub profile {
     push @{$self->{'profile'}}, [$t0, \@arg, [caller], $longmess];
     return;
 }
+
+##############################################
 sub enable {
     $_[0]->{'enabled'} = 1;
     return;
 }
 
+##############################################
 sub clear {
     $_[0]->{'profile'} = [];
     $_[0]->{'totals'}  = [];
@@ -43,6 +55,7 @@ sub clear {
     return;
 }
 
+##############################################
 sub _result {
     my($self) = @_;
     my $data = $self->{'profile'};
@@ -54,6 +67,7 @@ sub _result {
         my($key,$val) = @{$args};
         die("corrupt profile entry: ".Dumper($d)) unless $key;
         die("corrupt profile entry: ".Dumper($d)) unless $val;
+        my %row = @{$args};
         if($key eq 'begin') {
             my $entry = {
                 'childs'     => [],
@@ -63,6 +77,8 @@ sub _result {
                 'start_call' => $caller,
                 'stack'      => $stack,
                 'level'      => defined $cur->{'level'} ? $cur->{'level'} + 1 : 1,
+                'debug_hint' => $row{'debug_hint'},
+                'debug_hint_title' => $row{'debug_hint_title'},
             };
             push @{$childs}, $entry;
             $childs = $entry->{'childs'};
@@ -106,6 +122,7 @@ sub _result {
     return($result);
 }
 
+##############################################
 sub totals {
     my($self, @totals) = @_;
     $self->{'totals'} = [] unless $self->{'totals'};
@@ -129,6 +146,7 @@ sub totals {
     return;
 }
 
+##############################################
 sub _calc_total {
     my($self, $result) = @_;
     $self->{'total_time'} = 0;
@@ -141,6 +159,7 @@ sub _calc_total {
     return;
 }
 
+##############################################
 sub report_html {
     my($self) = @_;
     my $result = $self->_result();
@@ -163,6 +182,7 @@ sub report_html {
     return($report);
 }
 
+##############################################
 sub report {
     my($self) = @_;
     my $result = $self->_result();
@@ -186,6 +206,7 @@ sub report {
     return($report);
 }
 
+##############################################
 sub _format_text_row {
     my($self, $row) = @_;
     my $output  = "";
@@ -203,6 +224,7 @@ sub _format_text_row {
     return($output);
 }
 
+##############################################
 sub _format_html_row {
     my($self, $row) = @_;
     our $id;
@@ -213,7 +235,7 @@ sub _format_html_row {
     my $name    = $row->{'name'};
     my $bold    = ($name =~ m/^\*/mx) ? 1 : 0;
        $name    =~ s/^\*//gmx;
-    my $fullname= $name;
+    my $title= $name;
        $name    = substr($indent.$name, 0, 78);
     my $output  = "<tr class='js-indent' data-indent='".($row->{'level'}-1)."'>";
     my $onclick = '';
@@ -223,11 +245,23 @@ sub _format_html_row {
     my $legend = '';
     my $name_prefix = '';
     my $name_style = '';
-    if($name eq 'total time waited on backends')   { $legend = '<div class="legend" style="background: var(--stats-time-backend);"></div>'; }
+    if(   $name eq 'total time waited on backends')   { $legend = '<div class="legend" style="background: var(--stats-time-backend);"></div>'; }
     elsif($name eq 'total time waited on rendering')  { $legend = '<div class="legend" style="background: var(--stats-time-view);"></div>'; }
     elsif($name eq 'total time waited on controller') { $legend = '<div class="legend" style="background: var(--stats-time-controller);"></div>'; }
     elsif($name =~ /^total\ time\ /mx) { $name_style = "margin-left: 5px"; $name_prefix = " &bull; "; }
-    $output .= "<td class='whitespace-pre ".$name_style." ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' ".$onclick.($fullname ne $name ? " title='$fullname'" : "").">".$name_prefix.$name.$legend."</td>\n";
+    if(defined $row->{'debug_hint'}) {
+        $legend .= "<span class='textHINTsoft'>".$row->{'debug_hint'}."</span>";
+    }
+    $output .= "<td class='whitespace-pre ".$name_style." ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' "
+                    .$onclick
+                    .($title ne $name ? " title='$title'" : "")
+                .">"
+            .'<div class="flexrow gap-x-1 justify-between"'.($row->{'debug_hint_title'} ? " title='".$row->{'debug_hint_title'}."'" : "").'>'
+              .$name_prefix
+              .$name
+              .$legend
+            .'</div>'
+        ."</td>\n";
     $output .= "<td class='text-right'>".$elapsed."</td>\n";
     if($self->{'total_time'}) {
         if($elapsed && $row->{'level'} > 0) {
@@ -283,6 +317,7 @@ sub _format_html_row {
     return($output);
 }
 
+##############################################
 sub _total2row {
     my($total) = @_;
     my $name = $total->[0];
@@ -301,6 +336,7 @@ sub _total2row {
     return($row);
 }
 
+##############################################
 sub _row_elapsed {
     my($row) = @_;
     if(defined $row->{elapsed}) {
@@ -323,6 +359,8 @@ sub _row_elapsed {
     }
     return(sprintf("%.5fs", tv_interval($row->{start}, [gettimeofday])));
 }
+
+##############################################
 
 1;
 __END__
