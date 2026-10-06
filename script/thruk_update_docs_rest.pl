@@ -316,11 +316,11 @@ sub _update_docs {
     }
 
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths();
-    `mkdir -p bp;            cp t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
-    `mkdir -p panorama;      cp t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+    `mkdir -p bp;            cp t/scenarios/cli_api/omd/skel/etc/thruk/bp/1.tbp bp/9999.tbp`;
+    `mkdir -p panorama;      cp t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab panorama/9999.tab`;
     `mkdir -p var/broadcast; cp t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
-    `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
-    `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    `mkdir -p var/downtimes; cp t/scenarios/cli_api/omd/skel/var/thruk/downtimes/1.tsk var/downtimes/9999.tsk`;
+    `mkdir -p var/reports;   cp t/scenarios/cli_api/omd/skel/var/thruk/reports/1.rpt var/reports/9999.rpt`;
     my $system_api_key = decode_json(`./script/thruk r -d "comment=test" -d "system=1" -d "roles=admin" -d "force_user=test" /thruk/api_keys`);
     my $api_key = decode_json(`./script/thruk r -d "comment=test" -d "username=restapidocs" /thruk/api_keys`);
     # fake usage

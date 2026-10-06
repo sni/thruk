@@ -350,7 +350,7 @@ for my $b (@{$broken}) {
     # add parameter from totals link
     $params->{'servicestatustypes'} = 16;
     (undef, $servicefilter) = Thruk::Utils::Status::do_filter($c, 'dfl_', $params);
-    my $exp = { '-and' => [
+    $exp = { '-and' => [
                [ { 'host_name' => { '=' => 'test' } } ],
                { '-and' => { 'has_been_checked' => 1, 'state' => 2 } },
     ] };
