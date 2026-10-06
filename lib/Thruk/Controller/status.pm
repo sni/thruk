@@ -1411,7 +1411,7 @@ sub _combined_show_all_url {
     }
 
     $data->{'style'} = $to_style;
-    return Thruk::Utils::Filter::uri_with($c, $data);
+    return Thruk::Utils::Filter::uri_with($c, $data, 1, "", 1 );
 }
 
 ##########################################################
