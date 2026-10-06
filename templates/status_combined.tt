@@ -138,7 +138,7 @@
     <div class="mainTableFooter">
       <div class="textPager font-medium leading-7 whitespace-nowrap">
         [% IF services_limit_hit %]
-        <a href="[% services_show_all_url | html` %]"><span class="alerttext">Limit of [% services.size %] matching services reached, click to show all matching services.</span></a>
+        <a href="[% services_show_all_url | html %]"><span class="alerttext">Limit of [% services.size %] matching services reached, click to show all matching services.</span></a>
         [% ELSE %]
           [% services.size %] of [% services.size %] Matching Service Entries Displayed
         [% END %]
