@@ -5,35 +5,22 @@
     - role: local_tests
     - role: thruk_developer
   tasks:
-  - copy:
-      src: /omd/sites/demo/share/doc/naemon/example.cfg
-      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
-      owner: demo
-      group: demo
   - name: "omd config change"
     shell: "omd config demo change"
     args:
       stdin: |
         APACHE_MODE=own
         LIVESTATUS_TCP=on
-  - copy:
-      src: /root/1.rpt
-      dest: /omd/sites/demo/var/thruk/reports/
+  - name: "install example.cfg"
+    copy:
+      src: /omd/sites/demo/share/doc/naemon/example.cfg
+      dest: /omd/sites/demo/etc/naemon/conf.d/example.cfg
       owner: demo
       group: demo
-  - copy:
-      src: /root/1.tab
-      dest: /omd/sites/demo/etc/thruk/panorama/
-      owner: demo
-      group: demo
-  - copy:
-      src: /root/1.tsk
-      dest: /omd/sites/demo/var/thruk/downtimes/
-      owner: demo
-      group: demo
-  - copy:
-      src: /root/1.tbp
-      dest: /omd/sites/demo/etc/thruk/bp/
-      owner: demo
-      group: demo
-  - shell: sudo su - demo -c "sed -e 's/^#use_/use_/' -i etc/thruk/thruk_local.d/lmd.conf"
+  - name: "install skel files into demo site"
+    shell: rsync -a --chown=demo:demo /root/ansible_dropin/skel/. /omd/sites/demo/.
+  - name: "enable lmd"
+    lineinfile:
+      path: /omd/sites/demo/etc/thruk/thruk_local.d/lmd.conf
+      regexp: '^#use_lmd_core'
+      line: 'use_lmd_core=1'
