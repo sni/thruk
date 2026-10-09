@@ -16,14 +16,28 @@ BEGIN {
 
 use_ok("Thruk::Utils::External");
 
+sub external_array_expr_test {
+    my($first, $second) = @_;
+    print $first.$second;
+    return 3;
+}
+
 my($res, $c) = ctx_request('/thruk/main.html');
 my $cat      = -x '/usr/bin/cat'   ? '/usr/bin/cat'   : '/bin/cat';
 my $false    = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
 
 # perl
-my $job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd("hostname"); print $out; return $rc;', background => 1 });
+my $job = Thruk::Utils::External::perl($c, { expr => ['main::external_array_expr_test', 'array ', 'expression'], background => 1 });
 TestUtils::wait_for_job($job);
 my($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
+is($out, "array expression", "array expression arguments passed to function");
+is($err, "", "array expression error output empty");
+is($rc, 0, "array expression exit code 0");
+is($perl_res, 3, "array expression result returned");
+
+$job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd("hostname"); print $out; return $rc;', background => 1 });
+TestUtils::wait_for_job($job);
+($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
 is($out, `hostname`, "output ok");
 is($err, "", "err output empty");
 is($rc, 1, "exit code 1");

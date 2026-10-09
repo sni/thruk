@@ -124,9 +124,14 @@ sub perl {
             $c->db->disable_backends();
             $c->db->enable_backends($conf->{'backends'});
         }
-        ## no critic
-        my $rc = eval($conf->{'expr'});
-        ## use critic
+        my $rc;
+        if(ref $conf->{'expr'} eq 'ARRAY') {
+            $rc = eval { _call_perl_expr($conf->{'expr'}) };
+        } else {
+            ## no critic
+            $rc = eval($conf->{'expr'});
+            ## use critic
+        }
         die($@) if $@;
         _finished_job_page($c, $c->stash) if !$c->stash->{job_id}; # breaks cascading jobs, ex.: xls export on showlog
         return $rc;
@@ -152,10 +157,15 @@ sub perl {
 
         do {
             $c->stats->profile(begin => 'External::perl eval');
-            ## no critic
-            my $rc = eval($conf->{'expr'});
+            my $rc;
+            if(ref $conf->{'expr'} eq 'ARRAY') {
+                $rc = eval { _call_perl_expr($conf->{'expr'}) };
+            } else {
+                ## no critic
+                $rc = eval($conf->{'expr'});
+                ## use critic
+            }
             $err = $@;
-            ## use critic
             $c->stats->profile(end => 'External::perl eval');
 
             if($err) {
@@ -240,6 +250,17 @@ sub perl {
     }
     unlink($dir."/pid"); # signal parent we are done
     exit(0);
+}
+
+##############################################
+
+sub _call_perl_expr {
+    my($expr) = @_;
+    my($func, @args) = @{$expr};
+    ## no critic
+    no strict 'refs';
+    ## use critic
+    return $func->(@args);
 }
 
 ##############################################
