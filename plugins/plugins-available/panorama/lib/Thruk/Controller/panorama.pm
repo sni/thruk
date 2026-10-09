@@ -1149,7 +1149,7 @@ sub _task_availability {
     if($c->req->parameters->{'force'}) {
         avail_update($c);
     } else {
-        Thruk::Utils::External::perl($c, { expr       => 'Thruk::Controller::panorama::avail_update($c)',
+        Thruk::Utils::External::perl($c, { expr       => ['Thruk::Controller::panorama::avail_update', $c],
                                            message    => 'availability is being calculated',
                                            background => 1,
                                         });

@@ -1251,8 +1251,9 @@ sub _renew_logcache {
         $type = 'postgresql' if $c->config->{'logcache'} =~ m/^(?:postgresql|postgres)/mxi;
         if(scalar @{$backends2import} > 0) {
             require Thruk::Utils::External;
+            my $provider = 'Thruk::Backend::Provider::'.(ucfirst $type);
             my $job = Thruk::Utils::External::perl($c,
-                                             { expr       => 'Thruk::Backend::Provider::'.(ucfirst $type).'->_import_logs($c, "import")',
+                                             { expr       => [$provider.'::_import_logs', $provider, $c, 'import'],
                                                message    => 'please stand by while your initial logfile cache will be created...',
                                                forward    => $c->req->url,
                                                backends   => $backends2import,
@@ -2177,7 +2178,7 @@ sub _get_result_lmd_with_retries {
             $c->stash->{'remote_user'} = 'thruk' unless $c->stash->{'remote_user'};
             _error("lmd error code %d: %s", $code, $c->stash->{'lmd_error'});
             require Thruk::Utils::External;
-            Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::kill_if_not_responding($c, $c->config);', background => 1 });
+            Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::LMD::kill_if_not_responding', $c, $c->config], background => 1 });
         }
         $err = "internal lmd error - ".($c->stash->{'lmd_error'} || $err);
     }

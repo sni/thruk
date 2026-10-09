@@ -137,7 +137,12 @@ sub perl {
         return $rc;
     }
 
-    $c->stash->{job_conf} = $conf;
+    if(ref $conf->{'expr'} eq 'ARRAY') {
+        $c->stash->{job_conf} = { %{$conf} };
+        delete $c->stash->{job_conf}->{'expr'};
+    } else {
+        $c->stash->{job_conf} = $conf;
+    }
 
     my ($id,$dir) = init_external($c);
     return unless $id;

@@ -215,7 +215,7 @@ sub get_server {
     }
     if($refresh_required) {
         Thruk::Utils::External::perl($c, {
-            'expr'       => 'Thruk::NodeControl::Utils::ansible_get_facts($c, "'.$peer->{'key'}.'", 1);',
+            'expr'       => ['Thruk::NodeControl::Utils::ansible_get_facts', $c, $peer->{'key'}, 1],
             'background' => 1,
         });
         $facts->{'gathering'} = 1;
@@ -642,7 +642,7 @@ sub omd_install {
     # continue in background job
     _set_job_started($c, 'installing', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
-        expr        => 'Thruk::NodeControl::Utils::_omd_install_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
+        expr        => ['Thruk::NodeControl::Utils::_omd_install_step2', $c, $peer->{'key'}, $version],
         message     => 'Installing OMD '.$version,
         background  => 1,
         log_archive => $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_install.log',
@@ -716,7 +716,7 @@ sub omd_update {
     # continue in background job
     _set_job_started($c, 'updating', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
-        expr        => 'Thruk::NodeControl::Utils::_omd_update_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
+        expr        => ['Thruk::NodeControl::Utils::_omd_update_step2', $c, $peer->{'key'}, $version],
         message     => sprintf('updating %s on %s to omd %s', $facts->{'omd_site'}, $peer->{'name'}, $version),
         background  => 1,
         log_archive => $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_update.log',
@@ -851,7 +851,7 @@ sub omd_install_update_cleanup {
     # continue in background job
     _set_job_started($c, 'run_all', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
-        expr        => 'Thruk::NodeControl::Utils::_omd_install_update_cleanup_step2($c, "'.$peer->{'key'}.'", "'.$version.'")',
+        expr        => ['Thruk::NodeControl::Utils::_omd_install_update_cleanup_step2', $c, $peer->{'key'}, $version],
         background  => 1,
     });
     return($job);
@@ -1016,7 +1016,7 @@ sub omd_cleanup {
     # continue in background job
     _set_job_started($c, 'cleaning', $peer->{'key'});
     my $job = Thruk::Utils::External::perl($c, {
-        expr        => 'Thruk::NodeControl::Utils::_omd_cleanup_step2($c, "'.$peer->{'key'}.'")',
+        expr        => ['Thruk::NodeControl::Utils::_omd_cleanup_step2', $c, $peer->{'key'}],
         message     => 'running OMD cleanup',
         background  => 1,
         log_archive => $c->config->{'var_path'}.'/node_control/'.$peer->{'key'}.'_cleanup.log',
@@ -1364,7 +1364,7 @@ sub omd_service {
     my($c, $peer, $service, $cmd) = @_;
     confess("no peer") unless defined $peer;
     my $job = Thruk::Utils::External::perl($c, {
-        'expr'       => 'Thruk::NodeControl::Utils::_omd_service_cmd($c, "'.$peer->{'key'}.'", "'.$service.'", "'.$cmd.'");',
+        'expr'       => ['Thruk::NodeControl::Utils::_omd_service_cmd', $c, $peer->{'key'}, $service, $cmd],
         'background' => 1,
         'clean'      => 1,
     });

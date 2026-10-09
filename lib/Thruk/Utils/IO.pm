@@ -900,9 +900,8 @@ sub cmd {
 
     if($options->{'detached'}) {
         confess("stdin not supported for detached commands") if $options->{'stdin'};
-        confess("array cmd not supported for detached commands") if ref $cmd eq 'ARRAY';
         require Thruk::Utils::External;
-        Thruk::Utils::External::perl($c, { expr => '`'.$cmd.'`', background => 1 });
+        Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::IO::cmd', $cmd], background => 1 });
         $c->stats->profile(end => "IO::cmd") if $c;
         return(0, "cmd started in background");
     }

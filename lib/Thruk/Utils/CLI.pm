@@ -683,7 +683,7 @@ sub _run_command_action {
         'rc'      => 0,
     };
 
-    # map compatibilty style commands
+    # map compatibility style commands
     if($action =~ /^(https?:\/\/.*|\w+\.cgi.*|\/thruk\/.*)$/mx) {
         $action = 'url';
         unshift @{$opt->{'commandoptions'}}, $1;
@@ -945,7 +945,8 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_check($c)',
+        require Thruk::Controller::conf;
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => ['Thruk::Controller::conf::_config_check', $c],
                                                        message    => 'please stand by while configuration is being checked...',
                                                        background => 1,
                                 });
@@ -955,7 +956,8 @@ sub _cmd_configtool {
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_reload($c)',
+        require Thruk::Controller::conf;
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => ['Thruk::Controller::conf::_config_reload', $c],
                                                        message    => 'please stand by while configuration is being reloaded...',
                                                        background => 1,
                                 });

@@ -101,7 +101,7 @@ sub set_object_model {
         # need to parse complete objects
         $c->stash->{set_object_model_err} = "configuration is being parsed right now, try again in a few moments";
         if(scalar keys %{$c->db->get_peer_by_key($c->stash->{'param_backend'})->{'configtool'}} > 0) {
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::read_objects($c)',
+            Thruk::Utils::External::perl($c, { expr    => ['Thruk::Utils::Conf::read_objects', $c],
                                                message => 'please stand by while reading the configuration files...',
                                                forward => $c->req->url,
                                               });

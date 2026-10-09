@@ -22,6 +22,11 @@ sub external_array_expr_test {
     return 3;
 }
 
+sub external_array_context_test {
+    my($context) = @_;
+    return ref $context ? 3 : 0;
+}
+
 my($res, $c) = ctx_request('/thruk/main.html');
 my $cat      = -x '/usr/bin/cat'   ? '/usr/bin/cat'   : '/bin/cat';
 my $false    = -x '/usr/bin/false' ? '/usr/bin/false' : '/bin/false';
@@ -34,6 +39,13 @@ is($out, "array expression", "array expression arguments passed to function");
 is($err, "", "array expression error output empty");
 is($rc, 0, "array expression exit code 0");
 is($perl_res, 3, "array expression result returned");
+
+$job = Thruk::Utils::External::perl($c, { expr => ['main::external_array_context_test', $c], background => 1 });
+TestUtils::wait_for_job($job);
+($out,$err,$time,$dir,$stash,$rc,$profile,$start,$end,$perl_res) = Thruk::Utils::External::get_result($c, $job);
+is($err, "", "array expression accepts context argument");
+is($rc, 0, "array expression with context exit code 0");
+is($perl_res, 3, "array expression with context result returned");
 
 $job = Thruk::Utils::External::perl($c, { expr => 'my($rc, $out) = Thruk::Utils::IO::cmd("hostname"); print $out; return $rc;', background => 1 });
 TestUtils::wait_for_job($job);
