@@ -483,7 +483,8 @@ sub _internal_request {
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
     # serve static files internally
-    if($url =~ m%/thruk/(vendor|javascript|themes)/%mx) {
+    # shortcut: reject '..' path components to keep the request inside home/root; no symlink containment needed for the lexical traversal case
+    if($url =~ m%/thruk/(vendor|javascript|themes)/%mx and $url !~ m{/\.\.(/|$)}mx) {
         my $file = Thruk->config->{home}.'/root'.$url;
         if(-f $file) {
             require Plack::MIME;
