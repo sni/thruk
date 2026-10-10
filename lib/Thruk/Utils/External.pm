@@ -986,7 +986,7 @@ sub do_parent_stuff {
     Thruk::Utils::IO::write($dir."/hostname", $Thruk::Globals::NODE_ID."\n".$Thruk::Globals::HOSTNAME."\n");
 
     # write start file
-    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper($conf)."\n");
+    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper(_clean_context_refs($conf))."\n");
 
     # write user file
     if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
@@ -1295,6 +1295,34 @@ sub _clean_unstorable_refs {
             delete $var->{$key};
         }
     }
+    return $var;
+}
+
+##############################################
+# replace $c and such with placeholders, useful before Dumping
+sub _clean_context_refs {
+    my($var) = @_;
+
+    if(ref $var eq 'HASH') {
+        my $clone = {};
+        for my $key (keys %{$var}) {
+            $clone->{$key} = _clean_context_refs($var->{$key});
+        }
+        return $clone;
+    }
+
+    if(ref $var eq 'ARRAY') {
+        my $clone = [];
+        for my $val (@{$var}) {
+            push @$clone, _clean_context_refs($val);
+        }
+        return $clone;
+    }
+
+    if(ref $var eq 'Thruk::Context') {
+        return '<Thruk::Context>';
+    }
+
     return $var;
 }
 

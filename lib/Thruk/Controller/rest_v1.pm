@@ -191,6 +191,7 @@ sub index {
     if($c->req->parameters->{"background"}) {
         $c->config->{'no_external_job_forks'} = 0;
         delete $c->req->parameters->{"background"};
+        require Thruk::Utils::External;
         my $job = Thruk::Utils::External::perl($c, {
                     expr       => ['Thruk::Controller::rest_v1::_process_rest_request', $c, $path_info, $format],
                     message    => 'rest api request rendered in background, please stand by...',
