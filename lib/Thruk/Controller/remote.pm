@@ -31,7 +31,7 @@ sub index {
     if($c->req->header('X-Thruk-Passthrough')) {
         # only relative paths are allowed; absolute urls would let any authenticated user
         # make the server fetch arbitrary hosts and read the response (SSRF)
-        if($c->req->header('X-Thruk-Passthrough') =~ m{^https?:}mi) {
+        if($c->req->header('X-Thruk-Passthrough') =~ m{^https?:}mix) {
             $c->res->code(400);
             return $c->render("text" => 'invalid X-Thruk-Passthrough url');
         }
