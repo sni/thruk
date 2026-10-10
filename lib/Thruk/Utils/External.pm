@@ -1314,7 +1314,7 @@ sub _clean_context_refs {
     if(ref $var eq 'ARRAY') {
         my $clone = [];
         for my $val (@{$var}) {
-            push @$clone, _clean_context_refs($val);
+            push @{$clone}, _clean_context_refs($val);
         }
         return $clone;
     }
