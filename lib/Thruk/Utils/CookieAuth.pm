@@ -437,6 +437,13 @@ sub retrieve_session {
 
     return unless defined $data;
 
+    # enforce idle timeout per request, not only in the maintenance job
+    my $timeout = $config->{'cookie_auth_session_timeout'};
+    if(!$args{'data'} && $timeout > 0 && $active < time() - $timeout) {
+        _audit_log("session", "session timeout hit, rejecting expired session", $data->{'username'}//'?', $hashed_key, 0);
+        return;
+    }
+
     if($sessionid && $data->{hash}) {
         # try to decrypt from private key (can be skipped for old sessions)
         my $decrypted = Thruk::Utils::Crypt::decrypt($sessionid, $data->{'hash'});
