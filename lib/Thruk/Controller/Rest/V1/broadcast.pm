@@ -120,7 +120,7 @@ sub _rest_get_thruk_broadcast_new {
             $x++;
         }
     }
-    if($file =~ m/^[\.\/]+/mx) {
+    if($file =~ m/^[\.\/]+/mx || $file =~ m%(?:\A|/)\.\.(?:/|\z)%mx) {
         return({
             'message' => 'invalid file name',
             'code'    => 400,
