@@ -1,2 +1,11 @@
-﻿<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/css/line.css' />
+﻿<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-4.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-6.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-7.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-11.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-13.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-14.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-18.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='preload' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/fonts/line/unicons-19.woff2' as='font' type='font/woff2' crossorigin />
+<link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/unicons/unicons-4.2.0/css/line.css' />
+<link rel='preload' href='[% url_prefix %]vendor/fontawesome/fontawesome-free-6.5.2-web/webfonts/fa-solid-900.woff2' as='font' type='font/woff2' crossorigin />
 <link rel='stylesheet' type='text/css' href='[% url_prefix %]vendor/fontawesome/fontawesome-free-6.5.2-web/css/all.min.css' />
