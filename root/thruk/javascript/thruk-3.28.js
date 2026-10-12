@@ -4171,7 +4171,6 @@ function getErrorText(error) {
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
     text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
-    text = text + "Browser:    " + platform.description + "\n";
     text = text + "UserAgent:  " + navigator.userAgent + "\n";
     text = text + "User:       " + remote_user+ "\n";
     text = text + "Backends:   ";
