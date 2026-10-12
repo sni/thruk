@@ -5,18 +5,15 @@ build: node_modules
 	cp -rp ./node_modules/@iconscout/unicons/fonts .
 	cp -rp ./node_modules/@iconscout/unicons/css .
 	# firefox: "downloadable font: rejected by sanitizer"
-	sed -i '/unicons-1.woff2/d' ./css/line.css
-	sed -i '/unicons-5.woff2/d' ./css/line.css
-	sed -i '/unicons-6.woff2/d' ./css/line.css
-	sed -i '/unicons-7.woff2/d' ./css/line.css
-	sed -i '/unicons-8.woff2/d' ./css/line.css
-	sed -i '/unicons-9.woff2/d' ./css/line.css
-	sed -i '/unicons-13.woff2/d' ./css/line.css
-	sed -i '/unicons-14.woff2/d' ./css/line.css
-	sed -i '/unicons-16.woff2/d' ./css/line.css
-	sed -i '/unicons-17.woff2/d' ./css/line.css
-	sed -i '/unicons-18.woff2/d' ./css/line.css
-	sed -i '/unicons-19.woff2/d' ./css/line.css
+	#sed -i '/unicons-[0-9]*.woff2/d' ./css/line.css
+	#find fonts/ -name \*.woff2 -delete
+	rm -rf fonts/thinline
+	rm -rf fonts/solid
+	rm -rf css/solid.css
+	rm -rf css/thinline.css
+	rm -rf css/animation.css
+	rm -rf css/before.css
+	sed -i 's/@font-face[[:space:]]*{/&\nfont-display: swap;/g' ./css/line.css
 	rm -rf unicons-*
 	set -x; VERSION=$$(npm info "@iconscout/unicons" version); \
 		mkdir -p unicons-$$VERSION; \
