@@ -622,7 +622,7 @@ sub set_default_config {
         _trace("loading plugin: ".$addon_name);
 
         # lib directory included?
-        if(-d $addon.'lib') {
+        if(-d $addon.'lib' && !Thruk::Base::array_contains($addon.'lib', \@INC)) {
             _trace(" -> lib");
             unshift(@INC, $addon.'lib');
         }
@@ -633,6 +633,9 @@ sub set_default_config {
             push @{$config->{plugin_templates_paths}}, $addon.'templates';
         }
     }
+
+    # remove duplicates from @INC
+    Thruk::Base::sanitize_inc();
 
     ###################################################
     # get installed / enabled themes
