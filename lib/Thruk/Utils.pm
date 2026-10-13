@@ -909,7 +909,7 @@ sub get_custom_vars {
     }
 
     # add host values
-    _normalize_custom_vars($data, "_host");
+    _normalize_custom_vars($data, "host_");
     for my $key (sort keys %{$data->{'host_custom_variables'}}) {
         $hash{"HOST".$key} = $data->{'host_custom_variables'}->{$key};
     }
