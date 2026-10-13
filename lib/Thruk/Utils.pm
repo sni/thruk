@@ -1857,11 +1857,11 @@ sub get_perf_image {
     require File::Temp;
     my($fh, $filename) = File::Temp::tempfile();
     CORE::close($fh);
-    my $cmd = $exporter.' "'.$options->{'host'}.'" "'.$options->{'service'}.'" "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.($pnpurl||'').'" "'.$filename.'" "'.$options->{'source'}.'"';
+    my @cmd = ($exporter, $options->{'host'}, $options->{'service'}, $options->{'width'}, $options->{'height'}, $options->{'start'}, $options->{'end'}, $pnpurl||'', $filename, $options->{'source'});
     if($grafanaurl) {
-        $cmd = $exporter.' "'.$options->{'width'}.'" "'.$options->{'height'}.'" "'.$options->{'start'}.'" "'.$options->{'end'}.'" "'.$grafanaurl.'" "'.$filename.'"';
+        @cmd = ($exporter, $options->{'width'}, $options->{'height'}, $options->{'start'}, $options->{'end'}, $grafanaurl, $filename);
     }
-    my($rc, $out) = Thruk::Utils::IO::cmd($cmd, { timeout => $options->{'timeout'} });
+    my($rc, $out) = Thruk::Utils::IO::cmd(\@cmd, { timeout => $options->{'timeout'} });
     unlink($c->stash->{'fake_session_file'});
     if(-e $filename) {
         my $imgdata  = Thruk::Utils::IO::read($filename);
@@ -3668,7 +3668,7 @@ sub get_timezone_data {
             } elsif(!$force) {
                 # start update in background
                 my $job = Thruk::Utils::External::perl($c, {
-                    expr       => 'Thruk::Utils::get_timezone_data($c, undef, 1)',
+                    expr       => ['Thruk::Utils::get_timezone_data', $c, undef, 1],
                     allow      => 'all',
                     background => 1,
                 });

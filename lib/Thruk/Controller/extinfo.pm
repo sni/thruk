@@ -1083,6 +1083,23 @@ sub _check_stale_check {
 sub _process_grafana_page {
     my($c) = @_;
 
+    my $host = $c->req->parameters->{'host'};
+    return $c->detach('/error/index/100') unless defined $host;
+    my $hosts = $c->db->get_hosts(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'), { 'name' => $host } ], columns => [qw/name/]);
+    if(!defined $hosts || scalar @{$hosts} == 0) {
+        $c->error("no such host");
+        return $c->detach('/error/index/100');
+    }
+
+    my $service = $c->req->parameters->{'service'};
+    if($service) {
+        my $services = $c->db->get_services(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), { 'host_name' => $host, 'description' => $service } ], columns => [qw/description/]);
+        if(!defined $services || scalar @{$services} == 0) {
+            $c->error("no such service");
+            return $c->detach('/error/index/100');
+        }
+    }
+
     my $format = $c->req->parameters->{'format'} || 'png';
     $c->res->body(Thruk::Utils::get_perf_image($c, {
         host        => $c->req->parameters->{'host'},

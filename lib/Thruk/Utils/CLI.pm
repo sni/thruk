@@ -483,7 +483,8 @@ sub _internal_request {
     $Thruk::thruk->{'TRANSFER_USER'} = $user if defined $user;
 
     # serve static files internally
-    if($url =~ m%/thruk/(vendor|javascript|themes)/%mx) {
+    # shortcut: reject '..' path components to keep the request inside home/root; no symlink containment needed for the lexical traversal case
+    if($url =~ m%/thruk/(vendor|javascript|themes)/%mx and $url !~ m{/\.\.(/|$)}mx) {
         my $file = Thruk->config->{home}.'/root'.$url;
         if(-f $file) {
             require Plack::MIME;
@@ -683,7 +684,7 @@ sub _run_command_action {
         'rc'      => 0,
     };
 
-    # map compatibilty style commands
+    # map compatibility style commands
     if($action =~ /^(https?:\/\/.*|\w+\.cgi.*|\/thruk\/.*)$/mx) {
         $action = 'url';
         unshift @{$opt->{'commandoptions'}}, $1;
@@ -945,7 +946,8 @@ sub _cmd_configtool {
     # run config check
     elsif($opt->{'args'}->{'sub'} eq 'configcheck') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_check($c)',
+        require Thruk::Controller::conf;
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => ['Thruk::Controller::conf::_config_check', $c],
                                                        message    => 'please stand by while configuration is being checked...',
                                                        background => 1,
                                 });
@@ -955,7 +957,8 @@ sub _cmd_configtool {
     # reload configuration
     elsif($opt->{'args'}->{'sub'} eq 'configreload') {
         require Thruk::Utils::External;
-        my $jobid = Thruk::Utils::External::perl($c, { expr       => 'use Thruk::Controller::conf; Thruk::Controller::conf::_config_reload($c)',
+        require Thruk::Controller::conf;
+        my $jobid = Thruk::Utils::External::perl($c, { expr       => ['Thruk::Controller::conf::_config_reload', $c],
                                                        message    => 'please stand by while configuration is being reloaded...',
                                                        background => 1,
                                 });

@@ -75,6 +75,9 @@ sub _rest_get_thruk_downtimes {
         });
     }
     elsif($method eq 'DELETE') {
+        if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
+            return({ 'message' => 'permission denied', code => 403 });
+        }
         if(unlink($file)) {
             Thruk::Utils::RecurringDowntimes::update_cron_file($c);
             return({

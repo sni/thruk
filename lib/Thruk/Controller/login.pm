@@ -328,7 +328,7 @@ sub _invalidate_current_session {
     if($cookie) {
         my $session_data = Thruk::Utils::CookieAuth::retrieve_session(config => $c->config, id => $cookie);
 
-        my $sessionid = $session_data->{'hashed_key'};
+        my $sessionid = $session_data && $session_data->{'hashed_key'};
         $sessionid = (Thruk::Utils::CookieAuth::private2hashed($cookie))[0] unless $sessionid; # try to reconstruct the session id for already removed session files
         _audit_log("logout", "session ended, ".$hint, $session_data->{'username'}, $sessionid);
 

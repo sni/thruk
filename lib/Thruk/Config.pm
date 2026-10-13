@@ -255,12 +255,10 @@ my $base_defaults = {
     'all_in_one_javascript'                 => [
                 'vendor/jquery-3.6.4.min.js',
                 'javascript/thruk-'.$VERSION.'.js',
-                'vendor/daterangepicker-3.0.5/moment.min.js',
-                'vendor/daterangepicker-3.0.5/daterangepicker.js',
                 'vendor/strftime-min-1.3.js',
-                'vendor/bestiejs-1.3.5/platform.js',
     ],
     'jquery_ui'                             => '1.13.1',
+    'daterangepicker'                       => '3.0.5',
     'all_in_one_javascript_panorama'        => [
                 'vendor/jquery-3.6.4.min.js',
                 'javascript/thruk-'.$VERSION.'.js',
@@ -270,7 +268,6 @@ my $base_defaults = {
                 'vendor/sprintf-ef8258f.js',
                 'vendor/bigscreen-2.0.4.js',
                 'vendor/strftime-min-1.3.js',
-                'vendor/bestiejs-1.3.5/platform.js',
                 'vendor/openlayer-2.13.1/OpenLayers-2.13.1.js',
                 'vendor/geoext2-2.0.2/src/GeoExt/Version.js',
                 'vendor/geoext2-2.0.2/src/GeoExt/data/LayerModel.js',

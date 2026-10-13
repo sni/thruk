@@ -186,7 +186,7 @@ sub _create_report {
     if(defined $c->req->parameters->{'host'} && $c->req->parameters->{'host'} ne 'all') {
         $c->req->parameters->{'include_host_services'} = 1;
     }
-    return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
+    return Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::Avail::calculate_availability', $c], message => 'please stand by while your report is being generated...' });
 }
 
 ##########################################################
@@ -219,7 +219,7 @@ sub _outages {
         $c->req->parameters->{'h_filter'} = $hostfilter;
     }
 
-    return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Avail::calculate_availability($c)', message => 'please stand by while your report is being generated...' });
+    return Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::Avail::calculate_availability', $c], message => 'please stand by while your report is being generated...' });
 }
 
 1;

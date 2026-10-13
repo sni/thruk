@@ -6,7 +6,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 51;
+    plan tests => 59;
 
     use lib('t');
     require TestUtils;
@@ -23,6 +23,13 @@ my $pages = [{
         method  => 'post',
         post    => { 'file' => 'test.json', text => 'test broadcast' },
         like    => ['successfully created broadcast'],
+    }, {
+# path traversal in 'file' param is rejected
+        url     => '/thruk/broadcasts',
+        method  => 'post',
+        post    => { 'file' => 'a/../../x.json', text => 'traversal' },
+        code    => 400,
+        like    => ['invalid file name'],
     }, {
         url     => '/thruk/broadcasts',
         like    => ['test broadcast'],

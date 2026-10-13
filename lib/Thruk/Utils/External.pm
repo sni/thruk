@@ -124,15 +124,25 @@ sub perl {
             $c->db->disable_backends();
             $c->db->enable_backends($conf->{'backends'});
         }
-        ## no critic
-        my $rc = eval($conf->{'expr'});
-        ## use critic
+        my $rc;
+        if(ref $conf->{'expr'} eq 'ARRAY') {
+            $rc = eval { _call_perl_expr($conf->{'expr'}) };
+        } else {
+            ## no critic
+            $rc = eval($conf->{'expr'});
+            ## use critic
+        }
         die($@) if $@;
         _finished_job_page($c, $c->stash) if !$c->stash->{job_id}; # breaks cascading jobs, ex.: xls export on showlog
         return $rc;
     }
 
-    $c->stash->{job_conf} = $conf;
+    if(ref $conf->{'expr'} eq 'ARRAY') {
+        $c->stash->{job_conf} = { %{$conf} };
+        delete $c->stash->{job_conf}->{'expr'};
+    } else {
+        $c->stash->{job_conf} = $conf;
+    }
 
     my ($id,$dir) = init_external($c);
     return unless $id;
@@ -152,10 +162,15 @@ sub perl {
 
         do {
             $c->stats->profile(begin => 'External::perl eval');
-            ## no critic
-            my $rc = eval($conf->{'expr'});
+            my $rc;
+            if(ref $conf->{'expr'} eq 'ARRAY') {
+                $rc = eval { _call_perl_expr($conf->{'expr'}) };
+            } else {
+                ## no critic
+                $rc = eval($conf->{'expr'});
+                ## use critic
+            }
             $err = $@;
-            ## use critic
             $c->stats->profile(end => 'External::perl eval');
 
             if($err) {
@@ -240,6 +255,17 @@ sub perl {
     }
     unlink($dir."/pid"); # signal parent we are done
     exit(0);
+}
+
+##############################################
+
+sub _call_perl_expr {
+    my($expr) = @_;
+    my($func, @args) = @{$expr};
+    ## no critic
+    no strict 'refs';
+    ## use critic
+    return $func->(@args);
 }
 
 ##############################################
@@ -960,7 +986,7 @@ sub do_parent_stuff {
     Thruk::Utils::IO::write($dir."/hostname", $Thruk::Globals::NODE_ID."\n".$Thruk::Globals::HOSTNAME."\n");
 
     # write start file
-    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper($conf)."\n");
+    Thruk::Utils::IO::write($dir."/start", time()."\n".Dumper(_clean_context_refs($conf))."\n");
 
     # write user file
     if(!defined $conf->{'allow'} || defined $conf->{'allow'} eq 'user') {
@@ -1269,6 +1295,34 @@ sub _clean_unstorable_refs {
             delete $var->{$key};
         }
     }
+    return $var;
+}
+
+##############################################
+# replace $c and such with placeholders, useful before Dumping
+sub _clean_context_refs {
+    my($var) = @_;
+
+    if(ref $var eq 'HASH') {
+        my $clone = {};
+        for my $key (keys %{$var}) {
+            $clone->{$key} = _clean_context_refs($var->{$key});
+        }
+        return $clone;
+    }
+
+    if(ref $var eq 'ARRAY') {
+        my $clone = [];
+        for my $val (@{$var}) {
+            push @{$clone}, _clean_context_refs($val);
+        }
+        return $clone;
+    }
+
+    if(ref $var eq 'Thruk::Context') {
+        return '<Thruk::Context>';
+    }
+
     return $var;
 }
 
