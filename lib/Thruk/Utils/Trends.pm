@@ -119,7 +119,7 @@ sub _show_report {
 
     return unless $host or $service;
 
-    return Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::Trends::_do_report($c)', message => 'please stand by while your report is being generated...' });
+    return Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::Trends::_do_report', $c], message => 'please stand by while your report is being generated...' });
 }
 
 

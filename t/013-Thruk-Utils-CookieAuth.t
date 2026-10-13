@@ -9,7 +9,7 @@ use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 9;
+    plan tests => 11;
 
     use lib('t');
     require TestUtils;
@@ -46,6 +46,14 @@ my $c = TestUtils::get_c();
     my $session3 = Thruk::Utils::CookieAuth::retrieve_session(file => $sessionfile, config => $c->config);
     is($session3->{'file'}, $sessionfile, "got session file");
     like($session3->{'hash'}, '/^CBC,.+/', "basic auth hash is still crypted");
+
+    # per-request idle timeout check
+    utime(time() - 100, time() - 100, $sessionfile);
+    my $session4 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
+    ok($session4, "recently active session not rejected");
+    utime(time() - ($c->config->{'cookie_auth_session_timeout'} + 100), time() - ($c->config->{'cookie_auth_session_timeout'} + 100), $sessionfile);
+    my $session5 = Thruk::Utils::CookieAuth::retrieve_session(id => $sessionid, config => $c->config);
+    ok(!$session5, "session beyond idle timeout rejected per request");
 
     unlink($sessionfile);
 };

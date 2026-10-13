@@ -29,6 +29,12 @@ sub index {
 
     # proxy request
     if($c->req->header('X-Thruk-Passthrough')) {
+        # only relative paths are allowed; absolute urls would let any authenticated user
+        # make the server fetch arbitrary hosts and read the response (SSRF)
+        if($c->req->header('X-Thruk-Passthrough') =~ m{^https?:}mix) {
+            $c->res->code(400);
+            return $c->render("text" => 'invalid X-Thruk-Passthrough url');
+        }
         if(!$c->user_exists) {
             $c->authenticate(skip_db_access => 1);
         }
@@ -96,6 +102,14 @@ sub index {
 
     # log requests?
     if($action eq 'log' and $c->req->method eq 'POST') {
+        # unauthenticated log writes would allow anyone to forge log entries (audit integrity)
+        if(!$c->user_exists) {
+            $c->authenticate(skip_db_access => 1);
+        }
+        if(!$c->user_exists) {
+            $c->res->code(401);
+            return $c->render("text" => 'not authorized');
+        }
         my $body = $c->req->body;
         if($body) {
             if(ref $body eq 'File::Temp') {

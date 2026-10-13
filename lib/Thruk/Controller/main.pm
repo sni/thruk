@@ -409,7 +409,7 @@ sub _notifications_data {
         $cache->touch(); # update timestamp to avoid multiple parallel updates
         require Thruk::Utils::External;
         Thruk::Utils::External::perl($c, {
-                    expr       => 'Thruk::Controller::main::_notifications_update_cache($c, '.$start.')',
+                    expr       => ['Thruk::Controller::main::_notifications_update_cache', $c, $start],
                     background => 1,
                     clean      => 1,
         });

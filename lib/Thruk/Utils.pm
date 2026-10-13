@@ -3668,7 +3668,7 @@ sub get_timezone_data {
             } elsif(!$force) {
                 # start update in background
                 my $job = Thruk::Utils::External::perl($c, {
-                    expr       => 'Thruk::Utils::get_timezone_data($c, undef, 1)',
+                    expr       => ['Thruk::Utils::get_timezone_data', $c, undef, 1],
                     allow      => 'all',
                     background => 1,
                 });

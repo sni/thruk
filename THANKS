@@ -131,10 +131,6 @@ strftime.js
   - http://hacks.bluesmoon.info/strftime
   - BSD
 
-bestiejs.js
-  - https://github.com/bestiejs/platform.js
-  - MIT
-
 unicons
   - https://github.com/Iconscout/unicons
   - Apache-2.0

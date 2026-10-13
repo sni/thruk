@@ -500,7 +500,7 @@ sub _rest_get_config_check {
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key, 1) || next;
         my $job = Thruk::Utils::External::perl($c, {
-                                                    expr       => 'Thruk::Controller::conf::_config_check($c)',
+                                                    expr       => ['Thruk::Controller::conf::_config_check', $c],
                                                     message    => 'please stand by while configuration is being checked...',
                                                     background => 1,
         });
@@ -562,7 +562,7 @@ sub _rest_get_config_reload {
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key, 1) || next;
         my $job = Thruk::Utils::External::perl($c, {
-                                                    expr       => 'Thruk::Controller::conf::_config_reload($c)',
+                                                    expr       => ['Thruk::Controller::conf::_config_reload', $c],
                                                     message    => 'please stand by while configuration is being reloaded...',
                                                     background => 1,
         });
