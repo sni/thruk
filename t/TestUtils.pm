@@ -605,6 +605,7 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "crossorigin"\ for\ tag/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "fetchpriority"\ for\ tag/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "as"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "defer"\ for\ tag/imxo;
         next if $err_str =~ m/<html>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<head>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
