@@ -3,7 +3,6 @@ package Thruk::Backend::Provider::DBcommon;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Module::Load qw/load/;
 use POSIX ();
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -329,8 +328,8 @@ sub get_logs {
     # logfiles into tmp file
     my($fh, $filename);
     if($options{'file'}) {
-        load File::Temp, qw/tempfile/;
-        ($fh, $filename) = tempfile();
+        require File::Temp;
+        ($fh, $filename) = File::Temp::tempfile();
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     }
 
@@ -376,8 +375,7 @@ sub get_logs {
                 next if !$authorized_for_system_information;
             }
             if($fh) {
-                load Encode, qw/encode_utf8/;
-                print $fh encode_utf8($r->{'message'}),"\n";
+                print $fh Encode::encode_utf8($r->{'message'}),"\n";
             } else {
                 push @{$data}, $r;
             }
@@ -385,11 +383,10 @@ sub get_logs {
     }
     else {
         if($fh) {
-            load Encode, qw/encode_utf8/;
             my $sth = $dbh->prepare($sql);
             $sth->execute;
             while(my $r = $sth->fetchrow_arrayref()) {
-                print $fh encode_utf8($r->[8]),"\n";
+                print $fh Encode::encode_utf8($r->[8]),"\n";
             }
         } else {
             $data = $dbh->selectall_arrayref($sql, { Slice => {} });
@@ -1521,8 +1518,8 @@ sub _insert_logs {
     my @values;
     my($fh, $datafilename);
     if(!$use_extended_inserts) {
-        load File::Temp, qw/tempfile/;
-        ($fh, $datafilename) = tempfile();
+        require File::Temp;
+        ($fh, $datafilename) = File::Temp::tempfile();
         $fh->binmode (":encoding(utf-8)");
     }
     &timing_breakpoint('_insert_logs');
