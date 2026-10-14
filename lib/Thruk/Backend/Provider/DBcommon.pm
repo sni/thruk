@@ -837,7 +837,7 @@ sub _log_removeunused {
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$res}) {
-        for my $tbl (keys %{$table_names}) {
+        for my $tbl (@{$table_names}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
             $dbh->do("DROP TABLE " . $self->_quote_table($tbl) . $cascade);
