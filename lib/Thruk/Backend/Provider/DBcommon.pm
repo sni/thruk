@@ -820,7 +820,7 @@ sub _log_removeunused {
 
     # gather backend ids
     for my $b (@backends) {
-        delete $res->{$b};
+        delete $res->{$b->{'key'}};
     }
 
     # find tables without a backend
