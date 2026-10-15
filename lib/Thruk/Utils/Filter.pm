@@ -1760,8 +1760,7 @@ sub replace_links {
 
     # standard text link: https://link.domain/...
     $txt =~ s/(?:^|\s)(https?:\/\/(?:www\.)?[-a-zA-Z0-9\@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,8}\b(?:[-a-zA-Z0-9()\@:%_\+.~#?&\/=]*))(\s|<br>|$)
-             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>$2
-             /gmx;
+             /<a class="link" href="$1" target="_blank"><i class="uil uil-external-link-alt text-sm"><\/i>$1<\/a>$2/gmx;
 
     return($txt);
 }
