@@ -1803,7 +1803,7 @@ sub _is_compactable {
             }
         }
         elsif($l->{'type'} eq 'HOST ALERT' || $l->{'type'} eq 'CURRENT HOST STATE' || $l->{'type'} eq 'INITIAL HOST STATE') {
-            my $host_id = $l->{'host_id'} // $l->{'host_name'};
+            my $host_id = $l->{'host_id'} // $l->{'host_name'} // '';
             my $chk     = $alertstore->{'hst'}->{$host_id};
             if(!$chk || $chk ne $uniq) {
                 $alertstore->{'hst'}->{$host_id} = $uniq;
