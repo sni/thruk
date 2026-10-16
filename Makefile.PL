@@ -69,13 +69,6 @@ feature     ('mysql_support',
   'DBD::mysql'                                    => 0,     # required by Thruk::Backend::Provider::Mysql
 );
 
-# experimental postgresql logcache support
-feature     ('experimental_postgresql_support',
-  -default                                        => 0,
-  'DBI'                                           => 0,     # required by Thruk::Backend::Provider::Postgresql
-  'DBD::Pg'                                       => 0,     # required by Thruk::Backend::Provider::Postgresql
-);
-
 # performance tweaking modules
 feature     ('performance_tweaking',
   -default                                        => 0,

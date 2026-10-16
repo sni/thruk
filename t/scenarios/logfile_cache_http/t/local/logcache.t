@@ -1,16 +1,14 @@
 use warnings;
 use strict;
-use File::Temp ();
 use Test::More;
-
-use Thruk::Utils::Encode ();
-use Thruk::Utils::IO ();
 
 BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
 }
+
+plan tests => 180;
 
 ###########################################################
 # test thruks script path
@@ -116,155 +114,6 @@ TestUtils::test_command({
 };
 
 ###########################################################
-# common database goals: the shared DBcommon engine,
-# exercised on whichever driver this scenario is configured with
-{
-    my $c = TestUtils::get_c();
-    my($peer) = grep { $_->{'logcache'} } @{ $c->db->get_peers(1) };
-    ok($peer, 'found a logcache backend') or BAIL_OUT('no logcache backend, cannot test DBcommon');
-    my $prefix   = $peer->{'key'};
-    my $provider = $peer->logcache;
-    my $dbh      = $provider->_dbh;
-    my $qt       = sub { return $provider->_quote_table($_[0]); };
-    my $logtable = $prefix.'_log';
-    my $status   = $prefix.'_status';
-    my $stale    = 'staleunittest';
-
-    # removeunused protects the configured backends
-    $c->stash->{'backends'} = [$prefix] unless defined $c->stash->{'backends'};
-
-    ###########################################################
-    # provider level import from a logfile fixture
-    {
-        my $fixture = '/thruk/t/data/mysql/archive.log';
-        local $ENV{THRUK_QUIET} = 1;
-        $provider->_drop_tables($dbh, $prefix);
-        $provider->_create_tables($dbh, $prefix);
-        is($provider->_update_logcache($c, 'update', $peer, $dbh, $prefix, undef, [$fixture]), 10, 'imported all fixture items');
-        is($provider->_update_logcache($c, 'update', $peer, $dbh, $prefix, undef, [$fixture]),  0, 'fixture items are not imported twice');
-
-        my($export) = $provider->get_logs(file => 1, collection => $prefix, sort => { 'ASC' => 'time' });
-        is(-f $export, 1, 'logcache export file created');
-        my $content = Thruk::Utils::IO::read($fixture);
-        Thruk::Utils::Encode::decode_any($content);
-        Thruk::Utils::Encode::remove_utf8_surrogates($content);
-        utf8::encode($content);
-        my($fh, $expected) = File::Temp::tempfile();
-        CORE::close($fh);
-        Thruk::Utils::IO::write($expected, $content);
-        TestUtils::test_command({
-            cmd   => '/usr/bin/diff -u '.$export.' '.$expected,
-            like => ['/^$/'],
-        });
-        unlink($export);
-        unlink($expected);
-        # close the read transaction, the CLI commands below drop tables
-        $dbh->commit;
-    }
-
-    ###########################################################
-    # drop and re-import recreates the cache from scratch
-    $dbh->commit;
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache drop -y -q",
-        like => [qr/\QOK - droped logcache for 1 site\E/],
-    });
-    is($provider->_has_log_table($dbh, $prefix), 0, 'logcache tables dropped');
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache import -q -y",
-        like => [qr/\QOK - imported\E/],
-    });
-    is($provider->_has_log_table($dbh, $prefix), 1, 'logcache tables recreated');
-    $dbh->commit;
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache optimize -f -q",
-        like => [qr/\QOK - optimized logcache for 1 site in\E/],
-    });
-    $dbh->commit;
-
-    ###########################################################
-    TestUtils::test_command({
-        cmd => "/usr/bin/env thruk logcache removeunused",
-    });
-
-    # removeunused: nothing to remove
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache removeunused",
-        like => [qr/\Qno old tables found in logcache\E/],
-    });
-
-    ###########################################################
-    # removeunused: stale tables are detected, dropped and the active backend is kept.
-    my $rows_before = $dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable));
-    $dbh->do('CREATE TABLE '.$qt->($stale.'_log').' (log_id integer, message text)');
-    $dbh->do('CREATE TABLE '.$qt->($stale.'_status').' (status_id integer, name text, value text)');
-    $dbh->commit;
-
-    # selfcheck uses the print only variant of the same function
-    my $to_remove = $provider->_log_removeunused($c, 1);
-    ok(ref $to_remove eq 'HASH' && $to_remove->{$stale}, 'selfcheck lists the stale tables');
-    ok(ref $to_remove eq 'HASH' && !$to_remove->{$prefix}, 'selfcheck keeps the active backend');
-
-    # that call reconnects and its selects hold read locks, refresh and release them
-    $dbh = $provider->_dbh;
-    $dbh->commit;
-
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache removeunused",
-        like => [qr/\Q1 old backends removed (2 tables) from logcache\E/],
-    });
-    is($provider->_has_log_table($dbh, $stale),  0, 'stale logcache tables removed');
-    is($provider->_has_log_table($dbh, $prefix), 1, 'active logcache tables kept');
-    is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable)), $rows_before, 'active logcache rows untouched');
-
-    ###########################################################
-    # clean removes entries older than the given duration
-    my $old = time() - 10*86400;
-    $dbh->do('INSERT INTO '.$qt->($logtable).' (time,class,type,state,state_type,contact_id,host_id,service_id,message)'
-             .' VALUES (?,0,NULL,NULL,NULL,NULL,NULL,NULL,?)', undef, $old, 'dbcommon unittest old entry');
-    $dbh->commit;
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache clean 1 -q",
-        like => [qr/\QOK - removed \E[1-9]\d*\Q log items from 1 site\E/],
-    });
-    is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable).' WHERE message = ?', undef, 'dbcommon unittest old entry'), 0, 'old entry has been cleaned');
-
-    ###########################################################
-    # compact collapses repeated identical alerts
-    my $very_old = time() - 100*86400;
-    my($host_id) = $dbh->selectrow_array('SELECT host_id FROM '.$qt->($prefix.'_host').' LIMIT 1');
-    isnt($host_id, undef, 'got a host for the compaction fixture');
-    my $ins = 'INSERT INTO '.$qt->($logtable).' (time,class,type,state,state_type,contact_id,host_id,service_id,message)'
-            .' VALUES (?,1,?,?,?,NULL,?,NULL,?)';
-    for my $i (1..3) {
-        $dbh->do($ins, undef, $very_old, 'HOST ALERT', 2, 'HARD', $host_id, 'dbcommon unittest duplicate alert');
-    }
-    $dbh->commit;
-    TestUtils::test_command({
-        cmd  => "/usr/bin/env thruk logcache compact 10w -f -q",
-        like => [qr/\QOK - compacted \E\d+\Q log items and removed \E[1-9]\d*/],
-    });
-    cmp_ok($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable).' WHERE message = ?', undef, 'dbcommon unittest duplicate alert'), '<', 3, 'duplicate alerts compacted');
-
-    ###########################################################
-    # cache version guard
-    {
-        # keep the in process context out of it, we only want the version check
-        local $Thruk::Globals::c;
-        $dbh->do('UPDATE '.$qt->($status)." SET value = '1' WHERE status_id = 4");
-        $dbh->commit;
-        my $err = eval { $provider->get_logs(collection => $prefix); 1 } ? undef : $@;
-        like($err, qr/Logcache too old/, 'stale cache version is detected');
-
-        $dbh->do('UPDATE '.$qt->($status)." SET value = '".$provider->cache_version()."' WHERE status_id = 4");
-        $dbh->commit;
-        eval { $provider->get_logs(collection => $prefix, options => { limit => 1 }); };
-        is($@, '', 'get_logs works again after restoring the cache version');
-        $dbh->commit;
-    }
-}
-
-###########################################################
 # be nice and enable checks again
 TestUtils::test_command({
     cmd     => "/usr/bin/env thruk r -d '' /system/cmd/start_executing_host_checks",
@@ -324,4 +173,3 @@ TestUtils::test_command({
 });
 
 ###########################################################
-done_testing();

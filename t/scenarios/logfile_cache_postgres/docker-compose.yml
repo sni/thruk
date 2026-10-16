@@ -9,8 +9,6 @@ services:
         - ../../../:/thruk:ro
         - .:/scenario:ro
         - .:/test:ro
-        # the local test link points into the mysql scenario, sharing the logcache.t
-        - ../logfile_cache_http/t/local:/logfile_cache_http/t/local:ro
         - ../../../var/tmp:/var/tmp:rw
   db:
      image: postgres:18
@@ -18,5 +16,3 @@ services:
         POSTGRES_PASSWORD: thruk
         POSTGRES_DB: thruk
         POSTGRES_USER: thruk
-     ports:
-        - "127.0.0.3:60432:5432"

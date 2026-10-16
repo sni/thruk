@@ -2,7 +2,6 @@ include ../_common/Makefile.common
 
 export THRUK_TEST_AUTH               = omdadmin:omd
 export PLACK_TEST_EXTERNALSERVER_URI = http://127.0.0.3:60080/demo/
-export TEST_POSTGRES                  = postgresql://thruk:thruk@127.0.0.3:60432/thruk
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \

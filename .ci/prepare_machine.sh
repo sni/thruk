@@ -24,7 +24,6 @@ apt-get -y install \
     libdatetime-perl \
     libdatetime-timezone-perl \
     libdbd-mysql-perl \
-    libdbd-pg-perl \
     libdbi-perl \
     libdevel-cycle-perl \
     libexcel-template-perl \
