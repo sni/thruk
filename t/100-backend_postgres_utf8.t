@@ -5,6 +5,7 @@ use File::Temp qw/tempfile/;
 use Test::More;
 
 use lib 'lib';
+
 use Thruk::Base ();
 use Thruk::Utils::Encode ();
 use Thruk::Utils::IO ();

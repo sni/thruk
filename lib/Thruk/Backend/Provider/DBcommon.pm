@@ -3,6 +3,7 @@ package Thruk::Backend::Provider::DBcommon;
 use warnings;
 use strict;
 use Carp qw/confess/;
+use Encode ();
 use POSIX ();
 
 use Thruk::Timer qw/timing_breakpoint/;
