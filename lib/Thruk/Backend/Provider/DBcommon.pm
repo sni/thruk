@@ -3,7 +3,7 @@ package Thruk::Backend::Provider::DBcommon;
 use warnings;
 use strict;
 use Carp qw/confess/;
-use Module::Load qw/load/;
+use Encode ();
 use POSIX ();
 
 use Thruk::Timer qw/timing_breakpoint/;
@@ -329,8 +329,8 @@ sub get_logs {
     # logfiles into tmp file
     my($fh, $filename);
     if($options{'file'}) {
-        load File::Temp, qw/tempfile/;
-        ($fh, $filename) = tempfile();
+        require File::Temp;
+        ($fh, $filename) = File::Temp::tempfile();
         open($fh, '>', $filename) or die('open '.$filename.' failed: '.$!);
     }
 
@@ -376,8 +376,7 @@ sub get_logs {
                 next if !$authorized_for_system_information;
             }
             if($fh) {
-                load Encode, qw/encode_utf8/;
-                print $fh encode_utf8($r->{'message'}),"\n";
+                print $fh Encode::encode_utf8($r->{'message'}),"\n";
             } else {
                 push @{$data}, $r;
             }
@@ -385,11 +384,10 @@ sub get_logs {
     }
     else {
         if($fh) {
-            load Encode, qw/encode_utf8/;
             my $sth = $dbh->prepare($sql);
             $sth->execute;
             while(my $r = $sth->fetchrow_arrayref()) {
-                print $fh encode_utf8($r->[8]),"\n";
+                print $fh Encode::encode_utf8($r->[8]),"\n";
             }
         } else {
             $data = $dbh->selectall_arrayref($sql, { Slice => {} });
@@ -820,7 +818,7 @@ sub _log_removeunused {
 
     # gather backend ids
     for my $b (@backends) {
-        delete $res->{$b};
+        delete $res->{$b->{'key'}};
     }
 
     # find tables without a backend
@@ -837,7 +835,7 @@ sub _log_removeunused {
     my $tables_count  = 0;
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$res}) {
-        for my $tbl (keys %{$table_names}) {
+        for my $tbl (@{$table_names}) {
             next unless $tbl =~ m/^${key}_/mx;
             $tables_count++;
             $dbh->do("DROP TABLE " . $self->_quote_table($tbl) . $cascade);
@@ -1521,8 +1519,8 @@ sub _insert_logs {
     my @values;
     my($fh, $datafilename);
     if(!$use_extended_inserts) {
-        load File::Temp, qw/tempfile/;
-        ($fh, $datafilename) = tempfile();
+        require File::Temp;
+        ($fh, $datafilename) = File::Temp::tempfile();
         $fh->binmode (":encoding(utf-8)");
     }
     &timing_breakpoint('_insert_logs');
@@ -1806,7 +1804,7 @@ sub _is_compactable {
             }
         }
         elsif($l->{'type'} eq 'HOST ALERT' || $l->{'type'} eq 'CURRENT HOST STATE' || $l->{'type'} eq 'INITIAL HOST STATE') {
-            my $host_id = $l->{'host_id'} // $l->{'host_name'};
+            my $host_id = $l->{'host_id'} // $l->{'host_name'} // '';
             my $chk     = $alertstore->{'hst'}->{$host_id};
             if(!$chk || $chk ne $uniq) {
                 $alertstore->{'hst'}->{$host_id} = $uniq;
