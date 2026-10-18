@@ -1092,7 +1092,7 @@ sub get_user {
 
     # If we are the user we want to be we use getgroups
     # Which is fast and non intrusive against ldap/nis
-    if($cuid eq $uid) {
+    if(defined $cuid && $cuid eq $uid) {
         # Get the groups from getgroups
         my @gids = POSIX::getgroups;
         foreach my $egid (@gids) {
