@@ -187,7 +187,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/enable_contac
 
 === POST /contacts/<name>/cmd/enable_contact_svc_notifications
 
-Disables service notifications for a particular contact.
+Enables service notifications for a particular contact.
 
 This command does not require any arguments.
 
@@ -463,7 +463,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/del_all_host_
 
 === POST /hosts/<name>/cmd/del_comment
 
-Removes downtime by id for this host.
+Removes comment by id for this host.
 
 Required arguments:
 
@@ -1049,7 +1049,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/change_retry_
 
 === POST /services/<host>/<service>/cmd/change_svc_check_timeperiod
 
-Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
+Changes the check timeperiod for a particular service to what is specified by the 'check_timeperiod' option. The 'check_timeperiod' option should be the short name of the timeperiod that is to be used as the service check timeperiod. The timeperiod must have been configured in Naemon before it was last (re)started.
 
 Required arguments:
 
@@ -1092,7 +1092,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/del_all_svc_c
 
 === POST /services/<host>/<service>/cmd/del_comment
 
-Removes downtime by id for this service.
+Removes comment by id for this service.
 
 Required arguments:
 
@@ -1474,7 +1474,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/enable_flap_d
 
 === POST /system/cmd/enable_host_freshness_checks
 
-Enables freshness checks of all services on a program-wide basis. Individual services that have freshness checks disabled will not be checked for freshness.
+Enables freshness checks of all hosts on a program-wide basis. Individual hosts that have freshness checks disabled will not be checked for freshness.
 
 This command does not require any arguments.
 
@@ -1540,7 +1540,7 @@ See https://www.naemon.io/documentation/developer/externalcommands/restart_progr
 
 === POST /system/cmd/save_state_information
 
-Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention
+Causes Naemon to save all current monitoring status information to the state retention file. Normally, state retention information is saved before the Naemon process shuts down and (potentially) at regularly scheduled intervals. This command allows you to force Naemon to save this information to the state retention file immediately. This does not affect the current status information in the Naemon process.
 
 This command does not require any arguments.
 
