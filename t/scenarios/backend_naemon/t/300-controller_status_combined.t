@@ -7,7 +7,11 @@ use URI::Escape qw/uri_escape/;
 use Thruk ();
 
 BEGIN {
-    plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
+  plan skip_all => 'local test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
+  plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+}
+
+BEGIN {
     use lib('t');
     require TestUtils;
     import TestUtils;
