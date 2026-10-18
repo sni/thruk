@@ -89,8 +89,8 @@ nagimp has the following arguments:
 
 =item B<--replace=search##replace>
 
-    Replace text in object config. Search is a regular expression. Replace value
-    is seperated by '##'.
+    Replace text in object config. Search is a regular expression. The search
+    and replacement values are separated by '##'.
 
 =item B<-dn> , B<--disable-notifications>
 

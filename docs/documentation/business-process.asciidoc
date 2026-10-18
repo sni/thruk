@@ -170,7 +170,7 @@ optional 4th hash.
 
 Arguments can be specified by comments in the perl module containing your function.
 See the example above...
-Each Argument requires 3 attributes which are seperated by a semicolon ;
+Each argument requires 3 attributes separated by semicolons (;).
 
 ------
 # arg1: Text;      text;     text that should be echoed
@@ -178,8 +178,8 @@ Each Argument requires 3 attributes which are seperated by a semicolon ;
 
  - Name: name of this attribute, used in the edit dialog
  - Type: can be any of 'Text', 'Select', 'Checkbox', 'Host', 'Hostgroup', 'Service', 'Servicegroup'.
- - Options: optional arguments. In case of Text used as placeholder, in case of Select
-            or Checkbox used as semicolon seperated list of options.
+ - Options: optional arguments. For Text, used as a placeholder; for Select
+            or Checkbox, used as a semicolon-separated list of options.
 
 [TIP]
 .perl
@@ -191,7 +191,7 @@ normal aggregation functions and helpers from link:../api/Thruk/BP/Functions.htm
 
 
 == Scripted Business Processes
-It is a total valid use case to generate business process from a custom script.
+It is valid to generate business processes with a custom script.
 
   1. Simply generate and write out the json structure into your `bp` folder.
   2. Run `thruk bp commit` to update cronjobs and generate objects.
@@ -213,5 +213,5 @@ There are a few extra attributes you can add to your nodes when exporting them:
   - `create_host_object`: if set to 0, no bp host object will be exported.
      You are then responsible that this host does exist.
 
-Other attributes should be mostly self explaining and can be adopted from a manual
+Other attributes should be mostly self-explanatory and can be copied from a manually
 created business process by looking at the file in your `bp` folder.

@@ -79,11 +79,11 @@ You may need the SLES sdk dvd for additional dependencies.
 
 === Source Installation
 
-A link:install_from_source.html[Source Installation] can sometimes be usefull if you
-have special requirements to paths and users. This is only for experienced users
-and should be considered as last resort.
+A link:install_from_source.html[Source Installation] can sometimes be useful if you
+have special requirements for paths and users. This is only for experienced users
+and should be considered a last resort.
 
-There is a separate page with link:install_from_source.html[detailed  Instructions].
+There is a separate page with link:install_from_source.html[detailed instructions].
 
 
 == Configuration
@@ -97,7 +97,7 @@ overwritten.
     /etc/thruk/cgi.cfg
 -------
 
-See the link:configuration.html[Thruk Configuration] section for detailed explaination of options from the `thruk_local.conf`.
+See the link:configuration.html[Thruk Configuration] section for a detailed explanation of the options in `thruk_local.conf`.
 
 See the link:cgi-cfg.html[CGI Configuration] section for options from the `cgi.cfg` file.
 
@@ -125,7 +125,7 @@ multiple 'peer' items.
 
 === Livestatus
 
-Livestatus is a addon for Naemon, Nagios or Icinga which provides real time
+Livestatus is an add-on for Naemon, Nagios or Icinga which provides real-time
 status data. Contrary to database addons it adds very little overhead to the
 Naemon core which makes livestatus based gui fast and real time.
 
@@ -174,8 +174,8 @@ image:source/livestatus.png[Livestatus Architecture]
 === TLS Livestatus
 {% include new_since.ad version="2.20" %}
 
-TLS Livestatus is just like livestatus but encrypted with TLS/SSL. Therefor
-you need to create certificates and configure your backend(s) for example like:
+TLS Livestatus is just like Livestatus but encrypted with TLS/SSL. To use it,
+you need to create certificates and configure your backends, for example:
 
 .thruk_local.conf:
 -------
@@ -246,7 +246,7 @@ stunnel.conf:
 
 === HTTP
 
-A HTTP connection is possible between multiple Thruk installations. A
+An HTTP connection is possible between multiple Thruk installations. An
 HTTP connection not only makes live data available, it also offers a
 secure way to manage object configuration from remote. To authenticate
 the central Thruk installation, you need to provide the secret key from the

@@ -1,11 +1,11 @@
-Thruk - Monitoring Webinterface
+Thruk - Monitoring Web Interface
 ===============================
 
-Thruk is a multibackend monitoring webinterface which currently
-supports Naemon, Icinga, Shinken and Nagios as backend using the Livestatus
-API. It is designed to be a 'dropin' replacement and covers the original
-features plus adds additional enhancements for large installations, increased
-usability and many useful addons.
+Thruk is a multi-backend monitoring web interface that currently
+supports Naemon, Icinga, Shinken and Nagios as backends using the Livestatus
+API. It is designed to be a drop-in replacement, covering the original
+features and adding enhancements for large installations, improved
+usability and many useful add-ons.
 
 ![Thruk Startpage](https://thruk.org/images/galleries/01_main-thumb.png "Thruk Startpage")
 ![Thruk Panorama](https://thruk.org/images/galleries/geomaps-thumb.png "Thruk Panorama")
@@ -14,15 +14,15 @@ usability and many useful addons.
 
 Documentation
 -------------
-All documentation is under `docs/`
+All documentation is under `docs/`.
 
 Support
 -------
 
   * Ask a question on [Stack Overflow](https://stackoverflow.com/questions/tagged/thruk)
   * Mailing list on [Google Groups](https://groups.google.com/group/thruk).
-  * File a Bug in [GitHub Issues](https://github.com/sni/thruk/issues).
-  * Report a Security Advisory [GitHub Security](https://github.com/sni/thruk/security).
+  * File a bug in [GitHub Issues](https://github.com/sni/thruk/issues).
+  * Report a security vulnerability through [GitHub Security](https://github.com/sni/thruk/security).
   * Chat with developers on [IRC Libera #thruk](irc://irc.libera.chat/thruk) ([Webchat](https://web.libera.chat/?nick=Guest?#thruk)).
 
 
@@ -32,28 +32,28 @@ Main Features / Advantages
   * Multiple backends
   * Faster while using less CPU
   * Displays live data, no delay between core and GUI
-  * Clusterable, can be clustered over hosts
+  * Can be clustered across multiple hosts
   * Business Process Add-on
   * Advanced status filters
   * Extended logfile search
   * Multiple themes included
   * Excel export for status and logfiles
   * Adjustable side menu
-  * Full expanded plugin commandline for easy testing
+  * Fully expanded plugin command line for easy testing
   * Save searches in personal bookmarks
   * Config Tool included
   * Mobile interface included
   * SLA Reports in PDF format
   * Recurring Downtimes
   * Fully Featured Dashboard
-  * Independant from monitoring core, can be installed on remote host
+  * Independent of the monitoring core, can be installed on a remote host
   * Easy to extend with plugins
 
 ### Contributions
 
 Thanks to all the amazing [community contributors for sending PRs](https://github.com/sni/thruk/graphs/contributors) and keeping this project updated. :heart:
 
-If you have an idea or some kind of improvement, you are welcome to contribute and participate in the Project, feel free to send your PR.
+If you have an idea for an improvement, you are welcome to contribute to the project. Feel free to submit a pull request.
 
 <p align="center">
 <a href="https://github.com/sni/thruk/graphs/contributors">
@@ -77,5 +77,5 @@ b) the GNU General Public License as published by the Free Software Foundation;
 
 `SPDX-License-Identifier: Artistic-1.0-Perl OR GPL-1.0-or-later`
 
-Vendor specific libraries below `./root/thruk/vendor/` may have different
-licenses. See `THANKS` file for details.
+Vendor-specific libraries under `./root/thruk/vendor/` may have different
+licenses. See the `THANKS` file for details.

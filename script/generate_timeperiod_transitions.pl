@@ -236,7 +236,7 @@ script has the following arguments
     Time definition in the following form:
     HH:MM-HH:MM
 
-    multiple time definitions must be comma seperated
+    Multiple time definitions must be comma-separated:
     HH:MM-HH:MM,HH:MM-HH:MM,...
 
 =item B<-d> I<day definition>, B<--days>=I<day definition>

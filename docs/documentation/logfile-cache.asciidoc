@@ -9,8 +9,8 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 Accessing logfiles can be time and memory consuming, especially when having
 remote sites connected to Thruk. Livestatus caches logfile data used for
 queries. This increases the size of the naemon process, slows down the
-monitoring and increases the overall load on your monitoring host. Therefor
-Thruk may use a logfile cache to increase performance of logfile access and
+monitoring and increases the overall load on your monitoring host. Therefore,
+Thruk can use a logfile cache to improve the performance of logfile access and
 reports.
 
 For maximum performance, the Logfile Cache Database should be installed on the
@@ -26,7 +26,7 @@ up to 2 years of compacted logfiles to generate sla reports.
 Starting with OMD-Labs 2.40 you can simply run `omd config set MYSQL on; omd config set THRUK_LOGCACHE on` to enable the logcache.
 
 You will need to specify your mysql connection configuration in your
-thruk_local.conf. Make sure the user and database exists. The tables will then
+thruk_local.conf. Make sure the user and database exist. The tables will then
 be created automatically.
 
 thruk_local.conf:

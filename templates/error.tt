@@ -9,8 +9,8 @@
   <h1 class='textALERT mt-5'>[% errorMessage %]</h1>
   <h2 class="whitespace-normal text-center">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
 [% ELSE %]
-  <h1 class='textALERT mt-5'>internal server error</h1>
-  <h2 class="whitespace-normal text-center">internal server error occured, please look at your logfiles</h2>
+  <h1 class='textALERT mt-5'>Internal server error</h1>
+  <h2 class="whitespace-normal text-center">An internal server error occurred. Please check your log files.</h2>
   [% IF c.error.size > 0 %][% stacktrace = c.error.0 %][% END %]
 [% END %]
 
@@ -33,7 +33,7 @@
         onmouseover="this.href=this.href.replace(/body=.*/, 'body='+encodeURIComponent(document.getElementById('error_report_text').innerText));"
       >
         <i class="fa-solid fa-bug" title="Send Bug Report"></i>
-        Help making Thruk better by sending an anonymous bug report.
+        Help make Thruk better by sending an anonymous bug report.
       </a>
       <a href="#" onclick="document.getElementById('error_report_card').style.display=''; return false;" class="button flexrow gap-0 justify-between mt-5">
         <div class="w-5"></div>

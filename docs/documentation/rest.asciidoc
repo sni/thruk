@@ -672,21 +672,21 @@ Human readable table output is available via `/human/` or `/text/` path prefix.
 
 == HTTP Methods
 
-HTTP Methods are implemented according to link:https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9[RFC2616] which
-is in short:
+HTTP methods are implemented according to link:https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9[RFC2616],
+summarized below:
 
 [options="header"]
 |===========================================
-| GET     | retrieve ressources, ex.: `GET /thruk/reports` to list all reports.
-| POST    | update/create ressources or trigger actions, ex.: `POST /thruk/reports` to create a new report.
-| PUT     | overwrite existing ressource, ex.: `PUT /thruk/reports/1` to update an entire existing report. Thruk makes no difference between POST and PUT. You can use PUT for all POST urls and vice versa.
-| PATCH   | replace parts of existing ressource, ex.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
-| DELETE  | remove existing ressource, ex.: `DELETE /thruk/reports/1` to remove the report entirely.
+| GET     | retrieve resources, e.g.: `GET /thruk/reports` to list all reports.
+| POST    | update/create resources or trigger actions, e.g.: `POST /thruk/reports` to create a new report.
+| PUT     | overwrite an existing resource, e.g.: `PUT /thruk/reports/1` to update an entire existing report. Thruk does not distinguish between POST and PUT. You can use PUT for all POST URLs and vice versa.
+| PATCH   | replace parts of an existing resource, e.g.: `PATCH /thruk/reports/1` to set specific attributes of an existing report.
+| DELETE  | remove an existing resource, e.g.: `DELETE /thruk/reports/1` to remove the report entirely.
 |===========================================
 
 == Long Running Requests
 
-Some REST requests may take longer than the usual timeout of 40seconds. In this case you can start a background rest
+Some REST requests may take longer than the usual timeout of 40 seconds. In this case you can start a background REST
 request. Then in a separate request, the result of the initial REST request can be retrieved as soon as it is ready.
 
 ------
@@ -974,8 +974,8 @@ Use /config/fullobjects to get the full expanded config.
 
 === POST /config/objects
 
-Create new object. Besides the actual object config, requires
-2 special paramters :FILE and :TYPE.
+Create a new object. Besides the actual object configuration, this requires
+2 special parameters, :FILE and :TYPE.
 
 === PATCH /config/objects
 
@@ -2910,4 +2910,3 @@ Update timeperiods configuration partially.
 === DELETE /timeperiods/<name>/config
 
 Deletes given timeperiod from configuration.
-

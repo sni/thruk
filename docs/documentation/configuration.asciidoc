@@ -1849,12 +1849,12 @@ ex.:
   logcache_compact_duration = 10w
 
 === logcache_auto_bypass
-Define wether logcache will be bypassed if the start / end time of a log queries
+Define whether logcache will be bypassed if the start or end time of a log query
 is outside the range of the cache.
 
-    - `0`: never, only use cached logs and return empty result if outside cached range. (default)
-    - `1`: partially, bypass logcache if start and end are outside cache range, otherwise return partially result.
-    - `2`: always, bypass logcache if either start or end are outside the cache range.
+    - `0`: never, only use cached logs and return an empty result if outside the cached range. (default)
+    - `1`: partially, bypass logcache if both start and end are outside the cache range, otherwise return a partial result.
+    - `2`: always, bypass logcache if either start or end is outside the cache range.
 
 ex.:
 
