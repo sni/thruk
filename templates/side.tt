@@ -2,8 +2,8 @@
 
   <header class="header flex-shrink-0 hidden lg:flex h-[50px]">
     <a href="[% c.config.home_link %]" target="[% c.config.home_link_target %]" class="m-auto block">
-      <img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" alt="Thruk" title="Thruk" class="h-[42px]" />
-      <img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small_icon.png" alt="Thruk" title="Thruk" class="h-[36px] collapsed-only" />
+      <img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small.png" alt="Thruk" title="Thruk" class="h-[42px]" fetchpriority=high />
+      <img src="[% url_prefix %]themes/[% theme %]/images/logo_thruk_small_icon.png" alt="Thruk" title="Thruk" class="h-[36px] collapsed-only" fetchpriority=high />
     </a>
   </header>
 

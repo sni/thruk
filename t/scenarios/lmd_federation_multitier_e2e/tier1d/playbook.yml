@@ -45,7 +45,7 @@
       status_code: 200
     register: result
     until: result.status == 200
-    retries: 180
+    retries: 300
     delay: 1
     with_items:
       - tier2d

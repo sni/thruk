@@ -1433,7 +1433,7 @@ sub _apply_config_changes {
         return unless Thruk::Utils::check_csrf($c);
         if(defined $c->stash->{'peer_conftool'}->{'obj_check_cmd'}) {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::config_check($c, "'.$c->stash->{'param_backend'}.'")',
+            Thruk::Utils::External::perl($c, { expr    => ['Thruk::Utils::Conf::config_check', $c, $c->stash->{'param_backend'}],
                                                message => 'please stand by while configuration is being checked...',
                                         });
             return;
@@ -1452,7 +1452,7 @@ sub _apply_config_changes {
         }
         if(defined $c->stash->{'peer_conftool'}->{'obj_reload_cmd'} or $c->db->get_peer_by_key($c->stash->{'param_backend'})->{'type'} ne 'configonly') {
             $c->stash->{'parse_errors'} = $c->{'obj_db'}->{'parse_errors'};
-            Thruk::Utils::External::perl($c, { expr    => 'Thruk::Utils::Conf::config_reload($c, "'.$c->stash->{'param_backend'}.'")',
+            Thruk::Utils::External::perl($c, { expr    => ['Thruk::Utils::Conf::config_reload', $c, $c->stash->{'param_backend'}],
                                                message => 'please stand by while configuration is being reloaded...',
                                         });
             return;

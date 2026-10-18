@@ -48,7 +48,7 @@ sub handle_oauth_login {
     my $state = $c->req->parameters->{'state'};
     # oauth login flow, step 2
     if($code && $state) {
-        _cleanup_oauth_files($auth_folder, 600);
+        _cleanup_oauth_files($c, $auth_folder, 600);
         if(Thruk::Base::check_for_nasty_filename($state)) {
             $c->stats->profile(end => "handle_oauth_login");
             return $c->detach_error({msg => "oauth state contains invalid characters.", code => 400});
@@ -91,7 +91,7 @@ sub handle_oauth_login {
         $c->stats->profile(begin => "handle_oauth_login: post token");
         my $res = $ua->post($auth->{'token_url'}, $token_data);
         $c->stats->profile(end => "handle_oauth_login: post token");
-        _debug_http_response($res) if Thruk::Base->trace;
+        _debug_http_response($res, "post token", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
         unlink($auth_folder."/".$state.".json");
         my $token = _get_json($c, $res);
         if(!$token || !$token->{"access_token"}) {
@@ -111,7 +111,7 @@ sub handle_oauth_login {
             $c->stats->profile(begin => "handle_oauth_login: get api url");
             $res = $ua->get($auth->{'api_url'});
             $c->stats->profile(end => "handle_oauth_login: get api url");
-            _debug_http_response($res) if Thruk::Base->trace;
+            _debug_http_response($res, "api url", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
             my $userinfo = _get_json($c, $res);
             if(!$userinfo) {
                 $c->stats->profile(end => "handle_oauth_login");
@@ -123,6 +123,7 @@ sub handle_oauth_login {
                 return $c->detach_error({msg => "cannot find oauth user name", code => 500, debug_information => { userinfo => $userinfo }});
             }
         } else {
+            $c->stats->profile(begin => "load Crypt::JWT");
             # AD FS puts the claims in the id_token rather than in userinfo
             eval {
                 require Crypt::JWT;
@@ -131,6 +132,7 @@ sub handle_oauth_login {
             if ($@) {
                 die("Crypt::JWT is required when user id assertions not fetched from api_url");
             }
+            $c->stats->profile(end => "load Crypt::JWT");
             _debug(sprintf("oauth login step2: api_url not set, looking for user id in id_token")) if Thruk::Base->debug;
             my $id_token;
             if ($auth->{'jwks_url'}) {
@@ -138,14 +140,20 @@ sub handle_oauth_login {
                 $c->stats->profile(begin => "handle_oauth_login: get jwks url");
                 $res = $ua->get($auth->{'jwks_url'});
                 $c->stats->profile(end => "handle_oauth_login: get jwks url");
-                _debug_http_response($res) if Thruk::Base->trace;
+                _debug_http_response($res, "jwks", Thruk::Base->trace ? 'debug' : 'warn') if(Thruk::Base->trace || ($res->request->{_req_duration} && $res->request->{_req_duration} > 5));
                 my $jwks = _get_json($c, $res);
+                $c->stats->profile(begin => "decode_jwt jwks");
                 $id_token = decode_jwt(token => $token->{'id_token'}, kid_keys => $jwks);
+                $c->stats->profile(end => "decode_jwt jwks");
             } elsif ($auth->{'jwk_key'}) {
+                $c->stats->profile(begin => "decode_jwt jwk_key");
                 $id_token = decode_jwt(token => $token->{'id_token'}, keys => $auth->{'jwk_key'});
+                $c->stats->profile(end => "decode_jwt jwk_key");
             } else {
+                $c->stats->profile(begin => "decode_jwt insecure");
                 _debug("oauth login step2: WARNING insecure JWT decode");
                 $id_token = decode_jwt(token => $token->{'id_token'}, ignore_signature => 1);
+                $c->stats->profile(end => "decode_jwt insecure");
             }
             ($login, $teams) = _extract_login($auth, $id_token);
             if(!defined $login) {
@@ -202,7 +210,7 @@ sub handle_oauth_login {
 
     Thruk::Utils::IO::mkdir($auth_folder);
     Thruk::Utils::IO::json_lock_store($auth_folder."/".$state.".json", $state_data);
-    _cleanup_oauth_files($auth_folder, 600);
+    _cleanup_oauth_files($c, $auth_folder, 600);
     my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, $login_data, 1, $auth->{'auth_url'}, 1);
     _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
     $c->stats->profile(end => "handle_oauth_login");
@@ -222,7 +230,8 @@ sub _send_error {
 
 ##########################################################
 sub _cleanup_oauth_files {
-    my($folder, $timeout) = @_;
+    my($c, $folder, $timeout) = @_;
+    $c->stats->profile(begin => "_cleanup_oauth_files()");
     $timeout = time() - $timeout;
     opendir( my $dh, $folder) or die "can't opendir '$folder': $!";
     for my $entry (readdir($dh)) {
@@ -234,6 +243,7 @@ sub _cleanup_oauth_files {
             unlink($file);
         }
     }
+    $c->stats->profile(end => "_cleanup_oauth_files()");
     return;
 }
 

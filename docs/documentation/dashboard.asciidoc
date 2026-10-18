@@ -121,6 +121,7 @@ mouse button.
 
 
 Source:
+{% raw %}
 ------------
 {
   "general": {
@@ -158,6 +159,7 @@ Source:
   }
 }
 ------------
+{% endraw %}
 
 All examples can directly be used by adding any icon widget and copy &
 paste the source in the 'Source' Tab. Then hit the 'Apply' button.

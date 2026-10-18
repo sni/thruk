@@ -274,7 +274,7 @@ sub check_initial_start {
     local $c->stash->{'remote_user'} = '(cli)' unless $c->stash->{'remote_user'};
     if($background) {
         require Thruk::Utils::External;
-        Thruk::Utils::External::perl($c, { expr => 'Thruk::Utils::LMD::check_initial_start($c, $c->config, 0)', background => 1 });
+        Thruk::Utils::External::perl($c, { expr => ['Thruk::Utils::LMD::check_initial_start', $c, $c->config, 0], background => 1 });
         return;
     }
 
@@ -352,7 +352,7 @@ sub kill_if_not_responding {
     # kill in background job
     require Thruk::Utils::External;
     my $job = Thruk::Utils::External::perl($c, {
-        expr        => 'Thruk::Utils::LMD::_kill_step2($c, '.$lmd_timeout.', '.$lmd_pid.')',
+        expr        => ['Thruk::Utils::LMD::_kill_step2', $c, $lmd_timeout, $lmd_pid],
         message     => 'killing lmd',
         timeout     => $lmd_timeout+2,
         background  => 1,

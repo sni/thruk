@@ -638,12 +638,29 @@ sub validate_options {
 returns url with credentials removed for safe printing
 
 =cut
-
 sub url_clean_credentials {
     my($url) = @_;
     return unless defined $url;
     $url =~ s%//([^:]+):.*@%//$1:...@%gmx;
     return $url;
+}
+
+##############################################
+
+=head2 sanitize_inc
+
+    sanitize_inc()
+
+remove duplicate and non-existing folders from @INC without changing order of the includes
+
+=cut
+sub sanitize_inc {
+    my $clean = Thruk::Base::array_uniq(\@INC);
+    ## no critic
+    @INC = grep { -d $_ } @{$clean};
+    ## use critic
+
+    return;
 }
 
 ##############################################

@@ -318,15 +318,16 @@ sub _update_docs {
 
     my $root = $c->config->{'project_root'};
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths($c);
-    `mkdir -p bp;            cp $root/t/scenarios/cli_api/omd/1.tbp bp/9999.tbp`;
-    `mkdir -p panorama;      cp $root/t/scenarios/cli_api/omd/1.tab panorama/9999.tab`;
+    `mkdir -p bp;            cp $root/t/scenarios/cli_api/omd/skel/etc/thruk/bp/1.tbp bp/9999.tbp`;
+    `mkdir -p panorama;      cp $root/t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tabpanorama/9999.tab`;
     `mkdir -p var/broadcast; cp $root/t/scenarios/rest_api/omd/broadcast.json var/broadcast/broadcast.json`;
-    `mkdir -p var/downtimes; cp $root/t/scenarios/cli_api/omd/1.tsk var/downtimes/9999.tsk`;
-    `mkdir -p var/reports;   cp $root/t/scenarios/cli_api/omd/1.rpt var/reports/9999.rpt`;
+    `mkdir -p var/downtimes; cp $root/t/scenarios/cli_api/omd/skel/var/thruk/downtimes/1.tsk var/downtimes/9999.tsk`;
+    `mkdir -p var/reports;   cp $root/t/scenarios/cli_api/omd/skel/var/thruk/reports/1.rpt var/reports/9999.rpt`;
     my $system_api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', system => '1', roles => 'admin', force_user => 'test'});
     die("failed to create system api_key: ".($system_api_key->{'message'} || 'unknown error')."\n") unless $system_api_key && $system_api_key->{'private_key'};
     my $api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', username => 'restapidocs'});
     die("failed to create api_key: ".($api_key->{'message'} || 'unknown error')."\n") unless $api_key && $api_key->{'private_key'};
+
     # fake usage
     Thruk::Utils::IO::json_lock_store($api_key->{'file'}.".stats", { last_used => time(), last_from => "127.0.0.1" });
     # fake error message

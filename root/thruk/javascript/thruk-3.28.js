@@ -4171,7 +4171,6 @@ function getErrorText(error) {
     text = text + "Version:    " + version_info+"\n";
     text = text + "Release:    " + released+"\n";
     text = text + "Url:        " + window.location.pathname + "?" + window.location.search + "\n";
-    text = text + "Browser:    " + platform.description + "\n";
     text = text + "UserAgent:  " + navigator.userAgent + "\n";
     text = text + "User:       " + remote_user+ "\n";
     text = text + "Backends:   ";
@@ -4520,6 +4519,44 @@ function load_jquery_ui(callback) {
         },
         error:     ajax_xhr_error_logonly,
         cache:     true
+    });
+}
+
+/* moment + daterangepicker are loaded on demand to avoid blocking page render */
+var drp_loading = false;
+function has_daterangepicker() {
+    return typeof moment !== 'undefined' && !!jQuery.fn.daterangepicker;
+}
+function load_daterangepicker(callback) {
+    if(has_daterangepicker()) {
+        callback();
+        return;
+    }
+    if(drp_loading) {
+        return;
+    }
+    drp_loading = true;
+    var done = function() { drp_loading = false; callback(); };
+    var fail = function() { drp_loading = false; };
+    var css  = document.createElement('link');
+    css.href = url_prefix + 'vendor/daterangepicker-'+daterangepicker_ver+'/daterangepicker.css';
+    css.rel  = 'stylesheet';
+    css.type = 'text/css';
+    document.body.appendChild(css);
+    jQuery.ajax({
+        url:       url_prefix + 'vendor/daterangepicker-'+daterangepicker_ver+'/moment.min.js',
+        dataType:  'script',
+        cache:     true,
+        success:   function() {
+            jQuery.ajax({
+                url:       url_prefix + 'vendor/daterangepicker-'+daterangepicker_ver+'/daterangepicker.js',
+                dataType:  'script',
+                cache:     true,
+                success:   done,
+                error:     fail
+            });
+        },
+        error:     fail
     });
 }
 
@@ -6578,6 +6615,8 @@ function set_action_menu_attr(item, data, backend, host, service, callback) {
                     return(res);
                 });
             }
+        } else if(key == "class") {
+            item.className += ' '+attr;
         } else {
             item[key] = attr;
         }
@@ -9015,6 +9054,12 @@ function show_cal(ev) {
     }
 
     var id1           = ev.target.id;
+    // daterangepicker + moment are loaded on demand, re-click once they are ready
+    if(!has_daterangepicker()) {
+        var el = document.getElementById(id1);
+        load_daterangepicker(function() { el.click(); });
+        return;
+    }
     var hasClear      = ev.target.className.match(/cal_popup_clear/)         ? true : false;
     var hasRange      = ev.target.className.match(/cal_popup_range/)         ? true : false;
     var hasRangeCond  = ev.target.className.match(/cal_popup_range_cond/)    ? true : false;

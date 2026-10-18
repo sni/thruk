@@ -71,6 +71,7 @@ thruk_local.d/
 !t/scenarios/*/*
 !t/scenarios/*/*/*
 t/scenarios/*/panorama/
+!t/scenarios/*/omd/skel/**
 tmp_*
 action_menus/*
 plugins/plugins-enabled/editor

@@ -304,7 +304,7 @@ sub test_page {
                 last;
             }
 
-            if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+            if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m#cgi\-bin\/job\.cgi\?job=(\w+)|r/thruk/jobs?/\w+/output#mxo) {
                 # is it a background job page?
                 my $location = $request->{'_headers'}->{'location'};
                 wait_for_job($location);
@@ -314,7 +314,7 @@ sub test_page {
                     fail('Request '.$location.' should succeed. Original url: '.$opts->{'url'});
                     bail_out_req('request failed', $request, 1);
                 }
-                if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+                if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m#cgi\-bin\/job\.cgi\?job=(\w+)|r/thruk/jobs?/\w+/output#mxo) {
                     fail(sprintf('Request %s should not redirect to job page again. (start: %s, now: %s, original url: %s', $location, (scalar localtime $start), (scalar localtime $now), $opts->{'url'}));
                     bail_out_req('request failed', $request, 1);
                 }
@@ -344,14 +344,14 @@ sub test_page {
 
     my($job_location, $job_id);
     # job redirect
-    if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        $job_id = $1;
+    if($request->is_redirect && $request->{'_headers'}->{'location'} =~ m#cgi\-bin\/job\.cgi\?job=(\w+)|r/thruk/jobs?/(\w+)/output#mxo) {
+        $job_id = $1 // $2;
         $job_location = $request->{'_headers'}->{'location'};
     }
     # job page?
-    elsif(defined $return->{'content'} && $return->{'content'} =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
-        $job_id = $1;
-        $job_location = "/thruk/cgi-bin/job.cgi?job=".$job_id;
+    elsif(defined $return->{'content'} && $return->{'content'} =~ m#cgi\-bin\/job\.cgi\?job=(\w+)|r/thruk/jobs?/(\w+)/output#mxo) {
+        $job_id = $1 // $2;
+        $job_location = defined $1 ? "/thruk/cgi-bin/job.cgi?job=".$job_id : "/thruk/r/thruk/jobs/".$job_id."/output";
     }
     # follow job
     if($job_id) {
@@ -603,6 +603,10 @@ sub diag_lint_errors_and_remove_some_exceptions {
         next if $err_str =~ m/Unknown\ attribute\ "charset"\ for\ tag\ <meta>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "required"\ for\ tag\ <(input|select|textarea)>/imxo;
         next if $err_str =~ m/Unknown\ attribute\ "oncontextmenu"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "crossorigin"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "fetchpriority"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "as"\ for\ tag/imxo;
+        next if $err_str =~ m/Unknown\ attribute\ "defer"\ for\ tag/imxo;
         next if $err_str =~ m/<html>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<head>\ tag\ is\ required/imxo;
         next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
@@ -670,6 +674,9 @@ sub wait_for_job {
         $joburl = $url.'&json=1';
     }
     elsif($url =~ m/cgi\-bin\/job\.cgi\?job=(\w+)/mxo) {
+        $job = $1;
+    }
+    elsif($url =~ m#r/thruk/jobs?/(\w+)/output#mxo) {
         $job = $1;
     }
     my $start = [gettimeofday];

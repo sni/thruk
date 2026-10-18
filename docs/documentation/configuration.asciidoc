@@ -2138,6 +2138,8 @@ ex.:
       auth_url      = https://oauthserver/oauth2/v1/authorize     # Initial authenticator redirect url
       token_url     = https://oauthserver/oauth2/v1/token         # URL to exchange code into token
       api_url       = https://oauthserver/oauth2/v1/userinfo      # API endpoint to retrieve user information from
+      #jwks_url    = https://oauthserver/oauth2/v1/keys           # if api_url is not set, the id_token is decoded instead. Its signature must be verified either via jwks_url or jwk_key
+      #jwk_key     = {"kty":"RSA","n":"...","e":"AQAB"}           # static public key to verify the id_token signature (alternative to jwks_url)
       login_field   = login                                       # Hash key from user info to get the actual username from. If not set, Thruk will try 'login', then 'email'
       groups_field  = groups                                      # Hash key from user info to fetch teams from. If not set, Thruk will try 'groups'
       #enable_pkce  = 0                                           # enable oauth 2.1 pkce workflow if set to 1. Disabled by default
@@ -2522,6 +2524,7 @@ The menu item can have the following attributes:
                         the actionname must be a reference to a command from 'action_menu_actions'.
                         You may use `{% raw %}{{macros}}{% endraw %}` here too. Also javascript: links are valid,
                         for example `javascript:alert('$HOSTNAME$')`.
+     ** `class`         Add css class to link.
      ** `target`        Use '_blank' here to open link in a new window.
      ** `onclick`       confirmation dialog or any other callback, ex: "return(confirm('Really restart service?'));"
      ** `close_timeout` timeout till the result popup will close, defaults to 5 seconds if ok or 30 seconds if failed. Set to zero to never close the result popup.

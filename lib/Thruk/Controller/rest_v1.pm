@@ -157,7 +157,7 @@ sub index {
         $c->user->set_dynamic_attributes($c);
     }
 
-    if($c->user->{'readonly'} && $c->req->method ne 'GET') {
+    if($c->check_user_roles('authorized_for_read_only') && $c->req->method ne 'GET') {
         my $data = {
             'message'     => 'only GET requests allowed for readonly api keys.',
             'code'        => 400,
@@ -191,8 +191,9 @@ sub index {
     if($c->req->parameters->{"background"}) {
         $c->config->{'no_external_job_forks'} = 0;
         delete $c->req->parameters->{"background"};
+        require Thruk::Utils::External;
         my $job = Thruk::Utils::External::perl($c, {
-                    expr       => 'Thruk::Controller::rest_v1::_process_rest_request($c, "'.$path_info.'", "'.$format.'")',
+                    expr       => ['Thruk::Controller::rest_v1::_process_rest_request', $c, $path_info, $format],
                     message    => 'rest api request rendered in background, please stand by...',
                     clean      => 1,
                     render     => 1,
@@ -2862,7 +2863,7 @@ sub _rest_get_livestatus_commands {
 # REST PATH: GET /commands/<name>
 # lists commands for given name.
 # alias for /commands?name=<name>
-register_rest_path_v1('GET', qr%^/commands?/([^/]+)$%mx, \&_rest_get_livestatus_commands_by_name);
+register_rest_path_v1('GET', qr%^/commands?/([^/]+)$%mx, \&_rest_get_livestatus_commands_by_name, ['admin']);
 sub _rest_get_livestatus_commands_by_name {
     my($c, undef, $command) = @_;
     my $data = $c->db->get_commands(filter => [ Thruk::Utils::Auth::get_auth_filter($c, 'commands'), { "name" => $command }, _livestatus_filter($c) ], %{_livestatus_options($c)});

@@ -312,8 +312,10 @@ sub _rest_get_external_command {
             $data->{'failed_backends'} = $c->stash->{'failed_backends'};
 
             # did some commands succeed?
+            my $partial_error = 0;
             if((scalar keys %{$c->stash->{'failed_backends'}}) < (scalar keys %{$commands})) {
                 $data->{'message'} = sprintf('sending command failed on %d of %d sites', (scalar keys %{$c->stash->{'failed_backends'}}), (scalar keys %{$commands}));
+                $partial_error = 1;
             }
 
             # set code from backend response
@@ -328,7 +330,7 @@ sub _rest_get_external_command {
             }
 
             # allow overriding exit code for partial errors, only some backends down
-            if($c->config->{'rest_commands_ignore_partial_errors'}) {
+            if($c->config->{'rest_commands_ignore_partial_errors'} && $partial_error) {
                 $data->{'code'}    = 200;
                 $data->{'warning'} = delete $data->{'error'};
             }

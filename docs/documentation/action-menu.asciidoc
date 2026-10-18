@@ -57,12 +57,14 @@ See link:macros.html[Macros] for a list of all available macros.
 
 Inside the actual menu definition you can only use the following macros:
 
+{% raw %}
 - `$HOSTNAME$`
 - `$SERVICEDESC$`
 - `{{ theme }}`
 - `{{ remote_user }}`
 - `{{ site }}`
 - `{{ prefix }}`
+{% endraw %}
 
 === Scripts
 The scripts can do whatever they want. However you should consider a few things:

@@ -112,6 +112,7 @@ Get supported scopes here: https://login.microsoftonline.com/$TENANT/.well-known
     scopes        = "openid profile email"
     auth_url      = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize"
     token_url     = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token"
+    jwks_url      = "https://login.microsoftonline.com/$TENANT/discovery/v2.0/keys"
     login_field   = "preferred_username"
   </provider>
 </auth_oauth>

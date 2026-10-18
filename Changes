@@ -1,6 +1,7 @@
 This file documents the revision history for the Monitoring Webinterface Thruk.
 
 next:
+          - fix remote code vulnerability in grafana image export (GHSA-83cf-v4hm-pw6j)
           - fix mouse glitch on quick command menu (#1502)
           - fix parsing config values containing equal signs (#1512)
           - fix host state on main page (#1515)
@@ -10,6 +11,7 @@ next:
           - fix recurring downtimes added multiple times if some backends were down
           - add service time hint when editing crontab based schedules
           - fix search inputs loosing value when hitting enter
+          - update unicons to v4.2.0
           - Config Tool:
             - report invalid boolean object attributes instead of a perl warning
           - Teams:
