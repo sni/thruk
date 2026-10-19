@@ -1952,12 +1952,12 @@ sub _get_columns_meta_for_path {
 
     # add missing columns from data
     for my $conf (@{$meta}) {
-        if(!defined $conf->{'type'}) {
-            my($type, $unit) = guess_field_type($path_info, $conf->{'name'});
-            if($type) {
+        if(!defined $conf->{'type'} || ($conf->{'type'} eq 'number' && (!$conf->{'config'} || !$conf->{'config'}->{'unit'}))) {
+            my($type, $unit) = guess_field_type($path_info, $alias_columns->{$conf->{'name'}}->{'orig'} // $conf->{'name'});
+            if($type && !defined $conf->{'type'}) {
                 $conf->{'type'} = $type;
             }
-            if($unit) {
+            if($unit && $type eq $conf->{'type'} && !$conf->{'config'}->{'unit'}) {
                 $conf->{'config'}->{'unit'} = $unit;
             }
         }
@@ -3516,6 +3516,9 @@ sub guess_field_type {
     if($name =~ m/(^|_)percent$/mx) {
         return('number', '%');
     }
+    if($name =~ m/(^|_)(percent_state_change|(low|high)_flap_threshold)$/mx) {
+        return('number', '%');
+    }
 
     # seconds from availabilty checks
     if($url =~ m/\/availability/mx) {
@@ -3539,7 +3542,7 @@ sub guess_field_type {
     # ex.: hosts_active_15_sum
     if($name =~ m/_(sum|avg|min|max)$/mx) {
         my $unit = '';
-        if($name =~ m/_time_/mx) {
+        if($name =~ m/_(time|latency)_/mx) {
             $unit = 's';
         }
         if($name =~ m/state_change/mx) {
@@ -3566,7 +3569,7 @@ sub guess_field_type {
     }
 
     # ex.: duration
-    if($name =~ m/^(duration|response_time|execution_time)$/mx) {
+    if($name =~ m/(^|_)(duration|response_time|execution_time|latency|interval_length)$/mx) {
         return('number', 's');
     }
     if($name =~ m/(_duration|_seconds)$/mx) {

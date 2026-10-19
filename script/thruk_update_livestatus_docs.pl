@@ -38,6 +38,8 @@ use strict;
 use Cpanel::JSON::XS qw(encode_json);
 use LWP::Simple qw(get);
 
+use Thruk::Controller::rest_v1 ();
+
 my $output_file = "lib/Thruk/Controller/Rest/V1/livestatus_docs.pm";
 my $source_url  = "https://raw.githubusercontent.com/naemon/naemon.github.io/refs/heads/master/src/documentation/usersguide/livestatus.columns.json";
 
@@ -96,11 +98,12 @@ for my $table (sort keys %table_paths) {
     my $cols = [];
     for my $c (@columns) {
         my $type = $type_map{$c->{naemon_type}} // 'string';
-        $type = 'time' if $type eq 'number' && $c->{description} =~ m/\bunix\s+timestamp\b/imx;
+        $type = 'time' if $type eq 'number' && ($c->{description} =~ m/\bunix\s+timestamp\b/imx || $c->{name} eq 'last_log_rotation');
+        my($guessed_type, $unit) = Thruk::Controller::rest_v1::guess_field_type($table_paths{$table}->[0], $c->{name});
         push @$cols, {
             name        => $c->{name},
             type        => $type,
-            unit        => '',
+            unit        => $type eq $guessed_type ? $unit : '',
             description => $c->{description},
         };
     }

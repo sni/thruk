@@ -354,7 +354,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -396,7 +396,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -522,7 +522,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -534,7 +534,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -714,7 +714,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -1056,7 +1056,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "service_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -1086,7 +1086,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "service_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -1218,7 +1218,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "service_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -1230,7 +1230,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "service_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -1338,7 +1338,7 @@ __DATA__
      "description": "Percent state change",
      "name": "service_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -1674,7 +1674,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -1716,7 +1716,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -1842,7 +1842,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -1854,7 +1854,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -2034,7 +2034,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -2376,7 +2376,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "service_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -2406,7 +2406,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "service_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -2538,7 +2538,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "service_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -2550,7 +2550,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "service_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -2658,7 +2658,7 @@ __DATA__
      "description": "Percent state change",
      "name": "service_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -3138,7 +3138,7 @@ __DATA__
      "description": "The duration of the downtime in seconds",
      "name": "duration",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The end time of the downtime as UNIX timestamp",
@@ -3378,7 +3378,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -3420,7 +3420,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -3546,7 +3546,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -3558,7 +3558,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -3738,7 +3738,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -4074,7 +4074,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "service_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -4104,7 +4104,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "service_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -4236,7 +4236,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "service_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -4248,7 +4248,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "service_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -4356,7 +4356,7 @@ __DATA__
      "description": "Percent state change",
      "name": "service_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -4458,7 +4458,7 @@ __DATA__
      "description": "The duration of the downtime in seconds",
      "name": "duration",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The end time of the downtime as UNIX timestamp",
@@ -4698,7 +4698,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -4740,7 +4740,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -4866,7 +4866,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -4878,7 +4878,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -5058,7 +5058,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -5394,7 +5394,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "service_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -5424,7 +5424,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "service_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -5556,7 +5556,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "service_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -5568,7 +5568,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "service_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -5676,7 +5676,7 @@ __DATA__
      "description": "Percent state change",
      "name": "service_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -6306,7 +6306,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -6348,7 +6348,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -6474,7 +6474,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -6486,7 +6486,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -6666,7 +6666,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -7014,7 +7014,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -7056,7 +7056,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -7182,7 +7182,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -7194,7 +7194,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -7374,7 +7374,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -7722,7 +7722,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -7764,7 +7764,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "An optional URL to custom actions or information about the hostgroup",
@@ -8046,7 +8046,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -8058,7 +8058,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -8238,7 +8238,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -8586,7 +8586,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -8628,7 +8628,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "An optional URL to custom actions or information about the hostgroup",
@@ -8910,7 +8910,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -8922,7 +8922,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -9102,7 +9102,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -9654,7 +9654,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "current_host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -9696,7 +9696,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "current_host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -9822,7 +9822,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "current_host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -9834,7 +9834,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "current_host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -10014,7 +10014,7 @@ __DATA__
      "description": "Percent state change",
      "name": "current_host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -10338,7 +10338,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "current_service_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -10368,7 +10368,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "current_service_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -10500,7 +10500,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "current_service_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -10512,7 +10512,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "current_service_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -10620,7 +10620,7 @@ __DATA__
      "description": "Percent state change",
      "name": "current_service_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -10854,7 +10854,7 @@ __DATA__
      "description": "The default interval length from naemon.cfg",
      "name": "interval_length",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The time of the last check for a command as UNIX timestamp (deprecated)",
@@ -10865,7 +10865,7 @@ __DATA__
     {
      "description": "Time time of the last log file rotation",
      "name": "last_log_rotation",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -11442,7 +11442,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -11472,7 +11472,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -11694,7 +11694,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -11736,7 +11736,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -11862,7 +11862,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -11874,7 +11874,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -12054,7 +12054,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -12306,7 +12306,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -12318,7 +12318,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -12426,7 +12426,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -12696,7 +12696,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -12726,7 +12726,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -12948,7 +12948,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -12990,7 +12990,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -13116,7 +13116,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -13128,7 +13128,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -13308,7 +13308,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -13560,7 +13560,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -13572,7 +13572,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -13680,7 +13680,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -13950,7 +13950,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -13980,7 +13980,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -14202,7 +14202,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -14244,7 +14244,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -14370,7 +14370,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -14382,7 +14382,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -14562,7 +14562,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -14814,7 +14814,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -14826,7 +14826,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -14934,7 +14934,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -15318,7 +15318,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -15348,7 +15348,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -15570,7 +15570,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -15612,7 +15612,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -15738,7 +15738,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -15750,7 +15750,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -15930,7 +15930,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -16182,7 +16182,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -16194,7 +16194,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -16302,7 +16302,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -16686,7 +16686,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -16716,7 +16716,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -16938,7 +16938,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -16980,7 +16980,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -17106,7 +17106,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -17118,7 +17118,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -17298,7 +17298,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -17706,7 +17706,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -17718,7 +17718,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -17826,7 +17826,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",
@@ -18096,7 +18096,7 @@ __DATA__
      "description": "Time the service check needed for execution",
      "name": "execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Delay before the first notification",
@@ -18126,7 +18126,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Whether passive host checks are accepted (0/1)",
@@ -18348,7 +18348,7 @@ __DATA__
      "description": "Time the host check needed for execution",
      "name": "host_execution_time",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "The value of the custom variable FILENAME",
@@ -18390,7 +18390,7 @@ __DATA__
      "description": "High threshold of flap detection",
      "name": "host_high_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Hourly Value",
@@ -18516,7 +18516,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "host_latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Complete output from check plugin",
@@ -18528,7 +18528,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "host_low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Max check attempts for active host checks",
@@ -18708,7 +18708,7 @@ __DATA__
      "description": "Percent state change",
      "name": "host_percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Optional performance data of the last host check",
@@ -19116,7 +19116,7 @@ __DATA__
      "description": "Time difference between scheduled check time and actual check time",
      "name": "latency",
      "type": "number",
-     "unit": ""
+     "unit": "s"
     },
     {
      "description": "Unabbreviated output of the last check plugin",
@@ -19128,7 +19128,7 @@ __DATA__
      "description": "Low threshold of flap detection",
      "name": "low_flap_threshold",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "The maximum number of check attempts",
@@ -19236,7 +19236,7 @@ __DATA__
      "description": "Percent state change",
      "name": "percent_state_change",
      "type": "number",
-     "unit": ""
+     "unit": "%"
     },
     {
      "description": "Performance data of the last check plugin",

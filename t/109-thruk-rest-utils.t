@@ -27,13 +27,30 @@ subtest 'Livestatus column metadata' => sub {
         ['/services', 'last_check as checked', 'time'],
         ['/logs', 'time', 'time'],
         ['/downtimes', 'start_time', 'time'],
-        ['/downtimes', 'duration', 'number'],
+        ['/downtimes', 'duration', 'number', 's'],
         ['/comments', 'entry_time', 'time'],
+        ['/processinfo', 'last_log_rotation', 'time'],
+        ['/processinfo', 'interval_length', 'number', 's'],
+        ['/hosts', 'execution_time', 'number', 's'],
+        ['/hosts', 'latency', 'number', 's'],
+        ['/hosts', 'latency as delay', 'number', 's'],
+        ['/services', 'host_execution_time', 'number', 's'],
+        ['/services', 'latency as delay', 'number', 's'],
+        ['/logs', 'current_service_latency', 'number', 's'],
+        ['/hosts', 'percent_state_change', 'number', '%'],
+        ['/services', 'host_high_flap_threshold', 'number', '%'],
+        ['/services', 'low_flap_threshold', 'number', '%'],
+        ['/checks/stats', 'hosts_latency_avg', 'number', 's'],
+        ['/checks/stats', 'services_latency_max', 'number', 's'],
+        ['/checks/stats', 'hosts_active_state_change_avg', 'number', '%'],
+        ['/thruk/recurring_downtimes', 'duration', 'number', 'minutes'],
+        ['/hosts', 'check_interval', 'number'],
     ) {
-        my($path, $column, $type) = @{$test};
+        my($path, $column, $type, $unit) = @{$test};
         my $c = TestUtils::ctx_request('/?columns='.$column);
         my $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, $path, 'GET', []);
         is($meta->[0]->{'type'}, $type, $path.' '.$column);
+        is($meta->[0]->{'config'}->{'unit'}, $unit, $path.' '.$column.' unit');
     }
     done_testing();
 };
