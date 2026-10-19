@@ -509,11 +509,13 @@ sub _db_table_stats {
         return(0, 0, 0, {}, "logcache not yet created");
     }
     eval {
+        # reltuples is -1 for tables which were never analyzed (postgres >= 14),
+        # that is an unknown count, not a negative number of items
         my $res = $dbh->selectall_arrayref(
             "SELECT
                 SUM(pg_indexes_size(c.oid)) as index_size,
                 SUM(pg_table_size(c.oid)) as data_size,
-                SUM(reltuples) as items
+                SUM(GREATEST(reltuples, 0))::bigint as items
              FROM pg_class c
              JOIN pg_namespace n ON n.oid = c.relnamespace
              WHERE n.nspname = 'public'
