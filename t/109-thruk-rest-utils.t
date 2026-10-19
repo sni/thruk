@@ -1,8 +1,8 @@
 use warnings;
 use strict;
-use Test::More;
 use Cpanel::JSON::XS qw/decode_json/;
 use HTTP::Request ();
+use Test::More;
 
 plan tests => 36;
 
