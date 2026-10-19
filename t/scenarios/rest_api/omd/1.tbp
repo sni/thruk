@@ -50,7 +50,8 @@
          "contacts" : [],
          "depends" : [
             "node6",
-            "node7"
+            "node7",
+            "node8"
          ],
          "filter" : [],
          "function" : "worst()",
@@ -73,6 +74,15 @@
          "filter" : [],
          "function" : "status('localhost', 'Disk /', '=')",
          "id" : "node7",
+         "label" : "none"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status('localhost', '', '=')",
+         "id" : "node8",
          "label" : "none"
       }
    ],

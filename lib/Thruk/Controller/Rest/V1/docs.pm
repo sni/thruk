@@ -3992,6 +3992,42 @@ __DATA__
    ]
   }
  },
+ "/thruk/bp/<nr>/objects": {
+  "GET": {
+   "columns": [
+    {
+     "description": "object type: \"host\" or \"service\"",
+     "name": "_type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "host name (added to host rows for uniformity with service rows)",
+     "name": "host_name",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
+ "/thruk/bp/<nr>/objects/recursive": {
+  "GET": {
+   "columns": [
+    {
+     "description": "object type: \"host\" or \"service\"",
+     "name": "_type",
+     "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "host name (added to host rows for uniformity with service rows)",
+     "name": "host_name",
+     "type": "string",
+     "unit": ""
+    }
+   ]
+  }
+ },
  "/thruk/broadcasts": {
   "GET": {
    "columns": [

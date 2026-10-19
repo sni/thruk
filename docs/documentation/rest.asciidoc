@@ -2453,6 +2453,38 @@ update business processes configuration partially for given number.
 
 remove business processes for given number.
 
+=== GET /thruk/bp/<nr>/objects
+
+combined list of hosts and services directly referenced by a business process.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for host columns.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#services for service columns.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|_type                             | string     |          | object type: "host" or "service"
+|host_name                         | string     |          | host name (added to host rows for uniformity with service rows)
+|===========================================
+
+
+=== GET /thruk/bp/<nr>/objects/recursive
+
+combined list of hosts and services including all transitively linked BPs.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for host columns.
+see https://www.naemon.io/documentation/usersguide/livestatus.html#services for service columns.
+
+Additional attributes added by Thruk:
+
+[options="header"]
+|===========================================
+|Attribute                         | Type       | Unit     | Description
+|_type                             | string     |          | object type: "host" or "service"
+|host_name                         | string     |          | host name (added to host rows for uniformity with service rows)
+|===========================================
+
+
 === POST /thruk/bp/<nr>/refresh
 
 recalculate business processes status for given number.

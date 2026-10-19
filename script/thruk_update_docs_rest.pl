@@ -369,6 +369,10 @@ sub _update_docs {
     Thruk::Utils::IO::json_lock_patch('var/reports/9999.rpt', { error => "test" });
     # fake panorama maintmode
     Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
+    # refresh business processes so /thruk/stats lists the business_process_* columns
+    # (a real "bp all" calculation is the only thing that writes those metrics)
+    my($rc, $bp_out) = Thruk::Utils::IO::cmd("$root/script/thruk bp all 2>&1");
+    _warn("refreshing business processes failed (rc %d): %s\n", $rc, $bp_out) if $rc;
 
     my $login = "thrukadmin";
     my $userdata = Thruk::Utils::get_user_data($c, $login);
