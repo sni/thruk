@@ -1,4 +1,8 @@
 {
+   "backends" : {
+      "backends" : []
+   },
+   "create_host_object" : 1,
    "filter" : [
       "add_recursive_output_filter"
    ],
@@ -12,7 +16,8 @@
             "node5"
          ],
          "filter" : [],
-         "function" : "worst()",
+         "function" : "worst",
+         "function_args" : [],
          "id" : "node1",
          "label" : "tier1a bp"
       },
@@ -21,7 +26,12 @@
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier2a bp', 'tier2a bp', '=')",
+         "function" : "status",
+         "function_args" : [
+            "tier2a bp",
+            "tier2a bp",
+            "="
+         ],
          "id" : "node2",
          "label" : "tier2a link"
       },
@@ -30,7 +40,12 @@
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier2b', '.*', '=')",
+         "function" : "status",
+         "function_args" : [
+            "tier2b",
+            ".*",
+            "~"
+         ],
          "id" : "node3",
          "label" : "tier2b link"
       },
@@ -39,7 +54,12 @@
          "contacts" : [],
          "depends" : [],
          "filter" : [],
-         "function" : "status('tier1a', '.*', '~')",
+         "function" : "status",
+         "function_args" : [
+            "tier1a",
+            ".*",
+            "~"
+         ],
          "id" : "node4",
          "label" : "tier1a link"
       },
@@ -49,12 +69,28 @@
          "depends" : [
             "node4",
             "node2",
-            "node3"
+            "node3",
+            "node6"
          ],
          "filter" : [],
-         "function" : "worst()",
+         "function" : "worst",
+         "function_args" : [],
          "id" : "node5",
          "label" : "tier 1a middle"
+      },
+      {
+         "contactgroups" : [],
+         "contacts" : [],
+         "depends" : [],
+         "filter" : [],
+         "function" : "status",
+         "function_args" : [
+            "tier3b",
+            "",
+            "="
+         ],
+         "id" : "node6",
+         "label" : "host check"
       }
    ],
    "rankDir" : "TB",
