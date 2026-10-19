@@ -1,8 +1,10 @@
 use warnings;
 use strict;
 use Test::More;
+use Cpanel::JSON::XS qw/decode_json/;
+use HTTP::Request ();
 
-plan tests => 35;
+plan tests => 36;
 
 BEGIN {
     use lib('t');
@@ -52,6 +54,26 @@ subtest 'Livestatus column metadata' => sub {
         is($meta->[0]->{'type'}, $type, $path.' '.$column);
         is($meta->[0]->{'config'}->{'unit'}, $unit, $path.' '.$column.' unit');
     }
+    done_testing();
+};
+
+subtest 'Grafana column discovery headers' => sub {
+    my $request = HTTP::Request->new('GET' => '/thruk/r/v1/hosts?limit=1');
+    $request->header(
+        'X-Thruk-Output-Metadata-Only' => '1',
+        'X-THRUK-OutputFormat'         => 'wrapped_json',
+        'x-thruk-columns'             => 'true',
+    );
+    my $response = TestUtils::request($request);
+    is($response->code, 200, 'column discovery request succeeds');
+    my $data = decode_json($response->content);
+    is_deeply($data->{'data'}, [], 'metadata-only response contains no rows');
+    is(ref $data->{'meta'}->{'columns'}, 'ARRAY', 'response contains column metadata');
+    my $columns = { map { $_->{'name'} => $_ } @{$data->{'meta'}->{'columns'}} };
+    is($columns->{'name'}->{'type'}, 'string', 'host name has string metadata');
+    is($columns->{'state'}->{'type'}, 'number', 'host state has number metadata');
+    is($columns->{'last_check'}->{'type'}, 'time', 'last check has time metadata');
+    ok(!exists $columns->{'limit'}, 'limit is not included as a column');
     done_testing();
 };
 
