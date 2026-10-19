@@ -113,7 +113,7 @@ __DATA__
     {
      "description": "The time the entry was made as UNIX timestamp",
      "name": "entry_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -125,7 +125,7 @@ __DATA__
     {
      "description": "The time of expiry of this comment as a UNIX timestamp",
      "name": "expire_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -461,7 +461,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -473,13 +473,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -491,31 +491,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -563,13 +563,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1151,7 +1151,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "service_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1163,13 +1163,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "service_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "service_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1181,37 +1181,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "service_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "service_last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "service_last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "service_last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "service_last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "service_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1253,13 +1253,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "service_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "service_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1433,7 +1433,7 @@ __DATA__
     {
      "description": "The time the entry was made as UNIX timestamp",
      "name": "entry_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1445,7 +1445,7 @@ __DATA__
     {
      "description": "The time of expiry of this comment as a UNIX timestamp",
      "name": "expire_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1781,7 +1781,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1793,13 +1793,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1811,31 +1811,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -1883,13 +1883,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2471,7 +2471,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "service_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2483,13 +2483,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "service_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "service_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2501,37 +2501,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "service_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "service_last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "service_last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "service_last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "service_last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "service_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -2573,13 +2573,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "service_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "service_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3143,13 +3143,13 @@ __DATA__
     {
      "description": "The end time of the downtime as UNIX timestamp",
      "name": "end_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time the entry was made as UNIX timestamp",
      "name": "entry_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3485,7 +3485,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3497,13 +3497,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3515,31 +3515,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -3587,13 +3587,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4169,7 +4169,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "service_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4181,13 +4181,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "service_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "service_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4199,37 +4199,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "service_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "service_last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "service_last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "service_last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "service_last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "service_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4271,13 +4271,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "service_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "service_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4421,7 +4421,7 @@ __DATA__
     {
      "description": "The start time of the downtime as UNIX timestamp",
      "name": "start_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4463,13 +4463,13 @@ __DATA__
     {
      "description": "The end time of the downtime as UNIX timestamp",
      "name": "end_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time the entry was made as UNIX timestamp",
      "name": "entry_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4805,7 +4805,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4817,13 +4817,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4835,31 +4835,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -4907,13 +4907,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -5489,7 +5489,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "service_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -5501,13 +5501,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "service_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "service_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -5519,37 +5519,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "service_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "service_last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "service_last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "service_last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "service_last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "service_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -5591,13 +5591,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "service_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "service_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -5741,7 +5741,7 @@ __DATA__
     {
      "description": "The start time of the downtime as UNIX timestamp",
      "name": "start_time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -6413,7 +6413,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -6425,13 +6425,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -6443,31 +6443,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -6515,13 +6515,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7121,7 +7121,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7133,13 +7133,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7151,31 +7151,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7223,13 +7223,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7985,7 +7985,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -7997,13 +7997,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8015,31 +8015,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8087,13 +8087,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8849,7 +8849,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8861,13 +8861,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8879,31 +8879,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -8951,13 +8951,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -9761,7 +9761,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "current_host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -9773,13 +9773,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "current_host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "current_host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -9791,31 +9791,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "current_host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "current_host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "current_host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "current_host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "current_host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -9863,13 +9863,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "current_host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "current_host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10433,7 +10433,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "current_service_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10445,13 +10445,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "current_service_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "current_service_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10463,37 +10463,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "current_service_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "current_service_last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "current_service_last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "current_service_last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "current_service_last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "current_service_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10535,13 +10535,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "current_service_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "current_service_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10733,7 +10733,7 @@ __DATA__
     {
      "description": "Time of the log event (UNIX timestamp)",
      "name": "time",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10859,7 +10859,7 @@ __DATA__
     {
      "description": "The time of the last check for a command as UNIX timestamp (deprecated)",
      "name": "last_command_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -10961,7 +10961,7 @@ __DATA__
     {
      "description": "The time of the last program start as UNIX timestamp",
      "name": "program_start",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -11801,7 +11801,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -11813,13 +11813,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -11831,31 +11831,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -11903,13 +11903,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -12239,7 +12239,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -12251,13 +12251,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -12269,37 +12269,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -12341,13 +12341,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13055,7 +13055,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13067,13 +13067,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13085,31 +13085,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13157,13 +13157,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13493,7 +13493,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13505,13 +13505,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13523,37 +13523,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -13595,13 +13595,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14309,7 +14309,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14321,13 +14321,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14339,31 +14339,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14411,13 +14411,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14747,7 +14747,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14759,13 +14759,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14777,37 +14777,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -14849,13 +14849,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -15677,7 +15677,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -15689,13 +15689,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -15707,31 +15707,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -15779,13 +15779,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -16115,7 +16115,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -16127,13 +16127,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -16145,37 +16145,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -16217,13 +16217,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17045,7 +17045,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17057,13 +17057,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17075,31 +17075,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17147,13 +17147,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17639,7 +17639,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17651,13 +17651,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17669,37 +17669,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -17741,13 +17741,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -18455,7 +18455,7 @@ __DATA__
     {
      "description": "Time of the last check (Unix timestamp)",
      "name": "host_last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -18467,13 +18467,13 @@ __DATA__
     {
      "description": "Time of the last hard state change (Unix timestamp)",
      "name": "host_last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last notification (Unix timestamp)",
      "name": "host_last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -18485,31 +18485,31 @@ __DATA__
     {
      "description": "Time of the last state change - soft or hard (Unix timestamp)",
      "name": "host_last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was DOWN (Unix timestamp)",
      "name": "host_last_time_down",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UNREACHABLE (Unix timestamp)",
      "name": "host_last_time_unreachable",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the host was UP (Unix timestamp)",
      "name": "host_last_time_up",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this host (Unix timestamp)",
      "name": "host_last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -18557,13 +18557,13 @@ __DATA__
     {
      "description": "Scheduled time for the next check (Unix timestamp)",
      "name": "host_next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the next notification (Unix timestamp)",
      "name": "host_next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -19049,7 +19049,7 @@ __DATA__
     {
      "description": "The time of the last check (Unix timestamp)",
      "name": "last_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -19061,13 +19061,13 @@ __DATA__
     {
      "description": "The time of the last hard state change (Unix timestamp)",
      "name": "last_hard_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the last notification (Unix timestamp)",
      "name": "last_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -19079,37 +19079,37 @@ __DATA__
     {
      "description": "The time of the last state change (Unix timestamp)",
      "name": "last_state_change",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was CRITICAL (Unix timestamp)",
      "name": "last_time_critical",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was OK (Unix timestamp)",
      "name": "last_time_ok",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was UNKNOWN (Unix timestamp)",
      "name": "last_time_unknown",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The last time the service was in WARNING state (Unix timestamp)",
      "name": "last_time_warning",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "Time of the last update of this service (Unix timestamp)",
      "name": "last_update",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
@@ -19151,13 +19151,13 @@ __DATA__
     {
      "description": "The scheduled time of the next check (Unix timestamp)",
      "name": "next_check",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {
      "description": "The time of the next notification (Unix timestamp)",
      "name": "next_notification",
-     "type": "number",
+     "type": "time",
      "unit": ""
     },
     {

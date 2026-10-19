@@ -96,6 +96,7 @@ for my $table (sort keys %table_paths) {
     my $cols = [];
     for my $c (@columns) {
         my $type = $type_map{$c->{naemon_type}} // 'string';
+        $type = 'time' if $type eq 'number' && $c->{description} =~ m/\bunix\s+timestamp\b/imx;
         push @$cols, {
             name        => $c->{name},
             type        => $type,

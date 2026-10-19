@@ -2,7 +2,7 @@ use warnings;
 use strict;
 use Test::More;
 
-plan tests => 34;
+plan tests => 35;
 
 BEGIN {
     use lib('t');
@@ -16,6 +16,27 @@ use_ok 'Thruk::Utils';
 
 _test_replace_output();
 _test_get_filter();
+
+subtest 'Livestatus column metadata' => sub {
+    for my $test (
+        ['/hosts', 'last_check', 'time'],
+        ['/hosts', 'next_check', 'time'],
+        ['/hosts', 'last_state', 'number'],
+        ['/hosts', 'name', 'string'],
+        ['/services', 'host_last_check', 'time'],
+        ['/services', 'last_check as checked', 'time'],
+        ['/logs', 'time', 'time'],
+        ['/downtimes', 'start_time', 'time'],
+        ['/downtimes', 'duration', 'number'],
+        ['/comments', 'entry_time', 'time'],
+    ) {
+        my($path, $column, $type) = @{$test};
+        my $c = TestUtils::ctx_request('/?columns='.$column);
+        my $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, $path, 'GET', []);
+        is($meta->[0]->{'type'}, $type, $path.' '.$column);
+    }
+    done_testing();
+};
 
 ################################################################################
 sub _test_replace_output{
