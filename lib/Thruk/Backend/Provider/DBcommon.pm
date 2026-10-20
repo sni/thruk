@@ -681,6 +681,66 @@ sub get_existing_caches {
     return(\@list);
 }
 
+##########################################################
+# figure out if the update lock of a logcache is still held
+#
+# In a cluster the lock may be held by another node, where kill(0, $pid) is useless.
+# update_hostname is written when an update starts, so the lock can be attributed to a node.
+# A lock which has not been refreshed within logcache_update_stale_after is considered stale and may be taken over.
+#
+# returns a hash with running, stale, mode and the human readable msg
+sub _logcache_lock_state {
+    my($self, $c, $status) = @_;
+
+    my $lock_mode   = $status->{'lock_mode'}->{'value'};
+    my $update_pid  = $status->{'update_pid'}->{'value'};
+    my $lock_host   = $status->{'update_hostname'}->{'value'};
+    my $last_update = $status->{'last_update'}->{'value'};
+    my $stale_after = $c->config->{'logcache_update_stale_after'} // (3600 * 8);
+    my $hostname    = Thruk::Config::hostname();
+
+    my $state = {
+        'running' => 0,
+        'stale'   => 0,
+        'mode'    => '',
+        'msg'     => 'OK',
+    };
+    return($state) if(!$lock_mode);
+
+    # a lock which has not been refreshed for a while cannot be trusted
+    # the update process is gone or the pid has been reused by another process
+    if(!$last_update || $last_update < time() - $stale_after) {
+        $state->{'stale'} = 1;
+    }
+
+    # in a cluster the lock may be held by another node
+    my $other_host = 0;
+    if(ref $c && $c->can('cluster') && $c->cluster && $c->cluster->is_clustered()
+       && defined $lock_host && $lock_host ne '') {
+        $other_host = 1 if $lock_host ne $hostname;
+    }
+
+    if($other_host) {
+        $state->{'running'} = $state->{'stale'} ? 0 : 1;
+        $state->{'mode'}    = $state->{'running'} ? $lock_mode : '';
+        $state->{'msg'}     = sprintf('an update is running on machine %s with pid %s', $lock_host, $update_pid // '?');
+        $state->{'msg'}    .= ' (stale since '.scalar localtime($last_update).')' if $state->{'stale'} && $last_update;
+        return($state);
+    }
+
+    # our own lock or a single node setup, the pid has to be alive
+    my $alive = ($update_pid && kill(0, $update_pid)) ? 1 : 0;
+    $state->{'stale'} = 1 if !$alive;
+    if(!$state->{'stale'}) {
+        $state->{'running'} = 1;
+        $state->{'mode'}    = $lock_mode;
+        $state->{'msg'}     = sprintf('running %s since %s (pid: %s)', $lock_mode, $last_update ? scalar localtime($last_update) : '?', $update_pid // '?');
+        return($state);
+    }
+    $state->{'msg'} = sprintf('stale %s since %s (pid: %s)', $lock_mode, $last_update ? scalar localtime($last_update) : '?', $update_pid // '?');
+    return($state);
+}
+
 sub _log_stats {
     my($self, $c, $backends) = @_;
     my $driver = $self->_driver_name();
@@ -696,6 +756,7 @@ sub _log_stats {
         my $msg = "OK";
         my($index_size, $data_size, $items, $last_entry);
         my $status  = {};
+        my $mode    = '';
         if(!$peer->{'logcache'}) {
             $msg = "logcache is disabled";
         } else {
@@ -703,11 +764,13 @@ sub _log_stats {
             my $dbh  = $peer->logcache->_dbh();
             ($index_size, $data_size, $items, $status, $msg) = $self->_db_table_stats($dbh, $key);
             if(!$msg) {
-                (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
-                if($status->{'lock_mode'}->{'value'}) {
-                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $status->{'update_pid'}->{'value'}//'?');
-                } else {
-                    $msg = "OK";
+                my $lock = $self->_logcache_lock_state($c, $status);
+                $msg  = $lock->{'msg'};
+                $mode = $lock->{'mode'};
+
+                # do not read the cache while an update is running
+                if(!$lock->{'running'}) {
+                    (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
                 }
             }
         }
@@ -727,7 +790,7 @@ sub _log_stats {
             compact_duration => $status->{'compact_duration'}->{'value'}    // '',
             compact_till     => $status->{'compact_till'}->{'value'}        // '',
             last_entry       => $last_entry                                 // '',
-            mode             => $status->{'lock_mode'}->{'value'}           // '',
+            mode             => $mode,
             status           => $msg,
         };
     }
@@ -886,6 +949,8 @@ sub _log_check_inconsistency {
 sub _log_repair_inconsistency {
     my($self, $c, $prefix, $total) = @_;
     my $peer = $c->db->get_peer_by_key($prefix);
+    return unless $peer->{'logcache'};
+
     my $dbh  = $peer->logcache->_dbh;
 
     my $table_host = $self->_quote_table($prefix."_host");

@@ -1831,6 +1831,22 @@ ex.:
   logcache_worker = auto
 
 
+=== logcache_update_stale_after
+A running logcache update stores its mode, pid and hostname in the logcache
+status table. If the update process dies, that lock stays behind and would be
+reported as running forever. A lock which has not been refreshed within this
+many seconds is reported as stale and may be taken over by the next update.
+
+In a cluster the lock may be held by another node, where the pid cannot be
+checked. The hostname stored with the lock tells which node is updating; only
+when the lock is stale the update is allowed to continue. Raise this value if
+you run very long initial imports.
+
+ex.:
+
+  logcache_update_stale_after = 10800
+
+
 === logcache_clean_duration
 Default duration when running `thruk logcache clean`. See the
 link:timedefinitions.html[time definitions] page for available options.
