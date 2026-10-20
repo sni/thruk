@@ -46,7 +46,7 @@ sub new {
     my($class, $peer_config) = @_;
 
     my $options = $peer_config->{'options'};
-    confess('need at least one peer. Minimal options are <options>peer = mysql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
+    confess('need at least one peer. Minimal options are <options>peer = postgresql://user:password@host:port/dbname</options>'."\ngot: ".Dumper($peer_config)) unless defined $options->{'peer'};
 
     $options->{'name'} = 'postgresql' unless defined $options->{'name'};
     if(!defined $options->{'peer_key'}) {
