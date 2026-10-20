@@ -958,7 +958,7 @@ sub _log_repair_inconsistency {
     my $dbh  = $peer->logcache->_dbh;
 
     my $table_host = $self->_quote_table($prefix."_host");
-    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count > 1");
+    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count(host_id) > 1");
     $sth->execute;
 
     my $sp  = length("$total");
