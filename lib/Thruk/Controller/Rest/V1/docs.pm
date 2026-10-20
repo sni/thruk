@@ -4007,6 +4007,10 @@ __DATA__
      "type": "string",
      "unit": ""
     }
+   ],
+   "inherits": [
+    "/hosts",
+    "/services"
    ]
   }
  },
@@ -4025,6 +4029,10 @@ __DATA__
      "type": "string",
      "unit": ""
     }
+   ],
+   "inherits": [
+    "/hosts",
+    "/services"
    ]
   }
  },

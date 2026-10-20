@@ -461,6 +461,21 @@ sub _update_docs {
                     $content .= $additional->{$url}->{$proto};
                 }
                 $raw_json->{$url}->{$proto} = { columns => [] };
+                # endpoints whose rows are other documented paths declare it in their
+                # description, ex.: "see ...livestatus.html#hosts for host columns.";
+                # record the inherited paths so the runtime merges their columns
+                {
+                    my %seen;
+                    my $inherits = [];
+                    for my $line (@{$docs->{$url}->{$proto} || []}) {
+                        while($line =~ m%livestatus\.html#([a-z_]+)\s+for\s+\S*\s+columns%gi) {
+                            my $tbl = "/".$1;
+                            next if $seen{$tbl}++;
+                            push @{$inherits}, $tbl;
+                        }
+                    }
+                    $raw_json->{$url}->{$proto}->{inherits} = $inherits if @{$inherits};
+                }
                 $content .= '[options="header"]'."\n";
                 $content .= "|===========================================\n";
                 $content .= sprintf("|%-33s | %-10s | %-8s | %s\n", 'Attribute', 'Type', 'Unit', 'Description');

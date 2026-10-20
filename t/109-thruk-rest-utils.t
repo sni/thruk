@@ -88,12 +88,16 @@ subtest 'BP path column metadata specificity' => sub {
     my $columns = { map { $_->{'name'} => $_ } @{$meta} };
     is($columns->{'_type'}->{'type'}, 'string', 'recursive: _type metadata from objects docs');
     ok(exists $columns->{'host_name'}, 'recursive: host_name metadata present');
-    ok(!exists $columns->{'name'}, 'recursive: name (business process list) metadata absent');
 
     $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1/objects', 'GET', []);
     $columns = { map { $_->{'name'} => $_ } @{$meta} };
     is($columns->{'_type'}->{'type'}, 'string', 'objects: _type metadata from objects docs');
-    ok(!exists $columns->{'name'}, 'objects: name (business process list) metadata absent');
+
+    # bp objects rows are livestatus host and service rows, so their columns
+    # must be documented as well
+    for my $col (qw/address state description plugin_output execution_time/) {
+        ok(exists $columns->{$col}, "objects: livestatus column $col documented");
+    }
 
     # /thruk/bp/<nr> itself must still resolve to the business process list docs
     $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1', 'GET', []);

@@ -1877,6 +1877,21 @@ sub _get_columns_meta_for_path {
         } else {
             $keys->{$path} = $docs->{$path};
         }
+        # a path may inherit columns from other documented paths, declared in its
+        # description ex.: "see ...livestatus.html#hosts for host columns."
+        my $inherits = $keys->{$path} && $keys->{$path}->{GET} && $keys->{$path}->{GET}->{inherits};
+        if($inherits) {
+            my $col_hash = {};
+            for my $tbl (@{$inherits}) {
+                for my $col (@{$keys->{$tbl}->{GET}->{columns} || []}) {
+                    $col_hash->{$col->{name}} = $col;
+                }
+            }
+            for my $col (@{$keys->{$path}->{GET}->{columns} || []}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            $keys->{$path}->{GET}->{columns} = [values %{$col_hash}];
+        }
     }
     my $alias_columns = get_aliased_columns($c);
     my $req_columns  = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
