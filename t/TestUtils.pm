@@ -20,7 +20,8 @@ use lib 'lib';
 use Carp qw/confess/;
 use Cpanel::JSON::XS qw/encode_json decode_json/;
 use Data::Dumper;
-use File::Temp qw/tempfile/;
+use File::Path qw/rmtree/;
+use File::Temp qw/tempfile tempdir/;
 use HTTP::Cookies::Netscape;
 use HTTP::Request ();
 use HTTP::Request::Common 6.12 qw/GET POST/;
@@ -1356,10 +1357,12 @@ sub js_init {
 
     use Log::Log4perl qw(:easy);
     Log::Log4perl->easy_init($ERROR);
+    our $chrome_profile = tempdir(CLEANUP => 0);
     our $mech = WWW::Mechanize::Chrome->new(
         headless         => 1,
         separate_session => 1,
         incognito        => 1,
+        data_directory   => $chrome_profile,
         launch_arg       => ["--password-store=basic", "--remote-allow-origins=*"],
     );
     $mech->get_local(-f "./data/blank.html" ? "./data/blank.html" : "../../data/blank.html");
@@ -1381,6 +1384,10 @@ sub js_init {
 sub js_deinit {
     our $mech;
     $mech->close();
+    # File::Temp CLEANUP=1 cannot remove the profile dir while chrome is
+    # still writing to it, so remove it ourselves after the process exited
+    our $chrome_profile;
+    rmtree($chrome_profile);
 }
 
 #################################################
