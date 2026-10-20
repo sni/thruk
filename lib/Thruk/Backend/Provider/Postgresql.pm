@@ -518,6 +518,9 @@ sub _db_table_stats {
     if(!$self->_has_log_table($dbh, $prefix)) {
         return(0, 0, 0, {}, "logcache not yet created");
     }
+    if(!$self->_has_status_table($dbh, $prefix)) {
+        return(0, 0, 0, {}, "logcache is incomplete, status table is missing");
+    }
     eval {
         # reltuples is -1 for tables which were never analyzed (postgres >= 14),
         # that is an unknown count, not a negative number of items
@@ -554,6 +557,12 @@ sub _db_table_stats {
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
     my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ?", undef, $prefix.'_log')};
+    return scalar @tables >= 1 ? 1 : 0;
+}
+
+sub _has_status_table {
+    my($self, $dbh, $prefix) = @_;
+    my @tables = @{$dbh->selectcol_arrayref("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = ?", undef, $prefix.'_status')};
     return scalar @tables >= 1 ? 1 : 0;
 }
 

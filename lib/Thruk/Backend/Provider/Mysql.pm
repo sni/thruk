@@ -529,6 +529,9 @@ sub _db_table_stats {
     if(!$self->_has_log_table($dbh, $prefix)) {
         return(0, 0, 0, {}, "logcache not yet created");
     }
+    if(!$self->_has_status_table($dbh, $prefix)) {
+        return(0, 0, 0, {}, "logcache is incomplete, status table is missing");
+    }
     eval {
         my $res = $dbh->selectall_arrayref("SELECT SUM(index_length) as index_size, SUM(data_length) as data_size, SUM(table_rows) as items FROM information_schema.TABLES WHERE table_schema=Database() AND table_name LIKE '".$prefix."_%'", { Slice => {} });
         if($res && $res->[0]) {
@@ -551,6 +554,12 @@ sub _db_table_stats {
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
     my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'_log"')};
+    return scalar @tables >= 1 ? 1 : 0;
+}
+
+sub _has_status_table {
+    my($self, $dbh, $prefix) = @_;
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'_status"')};
     return scalar @tables >= 1 ? 1 : 0;
 }
 
