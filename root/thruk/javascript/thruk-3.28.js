@@ -9943,6 +9943,7 @@ var ajax_search = {
 
     get_current_input_search_pattern: function() {
         var input = document.getElementById(ajax_search.input_field);
+        if(!input) { return(""); }
         var pattern = input.value;
         if(pattern == "all") { pattern = ""; }
         if(pattern == "*")   { pattern = ""; }
@@ -10255,8 +10256,10 @@ var ajax_search = {
         }
         var panel = document.getElementById(ajax_search.result_pan);
         var input = document.getElementById(ajax_search.input_field);
-        if(!panel) { return; }
-        if(!input) { return; }
+        if(!panel)        { return; }
+        if(!input)        { return; }
+        if(!results)      { return; }
+        if(!results.sort) { return; }
 
         results.sort(sort_by('top_hits', false));
 
