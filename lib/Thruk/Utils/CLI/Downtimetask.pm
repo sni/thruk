@@ -152,6 +152,10 @@ sub _handle_file {
     my($backends, $cmd_typ) = Thruk::Utils::RecurringDowntimes::get_downtime_backends($c, $downtime);
     if(scalar @{$backends} == 0) { $backends = $c->db->get_default_backends(); }
 
+    # each target keeps its own backend list so one target's pruning never
+    # shrinks the backends available to another target
+    my %tbackends;
+
     my $errors = 0;
     for($retries = 0; $retries < $total_retries; $retries++) {
         sleep($retry_delay * $retries) if $retries > 0;
@@ -163,7 +167,8 @@ sub _handle_file {
                 $downtime->{'service'} = undef;
                 my $rc;
                 eval {
-                    ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    $tbackends{$hst} = [ @{$backends} ] unless defined $tbackends{$hst};
+                    ($rc, $tbackends{$hst}) = set_downtime($c, $downtime, $cmd_typ, $tbackends{$hst}, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'hosts'}->{$hst};
@@ -185,8 +190,10 @@ sub _handle_file {
                     $downtime->{'host'}    = $hst;
                     $downtime->{'service'} = $svc;
                     my $rc;
+                    my $tkey = $hst.';'.$svc;
                     eval {
-                        ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                        $tbackends{$tkey} = [ @{$backends} ] unless defined $tbackends{$tkey};
+                        ($rc, $tbackends{$tkey}) = set_downtime($c, $downtime, $cmd_typ, $tbackends{$tkey}, $start, $end, $hours, $minutes);
                     };
                     if($rc && !$@) {
                         $errors-- if defined $done->{'services'}->{$hst}->{$svc};
@@ -210,7 +217,8 @@ sub _handle_file {
                 $downtime->{$downtime->{'target'}} = $grp;
                 my $rc;
                 eval {
-                    ($rc, $backends) = set_downtime($c, $downtime, $cmd_typ, $backends, $start, $end, $hours, $minutes);
+                    $tbackends{$grp} = [ @{$backends} ] unless defined $tbackends{$grp};
+                    ($rc, $tbackends{$grp}) = set_downtime($c, $downtime, $cmd_typ, $tbackends{$grp}, $start, $end, $hours, $minutes);
                 };
                 if($rc && !$@) {
                     $errors-- if defined $done->{'groups'}->{$grp};
