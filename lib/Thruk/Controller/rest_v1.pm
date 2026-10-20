@@ -1886,13 +1886,9 @@ sub _get_columns_meta_for_path {
         @{$req_columns} = grep { $_ ne 'limit' } @{$req_columns};
     }
     my $columns = {};
-    for my $path (sort {
-        my $a_wc = ($a =~ /</mx) ? 1 : 0;
-        my $b_wc = ($b =~ /</mx) ? 1 : 0;
-        $a_wc <=> $b_wc
-        ||
-        length $b <=> length $a
-    } keys %{$keys}) {
+    # match the most specific (longest) documented path first so that
+    # ex. /thruk/bp/<nr>/objects/recursive wins over the /thruk/bp prefix
+    for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
         my $p = $path;
         # Replace endpoints like '/host/<name>/outages' to '/host/[^/]*/outages' for regex matches
         $p =~ s%<[^>]+>%[^/]*%gmx;

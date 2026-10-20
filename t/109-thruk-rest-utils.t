@@ -4,7 +4,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 use HTTP::Request ();
 use Test::More;
 
-plan tests => 36;
+plan tests => 37;
 
 BEGIN {
     use lib('t');
@@ -74,6 +74,32 @@ subtest 'Grafana column discovery headers' => sub {
     is($columns->{'state'}->{'type'}, 'number', 'host state has number metadata');
     is($columns->{'last_check'}->{'type'}, 'time', 'last check has time metadata');
     ok(!exists $columns->{'limit'}, 'limit is not included as a column');
+    done_testing();
+};
+
+# the most specific documented path must win, otherwise a prefix like /thruk/bp
+# would shadow /thruk/bp/<nr>/objects/recursive and return the wrong columns
+# (this is the metadata-fallback used by the grafana datasource, ex. a
+# metadata-only wrapped_json request without an explicit columns param)
+subtest 'BP path column metadata specificity' => sub {
+    my $c = TestUtils::ctx_request('/');
+
+    my $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1/objects/recursive', 'GET', []);
+    my $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    is($columns->{'_type'}->{'type'}, 'string', 'recursive: _type metadata from objects docs');
+    ok(exists $columns->{'host_name'}, 'recursive: host_name metadata present');
+    ok(!exists $columns->{'name'}, 'recursive: name (business process list) metadata absent');
+
+    $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1/objects', 'GET', []);
+    $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    is($columns->{'_type'}->{'type'}, 'string', 'objects: _type metadata from objects docs');
+    ok(!exists $columns->{'name'}, 'objects: name (business process list) metadata absent');
+
+    # /thruk/bp/<nr> itself must still resolve to the business process list docs
+    $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1', 'GET', []);
+    $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    ok(exists $columns->{'name'}, 'bp: name (business process list) metadata present');
+    ok(!exists $columns->{'_type'}, 'bp: _type metadata absent');
     done_testing();
 };
 
