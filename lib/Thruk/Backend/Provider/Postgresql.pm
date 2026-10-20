@@ -1009,7 +1009,7 @@ sub _check_lock {
     # check if there is already a update / import running
     my $skip          = 0;
     eval {
-        $self->_lock_table_share($dbh, $prefix);
+        $self->_lock_table_exclusive($dbh, $prefix);
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM "'.$prefix.'_status" WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -1018,17 +1018,17 @@ sub _check_lock {
             }
         }
     };
-    # PostgreSQL: transaction abort on lock failure; rollback before checking error
-    eval { $dbh->rollback; } if $@;
     if($@) {
-        _debug($@);
+        eval { $dbh->rollback; };
         return;
     }
     if($skip) {
+        eval { $dbh->rollback; };
         return;
     }
 
-    $self->_lock_table_exclusive($dbh, $prefix);
+    # _status table has the last_update, update_pid and lock_mode
+    # if update_pid is present, an update is ongoing
     my $now = time();
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(1,'last_update',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $now, $now);
     $dbh->do("INSERT INTO \"" . $prefix . "_status\" (status_id,name,value) VALUES(2,'update_pid',?) ON CONFLICT (status_id) DO UPDATE SET value=?", undef, $$, $$);
