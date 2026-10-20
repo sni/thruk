@@ -267,7 +267,7 @@ sub _get_create_schema {
           PRIMARY KEY (contact_id)
         )",
 
-    # contact_host_rel
+    # contact_host_rel -> who may see which host
         "DROP TABLE IF EXISTS \"" . $prefix . "_contact_host_rel\" CASCADE",
         "CREATE TABLE \"" . $prefix . "_contact_host_rel\" (
           contact_id int NOT NULL,
@@ -275,7 +275,7 @@ sub _get_create_schema {
           PRIMARY KEY (contact_id,host_id)
         )",
 
-    # contact_service_rel
+    # contact_service_rel -> who may see which services
         "DROP TABLE IF EXISTS \"" . $prefix . "_contact_service_rel\" CASCADE",
         "CREATE TABLE \"" . $prefix . "_contact_service_rel\" (
           contact_id int NOT NULL,
@@ -319,7 +319,8 @@ sub _get_create_schema {
         )",
         "CREATE INDEX \"" . $prefix . "_service_host_idx\" ON \"" . $prefix . "_service\" (host_id)",
 
-    # status
+    # status -> peer key used as prefix
+    # fixed key/values keys are status_id. the values are upserted
         "DROP TABLE IF EXISTS \"" . $prefix . "_status\" CASCADE",
         "CREATE TABLE \"" . $prefix . "_status\" (
           status_id serial,
@@ -835,6 +836,7 @@ sub _import_logs {
         my $dbh = $peer->logcache->_dbh;
         $backend_count++;
 
+        # $sp is the padding, calcualted from $total string length -> [%02d/02d] %ing %s logcache...
         _infos("[%0".$sp."d/%0".$sp."d] %sing %s logcache... ", $num, $total, $mode, $prefix);
 
         my $count = 0;

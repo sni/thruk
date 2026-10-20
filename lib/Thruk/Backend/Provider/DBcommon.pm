@@ -827,6 +827,7 @@ sub _logcache_stats_types {
         next unless $self->_has_log_table($dbh, $key);
         my $table = $self->_quote_table($key."_log");
         my $types  = [values %{$dbh->selectall_hashref("SELECT " . $self->_sql_coalesce($groupby, "''") . " as ".$groupby.", count(*) as total FROM ".$table." GROUP BY " . $groupby, $groupby)}];
+        # sort rows by the total count, largest first
         $types     = [reverse sort { $a->{'total'} <=> $b->{'total'} } @{$types}];
         my $total = 0;
         for my $t (@{$types}) {
@@ -866,6 +867,7 @@ sub _log_removeunused {
     my $table_names = $self->_get_all_table_names($dbh);
     my $res = {};
     for my $t (@{$table_names}) {
+        # table names are formatted as <peer>_<table_name>
         if($t =~ m/^(.*?)_(status|log)/mx) {
             my $key = $1;
             $res->{$key} = 1 unless $res->{$key};
@@ -874,6 +876,7 @@ sub _log_removeunused {
             my $key = $1;
             # fetch name
             my $table_status = $self->_quote_table($key."_status");
+            # status key/value table has 'peer_name' in its 11. index
             my @names = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 11 LIMIT 1')};
             $res->{$key} = $names[0] if scalar @names > 0;
         }
@@ -896,6 +899,7 @@ sub _log_removeunused {
 
     my $removed = 0;
     my $tables_count  = 0;
+    # mysql returns "" , postresql reutnrs " CASCADE" which alslo removes dependent objects
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$res}) {
         for my $tbl (@{$table_names}) {
@@ -1226,6 +1230,7 @@ sub _db_lock_tables {
     my $skip          = 0;
     eval {
         $self->_lock_table_share($dbh, $prefix);
+        # status key/value table has update_pid in index 2
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -1264,6 +1269,7 @@ sub _import_peer_logfiles {
 
     return(-1) unless $self->_tables_exist($dbh, $prefix);
 
+    # 86400 seconds = 24 * 60 * 60 seconds
     if($blocksize > 86400) {
         _warn("logcache blocksize too long, reduced to 1 day");
         $blocksize = 86400;
@@ -1276,6 +1282,7 @@ sub _import_peer_logfiles {
         $c->stats->profile(begin => "get last ".$driver." timestamp");
         # get last timestamp from DB
         ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
+        _debug("first entry from logcache: ".(scalar localtime $mstart)) if $mstart;
         _debug("last entry from logcache: ".(scalar localtime $mend)) if $mend;
         $c->stats->profile(end => "get last ".$driver." timestamp");
     }
@@ -1293,6 +1300,7 @@ sub _import_peer_logfiles {
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
+        # Provider::Base is the livestatus, whose logs will be imported
         ($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'}, $mend);
         if(defined $mend && $start < $mend) {
             $start = $mend;
