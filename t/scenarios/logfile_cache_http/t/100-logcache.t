@@ -4,6 +4,7 @@ use Data::Dumper;
 use Test::More;
 
 use Thruk::Backend::Provider::Base ();
+use Thruk::Utils::SelfCheck ();
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
@@ -69,6 +70,32 @@ my $dbh    = $peer->logcache()->_dbh();
     my @data   = @{$dbh->selectall_arrayref('SELECT * FROM `'.$prefix.'_log` l WHERE l.state_type IS NULL AND l.type = "SERVICE ALERT" LIMIT 10', { Slice => {} })};
     is(scalar @data, 0, "all service alerts have a state_type set") or diag(Dumper(\@data));
 };
+
+################################################################################
+# selfcheck must report duplicate host names instead of a hash reference
+{
+    my $hostname = 'selfcheck-duplicate-'.$$;
+    $dbh->do('INSERT INTO `'.$prefix.'_host` (host_name) VALUES (?), (?)', undef, $hostname, $hostname);
+    $dbh->commit;
+
+    my($rc, $msg, $details);
+    eval {
+        ($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, 'logcache_data', {});
+    };
+    my $error = $@;
+    $dbh = $peer->logcache()->_dbh();
+    $dbh->do('DELETE FROM `'.$prefix.'_host` WHERE host_name = ?', undef, $hostname);
+    $dbh->commit;
+    die $error if $error;
+
+    is($rc, 2, 'duplicate host names make selfcheck critical');
+    is($msg, 'CRITICAL - logcache_data', 'selfcheck identifies the failing check');
+    like($details, qr/\[logcache \Q$peer->{'name'}\E\] duplicate host names: \Q$hostname\E/, 'selfcheck prints the duplicate host name');
+    unlike($details, qr/HASH\(0x/, 'selfcheck does not print a hash reference');
+
+    ($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, 'logcache_data', {});
+    is($rc, 0, 'logcache selfcheck is OK after removing duplicate hosts');
+}
 
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
 # which depends on machine load and speed (initial import redirects after 10 seconds)

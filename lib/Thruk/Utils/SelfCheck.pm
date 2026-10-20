@@ -603,7 +603,7 @@ sub _logcache_data_check  {
     for my $s (@stats) {
         next unless $s->{'enabled'};
         if($incons->{$s->{'key'}}) {
-            $details .= sprintf('  - [logcache %s] %s'."\n", $s->{'name'}, $incons->{$s->{'key'}});
+            $details .= sprintf('  - [logcache %s] duplicate host names: %s'."\n", $s->{'name'}, join(', ', @{$incons->{$s->{'key'}}->{'hosts'}}));
             $errors++;
         }
     }
