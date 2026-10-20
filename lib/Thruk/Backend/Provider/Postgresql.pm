@@ -144,7 +144,7 @@ sub _dbh {
         $dsn .= ";port=".$self->{'dbport'} if $self->{'dbport'};
         $self->{'postgres'} = DBI->connect_cached($dsn, $self->{'dbuser'}, $self->{'dbpass'}, {RaiseError => 1, AutoCommit => 0, pg_enable_utf8 => 1});
         $self->{'postgres'}->do("SET client_encoding TO 'UTF8'");
-        $self->{'postgres'}->do("SET client_min_messages = warning");
+        $self->{'postgres'}->do("SET client_min_messages TO 'warning'");
         &timing_breakpoint('connected');
     }
     return $self->{'postgres'};
