@@ -148,5 +148,116 @@ sub _rest_get_thruk_bp_by_id_refresh {
 }
 
 ##########################################################
+# REST PATH: GET /thruk/bp/<nr>/objects
+# combined list of hosts and services directly referenced by a business process.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for host columns.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#services for service columns.
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/bp/(\d+)/objects$%mx, \&_rest_get_thruk_bp_objects);
+sub _rest_get_thruk_bp_objects {
+    my($c, undef, $nr) = @_;
+    require Thruk::BP::Utils;
+
+    my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $nr, drafts => 1 });
+    if(!$bps->[0]) {
+        return({ 'message' => 'no such business process', code => 404 });
+    }
+    my $objects = [];
+    _bp_objects_collect($c, $bps->[0], $objects);
+    return($objects);
+}
+
+##########################################################
+# REST PATH: GET /thruk/bp/<nr>/objects/recursive
+# combined list of hosts and services including all transitively linked BPs.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#hosts for host columns.
+# see https://www.naemon.io/documentation/usersguide/livestatus.html#services for service columns.
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/bp/(\d+)/objects/recursive$%mx, \&_rest_get_thruk_bp_objects_recursive);
+sub _rest_get_thruk_bp_objects_recursive {
+    my($c, undef, $nr) = @_;
+    require Thruk::BP::Utils;
+    require Thruk::Utils;
+
+    my $bps = Thruk::BP::Utils::load_bp_data($c, { id => $nr, drafts => 1 });
+    if(!$bps->[0]) {
+        return({ 'message' => 'no such business process', code => 404 });
+    }
+    my %bp_lookup;
+    my $objects = [];
+    _bp_objects_recurse($c, $bps->[0], $objects, \%bp_lookup);
+    return($objects);
+}
+
+sub _bp_objects_collect {
+    my($c, $bp, $objects) = @_;
+    my $livedata = $bp->bulk_fetch_live_data($c, 1);
+
+    if($livedata->{'hosts'}) {
+        for my $name (sort keys %{$livedata->{'hosts'}}) {
+            my $h = $livedata->{'hosts'}->{$name};
+            push @{$objects}, { %{$h}, 'host_name' => $name, '_type' => 'host' };
+        }
+    }
+    if($livedata->{'services'}) {
+        for my $hostname (sort keys %{$livedata->{'services'}}) {
+            for my $svcname (sort keys %{$livedata->{'services'}->{$hostname}}) {
+                my $s = $livedata->{'services'}->{$hostname}{$svcname};
+                push @{$objects}, { %{$s}, '_type' => 'service' };
+            }
+        }
+    }
+    return;
+}
+
+sub _bp_objects_recurse {
+    my($c, $bp, $objects, $bp_lookup) = @_;
+    my $bp_id = $bp->{'id'};
+    return if $bp_lookup->{$bp_id};
+    $bp_lookup->{$bp_id} = 1;
+
+    my $livedata = $bp->bulk_fetch_live_data($c, 1);
+    if($livedata->{'hosts'}) {
+        for my $name (sort keys %{$livedata->{'hosts'}}) {
+            my $h = $livedata->{'hosts'}->{$name};
+            push @{$objects}, { %{$h}, 'host_name' => $name, '_type' => 'host' };
+        }
+    }
+    if($livedata->{'services'}) {
+        for my $hostname (sort keys %{$livedata->{'services'}}) {
+            for my $svcname (sort keys %{$livedata->{'services'}->{$hostname}}) {
+                my $s = $livedata->{'services'}->{$hostname}{$svcname};
+                push @{$objects}, { %{$s}, '_type' => 'service' };
+            }
+        }
+    }
+
+    my %recursive_bps;
+    if($livedata->{'hosts'}) {
+        for my $host (values %{$livedata->{'hosts'}}) {
+            my $vars = Thruk::Utils::get_custom_vars($c, $host);
+            if($vars->{'THRUK_BP_ID'} && !$bp_lookup->{$vars->{'THRUK_BP_ID'}}) {
+                $recursive_bps{$vars->{'THRUK_BP_ID'}} = 1;
+            }
+        }
+    }
+    if($livedata->{'services'}) {
+        for my $name (keys %{$livedata->{'services'}}) {
+            for my $service (values %{$livedata->{'services'}->{$name}}) {
+                my $vars = Thruk::Utils::get_custom_vars($c, $service);
+                if($vars->{'THRUK_BP_ID'} && !$bp_lookup->{$vars->{'THRUK_BP_ID'}}) {
+                    $recursive_bps{$vars->{'THRUK_BP_ID'}} = 1;
+                }
+            }
+        }
+    }
+    for my $link_id (sort keys %recursive_bps) {
+        my $linked = Thruk::BP::Utils::load_bp_data($c, { id => $link_id });
+        if(scalar @{$linked} == 1) {
+            _bp_objects_recurse($c, $linked->[0], $objects, $bp_lookup);
+        }
+    }
+    return;
+}
+
+##########################################################
 
 1;

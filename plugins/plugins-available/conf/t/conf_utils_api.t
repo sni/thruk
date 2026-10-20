@@ -6,6 +6,7 @@ use File::Copy qw/copy/;
 use File::Temp qw/tempdir/;
 use IO::Socket::INET;
 use IO::Socket::UNIX;
+use POSIX ();
 use Test::More;
 use utf8;
 
@@ -116,8 +117,10 @@ my $now = time();
 # start fake live socket
 my $socketpid = fork();
 if(!$socketpid) {
-    $SIG{'INT'}  = sub { exit }; # clean exit
-    $SIG{'TERM'} = sub { exit };
+    # _exit without running END blocks, inherited handlers (ex. Test::Cmd)
+    # would otherwise delete parent's temp files
+    $SIG{'INT'}  = sub { POSIX::_exit(0) }; # clean exit
+    $SIG{'TERM'} = sub { POSIX::_exit(0) };
     while(1) {
         my $listner = IO::Socket::UNIX->new(
             Type   => SOCK_STREAM,

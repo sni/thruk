@@ -67,15 +67,23 @@
 
 - name: make puppeteer wait longer on busy machines
   lineinfile:
-    dest: /opt/omd/sites/{{ site }}/etc/environment
+    dest: /opt/omd/sites/{{ site }}/.thruk
     line: "WAIT_TIMEOUT=120"
     regexp: '^WAIT_TIMEOUT='
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    mode: "0644"
+    create: true
 
 - name: make puppeteer wait longer on busy machines
   lineinfile:
-    dest: /opt/omd/sites/{{ site }}/etc/environment
+    dest: /opt/omd/sites/{{ site }}/.thruk
     line: "START_TIMEOUT=120"
     regexp: '^START_TIMEOUT='
+    owner: "{{ site }}"
+    group: "{{ site }}"
+    mode: "0644"
+    create: true
 
 - name: "create demo script"
   copy:

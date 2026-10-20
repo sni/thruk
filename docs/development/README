@@ -28,10 +28,10 @@ Will be set to the current username.
 Will be set to the current contactgroups when running external hooks and scripts.
 
 ==== REMOTE_USER_ALIAS
-Will be set to the current contacts alias name when running external hooks and scripts.
+Will be set to the current contact's alias when running external hooks and scripts.
 
 ==== REMOTE_USER_EMAIL
-Will be set to the current contacts email address when running external hooks and scripts.
+Will be set to the current contact's email address when running external hooks and scripts.
 
 ==== TEST_AUTHOR
 Can be set to run author specific tests which may fail in
@@ -45,7 +45,7 @@ Put Thruk into author mode which enables strict templates checking and
 disables all template caches.
 
 ==== THRUK_BACKENDS
-Override currently used backends. Comma seperated list.
+Override currently used backends. Comma-separated list.
 
 ==== THRUK_BIN
 Can be set to specify location of the thruk binary used for tests.
@@ -76,7 +76,7 @@ Contains all groups as semicolon separated list.
 Don't send commands from cmd.cgi.
 
 ==== THRUK_NO_CONNECTION_POOL
-Skip connection pool and do all requests serial.
+Skip the connection pool and make all requests serially.
 
 Can be used whenever backends will be accessed.
 

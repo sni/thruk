@@ -34,8 +34,8 @@ Thruk Controller
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hosts?/outages$%mx, \&_rest_get_hosts_outages, undef, 1);
 sub _rest_get_hosts_outages {
     my($c) = @_;
@@ -59,8 +59,8 @@ sub _rest_get_hosts_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/outages$%mx, \&_rest_get_host_outages);
 sub _rest_get_host_outages {
     my($c, undef, $host) = @_;
@@ -84,8 +84,8 @@ sub _rest_get_host_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 #
 # supports hostgroup filter, ex. GET /hosts/availability?hostgroup=foo
 #
@@ -123,8 +123,8 @@ sub _rest_get_hosts_availability {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hosts?/([^/]+)/availability$%mx, \&_rest_get_host_availability);
 sub _rest_get_host_availability {
     my($c, undef, $host) = @_;
@@ -147,8 +147,8 @@ sub _rest_get_host_availability {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)/outages$%mx, \&_rest_get_hostgroup_outages);
 sub _rest_get_hostgroup_outages {
     my($c, undef, $group) = @_;
@@ -169,8 +169,8 @@ sub _rest_get_hostgroup_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/hostgroups?/([^/]+)/availability$%mx, \&_rest_get_hostgroup_availability);
 sub _rest_get_hostgroup_availability {
     my($c, undef, $group) = @_;
@@ -208,8 +208,8 @@ sub _rest_get_hostgroup_availability {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/outages$%mx, \&_rest_get_services_outages, undef, 1);
 sub _rest_get_services_outages {
     my($c) = @_;
@@ -233,8 +233,8 @@ sub _rest_get_services_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/availability$%mx, \&_rest_get_services_availability, undef, 1);
 sub _rest_get_services_availability {
     my($c) = @_;
@@ -271,8 +271,8 @@ sub _rest_get_services_availability {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)/outages$%mx, \&_rest_get_service_outages);
 sub _rest_get_service_outages {
     my($c, undef, $host, $service) = @_;
@@ -298,8 +298,8 @@ sub _rest_get_service_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/services?/([^/]+)/([^/]+)/availability$%mx, \&_rest_get_service_availability);
 sub _rest_get_service_availability {
     my($c, undef, $host, $service) = @_;
@@ -323,8 +323,8 @@ sub _rest_get_service_availability {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)/outages$%mx, \&_rest_get_servicegroup_outages);
 sub _rest_get_servicegroup_outages {
     my($c, undef, $group) = @_;
@@ -345,8 +345,8 @@ sub _rest_get_servicegroup_outages {
 #   * timeperiod        - last24hours | lastmonth | thismonth | ...
 #   * start             - unix timestamp
 #   * end               - unix timestamp
-#   * withdowntimes     - 0/1 wheter downtimes should count as outages
-#   * includesoftstates - 0/1 wheter soft states should be used as well
+#   * withdowntimes     - 0/1 whether downtimes should count as outages
+#   * includesoftstates - 0/1 whether soft states should be used as well
 Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/servicegroups?/([^/]+)/availability$%mx, \&_rest_get_servicegroup_availability);
 sub _rest_get_servicegroup_availability {
     my($c, undef, $group) = @_;

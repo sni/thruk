@@ -1,8 +1,10 @@
 use warnings;
 use strict;
+use Cpanel::JSON::XS qw/decode_json/;
+use HTTP::Request ();
 use Test::More;
 
-plan tests => 34;
+plan tests => 37;
 
 BEGIN {
     use lib('t');
@@ -16,6 +18,94 @@ use_ok 'Thruk::Utils';
 
 _test_replace_output();
 _test_get_filter();
+
+subtest 'Livestatus column metadata' => sub {
+    for my $test (
+        ['/hosts', 'last_check', 'time'],
+        ['/hosts', 'next_check', 'time'],
+        ['/hosts', 'last_state', 'number'],
+        ['/hosts', 'name', 'string'],
+        ['/services', 'host_last_check', 'time'],
+        ['/services', 'last_check as checked', 'time'],
+        ['/logs', 'time', 'time'],
+        ['/downtimes', 'start_time', 'time'],
+        ['/downtimes', 'duration', 'number', 's'],
+        ['/comments', 'entry_time', 'time'],
+        ['/processinfo', 'last_log_rotation', 'time'],
+        ['/processinfo', 'interval_length', 'number', 's'],
+        ['/hosts', 'execution_time', 'number', 's'],
+        ['/hosts', 'latency', 'number', 's'],
+        ['/hosts', 'latency as delay', 'number', 's'],
+        ['/services', 'host_execution_time', 'number', 's'],
+        ['/services', 'latency as delay', 'number', 's'],
+        ['/logs', 'current_service_latency', 'number', 's'],
+        ['/hosts', 'percent_state_change', 'number', '%'],
+        ['/services', 'host_high_flap_threshold', 'number', '%'],
+        ['/services', 'low_flap_threshold', 'number', '%'],
+        ['/checks/stats', 'hosts_latency_avg', 'number', 's'],
+        ['/checks/stats', 'services_latency_max', 'number', 's'],
+        ['/checks/stats', 'hosts_active_state_change_avg', 'number', '%'],
+        ['/thruk/recurring_downtimes', 'duration', 'number', 'minutes'],
+        ['/hosts', 'check_interval', 'number'],
+    ) {
+        my($path, $column, $type, $unit) = @{$test};
+        my $c = TestUtils::ctx_request('/?columns='.$column);
+        my $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, $path, 'GET', []);
+        is($meta->[0]->{'type'}, $type, $path.' '.$column);
+        is($meta->[0]->{'config'}->{'unit'}, $unit, $path.' '.$column.' unit');
+    }
+    done_testing();
+};
+
+subtest 'Grafana column discovery headers' => sub {
+    my $request = HTTP::Request->new('GET' => '/thruk/r/v1/hosts?limit=1');
+    $request->header(
+        'X-Thruk-Output-Metadata-Only' => '1',
+        'X-THRUK-OutputFormat'         => 'wrapped_json',
+        'x-thruk-columns'             => 'true',
+    );
+    my $response = TestUtils::request($request);
+    is($response->code, 200, 'column discovery request succeeds');
+    my $data = decode_json($response->content);
+    is_deeply($data->{'data'}, [], 'metadata-only response contains no rows');
+    is(ref $data->{'meta'}->{'columns'}, 'ARRAY', 'response contains column metadata');
+    my $columns = { map { $_->{'name'} => $_ } @{$data->{'meta'}->{'columns'}} };
+    is($columns->{'name'}->{'type'}, 'string', 'host name has string metadata');
+    is($columns->{'state'}->{'type'}, 'number', 'host state has number metadata');
+    is($columns->{'last_check'}->{'type'}, 'time', 'last check has time metadata');
+    ok(!exists $columns->{'limit'}, 'limit is not included as a column');
+    done_testing();
+};
+
+# the most specific documented path must win, otherwise a prefix like /thruk/bp
+# would shadow /thruk/bp/<nr>/objects/recursive and return the wrong columns
+# (this is the metadata-fallback used by the grafana datasource, ex. a
+# metadata-only wrapped_json request without an explicit columns param)
+subtest 'BP path column metadata specificity' => sub {
+    my $c = TestUtils::ctx_request('/');
+
+    my $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1/objects/recursive', 'GET', []);
+    my $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    is($columns->{'_type'}->{'type'}, 'string', 'recursive: _type metadata from objects docs');
+    ok(exists $columns->{'host_name'}, 'recursive: host_name metadata present');
+
+    $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1/objects', 'GET', []);
+    $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    is($columns->{'_type'}->{'type'}, 'string', 'objects: _type metadata from objects docs');
+
+    # bp objects rows are livestatus host and service rows, so their columns
+    # must be documented as well
+    for my $col (qw/address state description plugin_output execution_time/) {
+        ok(exists $columns->{$col}, "objects: livestatus column $col documented");
+    }
+
+    # /thruk/bp/<nr> itself must still resolve to the business process list docs
+    $meta = Thruk::Controller::rest_v1::_get_columns_meta_for_path($c, '/thruk/bp/1', 'GET', []);
+    $columns = { map { $_->{'name'} => $_ } @{$meta} };
+    ok(exists $columns->{'name'}, 'bp: name (business process list) metadata present');
+    ok(!exists $columns->{'_type'}, 'bp: _type metadata absent');
+    done_testing();
+};
 
 ################################################################################
 sub _test_replace_output{

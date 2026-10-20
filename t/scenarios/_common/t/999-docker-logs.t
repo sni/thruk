@@ -48,6 +48,7 @@ for my $svc (split/\n/mx, $services) {
             # remove connection errors which might happen during provisioning
             $log =~ s|\Q[ERROR]\E.*?\Q********\E.*?\QNo backend available\E.*?\Q[ERROR]\E.*?\Q********\E||sgmxi;
             $log =~ s|\Q[ERROR]\E.*?\QNo backend available\E.*?\Q[ERROR]\E.*?\Qfailed to connect\E||sgmxi;
+            $log =~ s|.*failed to open socket.*\n?(?:.*\Q[WARN]\E.*called at.*\n?)*||mg;
 
             for my $err (@errors) {
                 my @matches = $log =~ m/$err/g;

@@ -11,7 +11,7 @@ breadcrumb: [ "advanced.html", "Advanced" ]
 link:http://docs.pnp4nagios.org/[PNP4Nagios] graphs can be easily integrated in Thruk which will make them appear
 in the service or host details as well as in the SLA reports.
 
-Integration is done by specifing an 'action_url' with the path to your pnp4nagios installation. Further make sure
+Integration is done by specifying an 'action_url' with the path to your pnp4nagios installation. Also make sure
 `shown_inline_pnp=1` is set. Do not set any `graph_url`, this is only required for integrating other graphing addons.
 
 When using OMD, the integration of PNP4Nagios has been done for you already.
@@ -38,7 +38,7 @@ Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right acti
 
 ==== Cookie Authentication
 
-If you want to use the cookie authentication for PNP4Nagios as well (for single sign-on) some additional changes need to be made. Therefor copy the cookie auth include file (usually located at '/usr/share/thruk/thruk_cookie_auth.include') to your httpd config directory and modify every occurance of the following RewriteCond statement from:
+If you want to use cookie authentication for PNP4Nagios as well (for single sign-on), some additional changes need to be made. Copy the cookie auth include file (usually located at '/usr/share/thruk/thruk_cookie_auth.include') to your httpd config directory and modify every occurrence of the following RewriteCond statement from:
 
 ------
 RewriteCond %{REQUEST_URI}           ^/thruk
@@ -163,16 +163,16 @@ define service {
 ------
 
 
-==== Specifing Default Graph
+==== Specifying Default Graph
 {% include new_since.ad version="2.06" %}
 Often hosts or services have more than one graph, for example the ping check has
 one graph for round trip time and one for packet loss. By default Thruk will
-always use the first graph in it's details page and in reports. Since release
+always use the first graph on its details page and in reports. Since release
 2.06 you can specify the graph index by setting a custom variable '_GRAPH_SOURCE'.
 The PNP4Nagios source index starts with 0 as first graph. So use 1 if you want
 to view the second graph as default.
 
-Since v3.20 you can also use speaking names to address specific graphs.
+Since v3.20 you can also use descriptive names to address specific graphs.
 
 Example Service
 

@@ -5,20 +5,20 @@ title: Introduction
 
 == Introduction
 
-Thruk is a multibackend monitoring webinterface which currently
-supports Naemon, Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a 'dropin' replacement and covers almost
-100% of the original features plus adds additional enhancements for
-large installations and increased usability.
+Thruk is a multi-backend monitoring web interface that currently
+supports Naemon, Nagios, Icinga and Shinken as backends using the Livestatus
+API. It is designed to be a drop-in replacement and covers almost
+100% of the original features, with additional enhancements for
+large installations and improved usability.
 
 Main Features / Advantages
 
   * Multiple backends
   * Faster, no need to parse status.dat for every request
   * Less CPU usage
-  * Display live data, no delay between core and GUI
-  * Independant from monitoring core, can be installed on remote host
-  * Clusterable, can be clustered over hosts
+  * Displays live data, no delay between core and GUI
+  * Independent of the monitoring core, can be installed on a remote host
+  * Can be clustered across multiple hosts
   * Change status.cgi filter inline
   * Extended logfile search
   * Better logging, uses log4perl (who submitted which command?)
@@ -29,7 +29,7 @@ Main Features / Advantages
   * Multiple themes included
   * Excel export for status and logfiles
   * Adjustable side menu
-  * Full expanded plugin commandline for easy testing
+  * Fully expanded plugin command line for easy testing
   * Save searches in personal bookmarks
   * Config Tool included
   * Mobile interface included
@@ -67,7 +67,7 @@ here.
 Thruk connects to as many cores as you want. You could even combine
 Naemon, Nagios, Icinga and Shinken instances into one big combined view. That
 way you get the advantage of several independent locations and still
-have an overview about all your installations. Sites can be put into
+have an overview of all your installations. Sites can be put into
 groups for better arrangement.
 
 image:source/multi_site.png[Multi Site]
@@ -75,10 +75,10 @@ image:source/multi_site.png[Multi Site]
 
 == Flexible Dashboard
 
-Thruk panorama plugin provides a super flexible dashboard solution. Every user
-can build its own dashboards with a few clicks and share them to colleagues. Various
-elements and backgrounds and images can be positioned free without any constrains.
-Multiple Dashboards can be linked together and connected to actions. This allows
+The Thruk Panorama plugin provides a flexible dashboard solution. Every user
+can build their own dashboards with a few clicks and share them with colleagues. Various
+elements, backgrounds and images can be positioned freely without constraints.
+Multiple dashboards can be linked together and connected to actions. This allows
 you to create your own control center.
 
 image:dashboard/dashboard.png[Dashboard]
@@ -86,8 +86,8 @@ image:dashboard/dashboard.png[Dashboard]
 
 == SLA Reports
 The 'reporting' plugin creates comprehensive SLA reports in HTML and PDF format
-which may be send by mail at regular intervals. Besides that you may turn any
-page in Thruk into a regular E-Mail report.
+which can be sent by email at regular intervals. You can also turn any
+page in Thruk into a recurring email report.
 
 image:source/sla_reporting.png[SLA Reporting]
 
@@ -105,7 +105,7 @@ The Bookmarks feature allows you to save your searches and add them as
 your personal menu item. Besides the bookmarks, you can adjust the
 menu easily with the menu_local.conf for all users.
 
-The Excel export creates real Excel files which can be send by mail or
+The Excel export creates real Excel files which can be sent by email or
 used to extract hostnames and other information.
 
 image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
@@ -113,7 +113,7 @@ image:source/Bookmarks_and_excel_export.png[Bookmarks and Excel Export]
 
 == Config Tool
 
-The Config Tool makes is very easy to change object configuration of
+The Config Tool makes it very easy to change the object configuration of
 your monitoring solution. It also allows you to make quick changes to your
 Thruk configuration, as well as managing user access via htpasswd
 files or adjusting your cgi.cfg.
@@ -123,7 +123,7 @@ image:source/Config_Tool.png[Config Tool]
 
 == Sending Multiple Commands
 
-The new status pages makes it very convenient to send multiple commands
+The status pages make it very convenient to send multiple commands
 at once. It is even possible to send host and service commands at the
 same time. When rescheduling hosts and services, Thruk will wait until
 your check is finished and display the result as soon as the check has
@@ -136,7 +136,7 @@ image:source/Reschedule.png[Multiple Commands]
 
 Remember the days when you had to guess numbers in the url to filter
 hosts or services. With Thruk it's possible to quickly change your
-display filter. You can combine multiple filter to create whatever
+display filter. You can combine multiple filters to create whatever
 views you like. An Ajax search supports you, so you don't have to
 guess host or service names, plus you get the power of regular expressions.
 
@@ -145,9 +145,9 @@ image:source/Filter.png[Easy Filtering]
 
 == PNP4Nagios Graphs
 
-When your action_url contains /pnp4nagios/, there will be automatically
-a graph displayed for your host and service. This gives you a quick
-view about the performance history. The image is then linked to
+When your action_url contains /pnp4nagios/, a graph is automatically
+displayed for your host or service. This gives you a quick
+view of the performance history. The image is then linked to
 PNP4Nagios to get detailed information.
 
 image:source/PNP4nagios.png[PNP4Nagios]
@@ -155,7 +155,7 @@ image:source/PNP4nagios.png[PNP4Nagios]
 
 == Multiple Lines of Plugin Output
 
-When your check returns multiple lines of plugin output. Thruk marks
+When your check returns multiple lines of plugin output, Thruk marks
 the output in blue and a click on it displays the complete output.
 This is especially useful for check_multi checks. In addition to
 that, the comments and downtimes also have a small popup with their

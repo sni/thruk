@@ -284,8 +284,8 @@ sub _rest_get_config_objects {
 
 ##########################################################
 # REST PATH: POST /config/objects
-# Create new object. Besides the actual object config, requires
-# 2 special paramters :FILE and :TYPE.
+# Create a new object. Besides the actual object configuration, this requires
+# 2 special parameters, :FILE and :TYPE.
 Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/config/objects?$%mx, \&_rest_get_config_objects_new, ["admin"]);
 sub _rest_get_config_objects_new {
     my($c) = @_;

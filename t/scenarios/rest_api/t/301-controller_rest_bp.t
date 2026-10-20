@@ -7,7 +7,7 @@ use Test::More;
 die("*** ERROR: this test is meant to be run with PLACK_TEST_EXTERNALSERVER_URI set") unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
 BEGIN {
-    plan tests => 59;
+    plan tests => 81;
 
     use lib('t');
     require TestUtils;
@@ -49,11 +49,22 @@ test_page({
     like    => ['"name" : "Test Business Process"', '"id" : "1",', '"state_type" : "both",'],
 });
 
-################################################################################
+ ################################################################################
 # update status
 test_page({
     url     => 'POST /thruk/bp/1/refresh',
     like    => ['business process refreshed successfully'],
+});
+
+################################################################################
+# list objects for a business process
+test_page({
+    url     => 'GET /thruk/bp/1/objects',
+    like    => ['"host_name" : "localhost"', '"_type" : "host"', '"description" : "Users"', '"_type" : "service"'],
+});
+test_page({
+    url     => 'GET /thruk/bp/1/objects/recursive',
+    like    => ['"host_name" : "localhost"', '"_type" : "host"', '"description" : "Users"', '"_type" : "service"'],
 });
 
 ################################################################################

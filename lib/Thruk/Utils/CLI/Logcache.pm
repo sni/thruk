@@ -368,7 +368,7 @@ sub cmd {
                        $msg,
                        $action,
                        $log_count,
-                       $plugin_ref_count ? "(and ".$plugin_ref_count." plugin ouput references) " : '',
+                       $plugin_ref_count ? "(and ".$plugin_ref_count." plugin output references) " : '',
                        $num_sites,
                        ($num_sites == 1 ? '' : 's'),
                        $res,

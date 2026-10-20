@@ -266,27 +266,33 @@ sub process_rest_request {
     $wrapped = 1 if(defined $c->req->parameters->{'headers'} && $c->req->parameters->{'headers'} eq 'wrapped_json');
     $c->stash->{'meta_column_info'} = {};
 
+    my $metadata_only = $c->req->header('X-Thruk-Output-Metadata-Only');
+    $wrapped = 1 if $metadata_only;
 
     delete $c->stash->{'req_table'};
 
     if(!$data) {
-        eval {
-            $data = _fetch($c, $path_info, $method);
+        if($metadata_only) {
+            $data = [];
+        } else {
+            eval {
+                $data = _fetch($c, $path_info, $method);
 
-            # generic post processing
-            $data = _post_processing($c, $data);
-        };
-        my $err = $@;
-        if($err) {
-            if($err =~ m/bad\ request:\s*(.*)\s+at\s+.*\.pm\s+line\s+\d+\.$/mx) {
-                $data = { 'message' => 'error during request', description => $1, code => 400 };
-            } else {
-                $data = { 'message' => 'error during request', description => $err, code => 500 };
-            }
-            if($c->{"detached"}) {
-                _debug($err);
-            } else {
-                _error($err);
+                # generic post processing
+                $data = _post_processing($c, $data);
+            };
+            my $err = $@;
+            if($err) {
+                if($err =~ m/bad\ request:\s*(.*)\s+at\s+.*\.pm\s+line\s+\d+\.$/mx) {
+                    $data = { 'message' => 'error during request', description => $1, code => 400 };
+                } else {
+                    $data = { 'message' => 'error during request', description => $err, code => 500 };
+                }
+                if($c->{"detached"}) {
+                    _debug($err);
+                } else {
+                    _error($err);
+                }
             }
         }
     }
@@ -1742,7 +1748,7 @@ sub _expand_perfdata_and_custom_vars {
     my($c, $data, $type) = @_;
     return $data unless ref $data eq 'ARRAY';
 
-    # check wether user is allowed to see all custom variables
+    # check whether user is allowed to see all custom variables
     my $allowed      = $c->check_user_roles("admin");
     my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
 
@@ -1852,14 +1858,56 @@ sub _get_help_for_path {
 ##########################################################
 sub _get_columns_meta_for_path {
     my($c, $path_info, $method, $data) = @_;
+
     require Thruk::Controller::Rest::V1::docs;
-    my $keys = Thruk::Controller::Rest::V1::docs::keys();
+    require Thruk::Controller::Rest::V1::livestatus_docs;
+    my $lv_keys = Thruk::Controller::Rest::V1::livestatus_docs::keys();
+    my $keys    = { %{$lv_keys} };
+    my $docs    = Thruk::Controller::Rest::V1::docs::keys();
+    for my $path (keys %{$docs}) {
+        if($keys->{$path} && $keys->{$path}->{GET} && $docs->{$path}->{GET}) {
+            my $col_hash = {};
+            for my $col (@{$keys->{$path}->{GET}->{columns}}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            for my $col (@{$docs->{$path}->{GET}->{columns}}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            $keys->{$path}->{GET}->{columns} = [values %{$col_hash}];
+        } else {
+            $keys->{$path} = $docs->{$path};
+        }
+        # a path may inherit columns from other documented paths, declared in its
+        # description ex.: "see ...livestatus.html#hosts for host columns."
+        my $inherits = $keys->{$path} && $keys->{$path}->{GET} && $keys->{$path}->{GET}->{inherits};
+        if($inherits) {
+            my $col_hash = {};
+            for my $tbl (@{$inherits}) {
+                for my $col (@{$keys->{$tbl}->{GET}->{columns} || []}) {
+                    $col_hash->{$col->{name}} = $col;
+                }
+            }
+            for my $col (@{$keys->{$path}->{GET}->{columns} || []}) {
+                $col_hash->{$col->{name}} = $col;
+            }
+            $keys->{$path}->{GET}->{columns} = [values %{$col_hash}];
+        }
+    }
     my $alias_columns = get_aliased_columns($c);
-    my $req_columns   = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
+    my $req_columns  = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
+
+    # Remove the 'limit' if present, it is a parameter but not a request column.
+    if ($req_columns && @{$req_columns}) {
+        @{$req_columns} = grep { $_ ne 'limit' } @{$req_columns};
+    }
     my $columns = {};
+    # match the most specific (longest) documented path first so that
+    # ex. /thruk/bp/<nr>/objects/recursive wins over the /thruk/bp prefix
     for my $path (reverse sort { length $a <=> length $b } keys %{$keys}) {
         my $p = $path;
+        # Replace endpoints like '/host/<name>/outages' to '/host/[^/]*/outages' for regex matches
         $p =~ s%<[^>]+>%[^/]*%gmx;
+
         if($path_info !~ qr/$p/mx) {
             next;
         }
@@ -1872,6 +1920,27 @@ sub _get_columns_meta_for_path {
             $columns->{$d->{'name'}} = $col;
         }
         last;
+    }
+
+    # If request does not specify any columns, it should include metadata for all columns
+    if(scalar @{$req_columns} == 0) {
+        my $firstrow;
+        if(ref $data eq 'ARRAY' && $data->[0]) {
+            $firstrow = $data->[0];
+        }
+        elsif(ref $data eq 'HASH') {
+            $firstrow = $data;
+        }
+        if($firstrow) {
+            for my $key (sort keys %{$firstrow}) {
+                push @{$req_columns}, $key ;
+            }
+        }
+    }
+
+    # fallback: use all documented columns when no data to extract from
+    if(scalar @{$req_columns} == 0 && scalar keys %{$columns}) {
+        @{$req_columns} = sort keys %{$columns};
     }
 
     my $meta = [];
@@ -1892,29 +1961,14 @@ sub _get_columns_meta_for_path {
         push @{$meta}, $col;
     }
 
-    if(scalar @{$meta} == 0) {
-        my $firstrow;
-        if(ref $data eq 'ARRAY' && $data->[0]) {
-            $firstrow = $data->[0];
-        }
-        elsif(ref $data eq 'HASH') {
-            $firstrow = $data;
-        }
-        if($firstrow) {
-            for my $key (sort keys %{$firstrow}) {
-                push @{$meta}, { name => $key };
-            }
-        }
-    }
-
     # add missing columns from data
     for my $conf (@{$meta}) {
-        if(!defined $conf->{'type'}) {
-            my($type, $unit) = guess_field_type($path_info, $conf->{'name'});
-            if($type) {
+        if(!defined $conf->{'type'} || ($conf->{'type'} eq 'number' && (!$conf->{'config'} || !$conf->{'config'}->{'unit'}))) {
+            my($type, $unit) = guess_field_type($path_info, $alias_columns->{$conf->{'name'}}->{'orig'} // $conf->{'name'});
+            if($type && !defined $conf->{'type'}) {
                 $conf->{'type'} = $type;
             }
-            if($unit) {
+            if($unit && $type eq $conf->{'type'} && !$conf->{'config'}->{'unit'}) {
                 $conf->{'config'}->{'unit'} = $unit;
             }
         }
@@ -3242,6 +3296,7 @@ sub _post_process_logs {
 # _parse_columns_data_alias parses list of columns into their aliases
 sub _parse_columns_data_alias {
     my($raw) = @_;
+
     my $num_cols = scalar @{$raw};
     my $columns = [];
     for(my $x = 0; $x < $num_cols; $x++) {
@@ -3268,6 +3323,7 @@ sub _parse_columns_data_alias {
 # _parse_columns_data_names parses list of columns into their names (without alias and functions)
 sub _parse_columns_data_names {
     my($raw, $keep_functions) = @_;
+
     my $columns = [];
     my $num_cols = scalar @{$raw};
     my $c = $Thruk::Globals::c;
@@ -3311,6 +3367,7 @@ sub _parse_columns_data_names {
 # ];
 sub _parse_columns_data {
     my($raw) = @_;
+
     my $columns = [];
 
     my $alias = _parse_columns_data_alias($raw);
@@ -3470,6 +3527,9 @@ sub guess_field_type {
     if($name =~ m/(^|_)percent$/mx) {
         return('number', '%');
     }
+    if($name =~ m/(^|_)(percent_state_change|(low|high)_flap_threshold)$/mx) {
+        return('number', '%');
+    }
 
     # seconds from availabilty checks
     if($url =~ m/\/availability/mx) {
@@ -3493,7 +3553,7 @@ sub guess_field_type {
     # ex.: hosts_active_15_sum
     if($name =~ m/_(sum|avg|min|max)$/mx) {
         my $unit = '';
-        if($name =~ m/_time_/mx) {
+        if($name =~ m/_(time|latency)_/mx) {
             $unit = 's';
         }
         if($name =~ m/state_change/mx) {
@@ -3520,7 +3580,7 @@ sub guess_field_type {
     }
 
     # ex.: duration
-    if($name =~ m/^(duration|response_time|execution_time)$/mx) {
+    if($name =~ m/(^|_)(duration|response_time|execution_time|latency|interval_length)$/mx) {
         return('number', 's');
     }
     if($name =~ m/(_duration|_seconds)$/mx) {

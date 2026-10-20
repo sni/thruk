@@ -86,7 +86,7 @@ Macros from the `resource.cfg`:
 [options="header"]
 |===========================================================================================================
 | Macro   | Example                 | Description
-| $USER1$ | /usr/lib/nagios/plugins | USER1 variable from the ressource.cfg
+| $USER1$ | /usr/lib/nagios/plugins | USER1 variable from resource.cfg
 | ...     |                         |
 |===========================================================================================================
 
