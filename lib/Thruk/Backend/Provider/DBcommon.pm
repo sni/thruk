@@ -1159,18 +1159,26 @@ sub _check_cache_structure {
     my($self, $c, $dbh, $prefix) = @_;
     return 1 unless $self->_tables_exist($dbh, $prefix);
 
-    my $cache_version = 1;
     my $table_status = $self->_quote_table($prefix.'_status');
-    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
-    if(scalar @versions > 0 and $versions[0]) {
-        $cache_version = $versions[0];
+    my @versions;
+    # status_table index 4 has the cache_version
+    eval {
+        @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    };
+    if($@ or scalar @versions < 1) {
+        my $err = $@;
+        chomp $err if $err;
+        # a failed statement leaves the transaction aborted on postgres, roll it back first
+        eval { $dbh->rollback; };
+        _warn('cannot read logcache version'.($err ? ': '.$err : '').', recreating cache...');
+        return 1;
     }
 
-    my $cache_ver = $self->cache_version();
-    if($cache_version < $cache_ver) {
-        # only log message if not importing already
-        my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$cache_ver.'...';
-        _warn($msg);
+    my $cache_version = $versions[0];
+    my $cache_ver     = $self->cache_version();
+    if($cache_version != $cache_ver) {
+        my $state = $cache_version < $cache_ver ? 'too old' : 'too new';
+        _warn('logcache version '.$state.': '.$cache_version.', recreating with version '.$cache_ver.'...');
         return 1;
     }
     return 0;
