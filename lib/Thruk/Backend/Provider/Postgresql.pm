@@ -345,15 +345,25 @@ sub _get_create_schema {
 
 ##########################################################
 
+# Postgres lock types:
+# Advisory: An application defined lock, not directly dependent on a table object. Keys are numbers
+# Xact: Held until the end of the current transaction, then auto released. If the process crashes, its transaction dies and the lock disappears.
+
+# The keys for both of these are generated from the prefix.
+# This means that for a transaction that calls this function, it waits until nobody else holds this mutex. Keyed with the thruk_logcache_<peer prefix> , so it works for every table for that peer
+# This enables granular peer based mutexes
+
+# They work even when tables are dropped and recreated, as they are not bound to table instances
+
 sub _lock_table_share {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN SHARE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
 sub _lock_table_exclusive {
     my($self, $dbh, $prefix) = @_;
-    $dbh->do('LOCK TABLE "'.$prefix.'_status" IN EXCLUSIVE MODE');
+    $dbh->do('SELECT pg_advisory_xact_lock(hashtext(?))', undef, 'thruk_logcache_'.$prefix);
     return;
 }
 
