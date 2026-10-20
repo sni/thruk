@@ -914,7 +914,7 @@ sub _log_removeunused {
 }
 
 sub _log_check_inconsistency {
-    my($self, $c, $backends) = @_;
+    my($self, $c, $backends, $heal) = @_;
     my $driver = $self->_driver_name();
     $c->stats->profile(begin => $driver."::_log_check_inconsistency()");
 
@@ -937,6 +937,10 @@ sub _log_check_inconsistency {
         for my $r (@{$sth->fetchall_arrayref()}) {
             $num += $r->[0];
             push @{$errors->{$prefix}->{'hosts'}}, $r->[1];
+        }
+        if($heal && defined $errors->{$prefix}->{'hosts'} && scalar @{$errors->{$prefix}->{'hosts'}} > 0) {
+            $self->_log_repair_inconsistency($c, $prefix, scalar @{$errors->{$prefix}->{'hosts'}});
+            $errors->{$prefix}->{'healed'} = 1;
         }
         $c->stats->profile(end => "$key");
     }
