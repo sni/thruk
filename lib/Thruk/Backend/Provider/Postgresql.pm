@@ -977,7 +977,14 @@ sub _create_tables_if_not_exist {
 sub _create_tables {
     my($self, $dbh, $prefix) = @_;
     for my $stm (@{$self->_get_create_schema($prefix)}) {
-        $dbh->do($stm);
+        eval {
+            $dbh->do($stm);
+        };
+        if($@) {
+            my $err = $@;
+            eval { $dbh->rollback; };
+            confess("create table statement failed: ".$stm."\nerror: ".$err);
+        }
     }
     $dbh->commit || confess $dbh->errstr;
     return;
