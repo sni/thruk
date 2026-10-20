@@ -97,6 +97,34 @@ my $dbh    = $peer->logcache()->_dbh();
     is($rc, 0, 'logcache selfcheck is OK after removing duplicate hosts');
 }
 
+################################################################################
+# selfcheck must identify logcache tables belonging to a removed backend
+{
+    my $unused = 'selfcheckunused'.$$;
+    $dbh = $peer->logcache()->_dbh();
+    $dbh->do('CREATE TABLE `'.$unused.'_status` LIKE `'.$prefix.'_status`');
+
+    my($rc, $msg, $details);
+    eval {
+        $dbh->do('INSERT INTO `'.$unused.'_status` (status_id, name, value) VALUES (11, ?, ?)', undef, 'peer_name', 'unused backend');
+        $dbh->commit;
+        ($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, 'logcache', {});
+    };
+    my $error = $@;
+    $dbh = $peer->logcache()->_dbh();
+    $dbh->do('DROP TABLE `'.$unused.'_status`');
+    $dbh->commit;
+    die $error if $error;
+
+    is($rc, 2, 'unused logcache table makes selfcheck critical');
+    is($msg, 'CRITICAL - logcache', 'selfcheck identifies the failing check');
+    like($details, qr/old logcache table \Q$unused\E \(unused backend\) could be removed/, 'selfcheck identifies the unused backend by key and name');
+    like($details, qr/hint: run `thruk logcache removeunused`/, 'selfcheck suggests removing unused tables');
+
+    ($rc, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, 'logcache', {});
+    like($details, qr/no old tables found in logcache/, 'selfcheck finds no unused tables after cleanup');
+}
+
 # cannot determine fixed number of tests, number depends on wether initial import redirects or not,
 # which depends on machine load and speed (initial import redirects after 10 seconds)
 done_testing();
