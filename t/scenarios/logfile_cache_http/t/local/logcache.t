@@ -3,6 +3,7 @@ use strict;
 use File::Temp ();
 use Test::More;
 
+use Thruk::Config ();
 use Thruk::Utils::Encode ();
 use Thruk::Utils::IO ();
 
@@ -262,6 +263,136 @@ TestUtils::test_command({
         is($@, '', 'get_logs works again after restoring the cache version');
         $dbh->commit;
     }
+    ###########################################################
+    # DBcommon update locking and self heal
+    {
+        my $host = $prefix.'_host';
+
+        my $status_rows = sub {
+            my $rows = $dbh->selectall_hashref('SELECT name, value FROM '.$qt->($status), 'name');
+            return { map { $_ => $rows->{$_}->{'value'} } keys %{$rows} };
+        };
+        my $set_status = sub {
+            my($name, $value) = @_;
+            $dbh->do('UPDATE '.$qt->($status).' SET value = ? WHERE name = ?', undef, $value, $name);
+            return;
+        };
+
+        ###########################################################
+        # a completed update clears all lock columns
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache update -q -y",
+            like => [qr/\QOK - \E/],
+        });
+        $dbh->commit;
+        {
+            my $rows = $status_rows->();
+            is($rows->{'lock_mode'}, '', 'update: lock_mode cleared');
+            is($rows->{'update_hostname'}, '', 'update: update_hostname cleared');
+            ok(!defined $rows->{'update_pid'} || $rows->{'update_pid'} eq '', 'update: update_pid cleared');
+            ok($rows->{'last_update'} > 0, 'update: last_update set');
+        }
+
+        ###########################################################
+        # a stale lock is reported and taken over by the next update
+        $set_status->('lock_mode', 'update');
+        $set_status->('update_pid', 999999);
+        $set_status->('update_hostname', 'othernode');
+        $set_status->('last_update', time() - 86400);
+        $dbh->commit;
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache stats",
+            like => [qr/stale update since/],
+        });
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache update -q -y",
+            like => [qr/\QOK - \E/],
+        });
+        $dbh->commit;
+        is($status_rows->()->{'lock_mode'}, '', 'stale lock: taken over and cleared');
+
+        ###########################################################
+        # a fresh lock held by a running pid stops the update
+        $set_status->('lock_mode', 'update');
+        $set_status->('update_pid', $$);
+        $set_status->('update_hostname', Thruk::Config::hostname());
+        $set_status->('last_update', time());
+        $dbh->commit;
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache stats",
+            like => [qr/running update since/],
+        });
+        TestUtils::test_command({
+            cmd     => "/usr/bin/env thruk logcache update -y",
+            errlike => [qr/already running/],
+        });
+        $dbh->commit;
+        {
+            my $rows = $status_rows->();
+            is($rows->{'lock_mode'}, 'update', 'fresh lock: update was skipped');
+            is($rows->{'update_pid'}, $$, 'fresh lock: lock is still owned');
+        }
+        $set_status->('lock_mode', '');
+        $set_status->('update_pid', undef);
+        $set_status->('update_hostname', '');
+        $set_status->('last_update', time());
+        $dbh->commit;
+
+        ###########################################################
+        # duplicate host names are detected, healed and reported
+        my $dup = 'dbcommon-heal-'.$$;
+        $dbh->do('INSERT INTO '.$qt->($host).' (host_name) VALUES (?)', undef, $dup);
+        $dbh->do('INSERT INTO '.$qt->($host).' (host_name) VALUES (?)', undef, $dup);
+        $dbh->commit;
+        is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($host).' WHERE host_name = ?', undef, $dup), 2, 'duplicate host fixture created');
+
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk selfcheck logcache_data",
+            exit => 2,
+            like => [qr/duplicate host names: \Q$dup\E/],
+        });
+        TestUtils::test_command({
+            cmd     => "/usr/bin/env thruk selfcheck logcache_data --heal",
+            exit    => 1,
+            like    => [qr/duplicate host names healed: \Q$dup\E/],
+            errlike => [qr/dbcommon-heal-/],
+        });
+        $dbh->commit;
+        is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($host).' WHERE host_name = ?', undef, $dup), 1, 'duplicate host names healed');
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk selfcheck logcache_data",
+            exit => 0,
+            like => [qr/no errors in 1 logcache/],
+        });
+
+        ###########################################################
+        # a fresh cache reports zero items, not negative ones
+        $provider->_create_tables($dbh, 'clampunittest');
+        $dbh->commit;
+        my(undef, undef, $items) = $provider->_db_table_stats($dbh, 'clampunittest');
+        cmp_ok($items, '>=', 0, 'fresh cache reports non-negative item count');
+        $provider->_drop_tables($dbh, 'clampunittest');
+        $dbh->commit;
+
+        ###########################################################
+        # an incomplete cache is reported instead of failing with a database error
+        $dbh->do('DROP TABLE '.$qt->($status));
+        $dbh->commit;
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache stats",
+            like => [qr/logcache is incomplete, status table is missing/],
+        });
+
+        ###########################################################
+        # restore a complete cache for the remaining tests
+        TestUtils::test_command({
+            cmd  => "/usr/bin/env thruk logcache import -q -y",
+            like => [qr/\QOK - imported\E/],
+        });
+        $dbh->commit;
+        is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($status)), 12, 'import restores all status rows');
+    }
+
 }
 
 ###########################################################
