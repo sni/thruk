@@ -3,9 +3,8 @@ use strict;
 use File::Temp ();
 use Test::More;
 
-use Thruk::Config ();
+use Thruk::Config;
 use Thruk::Utils::Encode ();
-use Thruk::Utils::IO ();
 
 BEGIN {
     use lib('t');
