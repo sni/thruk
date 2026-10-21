@@ -1893,6 +1893,16 @@ sub _get_columns_meta_for_path {
             $keys->{$path}->{GET}->{columns} = [values %{$col_hash}];
         }
     }
+    my(undef, undef, $path_docs) = get_rest_paths($c);
+    for my $path (keys %{$path_docs}) {
+        next if $keys->{$path}->{$method};
+        for my $line (@{$path_docs->{$path}->{$method} || []}) {
+            if($line =~ m%^alias\ for\ ([^?\s]+)%mx && $keys->{$1}->{$method}) {
+                $keys->{$path}->{$method} = $keys->{$1}->{$method};
+                last;
+            }
+        }
+    }
     my $alias_columns = get_aliased_columns($c);
     my $req_columns  = get_request_columns($c, ALIAS) || ((ref $data eq 'ARRAY' && $data->[0]) ? [sort keys %{$data->[0]}] : []);
 
@@ -1940,6 +1950,15 @@ sub _get_columns_meta_for_path {
 
     # fallback: use all documented columns when no data to extract from
     if(scalar @{$req_columns} == 0 && scalar keys %{$columns}) {
+        # Custom-variable columns are dynamic and cannot come from the documentation.
+        my $services = $columns->{'host_custom_variables'} ? 1 : 0;
+        if($columns->{'custom_variables'} && ($columns->{'address'} || $services)) {
+            my $vars = Thruk::Utils::Status::get_custom_variable_names($c, $services ? 'all' : 'host', 0, undef, $services);
+            for my $var (@{$vars}) {
+                my $name = '_'.uc($var);
+                $columns->{$name} = { name => $name };
+            }
+        }
         @{$req_columns} = sort keys %{$columns};
     }
 

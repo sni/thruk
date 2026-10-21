@@ -4,7 +4,7 @@ use Cpanel::JSON::XS qw/decode_json/;
 use HTTP::Request ();
 use Test::More;
 
-plan tests => 37;
+plan tests => 38;
 
 BEGIN {
     use lib('t');
@@ -104,6 +104,55 @@ subtest 'BP path column metadata specificity' => sub {
     $columns = { map { $_->{'name'} => $_ } @{$meta} };
     ok(exists $columns->{'name'}, 'bp: name (business process list) metadata present');
     ok(!exists $columns->{'_type'}, 'bp: _type metadata absent');
+    done_testing();
+};
+
+subtest 'Custom-variable column discovery' => sub {
+    my $c = TestUtils::ctx_request('/');
+    $c->req->headers->header('X-Thruk-Output-Metadata-Only' => '1', 'x-thruk-columns' => 'true');
+    local $c->config->{'show_custom_vars'} = ['TEST', 'HOSTTEST'];
+    local $c->config->{'expose_custom_vars'} = [];
+    local $c->user->{'roles'} = ['authorized_for_all_hosts', 'authorized_for_all_services'];
+
+    no warnings 'redefine';
+    local *Thruk::Backend::Manager::get_hosts = sub {
+        my(undef, %options) = @_;
+        is_deeply($options{'columns'}, ['custom_variable_names'], 'only host variable names requested');
+        return [{custom_variable_names => ['TEST', 'PRIVATE']}];
+    };
+    local *Thruk::Backend::Manager::get_services = sub {
+        my(undef, %options) = @_;
+        is_deeply($options{'columns'}, ['custom_variable_names'], 'only service variable names requested');
+        return [{custom_variable_names => ['TEST', 'PRIVATE']}];
+    };
+
+    for my $path ('/hosts', '/hosts/localhost', '/services', '/hosts/localhost/services', '/services/localhost/Ping',
+                  '/thruk/bp/1/objects', '/thruk/bp/1/objects/recursive') {
+        my $data = Thruk::Controller::rest_v1::process_rest_request($c, $path, 'GET');
+        is_deeply($data->{'data'}, [], $path.' metadata response contains no rows');
+        my $columns = { map { $_->{'name'} => $_ } @{$data->{'meta'}->{'columns'}} };
+        ok(exists $columns->{'_TEST'}, $path.' exposed variable discovered');
+        ok(!exists $columns->{'_PRIVATE'}, $path.' private variable hidden');
+        if($path =~ m/services|\/objects/mx) {
+            ok(exists $columns->{'description'}, $path.' service columns included');
+            ok(exists $columns->{'_HOSTTEST'}, $path.' host variable discovered');
+            ok(!exists $columns->{'_HOSTPRIVATE'}, $path.' private host variable hidden');
+        }
+    }
+
+    $c->req->headers->remove_header('x-thruk-columns');
+    $c->user->{'roles'} = ['authorized_for_admin'];
+    my $admin_data = Thruk::Controller::rest_v1::process_rest_request($c, '/services', 'GET');
+    my $admin_columns = { map { $_->{'name'} => $_ } @{$admin_data->{'meta'}->{'columns'}} };
+    ok(exists $admin_columns->{'_PRIVATE'}, 'admin discovers all service variables without Grafana header');
+    ok(exists $admin_columns->{'_HOSTPRIVATE'}, 'admin discovers all host variables without Grafana header');
+
+    my $contact_data = Thruk::Controller::rest_v1::process_rest_request($c, '/contacts', 'GET');
+    ok(!(grep { $_->{'name'} eq '_TEST' } @{$contact_data->{'meta'}->{'columns'}}), 'contact metadata excludes host and service variables');
+
+    $c->req->parameters->{'columns'} = 'name';
+    my $data = Thruk::Controller::rest_v1::process_rest_request($c, '/hosts', 'GET');
+    is_deeply([map { $_->{'name'} } @{$data->{'meta'}->{'columns'}}], ['name'], 'explicit column selection preserved');
     done_testing();
 };
 
