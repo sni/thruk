@@ -899,7 +899,7 @@ sub _log_removeunused {
 
     my $removed = 0;
     my $tables_count  = 0;
-    # mysql returns "" , postresql reutnrs " CASCADE" which alslo removes dependent objects
+    # mysql returns "" , postresql returns " CASCADE" which alslo removes dependent objects
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$res}) {
         for my $tbl (@{$table_names}) {

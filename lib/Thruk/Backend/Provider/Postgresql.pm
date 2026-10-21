@@ -836,7 +836,7 @@ sub _import_logs {
         my $dbh = $peer->logcache->_dbh;
         $backend_count++;
 
-        # $sp is the padding, calcualted from $total string length -> [%02d/02d] %ing %s logcache...
+        # $sp is the padding, calculated from $total string length -> [%02d/02d] %ing %s logcache...
         _infos("[%0".$sp."d/%0".$sp."d] %sing %s logcache... ", $num, $total, $mode, $prefix);
 
         my $count = 0;
