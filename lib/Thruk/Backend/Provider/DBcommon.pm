@@ -681,6 +681,66 @@ sub get_existing_caches {
     return(\@list);
 }
 
+##########################################################
+# figure out if the update lock of a logcache is still held
+#
+# In a cluster the lock may be held by another node, where kill(0, $pid) is useless.
+# update_hostname is written when an update starts, so the lock can be attributed to a node.
+# A lock which has not been refreshed within logcache_update_stale_after is considered stale and may be taken over.
+#
+# returns a hash with running, stale, mode and the human readable msg
+sub _logcache_lock_state {
+    my($self, $c, $status) = @_;
+
+    my $lock_mode   = $status->{'lock_mode'}->{'value'};
+    my $update_pid  = $status->{'update_pid'}->{'value'};
+    my $lock_host   = $status->{'update_hostname'}->{'value'};
+    my $last_update = $status->{'last_update'}->{'value'};
+    my $stale_after = $c->config->{'logcache_update_stale_after'} // (3600 * 8);
+    my $hostname    = Thruk::Config::hostname();
+
+    my $state = {
+        'running' => 0,
+        'stale'   => 0,
+        'mode'    => '',
+        'msg'     => 'OK',
+    };
+    return($state) if(!$lock_mode);
+
+    # a lock which has not been refreshed for a while cannot be trusted
+    # the update process is gone or the pid has been reused by another process
+    if(!$last_update || $last_update < time() - $stale_after) {
+        $state->{'stale'} = 1;
+    }
+
+    # in a cluster the lock may be held by another node
+    my $other_host = 0;
+    if(ref $c && $c->can('cluster') && $c->cluster && $c->cluster->is_clustered()
+       && defined $lock_host && $lock_host ne '') {
+        $other_host = 1 if $lock_host ne $hostname;
+    }
+
+    if($other_host) {
+        $state->{'running'} = $state->{'stale'} ? 0 : 1;
+        $state->{'mode'}    = $state->{'running'} ? $lock_mode : '';
+        $state->{'msg'}     = sprintf('an update is running on machine %s with pid %s', $lock_host, $update_pid // '?');
+        $state->{'msg'}    .= ' (stale since '.scalar localtime($last_update).')' if $state->{'stale'} && $last_update;
+        return($state);
+    }
+
+    # our own lock or a single node setup, the pid has to be alive
+    my $alive = ($update_pid && kill(0, $update_pid)) ? 1 : 0;
+    $state->{'stale'} = 1 if !$alive;
+    if(!$state->{'stale'}) {
+        $state->{'running'} = 1;
+        $state->{'mode'}    = $lock_mode;
+        $state->{'msg'}     = sprintf('running %s since %s (pid: %s)', $lock_mode, $last_update ? scalar localtime($last_update) : '?', $update_pid // '?');
+        return($state);
+    }
+    $state->{'msg'} = sprintf('stale %s since %s (pid: %s)', $lock_mode, $last_update ? scalar localtime($last_update) : '?', $update_pid // '?');
+    return($state);
+}
+
 sub _log_stats {
     my($self, $c, $backends) = @_;
     my $driver = $self->_driver_name();
@@ -696,6 +756,7 @@ sub _log_stats {
         my $msg = "OK";
         my($index_size, $data_size, $items, $last_entry);
         my $status  = {};
+        my $mode    = '';
         if(!$peer->{'logcache'}) {
             $msg = "logcache is disabled";
         } else {
@@ -703,11 +764,13 @@ sub _log_stats {
             my $dbh  = $peer->logcache->_dbh();
             ($index_size, $data_size, $items, $status, $msg) = $self->_db_table_stats($dbh, $key);
             if(!$msg) {
-                (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
-                if($status->{'lock_mode'}->{'value'}) {
-                    $msg = sprintf("running %s since %s (pid: %s)", $status->{'lock_mode'}->{'value'}, $status->{'last_update'}->{'value'} ? scalar localtime($status->{'last_update'}->{'value'}) : '?', $status->{'update_pid'}->{'value'}//'?');
-                } else {
-                    $msg = "OK";
+                my $lock = $self->_logcache_lock_state($c, $status);
+                $msg  = $lock->{'msg'};
+                $mode = $lock->{'mode'};
+
+                # do not read the cache while an update is running
+                if(!$lock->{'running'}) {
+                    (undef, $last_entry) = @{$self->_get_logs_start_end(collection => $key, dbh => $dbh)};
                 }
             }
         }
@@ -727,7 +790,7 @@ sub _log_stats {
             compact_duration => $status->{'compact_duration'}->{'value'}    // '',
             compact_till     => $status->{'compact_till'}->{'value'}        // '',
             last_entry       => $last_entry                                 // '',
-            mode             => $status->{'lock_mode'}->{'value'}           // '',
+            mode             => $mode,
             status           => $msg,
         };
     }
@@ -764,6 +827,7 @@ sub _logcache_stats_types {
         next unless $self->_has_log_table($dbh, $key);
         my $table = $self->_quote_table($key."_log");
         my $types  = [values %{$dbh->selectall_hashref("SELECT " . $self->_sql_coalesce($groupby, "''") . " as ".$groupby.", count(*) as total FROM ".$table." GROUP BY " . $groupby, $groupby)}];
+        # sort rows by the total count, largest first
         $types     = [reverse sort { $a->{'total'} <=> $b->{'total'} } @{$types}];
         my $total = 0;
         for my $t (@{$types}) {
@@ -803,6 +867,7 @@ sub _log_removeunused {
     my $table_names = $self->_get_all_table_names($dbh);
     my $res = {};
     for my $t (@{$table_names}) {
+        # table names are formatted as <peer>_<table_name>
         if($t =~ m/^(.*?)_(status|log)/mx) {
             my $key = $1;
             $res->{$key} = 1 unless $res->{$key};
@@ -811,6 +876,7 @@ sub _log_removeunused {
             my $key = $1;
             # fetch name
             my $table_status = $self->_quote_table($key."_status");
+            # status key/value table has 'peer_name' in its 11. index
             my @names = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 11 LIMIT 1')};
             $res->{$key} = $names[0] if scalar @names > 0;
         }
@@ -833,6 +899,7 @@ sub _log_removeunused {
 
     my $removed = 0;
     my $tables_count  = 0;
+    # mysql returns "" , postresql returns " CASCADE" which alslo removes dependent objects
     my $cascade = $self->_sql_drop_table_cascade();
     for my $key (keys %{$res}) {
         for my $tbl (@{$table_names}) {
@@ -851,7 +918,7 @@ sub _log_removeunused {
 }
 
 sub _log_check_inconsistency {
-    my($self, $c, $backends) = @_;
+    my($self, $c, $backends, $heal) = @_;
     my $driver = $self->_driver_name();
     $c->stats->profile(begin => $driver."::_log_check_inconsistency()");
 
@@ -875,6 +942,10 @@ sub _log_check_inconsistency {
             $num += $r->[0];
             push @{$errors->{$prefix}->{'hosts'}}, $r->[1];
         }
+        if($heal && defined $errors->{$prefix}->{'hosts'} && scalar @{$errors->{$prefix}->{'hosts'}} > 0) {
+            $self->_log_repair_inconsistency($c, $prefix, scalar @{$errors->{$prefix}->{'hosts'}});
+            $errors->{$prefix}->{'healed'} = 1;
+        }
         $c->stats->profile(end => "$key");
     }
 
@@ -886,10 +957,12 @@ sub _log_check_inconsistency {
 sub _log_repair_inconsistency {
     my($self, $c, $prefix, $total) = @_;
     my $peer = $c->db->get_peer_by_key($prefix);
+    return unless $peer->{'logcache'};
+
     my $dbh  = $peer->logcache->_dbh;
 
     my $table_host = $self->_quote_table($prefix."_host");
-    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count > 1");
+    my $sth = $dbh->prepare("select count(host_id) as count, host_name from ".$table_host." group by host_name having count(host_id) > 1");
     $sth->execute;
 
     my $sp  = length("$total");
@@ -1094,18 +1167,26 @@ sub _check_cache_structure {
     my($self, $c, $dbh, $prefix) = @_;
     return 1 unless $self->_tables_exist($dbh, $prefix);
 
-    my $cache_version = 1;
     my $table_status = $self->_quote_table($prefix.'_status');
-    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
-    if(scalar @versions > 0 and $versions[0]) {
-        $cache_version = $versions[0];
+    my @versions;
+    # status_table index 4 has the cache_version
+    eval {
+        @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    };
+    if($@ or scalar @versions < 1) {
+        my $err = $@;
+        chomp $err if $err;
+        # a failed statement leaves the transaction aborted on postgres, roll it back first
+        eval { $dbh->rollback; };
+        _warn('cannot read logcache version'.($err ? ': '.$err : '').', recreating cache...');
+        return 1;
     }
 
-    my $cache_ver = $self->cache_version();
-    if($cache_version < $cache_ver) {
-        # only log message if not importing already
-        my $msg = 'logcache version too old: '.$cache_version.', recreating with version '.$cache_ver.'...';
-        _warn($msg);
+    my $cache_version = $versions[0];
+    my $cache_ver     = $self->cache_version();
+    if($cache_version != $cache_ver) {
+        my $state = $cache_version < $cache_ver ? 'too old' : 'too new';
+        _warn('logcache version '.$state.': '.$cache_version.', recreating with version '.$cache_ver.'...');
         return 1;
     }
     return 0;
@@ -1149,6 +1230,7 @@ sub _db_lock_tables {
     my $skip          = 0;
     eval {
         $self->_lock_table_share($dbh, $prefix);
+        # status key/value table has update_pid in index 2
         my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 2 LIMIT 1')};
         if(scalar @pids > 0 and $pids[0]) {
             if(kill(0, $pids[0])) {
@@ -1187,6 +1269,7 @@ sub _import_peer_logfiles {
 
     return(-1) unless $self->_tables_exist($dbh, $prefix);
 
+    # 86400 seconds = 24 * 60 * 60 seconds
     if($blocksize > 86400) {
         _warn("logcache blocksize too long, reduced to 1 day");
         $blocksize = 86400;
@@ -1199,6 +1282,7 @@ sub _import_peer_logfiles {
         $c->stats->profile(begin => "get last ".$driver." timestamp");
         # get last timestamp from DB
         ($mstart, $mend) = @{$peer->logcache->get_logs_start_end(collection => $prefix)};
+        _debug("first entry from logcache: ".(scalar localtime $mstart)) if $mstart;
         _debug("last entry from logcache: ".(scalar localtime $mend)) if $mend;
         $c->stats->profile(end => "get last ".$driver." timestamp");
     }
@@ -1216,6 +1300,7 @@ sub _import_peer_logfiles {
         }
         # fetching logs without any filter is a terrible bad idea
         $c->stats->profile(begin => "get livestatus timestamp no filter");
+        # Provider::Base is the livestatus, whose logs will be imported
         ($start, $end) = Thruk::Backend::Provider::Base::get_logs_start_end_no_filter($peer->{'class'}, $mend);
         if(defined $mend && $start < $mend) {
             $start = $mend;

@@ -29,9 +29,13 @@ You will need to specify your mysql connection configuration in your
 thruk_local.conf. Make sure the user and database exist. The tables will then
 be created automatically.
 
+There is experimental support for postgresql databases as well. This requires installing
+the packages as defined in the experimental_postgresql_support feature
+
 thruk_local.conf:
 -------
   logcache = mysql://username:password@localhost:3306/thruk_logs
+  logcache = postgresql://username:password@localhost:5432/thruk_logs # experimental_postgresql_support
 -------
 
 [TIP]

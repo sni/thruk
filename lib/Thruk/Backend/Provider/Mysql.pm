@@ -346,6 +346,7 @@ sub _get_create_schema {
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(9, 'compact_till', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(10,'lock_mode', '')",
         "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(11,'peer_name', '')",
+        "INSERT INTO `".$prefix."_status` (status_id, name, value) VALUES(12,'update_hostname', '')",
     );
     return \@statements;
 }
@@ -397,6 +398,7 @@ sub _finish_update {
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(6,'update_duration','".$duration."') ON DUPLICATE KEY UPDATE value='".$duration."'");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','') ON DUPLICATE KEY UPDATE value=''");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(11,'peer_name',".$dbh->quote($peer_name).") ON DUPLICATE KEY UPDATE value=".$dbh->quote($peer_name));
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(12,'update_hostname','') ON DUPLICATE KEY UPDATE value=''");
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->commit || return;
     return 1;
@@ -529,6 +531,9 @@ sub _db_table_stats {
     if(!$self->_has_log_table($dbh, $prefix)) {
         return(0, 0, 0, {}, "logcache not yet created");
     }
+    if(!$self->_has_status_table($dbh, $prefix)) {
+        return(0, 0, 0, {}, "logcache is incomplete, status table is missing");
+    }
     eval {
         my $res = $dbh->selectall_arrayref("SELECT SUM(index_length) as index_size, SUM(data_length) as data_size, SUM(table_rows) as items FROM information_schema.TABLES WHERE table_schema=Database() AND table_name LIKE '".$prefix."_%'", { Slice => {} });
         if($res && $res->[0]) {
@@ -551,6 +556,12 @@ sub _db_table_stats {
 sub _has_log_table {
     my($self, $dbh, $prefix) = @_;
     my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'_log"')};
+    return scalar @tables >= 1 ? 1 : 0;
+}
+
+sub _has_status_table {
+    my($self, $dbh, $prefix) = @_;
+    my @tables = @{$dbh->selectcol_arrayref('SHOW TABLES LIKE "'.$prefix.'_status"')};
     return scalar @tables >= 1 ? 1 : 0;
 }
 
@@ -993,12 +1004,11 @@ sub _check_lock {
     my $skip          = 0;
     eval {
         $self->_lock_table_share($dbh, $prefix) unless $c->config->{'logcache_pxc_strict_mode'};
-        my @pids = @{$dbh->selectcol_arrayref('SELECT value FROM `'.$prefix.'_status` WHERE status_id = 2 LIMIT 1')};
-        if(scalar @pids > 0 and $pids[0]) {
-            if(kill(0, $pids[0])) {
-                _info("WARNING: logcache update already running with pid ".$pids[0]);
-                $skip = 1;
-            }
+        my $status = $dbh->selectall_hashref('SELECT name, value FROM `'.$prefix.'_status`', 'name');
+        my $lock   = $self->_logcache_lock_state($c, $status);
+        if($lock->{'running'}) {
+            _info('WARNING: logcache update already running: '.$lock->{'msg'});
+            $skip = 1;
         }
     };
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
@@ -1010,10 +1020,12 @@ sub _check_lock {
         return;
     }
 
+    my $hostname = Thruk::Config::hostname();
     $self->_lock_table_exclusive($dbh, $prefix) unless $c->config->{'logcache_pxc_strict_mode'};
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(1,'last_update',UNIX_TIMESTAMP()) ON DUPLICATE KEY UPDATE value=UNIX_TIMESTAMP()");
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(2,'update_pid',".$$."  ) ON DUPLICATE KEY UPDATE value=".$$);
     $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(10,'lock_mode','".$mode."') ON DUPLICATE KEY UPDATE value='".$mode."'");
+    $dbh->do("INSERT INTO `".$prefix."_status` (status_id,name,value) VALUES(12,'update_hostname',".$dbh->quote($hostname).") ON DUPLICATE KEY UPDATE value=".$dbh->quote($hostname));
     $dbh->commit || confess $dbh->errstr;
     $self->_release_write_locks($dbh) unless $c->config->{'logcache_pxc_strict_mode'};
 

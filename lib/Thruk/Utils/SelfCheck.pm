@@ -597,21 +597,31 @@ sub _logcache_data_check  {
     my $heal    = $options->{'heal'};
     my $rc      = 0;
     my $errors  = 0;
+    my $healed  = 0;
     my @stats   = $provider->_log_stats($c);
     my $incons  = $provider->_log_check_inconsistency($c, undef, $heal);
 
     for my $s (@stats) {
         next unless $s->{'enabled'};
         if($incons->{$s->{'key'}}) {
-            $details .= sprintf('  - [logcache %s] duplicate host names: %s'."\n", $s->{'name'}, join(', ', @{$incons->{$s->{'key'}}->{'hosts'}}));
-            $errors++;
+            my $hosts = $incons->{$s->{'key'}}->{'hosts'} // [];
+            if($incons->{$s->{'key'}}->{'healed'}) {
+                $details .= sprintf('  - [logcache %s] duplicate host names healed: %s'."\n", $s->{'name'}, join(', ', @{$hosts}));
+                $healed++;
+            } else {
+                $details .= sprintf('  - [logcache %s] duplicate host names: %s'."\n", $s->{'name'}, join(', ', @{$hosts}));
+                $errors++;
+            }
         }
     }
 
-    if($errors == 0) {
-        $details .= "  - no errors in ".(scalar @stats)." logcaches\n";
-    } else {
+    if($errors > 0) {
         $rc = 2;
+    } elsif($healed > 0) {
+        # nothing to fix anymore, but report what was healed
+        $rc = 1;
+    } else {
+        $details .= "  - no errors in ".(scalar @stats)." logcaches\n";
     }
 
     my $msg = sprintf('Logcache %s', $rc_codes->{$rc});
