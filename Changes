@@ -1,4 +1,6 @@
-This file documents the revision history for the Monitoring Webinterface Thruk.
+# Changes
+
+This file documents the revision history for the Monitoring WebUI Thruk.
 
 3.30     Thu Oct 22 19:28:17 CEST 2026
           - fix remote code vulnerability in grafana image export (GHSA-83cf-v4hm-pw6j)
@@ -6,7 +8,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fix parsing config values containing equal signs (#1512)
           - fix host state on main page (#1515)
           - fix lock issue when user tries to login with invalid username (GHSA-3p2g-8g6m-r272)
-          - add role specific config overrrides
+          - add role specific config overrides
           - improve search performance
           - fix recurring downtimes added multiple times if some backends were down
           - add service time hint when editing crontab based schedules
@@ -24,7 +26,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
             - fix merging host/servicegroups response
             - add support for logcache=0 parameter on log based queries
             - check_thruk_rest: add support for template toolkit syntax in the url itself
-            - add option rest_commands_ignore_partial_errors to ignore errors when at least one command succeded
+            - add option rest_commands_ignore_partial_errors to ignore errors when at least one command succeeded
           - Reports:
             - adding an Icelandic translation (#1498)
 
@@ -282,7 +284,7 @@ This file documents the revision history for the Monitoring Webinterface Thruk.
           - fix requesting unknown columns (#1301)
           - fix removing sub items from navigation (#1314)
           - Reports:
-            - increase pdf render timout
+            - increase pdf render timeout
             - fix missing subject in report mails
           - Rest
             - add .../avail endpoint for hosts / services
