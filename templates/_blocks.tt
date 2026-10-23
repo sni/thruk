@@ -143,7 +143,7 @@
       data-perfdata="[% escape_html(perfdata) %]"
       data-plugin-output="[% escape_html(plugin_output) %]"
       data-check-command="[% check_command | strip_command_args | html %]"
-      data-pnp-url="[% IF pnp_url; strip_trailing_slash(pnp_url) | html %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri; END %]"
+      data-pnp-url="[% IF pnp_url; strip_trailing_slash(pnp_url) | html %]/graph?host=[% hst | html %]&amp;srv=[% svc | html; END %]"
       data-is-host=[% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]
     >
       [% IF show_placeholder %]
