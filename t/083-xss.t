@@ -14,7 +14,7 @@ my $whitelist_vars = Thruk::Base::array2hash([qw/
     loopclass body_class param.breakdown url defaults.$key.link
     c.config.useragentcompat c.stash.last_graph_type c.config.notes_url_target
     c.config.action_url_target avgClass log.class rowclasses show_sitepanel extrabodyclass b.cls
-    remote_thruk_url bug_email_rcpt main target prio pnp_url c.config.extra_version_link
+    remote_thruk_url bug_email_rcpt main target prio pnp_url strip_trailing_slash(pnp_url) c.config.extra_version_link
     histou_frame_url histou_url c.stash.help_topic n.annotation peer_key passive_icon svcbg
     get_user_token(c) object.get_id() object.get_id object.get_type() svc.get_id()
     obj_id start end servicelink l.url plugin.url r.link link action_url n.node_url
