@@ -44,20 +44,7 @@ sub check_proc {
     my $rotatesize = ($config->{'lmd_rotate_size'} || 20 ) *1024*1024; # rotate logfile if its more than 20mb
     my $pid;
     if($size && $size > $rotatesize) {
-        if(-e $logfile.'.'.$keep) {
-            unlink($logfile.'.'.$keep);
-            _debug(sprintf("removed %s", $logfile.'.'.$keep));
-        }
-        while($keep > 1) {
-            if(-e $logfile.'.'.($keep-1)) {
-                move($logfile.'.'.($keep-1), $logfile.'.'.$keep);
-                _debug(sprintf("moved %s to %s", $logfile.'.'.($keep-1), $logfile.'.'.$keep));
-            }
-            $keep--;
-        }
-        copy($logfile, $logfile.'.1');
-        Thruk::Utils::IO::write($logfile, '');
-        _debug(sprintf("moved %s to %s.1", $logfile, $logfile));
+        _rotate_logfile($logfile, $keep);
     }
     if(-e $lmd_dir.'/live.sock' && ($pid = check_pid($lmd_dir.'/pid'))) {
         return($pid);
@@ -96,9 +83,16 @@ sub check_proc {
         if($config->{'lmd_options'}) {
             $cmd .= ' '.join(" ", @{Thruk::Base::list($config->{'lmd_options'})}).' ';
         }
-        my $startlog = $lmd_dir.'/startup.log';
-        $cmd .= ' >'.$startlog.' 2>&1 &';
 
+        # rotate startup file
+        my $startlog = $lmd_dir.'/startup.log';
+        my $s_size   = -s $startlog;
+        if($s_size && $s_size > $rotatesize) {
+            _rotate_logfile($startlog, $keep);
+        }
+        $cmd .= ' >>'.$startlog.' 2>&1 &';
+
+        Thruk::Utils::IO::write($startlog, sprintf("[%s] starting lmd with: %s\n", scalar  localtime, $cmd), undef, 1);
         _debug("start cmd: ". $cmd);
         my($rc, $output) = Thruk::Utils::IO::cmd($cmd, { detached => 1 }); # start detached
         if($rc != 0) {
@@ -516,6 +510,31 @@ sub get_lmd_version {
         $config->{'lmd_version'} = $v;
         return($v);
     }
+
+    return;
+}
+
+##########################################################
+# rotate and copy/truncate logfile
+sub _rotate_logfile {
+    my($logfile, $keep) = @_;
+
+    if(-e $logfile.'.'.$keep) {
+        unlink($logfile.'.'.$keep);
+        _debug(sprintf("removed %s", $logfile.'.'.$keep));
+    }
+
+    while($keep > 1) {
+        if(-e $logfile.'.'.($keep-1)) {
+            move($logfile.'.'.($keep-1), $logfile.'.'.$keep);
+            _debug(sprintf("moved %s to %s", $logfile.'.'.($keep-1), $logfile.'.'.$keep));
+        }
+        $keep--;
+    }
+
+    copy($logfile, $logfile.'.1');
+    Thruk::Utils::IO::write($logfile, '');
+    _debug(sprintf("moved %s to %s.1", $logfile, $logfile));
 
     return;
 }
