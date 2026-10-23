@@ -20,9 +20,10 @@ for my $cmd (@{$cmds}) {
 
     # skip those
     if(   $line =~ m|/vendor/|mx
-       or $line =~ m|/cache/|mx
-       or $line =~ m|/panorama_js_box_reorder.js|mx
-       or $line =~ m|/092\-todo\.t|mx
+       || $line =~ m|/cache/|mx
+       || $line =~ m|/panorama_js_box_reorder.js|mx
+       || $line =~ m|/092\-todo\.t|mx
+       || $line =~ m|TestUtils.pm.*TODO:\ \{|mx
     ) {
       next;
     }

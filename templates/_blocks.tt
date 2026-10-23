@@ -27,26 +27,26 @@
 
   <div class="flex pl-1.5 gap-px">
     [% IF host.$host_is_executing > 0             %]<div id="[% paneprefix %]r[% loop_index %]_h_exec" class="flex overflow-hidden"><div class="spinner js-autohide not-clickable" title="This host is currently executing its hostcheck"></div></div>[% ELSE%]<div id="[% paneprefix %]r[% loop_index %]_h_exec"></div>[% END %]
-    [% IF host.$host_notifications_enabled == 0   %]<i class="fa-solid fa-bell-slash not-clickable" title="Notifications for this host have been disabled"></i>[% END %]
-    [% IF ! has_bp %]
-    [% IF strict_passive_mode %]
-      [% IF host.$host_check_type == 0 && host.$host_active_checks_enabled == 0 %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
-      [% IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 0 %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
-      [% IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 1 && passive_icon != "" %]<i class="[% passive_icon %] not-clickable" title="Active checks of the host have been disabled - only passive checks are being accepted"></i>[% END %]
-    [% ELSE %]
-      [% IF host.$host_active_checks_enabled == 0   %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
-    [% END %]
-    [% END %]
-    [% IF host.$host_is_flapping                  %]<i class="fa-solid fa-shuffle clickable" title='This host is flapping between states' onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
-    [% IF host.$host_acknowledged                 %]<i class="fa-solid fa-person-digging clickable" title="This host problem has been acknowledged" onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
-    [% IF host_comment_count > 0                  %]<i class="fa-solid fa-comment clickable" title="This host has [% host_comment_count %] comment associated with it" onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
-    [% IF host.$host_scheduled_downtime_depth > 0 %]<i class="[% IF with_status %]has_downtime[% END %] fa-solid fa-moon clickable" title="This host is currently in a period of scheduled downtime" onclick="return(host_downtimes_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
-    [% IF !skip_graph && host.$host_action_url_expanded %][% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.$host_action_url_expanded , host, hostprefix)) %]<a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>[% END %]
-    [% IF host.$host_notes_url_expanded           %]<a href='[% l = set_target_link(host.$host_notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-arrow-up-right-from-square clickable" title='View Extra Host Notes'></i></a>[% END %]
-    [% IF host.$host_icon_image_expanded          %]<div class="w-5"><img class="not-clickable" src="[% logo_path_prefix %][% host.$host_icon_image_expanded %]" alt='[% host.$host_icon_image_alt %]' title='[% host.$host_icon_image_alt %]' border="0" width="20" height="20"></div>[% END %]
-    [% IF with_status && show_config_edit_buttons && backends_with_obj_config.$peer_key %]<a href="conf.cgi?edit&amp;host=[% host.$host_name | uri %]&amp;backend=[% peer_key %]"><i class="fa-solid fa-pencil clickable" title='Configure This Host'></i></a>[% END %]
-    [% IF has_bp                                  %]<a href="bp.cgi?action=details&amp;bp=[% has_bp %]"><i class="fa-solid fa-sitemap clickable" title='Show Business Process'></i></a>[% END %]
-    [% IF custom_vars.exists('THRUK_ACTION_MENU') %]
+    [%- IF host.$host_notifications_enabled == 0   %]<i class="fa-solid fa-bell-slash not-clickable" title="Notifications for this host have been disabled"></i>[% END %]
+    [%- IF ! has_bp %]
+    [%- IF strict_passive_mode %]
+      [%- IF host.$host_check_type == 0 && host.$host_active_checks_enabled == 0 %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
+      [%- IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 0 %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
+      [%- IF host.$host_check_type == 1 && host.$host_accept_passive_checks == 1 && passive_icon != "" %]<i class="[% passive_icon %] not-clickable" title="Active checks of the host have been disabled - only passive checks are being accepted"></i>[% END %]
+    [%- ELSE %]
+      [%- IF host.$host_active_checks_enabled == 0   %]<i class="fa-solid fa-xmark round small red not-clickable" title="Checks of this host have been disabled"></i>[% END %]
+    [%- END %]
+    [%- END %]
+    [%- IF host.$host_is_flapping                  %]<i class="fa-solid fa-shuffle clickable" title='This host is flapping between states' onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
+    [%- IF host.$host_acknowledged                 %]<i class="fa-solid fa-person-digging clickable" title="This host problem has been acknowledged" onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
+    [%- IF host_comment_count > 0                  %]<i class="fa-solid fa-comment clickable" title="This host has [% host_comment_count %] comment associated with it" onclick="return(host_comments_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
+    [%- IF host.$host_scheduled_downtime_depth > 0 %]<i class="[% IF with_status %]has_downtime[% END %] fa-solid fa-moon clickable" title="This host is currently in a period of scheduled downtime" onclick="return(host_downtimes_popup('[% escape_js(host.$host_name) %]', '[% peer_key %]'))"></i>[% END %]
+    [%- IF !skip_graph && host.$host_action_url_expanded %][% action_url = proxifiy_url(c, host, get_action_url(c, 2, 1, host.$host_action_url_expanded , host, hostprefix)) %]<a href='[% l = set_target_link(action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-chart-line clickable" title='Show Performance Chart'></i></a>[% END %]
+    [%- IF host.$host_notes_url_expanded           %]<a href='[% l = set_target_link(host.$host_notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'><i class="fa-solid fa-arrow-up-right-from-square clickable" title='View Extra Host Notes'></i></a>[% END %]
+    [%- IF host.$host_icon_image_expanded          %]<div class="w-5"><img class="not-clickable" src="[% logo_path_prefix %][% host.$host_icon_image_expanded %]" alt='[% host.$host_icon_image_alt %]' title='[% host.$host_icon_image_alt %]' border="0" width="20" height="20"></div>[% END %]
+    [%- IF with_status && show_config_edit_buttons && backends_with_obj_config.$peer_key %]<a href="conf.cgi?edit&amp;host=[% host.$host_name | uri %]&amp;backend=[% peer_key %]"><i class="fa-solid fa-pencil clickable" title='Configure This Host'></i></a>[% END %]
+    [%- IF has_bp                                  %]<a href="bp.cgi?action=details&amp;bp=[% has_bp %]"><i class="fa-solid fa-sitemap clickable" title='Show Business Process'></i></a>[% END %]
+    [%- IF custom_vars.exists('THRUK_ACTION_MENU') %]
     <div class="flex gap-px">
       [% menu = get_action_menu(c, custom_vars.THRUK_ACTION_MENU) %]
       [% IF menu.defined('err') && menu.err %]
@@ -143,7 +143,7 @@
       data-perfdata="[% escape_html(perfdata) %]"
       data-plugin-output="[% escape_html(plugin_output) %]"
       data-check-command="[% check_command | strip_command_args | html %]"
-      data-pnp-url="[% IF pnp_url; pnp_url | html %]/graph?host=[% hst | html %]&srv=[% svc | html; END %]"
+      data-pnp-url="[% IF pnp_url; strip_trailing_slash(pnp_url) | html %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri; END %]"
       data-is-host=[% IF svc == '_HOST_' %]true[% ELSE %]false[% END %]
     >
       [% IF show_placeholder %]

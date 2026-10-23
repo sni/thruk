@@ -89,7 +89,7 @@
             <td class="truncate w-60 min-w-32 max-w-max js-agent-row">
               <div class="flexrow flex-nowrap gap-x-1 justify-between items-center">
                 <div class="flex-1">
-                  <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
+                  <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&amp;backend=[% h.peer_key | uri %]" title="[% h.address | html %] - [% h.alias | html %]">[% _host(h) | html %]</a>
                 </div>
                 [% comment_count = h.comments.size;
                    PROCESS _status_host_attributes
@@ -177,7 +177,7 @@
             </td>
             [% ELSE %]
             <td colspan="7">
-              <a class="link" href="extinfo.cgi?type=2&host=[% h.name | uri %]&service=agent+version&backend=[% h.peer_key | uri %]" title="view agent version service">
+              <a class="link" href="extinfo.cgi?type=2&amp;host=[% h.name | uri %]&amp;service=agent+version&amp;backend=[% h.peer_key | uri %]" title="view agent version service">
                 <div class="flexrow flex-nowrap gap-x-1 justify-between">
                   <div>[% info.$hostname.plugin_output.replace("^" _ state _ "(: | - )", "") %]</div>
                   [% IF info.$hostname.last_state_change %]<div title="[% date_format(c, info.$hostname.last_state_change) %]">(for [% duration(date.now - info.$hostname.last_state_change, 6) %])</div>[% END %]
@@ -200,8 +200,8 @@
                   <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
                   <a href="#" class="js-update-btn" onclick="return send_form_in_background_and_reload(this)"><i class="fa-solid fa-arrows-rotate text-sm" title="Update inventory"></i></a>
                 </form>
-                <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>
-                <a href="agents.cgi?action=clone&amp;hostname=[% h.name | uri %]&backend=[% h.peer_key | uri %]"><i class="fa-solid fa-clone text-sm" title='Clone this host'></i></a>
+                <a href="agents.cgi?action=edit&amp;hostname=[% h.name | uri %]&amp;backend=[% h.peer_key | uri %]"><i class="fa-solid fa-pencil text-sm" title='Edit this host'></i></a>
+                <a href="agents.cgi?action=clone&amp;hostname=[% h.name | uri %]&amp;backend=[% h.peer_key | uri %]"><i class="fa-solid fa-clone text-sm" title='Clone this host'></i></a>
                 [% PROCESS _button btn = {
                   form   => { action => 'agents.cgi', },
                   data   => { 'action' => 'remove', 'hostname' => h.name, backend => h.peer_key, CSRFtoken => get_user_token(c), },

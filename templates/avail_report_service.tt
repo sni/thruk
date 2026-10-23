@@ -13,7 +13,7 @@
     [% IF use_feature_trends %]<div><a class="flex" href="trends.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;t1=[% start %]&amp;t2=[% end %]&amp;assumestateretention=no&amp;includesoftstates=yes&amp;assumeinitialstates=yes&amp;assumestatesduringnotrunning=yes&amp;initialassumedservicestate=0&amp;backtrack=4&amp;rpttimeperiod=[% rpttimeperiod | uri %][% add_request_backend %]">View Trends For This Service</a></div>[% END %]
     <div><a class="flex" href="history.cgi?host=[% host | uri %]&amp;service=[% service | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Service</a></div>
     <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %][% add_request_backend %]">View Notifications For This Service</a></div>
-    <div><a class="flex" href="extinfo.cgi?type=2&amp;host=[% host | uri %]&service=[% service | uri %]">View Information For This Service</a></div>
+    <div><a class="flex" href="extinfo.cgi?type=2&amp;host=[% host | uri %]&amp;service=[% service | uri %]">View Information For This Service</a></div>
   </div>
 </div>
 

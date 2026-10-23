@@ -35,7 +35,6 @@ apt-get -y install \
     libfile-bom-perl \
     libfile-slurp-perl \
     libgd-perl \
-    libhtml-lint-perl \
     libhttp-message-perl \
     libio-socket-ip-perl \
     libio-string-perl \
@@ -67,6 +66,7 @@ apt-get -y install \
     perl-doc \
     poppler-utils \
     rsync \
+    tidy \
     tofrodos \
     wget \
     zlib1g-dev \

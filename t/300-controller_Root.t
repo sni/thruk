@@ -38,7 +38,7 @@ my $pages = [
     '/thruk/',
     '/thruk/docs/index.html',
     '/thruk/index.html',
-   { url => '/thruk/main.html', like => ['Check for updates', 'Thruk Monitoring Webinterface', 'Thruk Developer Team', 'Home', 'Documentation', 'Hosts', 'Availability', 'Problems'] },
+   { url => '/thruk/main.html', like => ['Check for updates', 'Thruk Monitoring WebUI', 'Thruk Developer Team', 'Home', 'Documentation', 'Hosts', 'Availability', 'Problems'] },
 ];
 
 for my $url (@{$pages}) {

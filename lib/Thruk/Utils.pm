@@ -2082,6 +2082,11 @@ sub get_action_url {
         if($action_url !~ m/theme=/mx) {
             $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
         }
+        # replace spaces in host / service names
+        ## no critic
+        $action_url =~ s/(host=)(.*?)(&)/_replace_url_spaces($1, $2, $3)/ge;
+        $action_url =~ s/(srv=)(.*?)(&)/_replace_url_spaces($1, $2, $3)/ge;
+        ## use critic
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/&/&amp;/gmx;
         $action_url =~ s/\+/%2B/gmx;
@@ -2140,6 +2145,15 @@ sub get_action_url {
     }
 
     return $new_action_url;
+}
+
+########################################
+sub _replace_url_spaces {
+    my($pre, $txt, $post) = @_;
+
+    $txt =~ s/\ /%20/gmxo;
+
+    return $pre.$txt.$post;
 }
 
 ########################################

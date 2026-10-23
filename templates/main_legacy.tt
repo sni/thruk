@@ -74,7 +74,7 @@
 
 <div class="card min-w-[420px] max-w-[500px] w-full mt-5 mx-auto">
   <div class="head justify-center">
-    <h3>Thruk Monitoring Webinterface</h3>
+    <h3>Thruk Monitoring WebUI</h3>
   </div>
   <div class="body">
     <table class="cellspacing w-fit mx-auto">

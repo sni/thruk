@@ -5,6 +5,7 @@
     package:
       - diffutils
       - expect  # contains unbuffer
+      - tidy
     rpm:
       - perl-Test-Harness
       - perl-ExtUtils-Manifest
@@ -12,6 +13,7 @@
     creates:
       - /usr/bin/unbuffer
       - /usr/bin/diff
+      - /usr/bin/tidy
       - /usr/share/perl5/vendor_perl/Test/Harness.pm
       - "/usr/share/perl5/vendor_perl/ExtUtils/Manifest.pm,/usr/share/perl/*/ExtUtils/Manifest.pm"
       - "/usr/share/perl5/vendor_perl/ExtUtils/Install.pm,/usr/share/perl5/ExtUtils/Install.pm"

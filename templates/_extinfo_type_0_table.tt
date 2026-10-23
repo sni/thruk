@@ -78,25 +78,25 @@
       [% IF backend_detail.$pd.running %]
         [% IF pi_detail.$pd.execute_service_checks && pi_detail.$pd.accept_passive_service_checks %]
           [% IF !command_disabled(c, 36) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=36&backend=[% pd %]'><div class='YES badge'>YES</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=36&amp;backend=[% pd %]'><div class='YES badge'>YES</div></a>
           [% ELSE %]
             <div class='YES badge'>YES</div>
           [% END %]
         [% ELSIF pi_detail.$pd.accept_passive_service_checks %]
           [% IF !command_disabled(c, 35) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=35&backend=[% pd %]'><div class='DISABLED badge'>PASSIVE</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=35&amp;backend=[% pd %]'><div class='DISABLED badge'>PASSIVE</div></a>
           [% ELSE %]
             <div class='DISABLED badge'>PASSIVE</div>
           [% END %]
         [% ELSIF pi_detail.$pd.execute_service_checks %]
           [% IF !command_disabled(c, 36) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=36&backend=[% pd %]'><div class='ENABLED badge'>ACTIVE</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=36&amp;backend=[% pd %]'><div class='ENABLED badge'>ACTIVE</div></a>
           [% ELSE %]
             <div class='ENABLED badge'>ACTIVE</div>
           [% END %]
         [% ELSE %]
           [% IF !command_disabled(c, 35) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=35&backend=[% pd %]'><div class='NO badge'>NO</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=35&amp;backend=[% pd %]'><div class='NO badge'>NO</div></a>
           [% ELSE %]
             <div class='NO badge'>NO</div>
           [% END %]
@@ -107,25 +107,25 @@
       [% IF backend_detail.$pd.running %]
         [% IF pi_detail.$pd.execute_host_checks && pi_detail.$pd.accept_passive_host_checks %]
           [% IF !command_disabled(c, 89) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=89&backend=[% pd %]'><div class='YES badge'>YES</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=89&amp;backend=[% pd %]'><div class='YES badge'>YES</div></a>
           [% ELSE %]
             <div class='YES badge'>YES</div>
           [% END %]
         [% ELSIF pi_detail.$pd.accept_passive_host_checks %]
           [% IF !command_disabled(c, 88) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=88&backend=[% pd %]'><div class='DISABLED badge'>PASSIVE</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=88&amp;backend=[% pd %]'><div class='DISABLED badge'>PASSIVE</div></a>
           [% ELSE %]
             <div class='DISABLED badge'>PASSIVE</div>
           [% END %]
         [% ELSIF pi_detail.$pd.execute_host_checks %]
           [% IF !command_disabled(c, 89) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=89&backend=[% pd %]'><div class='ENABLED badge'>ACTIVE</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=89&amp;backend=[% pd %]'><div class='ENABLED badge'>ACTIVE</div></a>
           [% ELSE %]
             <div class='ENABLED badge'>ACTIVE</div>
           [% END %]
         [% ELSE %]
           [% IF !command_disabled(c, 88) %]
-            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=88&backend=[% pd %]'><div class='NO badge'>NO</div></a>
+            <a class="js-modal-command-link" href='cmd.cgi?cmd_typ=88&amp;backend=[% pd %]'><div class='NO badge'>NO</div></a>
           [% ELSE %]
             <div class='NO badge'>NO</div>
           [% END %]

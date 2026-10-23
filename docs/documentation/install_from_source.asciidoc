@@ -20,7 +20,7 @@ situations. Especially for production environments.
 
 === Requirements
 
-In order to install the Thruk Monitoring Webinterface from source you
+In order to install the Thruk Monitoring WebUI from source you
 will need the following:
 
 - Perl

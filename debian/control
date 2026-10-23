@@ -19,12 +19,12 @@ Package: thruk
 Architecture: any
 Depends: ${extra:Depends}, thruk-base (= ${source:Version})
 Recommends: thruk-plugin-reporting (= ${source:Version})
-Description: Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
- Thruk is a multibackend monitoring webinterface which currently
+Description: Monitoring WebUI for Nagios/Naemon/Icinga and Shinken
+ Thruk is a multibackend monitoring WebUI which currently
  supports Nagios, Naemon, Icinga and Shinken as backend using the Livestatus
- API. It is designed to be a 'dropin' replacement and covers almost
+ API. It is designed to be a 'drop-in' replacement and covers almost
  all of the original features plus adds additional enhancements for
- large installations. This is the metapackage for complete Thruk setup.
+ large installations. This is the meta package for complete Thruk setup.
 
 Package: thruk-base
 Architecture: any
@@ -36,10 +36,10 @@ Depends: ${perl:Depends}, ${extra:Depends},
 Provides: thruk
 Replaces: thruk (<< 2.00)
 Breaks: thruk (<< 2.00)
-Description: Monitoring Webinterface for Nagios/Icinga and Shinken
- Thruk is a multibackend monitoring webinterface which currently
+Description: Monitoring WebUI for Nagios/Icinga and Shinken
+ Thruk is a multibackend monitoring WebUI which currently
  supports Nagios, Icinga and Shinken as backend using the Livestatus
- API. It is designed to be a 'dropin' replacement and covers almost
+ API. It is designed to be a 'drop-in' replacement and covers almost
  all of the original features plus adds additional enhancements for
  large installations. This package contains the Thruk gui base files.
 
