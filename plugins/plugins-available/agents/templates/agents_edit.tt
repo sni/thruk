@@ -33,7 +33,7 @@
       <tr>
         <th data-name="[% check.name | html %]">
           <div class="flex items-center min-w-max justify-between">
-            <div class="text-ellipsis overflow-hidden max-w-lg">[% IF services.exists(name) %]<a href="extinfo.cgi?type=2&host=[% s.host_name | uri %]&service=[% s.description | uri %]&backend=[% s.peer_key %]" class="link">[% END %][% check.name | html %][% IF services.exists(name) %]</a>[% END %]</div>
+            <div class="text-ellipsis overflow-hidden max-w-lg">[% IF services.exists(name) %]<a href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key %]" class="link">[% END %][% check.name | html %][% IF services.exists(name) %]</a>[% END %]</div>
             [% IF services.exists(name) %]
               [% comment_count = s.comments.size; has_bp=0; PROCESS _status_service_attributes service=s service_comment_count=comment_count loop_index=loop.index %]
             [% END %]
@@ -351,7 +351,7 @@
             <input type="hidden" name="backend" value="[% agent.peer_key | html %]">
             <ul class="w-full">
               <li>
-                <a href="agents.cgi?action=clone&amp;hostname=[% agent.hostname | uri %]&backend=[% agent.peer_key | uri %]" class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick=""><i class="fa-solid fa-clone text-xs"></i> Clone</a>
+                <a href="agents.cgi?action=clone&amp;hostname=[% agent.hostname | uri %]&amp;backend=[% agent.peer_key | uri %]" class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick=""><i class="fa-solid fa-clone text-xs"></i> Clone</a>
               </li>
               <li><hr></li>
               <li class="[% IF agent.hostname != "new" %]hover-red[% END %]">

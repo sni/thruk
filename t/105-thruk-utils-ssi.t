@@ -35,11 +35,11 @@ my $rand = rand();
 for my $place (qw/header footer/) {
     Thruk::Utils::IO::mkdir('ssi');
 
-    Thruk::Utils::IO::write('ssi/login-'.$place.'.ssi', "test ssi string: ".$rand);
+    Thruk::Utils::IO::write('ssi/login-'.$place.'.ssi', "<!-- test ssi string: ".$rand." -->");
     $c->app->_set_ssi();
     TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand ], code => 401 );
 
-    Thruk::Utils::IO::write('ssi/login-'.$place.'-foo.ssi', "second ssi string");
+    Thruk::Utils::IO::write('ssi/login-'.$place.'-foo.ssi', "<!-- second ssi string -->");
     $c->app->_set_ssi();
     TestUtils::test_page(url => '/thruk/cgi-bin/login.cgi', like => [ 'test ssi string', $rand, 'second ssi string' ], code => 401 );
 

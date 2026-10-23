@@ -8127,13 +8127,13 @@ function check_quick_command_reschedule_icons() {
     window.clearTimeout(hide_activity_icons_timer);
 
     if(value == 1 ) { // reschedule
-        jQuery.each(selectedServices, function(row_id, blah) {
+        jQuery.each(selectedServices, function(row_id) {
             var cell = document.getElementById(row_id + "_s_exec");
             if(cell) {
                 cell.innerHTML = '<div class="spinner" title="This service is currently executing its servicecheck"><\/div>';
             }
         });
-        jQuery.each(selectedHosts, function(row_id, blah) {
+        jQuery.each(selectedHosts, function(row_id) {
             var cell = document.getElementById(row_id + "_h_exec");
             if(cell) {
                 cell.innerHTML = '<div class="spinner" title="This service is currently executing its hostcheck"><\/div>';

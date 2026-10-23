@@ -46,8 +46,6 @@ my @js_functions = qw/js_init js_ok js_eval_ok js_eval_extracted js_is js_deinit
 push @EXPORT_OK, @js_functions;
 $EXPORT_TAGS{js} = \@js_functions;
 
-my $use_html_lint;
-my $lint;
 my $test_token = "";
 
 my $has_curl = 0; # does require newer curl, disabling for now (2020-06-09) # has_util("curl");
@@ -57,9 +55,16 @@ our $placktest;
 #########################
 sub has_util {
     my($util) = @_;
+    our $utils_cache;
+    $utils_cache ||= {};
+    return $utils_cache->{$util} if exists $utils_cache->{$util};
     for my $path (split/:/mx, $ENV{'PATH'}) {
-        return(1) if -x $path.'/'.$util;
+        if(-x $path.'/'.$util) {
+            $utils_cache->{$util} = 1;
+            return(1);
+        }
     }
+    $utils_cache->{$util} = 0;
     return(0);
 }
 
@@ -422,8 +427,8 @@ sub test_page {
         ok($rsize < 1024, 'resident size ('.$rsize.'MB) higher than 1024MB on '.Thruk::Utils::Encode::encode_utf8($opts->{'url'}));
     }
 
-    # html valitidy
-    if(!defined $opts->{'skip_doctype'} or $opts->{'skip_doctype'} == 0) {
+    # html validity
+    if(!defined $opts->{'skip_doctype'} || $opts->{'skip_doctype'} == 0) {
         if($content_type =~ 'text\/html' and !$request->is_redirect) {
             like($return->{'content'}, '/<html[^>]*>/i', 'html page has html section');
             like($return->{'content'}, '/<!doctype/i',   'html page has doctype');
@@ -452,28 +457,25 @@ sub test_page {
 
     SKIP: {
         if($content_type =~ m|text/html| and (!defined $opts->{'skip_html_lint'} or $opts->{'skip_html_lint'} == 0)) {
-            if(!defined $use_html_lint) {
-                # load lint on first use
-                $use_html_lint = 0;
-                eval {
-                    require HTML::Lint;
-                    $use_html_lint = 1;
-                    $lint          = HTML::Lint->new();
-                };
+            if(!has_util('tidy')) {
+                skip "no tidy installed", 1;
             }
-            if($use_html_lint == 0) {
-                skip "no HTML::Lint installed", 1;
-            }
-            $lint->newfile($opts->{'url'});
-            # will result in "Parsing of undecoded UTF-8 will give garbage when decoding entities..." otherwise
+            # HTML::Lint is HTML4-only, so the HTML5 pages always produced
+            # "unknown attribute" noise. tidy knows HTML5.
             my $content = $return->{'content'};
-            utf8::decode($content);
-            $lint->parse($content);
-            $lint->eof();
-            my @errors = $lint->errors;
-            @errors = diag_lint_errors_and_remove_some_exceptions($lint, $content);
-            is(scalar @errors, 0, "No errors found in HTML");
-            $lint->clear_errors();
+            utf8::decode($content) if defined $content;
+            my ($errors, $warnings) = tidy_lint($content, $opts->{'url'}, $opts->{'skip_doctype'});
+            if(scalar @{$errors} > 0) {
+                push @{$errors}, @{$warnings};
+                is(scalar @{$errors}, 0, "No errors (and warnings) found in HTML");
+            } elsif(scalar @{$warnings} > 0) {
+                TODO: {
+                    local $TODO = "fix tidy warnings";
+                    is(scalar @{$warnings}, 0, "No errors (and warnings) found in HTML");
+                }
+            } else {
+                ok(1, "No errors (and warnings) found in HTML");
+            }
             my $html_only_content = $return->{'content'};
             $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
             my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
@@ -583,55 +585,89 @@ sub set_cookie {
 }
 
 #########################
-sub diag_lint_errors_and_remove_some_exceptions {
-    my($lint, $content) = @_;
-    my @return;
-    for my $error ( $lint->errors ) {
-        my $err_str = $error->as_string;
-        next if $err_str =~ m/<IMG\ SRC="[^"]+">\ tag\ has\ no\ HEIGHT\ and\ WIDTH\ attributes/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "data\-[\w\-]+"\ for\ tag/imxo;
-        next if $err_str =~ m/Invalid\ character.*should\ be\ written\ as/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <input>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "placeholder"\ for\ tag\ <textarea>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "class"\ for\ tag\ <html>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <form>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "autocomplete"\ for\ tag\ <input>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "oninput"\ for\ tag\ <input>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "hidden"\ for\ tag\ <option>/imxo;
-        next if $err_str =~ m/Character\ ".*?"\ should\ be\ written\ as/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "manifest"\ for\ tag\ <html>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "sizes"\ for\ tag\ <link>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "charset"\ for\ tag\ <meta>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "required"\ for\ tag\ <(input|select|textarea)>/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "oncontextmenu"\ for\ tag/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "crossorigin"\ for\ tag/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "fetchpriority"\ for\ tag/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "as"\ for\ tag/imxo;
-        next if $err_str =~ m/Unknown\ attribute\ "defer"\ for\ tag/imxo;
-        next if $err_str =~ m/<html>\ tag\ is\ required/imxo;
-        next if $err_str =~ m/<head>\ tag\ is\ required/imxo;
-        next if $err_str =~ m/<title>\ tag\ is\ required/imxo;
-        next if $err_str =~ m/<body>\ tag\ is\ required/imxo;
-        next if $err_str =~ m/Entity\ .*\ is\ unknown/imxo;
-        next if $err_str =~ m/Unknown\ element\ <(main|header|footer|nav)>/imxo;
-        diag($error->as_string."\n");
-        my @lines = $error->as_string() =~ m/\((\d+):\d+\)/gmx;
-        for my $line (sort @lines) {
-            _diag_context($content, $line);
-        }
-        push @return, $error;
+sub tidy_lint {
+    my($content, $url, $skip_doc_type) = @_;
+    my ($fh, $name) = tempfile(UNLINK => 1);
+    binmode $fh;
+    print $fh $content;
+    close $fh;
+    # tidy auto-detects the doctype from the page content. it is HTML5-aware:
+    # rc 0 = clean, rc 1 = warnings or errors, rc >= 2 = fatal. it reports
+    # nearly everything as "Warning:" severity and reserves "- Error:" for
+    # genuinely broken/malformed markup.
+    my $out = `tidy -q -utf8 \Q$name\E 2>&1`;
+    my @lines = split /\n/, $out;
+    # note: /m only, not /mx -- /x strips the space from "- Warning"/"- Error"
+    my @tolerated = (
+        '<a> attribute "target" lacks value',
+        '<form> attribute "target" lacks value',
+        '<img> attribute "border" not allowed for HTML5',
+        '<img> proprietary attribute "fetchpriority"',
+        '<td> attribute "abbr" not allowed for HTML5',
+        '<td> attribute "align" not allowed for HTML5',
+        '<td> attribute "width" not allowed for HTML5',
+        'moved <style> tag to <head>',
+        'trimming empty <button>',
+        'trimming empty <div>',
+        'trimming empty <i>',
+        'trimming empty <span>',
+        'trimming empty <tbody>',
+        "blank 'title' element",
+    );
+    if($skip_doc_type) {
+        push @tolerated,
+            'inserting implicit <body>',
+            "inserting missing 'title' element",
+            'missing <!DOCTYPE> declaration';
     }
-    return @return;
+    my @warnings = grep {
+        my $w = $_;
+        !grep { $w =~ m/\Q$_\E/ } @tolerated
+    } grep /^line .* - Warning/m, @lines;
+    my @errors = grep /^line .* - Error/m, @lines;
+    if(scalar @errors or scalar @warnings) {
+        diag(sprintf("tidy: %s: %d errors, %d warnings\n", $url, scalar @errors, scalar @warnings));
+        # group by line number
+        my $grouped = {};
+        for my $issue (sort (@errors, @warnings)) {
+            my $line_nr = 0;
+            if($issue =~ m/^\s*line\s+(\d+)\s+column/gmx) {
+                $line_nr = $1;
+            }
+            $grouped->{$line_nr} = [] unless defined $grouped->{$line_nr};
+            push @{$grouped->{$line_nr}}, $issue;
+        }
+        for my $line_nr (sort { $a <=> $b } keys %{$grouped}) {
+            my $cols = [];
+            for my $issue (@{$grouped->{$line_nr}}) {
+                if($issue =~ m/^\s*line\s+\d+\s+column\s+(\d+)\s+/gmx) {
+                    push @{$cols}, $1;
+                }
+                diag($issue.":\n");
+            }
+            _diag_context($content, $line_nr, $cols) if $line_nr > 0;
+        }
+    }
+    return \@errors, \@warnings;
 }
 
 #########################
 sub _diag_context {
-    my($content, $nr) = @_;
+    my($content, $nr, $cols) = @_;
     my $linenr = 0;
     for my $line (split(/\n/, $content)) {
         $linenr++;
         if($linenr >= $nr-2 && $linenr <= $nr+2) {
-            diag($linenr.": ".substr($line, 0, 250));
+            diag(sprintf("% 5d: %s", $linenr, substr($line, 0, 250)));
+            if($linenr == $nr && $cols && scalar @{$cols} > 0) {
+                @{$cols} = sort @{$cols};
+                my $marker = "";
+                for my $col (@{$cols}) {
+                    next if length($marker) >= $col;
+                    $marker .= ($col > (length($marker)+1) ? (" " x ($col - 1 - length($marker))) : "") . "^";
+                }
+                diag((" "x7).$marker);
+            }
         }
     }
     return;

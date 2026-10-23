@@ -20,14 +20,14 @@ END
   [% hObj = 0 %]
   [% pObj = 0 %]
   [% IF parent.list.size == 1 %]
-    <a class="link" href="extinfo.cgi?type=1&host=[% parent | uri %]">
+    <a class="link" href="extinfo.cgi?type=1&amp;host=[% parent | uri %]">
     [% pID = parent %]
     [% IF parent_nodes.defined(pID) %]
       [% pObj = parent_nodes.$pID %]
       [% state = hoststatetext(pObj) %]
     [% END %]
   [% ELSE %]
-    <a class="link" href="extinfo.cgi?type=2&host=[% parent.0 | uri %]&service=[% parent.1 | uri %]">
+    <a class="link" href="extinfo.cgi?type=2&amp;host=[% parent.0 | uri %]&amp;service=[% parent.1 | uri %]">
     [% pID = parent.0 _ ';' _ parent.1 %]
     [% IF parent_nodes.defined(pID) %]
       [% pObj = parent_nodes.$pID %]
@@ -86,7 +86,7 @@ END
       [% END %]
     [% ELSE %]
       [% IF !command_disabled(c, hoff) %]
-        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hoff %]&amp;host=[% obj.name | uri %]&backend=[% peer_key | uri %]"><div class='badge ENABLED'>ENABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hoff %]&amp;host=[% obj.name | uri %]&amp;backend=[% peer_key | uri %]"><div class='badge ENABLED'>ENABLED</div></a>
       [% ELSE %]
         <div class='badge ENABLED'>ENABLED</div>
       [% END %]
@@ -100,7 +100,7 @@ END
       [% END %]
     [% ELSE %]
       [% IF !command_disabled(c, hon) %]
-        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hon %]&amp;host=[% obj.name | uri %]&backend=[% peer_key | uri %]"><div class='badge DISABLED'>DISABLED</div></a>
+        <a class="js-modal-command-link" href="cmd.cgi?cmd_typ=[% hon %]&amp;host=[% obj.name | uri %]&amp;backend=[% peer_key | uri %]"><div class='badge DISABLED'>DISABLED</div></a>
       [% ELSE %]
         <div class='badge DISABLED'>DISABLED</div>
       [% END %]

@@ -36,7 +36,7 @@
         [% IF host.childs.size > 0 %]<div><a href="status.cgi?style=hostdetail&amp;s0_type=parent&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]">View Child Hosts For This Host</a></div>[% END %]
         [% IF show_impacts_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=impact&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Impacts of [% host.name | uri %]">View Impacts For This Problem</a></div>[% END %]
         [% IF show_rootproblems_link %]<div><a href="shinken_status.cgi?style=bothtypes&amp;s0_type=rootproblem&amp;s0_op=%3D&amp;s0_value=[% host.name | uri %]&amp;title=Root problems of [% host.name | uri %]">View Root Problem For This Impact</a></div>[% END %]
-        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %][% add_request_backend %]">Logs</a> / <a href="avail.cgi?outages=1&host=[% host.name | uri %][% add_request_backend %]">Outages</a>)</div>
+        <div class="flex flex-nowrap gap-x-1"><a href="history.cgi?host=[% host.name | uri %]&amp;nosystem=1[% add_request_backend %]">View Alert History For This Host</a> (<a href="showlog.cgi?host=[% host.name | uri %][% add_request_backend %]">Logs</a> / <a href="avail.cgi?outages=1&amp;host=[% host.name | uri %][% add_request_backend %]">Outages</a>)</div>
         [% IF use_feature_trends %]<div><a href="trends.cgi?host=[% host.name | uri %][% add_request_backend %]">View Trends For This Host</a></div>[% END %]
         <div><a href="avail.cgi?host=[% host.name | uri %]&amp;show_log_entries[% add_request_backend %]">View Availability Report For This Host</a></div>
         <div><a href="notifications.cgi?host=[% host.name | uri %][% add_request_backend %]">View Notifications For This Host</a></div>
@@ -233,7 +233,7 @@
       <h3>Configuration Information</h3>
       <div class="flex gap-x-1">
         [% IF c.config.exists("has_feature_agents") && c.config.has_feature_agents && cust_vars.exists('AGENT') %]
-          <a class="button" href="agents.cgi?action=edit&hostname=[% host.name | uri %]&backend=[% peer_key %]"><i class="fa-solid fa-cube small"></i>Agent Configuration</a>
+          <a class="button" href="agents.cgi?action=edit&hostname=[% host.name | uri %]&amp;backend=[% peer_key %]"><i class="fa-solid fa-cube small"></i>Agent Configuration</a>
         [% END %]
         [% IF has_bp %]
           <a class="button" href="bp.cgi?action=details&bp=[% has_bp %]&edit=1"><i class="fa-solid fa-sitemap small"></i>Edit Business Process</a>

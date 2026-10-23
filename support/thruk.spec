@@ -19,7 +19,7 @@ URL:           http://thruk.org
 Source0:       %{fullname}.tar.gz
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}
 Group:         Applications/Monitoring
-Summary:       Monitoring Webinterface for Nagios/Naemon/Icinga and Shinken
+Summary:       Monitoring WebUI for Nagios/Naemon/Icinga and Shinken
 AutoReqProv:   no
 BuildRequires: make, patch, npm
 BuildRequires: perl
@@ -44,9 +44,9 @@ BuildRequires: epel-release
 %endif
 
 %description
-Thruk is a multibackend monitoring webinterface which currently
+Thruk is a multibackend monitoring WebUI which currently
 supports Naemon, Nagios, Icinga and Shinken as backend using the Livestatus
-API. It is designed to be a 'dropin' replacement and covers almost
+API. It is designed to be a 'drop-in' replacement and covers almost
 all of the original features plus adds additional enhancements for
 large installations.
 

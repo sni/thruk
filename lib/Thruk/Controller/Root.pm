@@ -13,7 +13,7 @@ Thruk::Controller::Root - Root Controller for Thruk
 
 =head1 DESCRIPTION
 
-Root Controller of the Thruk Monitoring Webinterface
+Root Controller of the Thruk Monitoring WebUI
 
 =head1 METHODS
 
@@ -98,7 +98,7 @@ sub thruk_main_html {
 
     $c->stash->{'hide_backends_chooser'}   = 1;
     Thruk::Action::AddDefaults::add_defaults($c, Thruk::Constants::ADD_SAFE_DEFAULTS);
-    $c->stash->{'title'}                   = 'Thruk Monitoring Webinterface';
+    $c->stash->{'title'}                   = 'Thruk Monitoring WebUI';
     $c->stash->{'page'}                    = 'splashpage';
     $c->stash->{'template'}                = 'main_legacy.tt';
     $c->stash->{'no_auto_reload'}          = 1;

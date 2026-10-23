@@ -2238,7 +2238,7 @@ sub add_request_backend {
     }
     return("") unless $backend;
 
-    return("&backend=".&escape_html($backend));
+    return("&amp;backend=".&escape_html($backend));
 }
 
 ########################################
@@ -2355,6 +2355,24 @@ sub maybe_pre {
     return $txt unless $txt =~ m/[\ \t]{2,}/mx;
 
     return("<pre>".$txt."</pre>");
+}
+
+########################################
+
+=head2 strip_trailing_slash
+
+  strip_trailing_slash
+
+returns link with trailing slash removed
+
+=cut
+sub strip_trailing_slash {
+    my($href) = @_;
+
+    my $stripped = "$href";
+    $stripped =~ s|/$||gmx;
+
+    return($stripped);
 }
 
 ########################################

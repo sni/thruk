@@ -62,8 +62,8 @@
 </table>
 <div class="flex justify-center my-2">
   [% IF obj.defined("description") %]
-    <a class="button w-60" href="extinfo.cgi?type=2&host=[% obj.host_name | uri %]&service=[% obj.description | uri %]">View Full Service Details</a>
+    <a class="button w-60" href="extinfo.cgi?type=2&amp;host=[% obj.host_name | uri %]&amp;service=[% obj.description | uri %]">View Full Service Details</a>
   [% ELSE %]
-    <a class="button w-60" href="extinfo.cgi?type=1&host=[% obj.name | uri %]">View Full Host Details</a>
+    <a class="button w-60" href="extinfo.cgi?type=1&amp;host=[% obj.name | uri %]">View Full Host Details</a>
   [% END %]
 </div>

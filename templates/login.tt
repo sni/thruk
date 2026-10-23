@@ -1,15 +1,11 @@
 ﻿<!DOCTYPE HTML>
 <html>
   <head>
-    <title>Thruk Monitoring Webinterface</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thruk Monitoring WebUI</title>
     [% PROCESS _favicon.tt %]
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_css.tt %]
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     [% PROCESS _common_js_files.tt %]
   </head>
   <body class='loginpage w-screen h-screen flexcol justify-center items-center'>
@@ -29,9 +25,9 @@
         <i class="uil uil-eye-slash absolute z-10 right-0 top-0 mr-2 my-1.5 opacity-50 text-lg js-toggle-password"></i>
       </div>
       <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
-        <div class="w-5"><i class="uil uil-placeholder"></i></div>
+        <span class="w-5"><i class="uil uil-placeholder"></i></span>
         Sign in
-        <div class="w-5"></div>
+        <span class="w-5"></span>
       </button>
     </form>
     [% END %]
@@ -40,9 +36,9 @@
       <input type="hidden" name="referer" value="[% referer | html %]">
       <input type="hidden" name="oauth" value="[% loop.index %]">
       <button type="submit" class="text-lg font-semibold mt-2 flexrow flex-nowrap justify-between w-full">
-        <div class="w-5"><i class="[% IF a.defined("icon") %][% a.icon | html %][% ELSE %]uil uil-placeholder[% END %]"></i></div>
+        <span class="w-5"><i class="[% IF a.defined("icon") %][% a.icon | html %][% ELSE %]uil uil-placeholder[% END %]"></i></span>
         [% IF a.defined("login") %][% a.login %][% ELSE %]Login with OAuth[% END %]
-        <div class="w-5"></div>
+        <span class="w-5"></span>
       </button>
     </form>
     [% END %]

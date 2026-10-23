@@ -35,8 +35,8 @@
   </a>
   <div class="card shadow-float absolute z-20 top-7" style="display: none;" id="excel_export_columns">
     <div class="head justify-between gap-2">
-      <h3>Choose Columns to Export</h3>
-      <button class="iconOnly" name="update" id="accept_ht" onclick="document.getElementById('excel_form_btn').click(); return false;" title="update">
+      <h3>Choose columns for Excel export</h3>
+      <button class="iconOnly" name="update" onclick="document.getElementById('excel_form_btn').click(); return false;" title="update">
         <i class="fa-solid fa-check round small green"></i>
       </button>
     </div>

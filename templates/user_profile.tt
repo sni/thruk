@@ -100,7 +100,7 @@
     <tr>
       <th class="w-40">Change Password</th>
       <td>
-        <a class="button w-fit" href="[% url_prefix %]cgi-bin/conf.cgi?action=user_password&referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]"><i class="uil uil-key-skeleton"></i> Update password</a>
+        <a class="button w-fit" href="[% url_prefix %]cgi-bin/conf.cgi?action=user_password&amp;referer=[% as_url_arg(short_uri(c, {referer => 'undef'})) %]"><i class="uil uil-key-skeleton"></i> Update password</a>
       </td>
     </tr>
     </table>

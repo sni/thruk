@@ -86,7 +86,6 @@ feature     ('performance_tweaking',
 # requirements test requirements
 if(scalar @ARGV != 1 || $ARGV[0] ne '--checkdeps') {
   test_requires 'Test::Simple'                                                            => 0;
-  test_requires 'HTML::Lint'                                                              => 0;
   test_requires 'File::BOM'                                                               => 0;
   test_requires 'Test::Cmd'                                                               => 0;
   test_requires 'Test::Pod'                                                               => 1.40;
