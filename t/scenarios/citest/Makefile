@@ -5,7 +5,7 @@ pre_prepare:
 
 extra_prepare:
 	rm -rf citest/prepare_machine.sh
-	docker exec citest-site-1 /thruk/t/scenarios/citest/extra_prepare.sh
+	docker compose exec site /thruk/t/scenarios/citest/extra_prepare.sh
 
 wait_start:
 	for x in $$(seq $(STARTUPWAIT)); do \
@@ -17,10 +17,13 @@ wait_start:
 	docker ps
 
 test: test_prepare wait_start
-	docker exec citest-site-1 /thruk/t/scenarios/citest/test.sh $(filter-out $@,$(MAKECMDGOALS))
+	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/test.sh $(filter-out $@,$(MAKECMDGOALS))
 
 test_verbose: test_prepare wait_start
-	docker exec citest-site-1 /thruk/t/scenarios/citest/test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
+	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
 test_prepare:
-	docker exec citest-site-1 rsync -a --delete --exclude=Makefile --exclude=thruk_local.conf --exclude=thruk_local.d --exclude=tmp/ --exclude=var/ --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
+	docker compose exec site rsync -a --delete --exclude=Makefile --exclude=thruk_local.conf --exclude=thruk_local.d --exclude=tmp/ --exclude=var/ --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
+
+server: test_prepare wait_start
+	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/server.sh $(filter-out $@,$(MAKECMDGOALS))

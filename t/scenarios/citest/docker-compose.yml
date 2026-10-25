@@ -1,11 +1,13 @@
 services:
   site:
     build: citest/
+    environment:
+        - TZ=Europe/Berlin
     volumes:
         - ../../../:/thruk:ro
         - .:/scenario:ro
         - .:/test:ro
         - ../../../var/tmp:/var/tmp:rw
-        - "/etc/timezone:/etc/timezone:ro"
-        - "/etc/localtime:/etc/localtime:ro"
         - "../../../.ci:/.ci:ro"
+    ports:
+        - "127.0.0.3:3000:3000"

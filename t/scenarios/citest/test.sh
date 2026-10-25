@@ -12,6 +12,8 @@ FILES=""
 for ARG in $*; do
     if test -f "$ARG"; then
         FILES="$FILES $ARG"
+    elif test -f "/thruk/$ARG"; then
+        FILES="$FILES /thruk/$ARG"
     elif [ "$ARG" == "-v" ]; then
         VERBOSE=1
     elif [ "$ARG" == "1" ]; then
@@ -38,5 +40,8 @@ export PERL5LIB=./lib/.:$PERL5LIB
 export TEST_AUTHOR=1
 export THRUK_AUTHOR=1
 export TEST_MYSQL="mysql://naemon:naemon@localhost:3306/test"
+
+rsync -a --chown=naemon:naemon /thruk/lib/.       /var/lib/naemon/thruk/lib/.
+rsync -a --chown=naemon:naemon /thruk/templates/. /var/lib/naemon/thruk/templates/.
 
 HARNESS_TIMER=1 PERL_DL_NONLAZY=1 stdbuf -o0 -e0 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness($VERBOSE)" $FILES
