@@ -78,6 +78,15 @@ $Thruk::Backend::Provider::Livestatus::minimal_service_columns = [qw/
     accept_passive_checks acknowledged check_type checks_enabled custom_variable_names custom_variable_values
     description display_name has_been_checked host_name state icon_image_alt icon_image_expanded scheduled_downtime_depth
     / ];
+
+# columns required to calculate host/service group summaries (status.cgi?style=hostsummary|servicesummary)
+# keep these lists small, expensive columns like comments slow down livestatus on large installations
+$Thruk::Backend::Provider::Livestatus::summary_host_columns = [qw/
+    acknowledged check_type checks_enabled has_been_checked name scheduled_downtime_depth state
+    / ];
+$Thruk::Backend::Provider::Livestatus::summary_service_columns = [qw/
+    acknowledged check_type checks_enabled description has_been_checked host_name scheduled_downtime_depth state
+    / ];
 $Thruk::Backend::Provider::Livestatus::default_service_columns = [
     @{$Thruk::Backend::Provider::Livestatus::minimal_service_columns}, qw/
     host_acknowledged host_check_type host_checks_enabled host_has_been_checked
