@@ -260,9 +260,9 @@
         <td class="featureBlock">
           <div class="pl-0">
             <a href='extinfo.cgi?type=0'>
-              [% IF pi.keys.size == 0 || pi.execute_service_checks == 1 %]<div class="vbadge ENABLED"><span>Enabled</span></div>
-              [% ELSIF pi.execute_service_checks == -1                  %]<div class="vbadge UNKNOWN"><span>Ambiguous</span></div>
-              [% ELSE                                                   %]<div class="vbadge DISABLED"><span>Disabled</span></div>
+              [% IF pi.keys.size == 0 || pi.execute_service_checks == 1 %]<span class="vbadge ENABLED"><span>Enabled</span></span>
+              [% ELSIF pi.execute_service_checks == -1                  %]<span class="vbadge UNKNOWN"><span>Ambiguous</span></span>
+              [% ELSE                                                   %]<span class="vbadge DISABLED"><span>Disabled</span></span>
               [% END %]
             </a>
 
@@ -301,9 +301,9 @@
         <td class="featureBlock">
           <div>
             <a href='extinfo.cgi?type=0'>
-              [% IF pi.keys.size == 0 || pi.accept_passive_service_checks == 1 %]<div class="vbadge ENABLED"><span>Enabled</span></div>
-              [% ELSIF pi.accept_passive_service_checks == -1                  %]<div class="vbadge UNKNOWN"><span>Ambiguous</span></div>
-              [% ELSE                                                          %]<div class="vbadge DISABLED"><span>Disabled</span></div>
+              [% IF pi.keys.size == 0 || pi.accept_passive_service_checks == 1 %]<span class="vbadge ENABLED"><span>Enabled</span></span>
+              [% ELSIF pi.accept_passive_service_checks == -1                  %]<span class="vbadge UNKNOWN"><span>Ambiguous</span></span>
+              [% ELSE                                                          %]<span class="vbadge DISABLED"><span>Disabled</span></span>
               [% END %]
             </a>
 
@@ -331,9 +331,9 @@
         <td class="featureBlock">
           <div>
             <a href='extinfo.cgi?type=0'>
-              [% IF pi.keys.size == 0 || pi.enable_notifications == 1 %]<div class="vbadge ENABLED"><span>Enabled</span></div>
-              [% ELSIF pi.enable_notifications == -1                  %]<div class="vbadge UNKNOWN"><span>Ambiguous</span></div>
-              [% ELSE                                                 %]<div class="vbadge DISABLED"><span>Disabled</span></div>
+              [% IF pi.keys.size == 0 || pi.enable_notifications == 1 %]<span class="vbadge ENABLED"><span>Enabled</span></span>
+              [% ELSIF pi.enable_notifications == -1                  %]<span class="vbadge UNKNOWN"><span>Ambiguous</span></span>
+              [% ELSE                                                 %]<span class="vbadge DISABLED"><span>Disabled</span></span>
               [% END %]
             </a>
 
@@ -361,9 +361,9 @@
         <td class="featureBlock">
           <div>
             <a href='extinfo.cgi?type=0'>
-              [% IF pi.keys.size == 0 || pi.enable_event_handlers == 1 %]<div class="vbadge ENABLED"><span>Enabled</span></div>
-              [% ELSIF pi.enable_event_handlers == -1                  %]<div class="vbadge UNKNOWN"><span>Ambiguous</span></div>
-              [% ELSE                                                  %]<div class="vbadge DISABLED"><span>Disabled</span></div>
+              [% IF pi.keys.size == 0 || pi.enable_event_handlers == 1 %]<span class="vbadge ENABLED"><span>Enabled</span></span>
+              [% ELSIF pi.enable_event_handlers == -1                  %]<span class="vbadge UNKNOWN"><span>Ambiguous</span></span>
+              [% ELSE                                                  %]<span class="vbadge DISABLED"><span>Disabled</span></span>
               [% END %]
             </a>
 
@@ -391,9 +391,9 @@
         <td class="featureBlock">
           <div>
             <a href='extinfo.cgi?type=0'>
-              [% IF pi.keys.size == 0 || pi.enable_flap_detection == 1 %]<div class="vbadge ENABLED"><span>Enabled</span></div>
-              [% ELSIF pi.enable_flap_detection == -1                  %]<div class="vbadge UNKNOWN"><span>Ambiguous</span></div>
-              [% ELSE                                                  %]<div class="vbadge DISABLED"><span>Disabled</span></div>
+              [% IF pi.keys.size == 0 || pi.enable_flap_detection == 1 %]<span class="vbadge ENABLED"><span>Enabled</span></span>
+              [% ELSIF pi.enable_flap_detection == -1                  %]<span class="vbadge UNKNOWN"><span>Ambiguous</span></span>
+              [% ELSE                                                  %]<span class="vbadge DISABLED"><span>Disabled</span></span>
               [% END %]
             </a>
 

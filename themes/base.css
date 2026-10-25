@@ -1732,8 +1732,8 @@ BODY.page_tac {
       @apply flexrow flex-nowrap gap-0 h-full pl-px w-48;
     }
   }
-  DIV.vbadge {
-    @apply p-0 w-6 h-full relative hover:opacity-75;
+  DIV.vbadge, SPAN.vbadge {
+    @apply block p-0 w-6 h-full relative hover:opacity-75;
     SPAN {
       @apply vertical block w-full h-full absolute bottom-0 text-center font-semibold leading-5;
     }

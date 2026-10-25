@@ -45,7 +45,7 @@
         jQuery("#mainframe").html('<iframe src="'+pageurl+'" class="h-full w-full border-0"><\/iframe>');
         jQuery("FOOTER").remove();
       } else {
-        thruk_message(1, 'This URL is not allowed to be embedded. Check <a href="https://thruk.org/documentation/configuration.html#_allowed_frame_links" target="_blank" class="textBody link"><i class="uil uil-external-link-alt text-sm"></i>allowed_frame_links</a> configuration.');
+        thruk_message(1, 'This URL is not allowed to be embedded. Check <a href="https://thruk.org/documentation/configuration.html#_allowed_frame_links" target="_blank" class="textBody link"><i class="uil uil-external-link-alt text-sm"><\/i>allowed_frame_links<\/a> configuration.');
       }
     }
     return(true);

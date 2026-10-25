@@ -49,7 +49,7 @@
                 <td class="px-2">
                   [% IF changed_files.size > 0 %]
                     <input type='hidden' name='ignore_whitespace' value='1'>
-                    <button name="diff" class="w-full" onClick="document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                    <button name="diff" class="w-full" onClick="document.getElementById('save_form').action = 'conf.cgi?sub=objects&amp;apply=yes#output'; return true;">
                       <i class="uil uil-search"></i>
                       view diff of changed files
                     </button>
@@ -99,7 +99,7 @@
                 </td>
                 <td class="px-2">
                   [% IF peer_conftool.exists('obj_check_cmd') %]
-                    <button name="check" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                    <button name="check" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&amp;apply=yes#output'; return true;">
                       <i class="uil uil-check"></i>
                       check your configuration changes
                     </button>
@@ -121,7 +121,7 @@
                 </td>
                 <td class="px-2">
                   [% IF peer_conftool.exists('obj_reload_cmd') %]
-                    <button name="reload" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&apply=yes#output'; return true;">
+                    <button name="reload" class="submit w-full" onclick="setBtnSpinner(this); document.getElementById('save_form').action = 'conf.cgi?sub=objects&amp;apply=yes#output'; return true;">
                       <i class="uil uil-sync"></i>
                       reload your monitoring core
                     </button>
