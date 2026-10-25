@@ -650,7 +650,13 @@ sub redirect_to {
     }
 
     $c->res->content_type('text/html; charset=utf-8');
-    $c->res->body('This item has moved to '.Thruk::Utils::Filter::escape_html($url));
+    $c->res->body('<!DOCTYPE HTML>
+<html>
+<head><title>redirecting...</title></head>
+<body>
+This item has moved to '.Thruk::Utils::Filter::escape_html($url).'
+</body>
+</html>');
     $c->res->redirect($url);
     $c->{'rendered'} = 1;
     if($url =~ m/ARRAY\(/mx) {
