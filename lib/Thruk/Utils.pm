@@ -2285,7 +2285,11 @@ sub update_cron_file {
         unlink($tmperror);
         print $fh $errors;
         # override know error with initial crontab
-        if($rc != 0 && ($rc != 1 || $errors !~ m/no\ crontab\ for/mx)) {
+        if($rc == 0) {
+            # ok
+        } elsif(($rc == 1 || $rc == 2) && $errors =~ m/\Qno crontab for\E/mx) {
+            # also fine, empty crontab
+        } else {
             die(sprintf("cron_pre_edit_cmd (".$cmd.") exited with value %d: %s\n%s\n", $rc, $output, $errors));
         }
     }
