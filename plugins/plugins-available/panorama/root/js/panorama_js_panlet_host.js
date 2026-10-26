@@ -128,7 +128,7 @@ TP.updateExtinfoDetails = function(This, success, response, options) {
             panel.getComponent('in_downtime').update('<div class="extinfo_noyes_0">NO<\/div>');
         } else {
             var d = downtimes[0];
-            panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(d.start_time)+' - '+TP.date_format(d.end_time)+'<a href="" title="remove downtime" onclick="TP.deleteDowntime(\''+d.id+'\', \''+panel.id+'\', \''+this.type+'\'); return false;"><img src="'+url_prefix+'plugins/panorama/images/remove.png" alt="remove downtime"><\/a>)');
+            panel.getComponent('in_downtime').update('<div class="extinfo_noyes_1">YES<\/div> ('+TP.date_format(d.start_time)+' - '+TP.date_format(d.end_time)+'<a title="remove downtime" onclick="TP.deleteDowntime(\''+d.id+'\', \''+panel.id+'\', \''+this.type+'\'); return false;"><img src="'+url_prefix+'plugins/panorama/images/remove.png" alt="remove downtime"><\/a>)');
         }
         panel.getComponent('in_check_period').update('<div class="extinfo_yesno_'+d.in_check_period+'">'+ (d.in_check_period>0 ? 'YES' : 'NO') +'<\/div>');
         panel.getComponent('in_notification_period').update('<div class="extinfo_yesno_'+d.in_notification_period+'">'+ (d.in_notification_period>0 ? 'YES' : 'NO') +'<\/div>');

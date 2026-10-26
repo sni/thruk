@@ -19,3 +19,10 @@ echo "CREATE USER IF NOT EXISTS 'naemon'@'%' IDENTIFIED BY 'naemon';" | mysql
 echo "GRANT ALL PRIVILEGES ON *.* TO 'naemon'@'%';" | mysql
 chmod g+rx /var/run/mysqld
 adduser naemon mysql
+
+(
+    cd /tmp
+    wget "https://github.com/htacg/tidy-html5/releases/download/5.8.0/tidy-5.8.0-Linux-64bit.deb"
+    apt install -y ./tidy-5.8.0-Linux-64bit.deb
+)
+

@@ -61,7 +61,7 @@
                       [% ELSE %]
                         placeholder="set global cgi roles"
                         onfocus="this.click()"
-                        onclick="ajax_search.init(this, 'cgi_role', { url: 'conf.cgi?action=json&type=cgi_roles', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
+                        onclick="ajax_search.init(this, 'cgi_role', { url: 'conf.cgi?action=json&amp;type=cgi_roles', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
                       [% END %]
                     >
                   </div>
@@ -80,7 +80,7 @@
                       [% ELSE %]
                         placeholder="include additional teams"
                         onfocus="this.click()"
-                        onclick="ajax_search.init(this, 'team', { url: 'conf.cgi?action=json&type=teams', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: [ filter_own_team, tags_input_filter_duplicates ] })"
+                        onclick="ajax_search.init(this, 'team', { url: 'conf.cgi?action=json&amp;type=teams', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: [ filter_own_team, tags_input_filter_duplicates ] })"
                       [% END %]
                     >
                   </div>
@@ -193,7 +193,7 @@
                           </div>
                         </td>
                         <td class="text-right">
-                          <a href="" onclick="jQuery(this).parents('TR.js-teams-permissions').first().remove(); return false;">
+                          <a onclick="jQuery(this).parents('TR.js-teams-permissions').first().remove(); return false;">
                             <i class="fa-solid fa-trash text-sm" title="delete permission entry"></i>
                           </a>
                         </td>

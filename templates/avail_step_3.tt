@@ -141,7 +141,7 @@
           <td class="w-3/4 max-w-[10rem]">
             <div class="flex">
               <div class="truncate flex-1">
-                <a class="link" target="_blank" href="" id="permalink"></a>
+                <a class="link" target="_blank" id="permalink"></a>
               </div>
               <div>
                 <button class="iconOnly px-1 copy_button" onclick="copyCode(event, String(document.getElementById('permalink').href)); return false;"><i class="uil uil-copy" title="Copy to clipboard"></i></button>

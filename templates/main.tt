@@ -18,8 +18,6 @@
 
 </style>
 
-<h1>[% page_title %]</h1>
-
 <div class="card w-full absolute top-0 left-0 rounded-none shadow-none border-t border-b border-l-0 border-r-0 borderDefault view_tabs">
   <div class="head border-b-0 flexrow flex-nowrap gap-0 justify-between" id="view_tabs">
     <div class="ml-6 w-32">
@@ -34,8 +32,11 @@
       </span>
       [% END %]
       <div class="relative">
-        <span class="tabs px-2 mt-px text-center font-medium text-base border-none hover:border-none">
-          <button class="iconOnly" onclick="showElement('edit_menu', undefined, true); return false;" title="add new view"><i class="fa-solid fa-ellipsis-vertical text-lg"></i></button>
+        <span
+          class="tabs px-2 mt-px text-center font-medium text-base border-none hover:border-none clickable"
+          onclick="showElement('edit_menu', undefined, true); return false;"
+          title="add new view">
+            <i class="fa-solid fa-ellipsis-vertical text-lg"></i>
         </span>
         <div id="edit_menu" style="display: none;" class="context_menu w-[160px] left-0 top-[40px]">
           <ul class="w-full">
@@ -143,7 +144,7 @@
   <div class="my-card">
     <div class="card w-auto min-h-[250px]">
       <div class="head">
-        <h3><a href="status.cgi?hostgroup=all&style=hostdetail" class="link">Hosts</a></h3>
+        <h3><a href="status.cgi?hostgroup=all&amp;style=hostdetail" class="link">Hosts</a></h3>
       </div>
       <div id="hosts-gaugeChart" class="js-graph-container"></div>
     </div>
@@ -194,7 +195,7 @@
         <h3><a class="link" href="notifications.cgi">Notifications</a></h3>
         [% IF notifications_age && notifications_age > 30 %]<div class="ml-4 textHINTsoft" title="last update: [% date_format(c, date.now - notifications_age) %]">updated [% duration(notifications_age, 6) %] ago</div>[% END %]
       </div>
-      <a href="notifications.cgi?start=&end=" id="notifications-link" class="relative">
+      <a href="notifications.cgi?start=&amp;end=" id="notifications-link" class="relative">
         <div id="notifications-barChart" class="js-graph-no-check-container"></div>
       </a>
     </div>
@@ -206,7 +207,7 @@
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
-        <h3><a href="status.cgi?hostgroup=all&style=hostdetail&hoststatustypes=12&hostprops=42" class="link">Unhandled Host Problems</a></h3>
+        <h3><a href="status.cgi?hostgroup=all&amp;style=hostdetail&amp;hoststatustypes=12&amp;hostprops=42" class="link">Unhandled Host Problems</a></h3>
       </div>
       <div class="overflow-x-auto">
         <table class="cellspacing-x">
@@ -247,7 +248,7 @@
   <div class="my-card min-w-[370px]">
     <div class="card w-auto h-full overflow-hidden">
       <div class="head">
-        <h3><a class="link" href="status.cgi?host=all&type=detail&hostprops=10&hoststatustypes=3&serviceprops=42&servicestatustypes=28">Unhandled Service Problems</a></h3>
+        <h3><a class="link" href="status.cgi?host=all&amp;type=detail&amp;hostprops=10&amp;hoststatustypes=3&amp;serviceprops=42&amp;servicestatustypes=28">Unhandled Service Problems</a></h3>
       </div>
       <div class="overflow-x-auto">
         <table class="cellspacing-x">
@@ -324,7 +325,7 @@ function getToolTipTemplateRow(name, value, color, cls) {
   value = value != null ? value : '{=VALUE}';
   return(''
     +'<tr class="'+cls+'">'
-    +'<td class="name"><span style="background-color:'+color+'"></span>'+name+'<\/td>'
+    +'<td class="name"><span style="background-color:'+color+'"><\/span>'+name+'<\/td>'
     +'<td class="value text-right">'+value+'<\/td>'
     +'<\/tr>'
   );

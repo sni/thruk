@@ -608,6 +608,7 @@ sub tidy_lint {
         '<td> attribute "align" not allowed for HTML5',
         '<td> attribute "valign" not allowed for HTML5',
         '<td> attribute "width" not allowed for HTML5',
+        '<th> attribute "abbr" not allowed for HTML5',
         'moved <style> tag to <head>',
         'trimming empty <button>',
         'trimming empty <div>',

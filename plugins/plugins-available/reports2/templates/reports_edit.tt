@@ -27,7 +27,7 @@
                 <div class="flexrow flex-nowrap gap-x-1">
                   <input type="text" name="name" value="[% r.name | html %]" class="w-full">
                   <div>
-                    <a href="" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'bodyEl': 'macro_help', 'caption': 'Help', 'width': 500 }); return false;">
+                    <a class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'draggable': true, 'bodyEl': 'macro_help', 'caption': 'Help', 'width': 500 }); return false;">
                       <i class="fa-solid fa-circle-question"></i>
                     </a>
                     <div class="hidden" id="macro_help">

@@ -80,7 +80,7 @@
         </td>
         [% END %]
         <td class="[% IF ctype != "exists" %]w-full[% END %]">
-          <a href="" id="info_link_[% name2id(check.id) | html %]" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'mainCls': 'modalFG min-h-[500px]', 'fixedPos': true, 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% name2id(check.id) | html %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); set_sub(1, false, 'infosub_[% name2id(check.id) | html %]'); return false;">(info)</a>
+          <a id="info_link_[% name2id(check.id) | html %]" class="link ml-1" onclick="overcard({'bodyCls': 'p-2', 'mainCls': 'modalFG min-h-[500px]', 'fixedPos': true, 'draggable': true, 'resizable': true, 'bodyEl': 'info_[% name2id(check.id) | html %]', 'caption': 'Details for check: [% check.name | html %]', 'width': 900 }); set_sub(1, false, 'infosub_[% name2id(check.id) | html %]'); return false;">(info)</a>
           [% PROCESS _info_popup %]
         </td>
         [% IF ctype == "exists" || ctype == "obsolete" %]
@@ -355,7 +355,7 @@
               </li>
               <li><hr></li>
               <li class="[% IF agent.hostname != "new" %]hover-red[% END %]">
-                <a href="" class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick="if(confirm('really remove host: [% agent.hostname | html %]?')) { return send_form_in_background_and_forward(this, {action: 'remove' }, null, 'agents.cgi') }; return false;"><i class="fa-solid fa-trash text-xs"></i> Remove</a>
+                <a class="[% IF agent.hostname == "new" %]disabled[% END %]" onclick="if(confirm('really remove host: [% agent.hostname | html %]?')) { return send_form_in_background_and_forward(this, {action: 'remove' }, null, 'agents.cgi') }; return false;"><i class="fa-solid fa-trash text-xs"></i> Remove</a>
               </li>
             </ul>
           </form>
@@ -425,7 +425,7 @@
                     value="[% agent.tags.join(', ') | html %]"
                     placeholder="additional tags"
                     onfocus="this.click()"
-                    onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&type=tags', emptymsg:'press enter to create new tag', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
+                    onclick="ajax_search.init(this, 'tag', { url: 'agents.cgi?action=json&amp;type=tags', emptymsg:'press enter to create new tag', autosubmit:false, keepOpen: true, onselect:tags_input_cb, filter: tags_input_filter_duplicates })"
                   >
                 </div>
               </td>

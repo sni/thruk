@@ -294,7 +294,6 @@ sub index {
     }
     $c->stash->{style}      = $style;
     $c->stash->{substyle}   = 'service';
-    $c->stash->{page_title} = '';
 
     Thruk::Utils::ssi_include($c);
 

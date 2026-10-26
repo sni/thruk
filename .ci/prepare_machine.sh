@@ -66,7 +66,6 @@ apt-get -y install \
     perl-doc \
     poppler-utils \
     rsync \
-    tidy \
     tofrodos \
     wget \
     zlib1g-dev \
@@ -107,6 +106,13 @@ fi
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
 
 chown -R naemon: .
+
+# install latest tidy
+(
+    cd /tmp
+    wget "https://github.com/htacg/tidy-html5/releases/download/5.8.0/tidy-5.8.0-Linux-64bit.deb"
+    apt install -y ./tidy-5.8.0-Linux-64bit.deb
+)
 
 # free some disk space again
 apt-get clean
