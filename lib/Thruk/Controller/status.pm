@@ -1120,7 +1120,7 @@ sub _process_summary_page {
     if( $c->stash->{substyle} eq 'host' ) {
         # we need the hosts data
         my $host_data = $c->db->get_hosts( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'hosts' ), $hostfilter ],
-                                          columns => [ @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}, qw/groups/ ],
+                                          columns => [ @{$Thruk::Backend::Provider::Livestatus::summary_host_columns}, qw/groups/ ],
                                              );
         for my $host ( @{$host_data} ) {
             for my $group ( @{ $host->{'groups'} } ) {
@@ -1132,8 +1132,8 @@ sub _process_summary_page {
     }
     # create a hash of all services
     my $service_columns = Thruk::Base::array_uniq([
-        @{$Thruk::Backend::Provider::Livestatus::minimal_service_columns},
-        (map { "host_".$_ } @{$Thruk::Backend::Provider::Livestatus::minimal_host_columns}),
+        @{$Thruk::Backend::Provider::Livestatus::summary_service_columns},
+        (map { "host_".$_ } @{$Thruk::Backend::Provider::Livestatus::summary_host_columns}),
         qw/groups host_groups/,
     ]);
     my $services_data = $c->db->get_services( filter => [ Thruk::Utils::Auth::get_auth_filter( $c, 'services' ), $servicefilter ],
