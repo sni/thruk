@@ -540,10 +540,10 @@ sub set_default_config {
     $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
 
     if($ENV{'THRUK_USER_ID'} !~ m/^\d+$/mx) {
-        $ENV{'THRUK_USER_ID'}  = (getpwnam($ENV{'THRUK_USER_ID'}))[2]  || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into numerical uid. Does this user really exist?");
+        $ENV{'THRUK_USER_ID'}  = (getpwnam($ENV{'THRUK_USER_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into numerical uid. Does this user really exist?");
     }
     if($ENV{'THRUK_USER'} =~ m/^\d+$/mx) {
-        $ENV{'THRUK_USER'}  = (getpwuid($ENV{'THRUK_USER'}))[0]  || die("cannot convert '".$ENV{'THRUK_USER_ID'}."' into username. Does this user really exist?");
+        $ENV{'THRUK_USER'}  = (getpwuid($ENV{'THRUK_USER'}))[0] || $ENV{'THRUK_USER_ID'};
     }
     if($ENV{'THRUK_GROUP_ID'} !~ m/^\d+$/mx) {
         $ENV{'THRUK_GROUP_ID'} = (getgrnam($ENV{'THRUK_GROUP_ID'}))[2] || die("cannot convert '".$ENV{'THRUK_GROUP_ID'}."' into numerical uid. Does this group really exist?");
