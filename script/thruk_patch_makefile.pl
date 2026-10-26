@@ -31,6 +31,17 @@ EOT
     if($line =~ m/^TEST_FILES\s*=/mx) {
         $line = "TEST_FILES = t/*.t t/xt/*/*.t\n";
     }
+    # keep the MakeMaker test target as test_legacy (builds blib, runs from blib)
+    # and add a new test target that runs the suite from lib/ like quicktest
+    # (with TEST_AUTHOR + HARNESS_TIMER), so 'make test' does not build blib
+    # (pm_to_blib/manifypods)
+    if($line =~ m/^test\s*::\s*\$\(TEST_TYPE\)\s*$/mx) {
+        $line = "test_legacy :: \$(TEST_TYPE)\n";
+        $new_makefile .= $line;
+        $line = <$fh> or last; # old recipe line, now belongs to test_legacy
+        $new_makefile .= $line;
+        $line = "test:\n\tHARNESS_TIMER=1 TEST_AUTHOR=1 PERL_DL_NONLAZY=1 perl \"-MExtUtils::Command::MM\" \"-e\" \"test_harness(0, 'inc', 'lib/')\" \$(TEST_FILES)\n";
+    }
     if($line =~ m/^\#\#\#\ THRUK/mx) {
         last;
     }
