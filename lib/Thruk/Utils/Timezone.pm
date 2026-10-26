@@ -62,7 +62,7 @@ sub detect_timezone {
         return($ENV{'TZ'});
     }
 
-    if(-r '/etc/timezone') {
+    if(-r '/etc/timezone' && -f '/etc/timezone') {
         chomp(my $tz = Thruk::Utils::IO::read('/etc/timezone'));
         if($tz) {
             _debug(sprintf("server timezone: %s (from /etc/timezone)", $tz)) if Thruk::Base->verbose;
