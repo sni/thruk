@@ -239,7 +239,7 @@ citest:
 	cp t/ci/thruk_local.conf .
 	touch .author
 	./configure
-	$(MAKE)
+	$(MAKE) config subdirs linkext
 	TEST_AUTHOR=1 \
 		THRUK_AUTHOR=1 \
 		TEST_MYSQL="mysql://root:root@localhost:3306/test" \
