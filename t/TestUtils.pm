@@ -1385,9 +1385,16 @@ sub js_deinit {
     our $mech;
     $mech->close();
     # File::Temp CLEANUP=1 cannot remove the profile dir while chrome is
-    # still writing to it, so remove it ourselves after the process exited
+    # still writing to it, so remove it ourselves after the process exited;
+    # chrome subprocesses may keep it open briefly, so retry until gone
     our $chrome_profile;
-    rmtree($chrome_profile);
+    my $tries = 50;
+    while (-d $chrome_profile && $tries--) {
+        local $SIG{__WARN__} = sub { };  # rmtree warns while chrome still holds the dir
+        rmtree($chrome_profile);
+        sleep 0.1;
+    }
+    warn "cannot remove directory for $chrome_profile\n" if -d $chrome_profile;
 }
 
 #################################################
