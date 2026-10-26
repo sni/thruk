@@ -1,7 +1,7 @@
 ﻿[% USE date %]
 <script>
   var pnp_source = "[% pnp_source %]";
-  var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&amp;view=1&amp;graph_width=550";
+  var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;view=1&amp;graph_width=550";
 
   /* try to fetch sources */
   var source_url = pnp_url.replace(/\/image\?/, '/json?');
