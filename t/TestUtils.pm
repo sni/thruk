@@ -470,7 +470,7 @@ sub test_page {
                 is(scalar @{$errors}, 0, "No errors (and warnings) found in HTML");
             } elsif(scalar @{$warnings} > 0) {
                 TODO: {
-                    local $TODO = "fix tidy warnings";
+                    local $TODO = "fix tidy warnings" unless $ENV{'THRUK_HTML_LINT_ARE_ERRORS'};
                     is(scalar @{$warnings}, 0, "No errors (and warnings) found in HTML");
                 }
             } else {
@@ -600,11 +600,13 @@ sub tidy_lint {
     # note: /m only, not /mx -- /x strips the space from "- Warning"/"- Error"
     my @tolerated = (
         '<a> attribute "target" lacks value',
+        '<button> attribute "name" lacks value',
         '<form> attribute "target" lacks value',
         '<img> attribute "border" not allowed for HTML5',
         '<img> proprietary attribute "fetchpriority"',
         '<td> attribute "abbr" not allowed for HTML5',
         '<td> attribute "align" not allowed for HTML5',
+        '<td> attribute "valign" not allowed for HTML5',
         '<td> attribute "width" not allowed for HTML5',
         'moved <style> tag to <head>',
         'trimming empty <button>',

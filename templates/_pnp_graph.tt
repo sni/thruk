@@ -1,7 +1,7 @@
 ﻿[% USE date %]
 <script>
   var pnp_source = "[% pnp_source %]";
-  var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&amp;view=1&graph_width=550";
+  var pnp_url    = "[% pnp_url %]/image?host=[% hst | uri %]&srv=[% svc | uri %]&amp;view=1&amp;graph_width=550";
 
   /* try to fetch sources */
   var source_url = pnp_url.replace(/\/image\?/, '/json?');
@@ -52,7 +52,7 @@
   <div id="pnp_graph_pane" class="relative justify-center min-h-[160px]">
     <a href="[% url_prefix %]#[% strip_trailing_slash(pnp_url) %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
-      <img id="pnpimg" style="display:none;" src="[% strip_trailing_slash(pnp_url) %]/image?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;view=1&graph_width=550" alt="pnp graph" class="mx-auto">
+      <img id="pnpimg" style="display:none;" src="[% strip_trailing_slash(pnp_url) %]/image?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;view=1&amp;graph_width=550" alt="pnp graph" class="mx-auto">
       <div id="pnperr" style="display:none" class="textALERT text-center py-2">Could not retrieve graph data</div>
       <iframe id="pnp_iframe" src="#" class="w-full h-[270px] p-0 m-0 mx-auto hidden"></iframe>
     </a>

@@ -237,7 +237,7 @@
       val = '<i class="uil uil-info round gray" title="Info"><\/i>' + val;
     }
     if(val == "") {
-      jQuery('.js-broadcast-panel DIV.broadcast').html('<span class="preview">Broadcast preview...</span>');
+      jQuery('.js-broadcast-panel DIV.broadcast').html('<span class="preview">Broadcast preview...<\/span>');
     } else {
       jQuery('.js-broadcast-panel DIV.broadcast').html(val);
     }

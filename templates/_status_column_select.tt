@@ -35,7 +35,7 @@
           </tr>
           <tr>
             <td colspan=3 class="px-2 py-0.5">
-              [% id = paneprefix _ "_columns_table_body"; PROCESS _table_search_field.tt ids=[id] extraCls="w-full" skip_hash=1 skip_form=1 placeholder="filter columns" %]
+              [% id = paneprefix _ "_columns_table_body"; PROCESS _table_search_field.tt ids=[id] extraCls="w-full" skip_hash=1 skip_form=1 placeholder="filter columns" table_search_input_id=paneprefix _ "table_search_input" %]
             </td>
           </tr>
         </thead>

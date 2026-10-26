@@ -369,7 +369,7 @@ END
       [% ELSE %]
         <div class='badge NO'>NO</div>
       [% END %]
-      (<a class="link" href="config.cgi?type=timeperiods&jump=[% obj.check_period | uri %]">[% obj.check_period | html %]</a>)
+      (<a class="link" href="config.cgi?type=timeperiods&amp;jump=[% obj.check_period | uri %]">[% obj.check_period | html %]</a>)
     </td>
   </tr>
   <tr>
@@ -380,7 +380,7 @@ END
       [% ELSE %]
         <div class='badge NO'>NO</div>
       [% END %]
-      (<a class="link" href="config.cgi?type=timeperiods&jump=[% obj.notification_period | uri %]">[% obj.notification_period | html %]</a>)
+      (<a class="link" href="config.cgi?type=timeperiods&amp;jump=[% obj.notification_period | uri %]">[% obj.notification_period | html %]</a>)
     </td>
   </tr>
   <tr>
