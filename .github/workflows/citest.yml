@@ -7,7 +7,7 @@ on:
     inputs:
       debug_enabled:
         type: boolean
-        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        description: 'Run the build with upterm debugging enabled (https://github.com/owenthereal/action-upterm)'
         required: false
         default: false
 
@@ -24,9 +24,12 @@ jobs:
       - name: perl -V
         run: perl -V
 
-      - name: Setup tmate session, see https://github.com/marketplace/actions/debugging-with-tmate
-        uses: mxschmitt/action-tmate@v3
+      - name: Setup upterm session, see https://github.com/owenthereal/action-upterm
+        uses: owenthereal/action-upterm@v2
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+        with:
+          limit-access-to-actor: true
+          limit-access-to-users: sni
 
       - uses: abbbi/github-actions-tune@v1
 
