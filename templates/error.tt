@@ -7,7 +7,7 @@
 
 [% IF errorMessage %]
   <h1 class='textALERT mt-5'>[% errorMessage %]</h1>
-  <h2 class="whitespace-normal text-center">[% dump2str(errorDescription, 0, 0) | nl2br %]</h2>
+  <div class="whitespace-normal text-center font-semibold">[% dump2str(errorDescription, 0, 0) | nl2br %]</div>
 [% ELSE %]
   <h1 class='textALERT mt-5'>Internal server error</h1>
   <h2 class="whitespace-normal text-center">An internal server error occurred. Please check your log files.</h2>

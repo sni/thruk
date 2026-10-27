@@ -5148,7 +5148,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
 
 function startColumnNamePopupEdit(pane_prefix, td) {
     var text   = (td.innerText || '').replace(/\s*$/, '');
-    td.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'></form>";
+    td.innerHTML = "<input type='text' class='header_inline_edit' value='"+text+"'><\/form>";
     window.setTimeout(function() {
         jQuery(td).find('INPUT').focus();
         var input = jQuery(td).find('INPUT')[0];
