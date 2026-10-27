@@ -20,13 +20,14 @@
   %]
 
   [% DEFAULT skip_graph=0 %]
+  [% DEFAULT skip_exec=0 %]
 
   [% IF hide_passive_icon %]
     [% passive_icon ='' %]
   [% END %]
 
   <div class="flex pl-1.5 gap-px">
-    [% IF host.$host_is_executing > 0             %]<div id="[% paneprefix %]r[% loop_index %]_h_exec" class="flex overflow-hidden"><div class="spinner js-autohide not-clickable" title="This host is currently executing its hostcheck"></div></div>[% ELSE%]<div id="[% paneprefix %]r[% loop_index %]_h_exec"></div>[% END %]
+    [% IF host.$host_is_executing > 0 && skip_exec == 0 %]<div id="[% paneprefix %]r[% loop_index %]_h_exec" class="flex overflow-hidden"><div class="spinner js-autohide not-clickable" title="This host is currently executing its hostcheck"></div></div>[% ELSIF !skip_exec %]<div id="[% paneprefix %]r[% loop_index %]_h_exec"></div>[% END %]
     [%- IF host.$host_notifications_enabled == 0   %]<i class="fa-solid fa-bell-slash not-clickable" title="Notifications for this host have been disabled"></i>[% END %]
     [%- IF ! has_bp %]
     [%- IF strict_passive_mode %]

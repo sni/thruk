@@ -588,8 +588,7 @@ sub set_cookie {
 sub tidy_lint {
     my($content, $url, $skip_doc_type) = @_;
     my ($fh, $name) = tempfile(UNLINK => 1);
-    binmode $fh;
-    print $fh $content;
+    print $fh Thruk::Utils::Encode::encode_utf8($content);
     close $fh;
     # tidy auto-detects the doctype from the page content. it is HTML5-aware:
     # rc 0 = clean, rc 1 = warnings or errors, rc >= 2 = fatal. it reports
@@ -609,6 +608,7 @@ sub tidy_lint {
         '<td> attribute "valign" not allowed for HTML5',
         '<td> attribute "width" not allowed for HTML5',
         '<th> attribute "abbr" not allowed for HTML5',
+        '<th> attribute "nowrap" not allowed for HTML5',
         'moved <style> tag to <head>',
         'trimming empty <button>',
         'trimming empty <div>',

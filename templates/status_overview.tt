@@ -119,7 +119,7 @@
                           <a href="status.cgi?host=[% hostname | uri %]&amp;style=detail" title="[% hst.address | html %]">[% _host(hst) | html %]</a>
                         </div>
                         [% SET host_comment_count = hst.comments.size %]
-                        [% PROCESS _status_host_attributes hostprefix="" host=hst host_comment_count=host_comment_count with_status=0 %]
+                        [% PROCESS _status_host_attributes hostprefix="" host=hst host_comment_count=host_comment_count with_status=0 skip_exec=1 %]
                       </div>
                     </td>
                   [% ELSIF col.field == "state" %]

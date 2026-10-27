@@ -34,15 +34,15 @@
                       <p>Macros are replaced by the report engine during rendering of the report.</p>
                       <p>Macros can be used in the name and description of the report.</p>
                       <p>Examples:</p>
-                      <p class="mt-4">
+                      <div class="mt-4">
                         <ul>
                           <li><b class="js-copy-to-clipboard clickable">{{ date:start, &quot;format&quot;}}</b> - inserts report start date with given format</li>
                           <li><b class="js-copy-to-clipboard clickable">{{ date:end, &quot;format&quot;}}</b> - inserts report end date with given format</li>
                           <li><b class="js-copy-to-clipboard clickable">{{ date:now, &quot;format&quot;}}</b> - inserts current date with given format</li>
                         </ul>
-                      </p>
+                      </div>
                       <p class="mt-4">Date format uses POSIX format strings, ex.:</p>
-                      <p>
+                      <div>
                         <ul>
                           <li><b>%Y</b> - year</li>
                           <li><b>%m</b> - month</li>
@@ -52,7 +52,7 @@
                           <li><b>%M</b> - minute</li>
                           <li><b>%S</b> - second</li>
                         </ul>
-                      </p>
+                      </div>
                     </div>
                   </div>
                 </div>

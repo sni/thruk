@@ -9,7 +9,7 @@
       <tr[% IF has_more && loop.index >= show_max %] style="display: none;" class="js-hidden_teams"[% END %]>
         <td class="align-top">
           [%- IF has_admin -%]
-            <a class="link" href="conf.cgi?sub=teams&action=edit&team=[% t | uri %]">[% t | html %]</a>
+            <a class="link" href="conf.cgi?sub=teams&amp;action=edit&amp;team=[% t | uri %]">[% t | html %]</a>
           [%- ELSE -%]
             [%- t | html -%]
           [%- END -%]

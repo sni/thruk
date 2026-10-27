@@ -6,7 +6,7 @@
     </select>
   </td>
   <td class="w-full">
-    <input type='text' id="p_[% nr %]_value" name="p_[% nr %]_value" value="[% p.name.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, null, { url: 'status.cgi?format=search&wildcards=1', autosubmit:false, striped: true, list: '\\s*,\\s*' })" class="w-full">
+    <input type='text' id="p_[% nr %]_value" name="p_[% nr %]_value" value="[% p.name.join(', ') | html %]" onfocus="this.click()" onclick="ajax_search.init(this, null, { url: 'status.cgi?format=search&amp;wildcards=1', autosubmit:false, striped: true, list: '\\s*,\\s*' })" class="w-full">
   </td>
   <td>
     <select id="p_[% nr %]_perm" name="p_[% nr %]_perm">

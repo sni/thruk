@@ -379,8 +379,3 @@
     [% END %]
   [% END %]
 [% END %]
-<style>
-  .multiformlist .w-56 {
-    width: min-content !important;
-  }
-</style>
