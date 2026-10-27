@@ -1642,6 +1642,8 @@ sub get_histou_url {
         my $regex = $c->config->{'grafana_url_regex'};
         if($obj->{$type} =~ m%$regex%mx) {
             my $url = _enhance_histou_url($c, $obj->{$type}, $obj);
+            $url =~ s/&amp;/&/gmx;
+            $url =~ s/&/&amp;/gmx;
             return(proxifiy_url($c, $obj, $url));
         }
     }
@@ -1755,6 +1757,10 @@ sub get_perf_image {
         $options->{'service'}  = '_HOST_' if $pnpurl;
         $custvars              = get_custom_vars($c, $hstdata->[0]);
     }
+
+    $pnpurl     =~ s|&amp;|&|gmx if $pnpurl;
+    $grafanaurl =~ s|&amp;|&|gmx if $grafanaurl;
+
 
     $c->stash->{'last_graph_type'} = 'pnp';
     if($grafanaurl) {
@@ -4449,7 +4455,7 @@ sub get_affected_backends {
 }
 
 ##########################################################
-# replaces dark themen in the histou url and
+# replaces dark theme in the histou url and
 # sets the spannulls value
 sub _enhance_histou_url {
     my($c, $url, $obj) = @_;

@@ -4,7 +4,7 @@
       [% FOREACH cust = custom_vars %]
       <tr class="cust_var cust_var_[% cust.0 | lc | html %]">
         <td class="align-top w-0">
-          <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&amp;dfl_s0_type=custom+variable&amp;dfl_s0_val_pre=[% cust.0 | uri %]&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% cust.1 | uri %]&amp;title=[% IF cust.2 %]Host [% END %]Status Details of [% cust.0 | uri %]: [% cust.1 | uri %]" class="link block hoverable py-1 px-2">
+          <a href="status.cgi?style=[% IF cust.2 %]host[% END %]detail&amp;dfl_s0_type=custom+variable&amp;dfl_s0_val_pre=[% cust.0 | uri %]&amp;dfl_s0_op=%3D&amp;dfl_s0_value=[% cust.1 | uri %]&amp;title=[% linktitle=""; IF cust.2; linktitle = "Host "; END; linktitle = linktitle _ "Status Details of " _ cust.0 _ ": " _ cust.1 ;linktitle | uri %]" class="link block hoverable py-1 px-2">
             [% cust.0 | html %]
           </a>
         </td>
