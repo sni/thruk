@@ -593,31 +593,29 @@ sub _get_log_service_auth {
     my($self,$dbh, $prefix, $contact) = @_;
 
     # Select all Services where the host is allowed by contact
+    # (no join on contact_service_rel, it would multiply the result by the number of service contacts)
     my $sql1 = "SELECT h.host_name, s.service_description
                FROM
                  \"" . $prefix . "_service\" s,
                  \"" . $prefix . "_host\" h,
                  \"" . $prefix . "_contact_host_rel\" chr,
-                 \"" . $prefix . "_contact\" c1,
-                 \"" . $prefix . "_contact_service_rel\" csr
+                 \"" . $prefix . "_contact\" c1
                WHERE
                  s.host_id = h.host_id
                  AND h.host_id = chr.host_id
                  AND c1.contact_id = chr.contact_id
-                 AND s.service_id = csr.service_id
                  AND c1.name = ?"
                ;
     # Select all Services which are directly allowed by contact
+    # (no join on contact_host_rel, it would multiply the result by the number of host contacts)
     my $sql2 = "SELECT h.host_name, s.service_description
                FROM
                  \"" . $prefix . "_service\" s,
                  \"" . $prefix . "_host\" h,
-                 \"" . $prefix . "_contact_host_rel\" chr,
                  \"" . $prefix . "_contact\" c1,
                  \"" . $prefix . "_contact_service_rel\" csr
                WHERE
                  s.host_id = h.host_id
-                 AND h.host_id = chr.host_id
                  AND c1.contact_id = csr.contact_id
                  AND s.service_id = csr.service_id
                  AND c1.name = ?"
