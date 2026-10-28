@@ -4,26 +4,35 @@ function resizeGraphIFrame(obj) {
     obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
   } catch(e) {}
 }
+var hideTooltipTimer = null;
+var scheduleHideTooltip = function() {
+  clearTimeout(hideTooltipTimer);
+  hideTooltipTimer = setTimeout(function(){ jQuery("#tooltip").remove(); }, 300);
+};
 jQuery(document).ready(function() {
   jQuery("a.histou_tips, a.tips").hover(
     function(e){
+      clearTimeout(hideTooltipTimer);
+      jQuery("#tooltip").remove();
       var popup_width   = 600;
       var popup_height  = 200;
       var url           = this.rel;
-      var screen_width  = jQuery(window).width();
-      var popup_pos_x   = e.pageX + 5;
-      if(e.pageX + popup_width > screen_width) {
-        popup_pos_x  = e.pageX - popup_width - 5;
+      var icon_pos      = jQuery(this).offset();
+      var popup_pos_x   = icon_pos.left + jQuery(this).outerWidth() + 5;
+      if(icon_pos.left + popup_width > jQuery(window).width()) {
+        popup_pos_x  = icon_pos.left - popup_width - 5;
       }
 
       var showPopup = function(url) {
         jQuery("#tooltip").remove();
-        jQuery("body").append("<div id='tooltip'><iframe src='"+url+"' width='"+popup_width+"' height='"+popup_height+"' frameBorder='0' scrolling='no' onload='resizeGraphIFrame(this)'><\/iframe><\/div>");
+        jQuery("body").append("<div id='tooltip' class='rounded-lg overflow-hidden'><iframe src='"+url+"' width='"+popup_width+"' height='"+popup_height+"' frameBorder='0' scrolling='no' onload='resizeGraphIFrame(this)'><\/iframe><\/div>");
         jQuery("#tooltip")
           .css("position","absolute")
           .css("z-index","15")
-          .css("top",(e.pageY - 10) + "px")
+          .css("top", icon_pos.top + "px")
           .css("left", popup_pos_x + "px")
+          .on("mouseenter", function(){ clearTimeout(hideTooltipTimer); })
+          .on("mouseleave", scheduleHideTooltip)
           .fadeIn("fast");
       };
 
@@ -40,9 +49,13 @@ jQuery(document).ready(function() {
         showPopup(url);
       }
     },
-    function(){
-      jQuery("#tooltip").remove();
-    }
+      function(){
+        scheduleHideTooltip();
+      }
   );
+  jQuery(document).on("click", function(){
+    clearTimeout(hideTooltipTimer);
+    jQuery("#tooltip").remove();
+  });
 });
 </script>
