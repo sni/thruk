@@ -375,6 +375,10 @@ TestUtils::test_command({
 
         ###########################################################
         # an incomplete cache is reported instead of failing with a database error
+        # pause cron so a logcache run cannot hit the missing status table
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env omd stop crontab',
+        });
         $dbh->do('DROP TABLE '.$qt->($status));
         $dbh->commit;
         TestUtils::test_command({
@@ -390,6 +394,9 @@ TestUtils::test_command({
         });
         $dbh->commit;
         is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($status)), 12, 'import restores all status rows');
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env omd start crontab',
+        });
     }
 
 }
