@@ -281,6 +281,16 @@ sub _extract_login {
         $teams = Thruk::Base::list($userinfo->{'groups'});
     }
 
+    if($teams && ($auth->{'team_regex'} || $auth->{'team_filter'})) {
+        my @t;
+        for my $t (@{$teams}) {
+            if($auth->{'team_regex'} && $t =~ m{$auth->{'team_regex'}}mx) { $t = $1 if defined $1 }
+            push @t, $t if !$auth->{'team_filter'} || $t =~ m{$auth->{'team_filter'}}mx;
+        }
+        $teams = \@t;
+    }
+    @{$teams} = sort @{$teams} if $teams;
+
     if($auth->{'login_field'}) {
         return($userinfo->{$auth->{'login_field'}}, $teams);
     }

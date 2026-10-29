@@ -2158,6 +2158,8 @@ ex.:
       #jwk_key     = {"kty":"RSA","n":"...","e":"AQAB"}           # static public key to verify the id_token signature (alternative to jwks_url)
       login_field   = login                                       # Hash key from user info to get the actual username from. If not set, Thruk will try 'login', then 'email'
       groups_field  = groups                                      # Hash key from user info to fetch teams from. If not set, Thruk will try 'groups'
+      #team_regex   = ^cn=([^,]+)                                 # regex applied to each team name; first capture group (or full match if none) is kept as team name
+      #team_filter  = .+                                          # regex; only team names matching it are kept, all others are dropped
       #enable_pkce  = 0                                           # enable oauth 2.1 pkce workflow if set to 1. Disabled by default
       #https_proxy  = http://<server>:<port>                      # optional proxy to use for accessing URLs from above
       #ssl_verify_hostnames = 1                                   # skip ssl hostname verification when set to 0
