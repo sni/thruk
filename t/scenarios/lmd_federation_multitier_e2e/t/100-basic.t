@@ -7,7 +7,7 @@ use URI::Escape qw/uri_escape/;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 392;
+    plan tests => 396;
 }
 
 
@@ -97,6 +97,13 @@ TestUtils::test_page(
         },
         'like'   => [ 'Commands successfully submitted' ],
         'follow' => 1,
+    );
+
+    # wait for the downtime to appear
+    TestUtils::test_page(
+        'url'     => '/thruk/r/csv/downtimes?comment='.$comment.'&columns=id&headers=0',
+        'like'    => [qr/^\d+$/],
+        'waitfor' => qr/^\d+$/,
     );
 
     # delete command should only go to a single backend
