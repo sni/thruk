@@ -498,16 +498,14 @@
                 <tr>
                   <th class="align-top text-right">Add Extra Options</th>
                   <td>
-                    <form>
-                      <select onchange="bpAddAttribute(this.value)" class="w-80">
-                        <option>--- add extra option ---</option>
-                        <option value="contactgroups">Contact Groups</option>
-                        <option value="contacts">Contacts</option>
-                        <option value="event_handler">Eventhandler</option>
-                        <option value="notification_period">Notification Period</option>
-                        <option value="max_check_attempts">Max Check Attempts</option>
-                      </select>
-                    </form>
+                    <select onchange="bpAddAttribute(this.value)" class="w-80">
+                      <option>--- add extra option ---</option>
+                      <option value="contactgroups">Contact Groups</option>
+                      <option value="contacts">Contacts</option>
+                      <option value="event_handler">Eventhandler</option>
+                      <option value="notification_period">Notification Period</option>
+                      <option value="max_check_attempts">Max Check Attempts</option>
+                    </select>
                   </td>
                 </tr>
               [% END %]

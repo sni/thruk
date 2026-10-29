@@ -22,7 +22,7 @@ function reports_body_end() {
 
     // insert anchors for easy testing on html pages
     jQuery('DIV.page').each(function(nr, el) {
-        jQuery('<a name="page'+(nr+1)+'">').insertBefore(el);
+        jQuery('<a id="page'+(nr+1)+'">').insertBefore(el);
     });
 }
 
@@ -34,7 +34,7 @@ function set_vertical_header() {
         // wrap cell content in divs and extract max-width
         var max_width = 20;
         jQuery(firstrow).find('TD, TH').each(function(y, cell) {
-            jQuery(cell).html('<div style="white-space:nowrap;">'+cell.innerHTML+'</div>');
+            jQuery(cell).html('<div style="white-space:nowrap;">'+cell.innerHTML+'<\/div>');
             var div = jQuery(jQuery(cell).find('DIV')[0]);
             var width = div.width();
             if(max_width < width) { max_width = width; }

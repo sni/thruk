@@ -629,7 +629,8 @@ sub tidy_lint {
     } grep /^line .* - Warning/m, @lines;
     my @errors = grep /^line .* - Error/m, @lines;
     if(scalar @errors or scalar @warnings) {
-        diag(sprintf("tidy: %s: %d errors, %d warnings (%s)\n", $url, scalar @errors, scalar @warnings, `tidy -V 2>&1`));
+        chomp(my $tidy_version = `tidy -V 2>&1`);
+        diag(sprintf("tidy: %s: %d errors, %d warnings (%s)\n", $url, scalar @errors, scalar @warnings, $tidy_version));
         # group by line number
         my $grouped = {};
         for my $issue (sort (@errors, @warnings)) {

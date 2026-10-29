@@ -3,7 +3,9 @@
 set -ex
 
 mkdir -p /var/lib/naemon/thruk
-rsync -a --delete --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
+rsync -a --delete \
+    /thruk/. /var/lib/naemon/thruk/.
+chown -R naemon:naemon /var/lib/naemon/thruk 2>&1 | grep -v "Read-only file system" || :
 ln -sfn $(realpath /thruk/support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
 sudo su naemon -c -- bash -c 'cd ~/thruk && ./.ci/install_deps.sh'
 #/thruk/script/install_puppeteer.sh

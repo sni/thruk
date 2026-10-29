@@ -86,8 +86,6 @@
               </tr>
             [% END %]
           [% END %]
-          <tr>
-          </tr>
         </table>
       </div>
       <div class="footer justify-evenly" style="flex: 0 0 40px;">

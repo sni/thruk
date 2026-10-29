@@ -83,6 +83,7 @@ sub startup {
     if(Thruk::Base->mode() eq 'DEVSERVER' || Thruk::Base->mode() eq 'TEST') {
         require  Plack::Middleware::Static;
         $app = Plack::Middleware::Static->wrap($app,
+                    # static content from plugins
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, config());
                                           return unless $p =~ m%^/thruk/plugins/%mx;
@@ -95,6 +96,7 @@ sub startup {
                     pass_through => 1,
         );
         $app = Plack::Middleware::Static->wrap($app,
+                    # static content from none-plugins
                     path         => sub {
                                           my $p = Thruk::Context::translate_request_path($_, config());
                                           return if $p =~ m%^/thruk/cgi\-bin/(remote|proxy)\.cgi%mx;

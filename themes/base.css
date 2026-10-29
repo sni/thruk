@@ -742,10 +742,10 @@ BODY.topNavOpen {
 .nav-container {
   .navitem {
     @apply card overflow-hidden absolute !hidden p-0 ml-[-4px] mt-[10px] rounded-t-none;
-    DIV {
-      @apply flex hoverable px-1 py-0.5;
+    DIV, SPAN {
+      @apply block flex hoverable;
       A {
-        @apply block link;
+        @apply block link px-1 py-0.5;
       }
     }
   }

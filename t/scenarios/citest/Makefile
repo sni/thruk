@@ -16,14 +16,11 @@ wait_start:
 	done
 	docker ps
 
-test: test_prepare wait_start
+test: wait_start
 	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/test.sh $(filter-out $@,$(MAKECMDGOALS))
 
-test_verbose: test_prepare wait_start
+test_verbose: wait_start
 	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/test.sh 1 $(filter-out $@,$(MAKECMDGOALS))
 
-test_prepare:
-	docker compose exec site rsync -a --delete --exclude=Makefile --exclude=thruk_local.conf --exclude=thruk_local.d --exclude=tmp/ --exclude=var/ --chown=naemon:naemon /thruk/. /var/lib/naemon/thruk/.
-
-server: test_prepare wait_start
+server: wait_start
 	docker compose exec $(DOCKER_COMPOSE_TTY) site /thruk/t/scenarios/citest/server.sh $(filter-out $@,$(MAKECMDGOALS))

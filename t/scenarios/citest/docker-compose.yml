@@ -9,5 +9,9 @@ services:
         - .:/test:ro
         - ../../../var/tmp:/var/tmp:rw
         - "../../../.ci:/.ci:ro"
+        - ../../../lib:/var/lib/naemon/thruk/lib:ro
+        - ../../../templates:/var/lib/naemon/thruk/templates:ro
+        - ../../../themes:/var/lib/naemon/thruk/themes:ro
+        - ../../../plugins/plugins-available:/var/lib/naemon/thruk/plugins/plugins-available:ro
     ports:
-        - "127.0.0.3:3000:3000"
+        - "3000:3000"

@@ -1916,7 +1916,7 @@ sub _get_context_object {
             $obj = $objs->[0];
         }
         elsif(!defined $obj) {
-            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'No such object. <a class="link dotted" href="conf.cgi?sub=objects&action=new&amp;type='.Thruk::Utils::Filter::escape_html($c->stash->{'type'}).'&amp;data.name='.Thruk::Utils::Filter::escape_html($c->stash->{'data_name'}).'">Create it<i class="fa-solid fa-plus text-sm align-middle"></i></a>', escape => 0 } );
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'No such object. <a class="link dotted" href="conf.cgi?sub=objects&amp;action=new&amp;type='.Thruk::Utils::Filter::escape_html($c->stash->{'type'}).'&amp;data.name='.Thruk::Utils::Filter::escape_html($c->stash->{'data_name'}).'">Create it<i class="fa-solid fa-plus text-sm align-middle"></i></a>', escape => 0 } );
         }
     }
 
@@ -2828,7 +2828,7 @@ sub _diff_link {
     our $diff_link_files;
     $diff_link_files->[$diff_link_nr] = $text;
     $diff_link_files->[$diff_link_nr] =~ s/^\-\-\-\s+a\///gmx;
-    $text = "<hr><a name='file".$diff_link_nr."'></a>\n".$text;
+    $text = "<hr><a id='file".$diff_link_nr."'></a>\n".$text;
     $diff_link_nr++;
     return $text;
 }

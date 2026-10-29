@@ -39,9 +39,7 @@ export PERL5LIB=./lib/.:$PERL5LIB
 
 export TEST_AUTHOR=1
 export THRUK_AUTHOR=1
+export THRUK_HTML_LINT_ARE_ERRORS=1
 export TEST_MYSQL="mysql://naemon:naemon@localhost:3306/test"
-
-rsync -a --chown=naemon:naemon /thruk/lib/.       /var/lib/naemon/thruk/lib/.
-rsync -a --chown=naemon:naemon /thruk/templates/. /var/lib/naemon/thruk/templates/.
 
 HARNESS_TIMER=1 PERL_DL_NONLAZY=1 stdbuf -o0 -e0 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness($VERBOSE)" $FILES

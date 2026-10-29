@@ -7,16 +7,16 @@
 <span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='contact'                                       %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contact">Contact</a></span>
 <span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='contactgroup'                                  %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=contactgroup">Contactgroup</a></span>
 <span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='hostdependency' || type == 'servicedependency' %] active[% END %] nav-container"><a class="block" href="conf.cgi?sub=objects&amp;type=hostdependency">Dependency</a>
-  <div class="navitem">
-    <div><a href="conf.cgi?sub=objects&amp;type=hostdependency">Host Dependency</a></div>
-    <div><a href="conf.cgi?sub=objects&amp;type=servicedependency">Service Dependency</a></div>
-  </div>
+  <span class="navitem">
+    <span><a href="conf.cgi?sub=objects&amp;type=hostdependency">Host Dependency</a></span>
+    <span><a href="conf.cgi?sub=objects&amp;type=servicedependency">Service Dependency</a></span>
+  </span>
 </span>
 <span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='hostescalation' || type == 'serviceescalation' %] active[% END %] nav-container"><a class="block" href="conf.cgi?sub=objects&amp;type=hostescalation">Escalation</a>
-  <div class="navitem">
-    <div><a href="conf.cgi?sub=objects&amp;type=hostescalation">Host Escalation</a></div>
-    <div><a href="conf.cgi?sub=objects&amp;type=serviceescalation">Service Escalation</a></div>
-  </div>
+  <span class="navitem">
+    <span><a href="conf.cgi?sub=objects&amp;type=hostescalation">Host Escalation</a></span>
+    <span><a href="conf.cgi?sub=objects&amp;type=serviceescalation">Service Escalation</a></span>
+  </span>
 </span>
 [% IF coretype == 'shinken' %]
 <span class="tabs w-24 px-1 text-center font-medium text-sm [% IF type =='notificationway'                               %] active[% END %]"><a class="block" href="conf.cgi?sub=objects&amp;type=notificationway">Notificationway</a></span>

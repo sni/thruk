@@ -158,7 +158,7 @@
   </div>
 
   [% IF output %]
-    <a name="output"></a>
+    <a id="output"></a>
     <div class="card mt-5 mx-auto w-fit min-w-[1000px]">
       <div class="head">
         <h3>Command Output</h3>

@@ -373,7 +373,7 @@ sub _add_report_matches {
                 details => sprintf('referenced in report \'%s\' '.$type.'s',
                                 $r->{'name'},
                             ),
-                link    => 'reports2.cgi?report='.$r->{'nr'}.'&action=list',
+                link    => 'reports2.cgi?report='.$r->{'nr'}.'&amp;action=list',
             });
         }
         if($type eq 'contact' && $r->{'user'} eq $name) {
@@ -382,7 +382,7 @@ sub _add_report_matches {
                 details => sprintf('contact owns report \'%s\'',
                                 $r->{'name'},
                             ),
-                link    => 'reports2.cgi?report='.$r->{'nr'}.'&action=list',
+                link    => 'reports2.cgi?report='.$r->{'nr'}.'&amp;action=list',
             });
         }
     }

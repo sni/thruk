@@ -6290,7 +6290,7 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     // add each search result
     var list = jQuery("#code_completion").find("UL");
     jQuery(completionsFound).each(function(i, e) {
-        var li = jQuery('<li class="res"></li>', {}).appendTo(list);
+        var li = jQuery('<li class="res"><\/li>', {}).appendTo(list);
         li.html(e[1]);
         // add click handler to select/apply result
         jQuery(li).on("click", function() {
