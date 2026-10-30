@@ -61,25 +61,26 @@ TestUtils::test_command({
 
 my $failed = {};
 for my $p (@{$plugins}) {
-    next if($filter && $p->{'name'} ne $filter);
+    my $name = $p->{'name'};
+    next if($filter && $name ne $filter);
 
     # install plugin or use existing if core plugin
     my $use_existing = 0;
-    if(-e 'plugins/plugins-enabled/'.$p->{'name'}) {
+    if(-e 'plugins/plugins-enabled/'.$name) {
         $use_existing = 1;
     }
-    elsif(-e 'plugins/plugins-available/'.$p->{'name'}) {
+    elsif(-e 'plugins/plugins-available/'.$name) {
         TestUtils::test_command({
-            cmd     => $BIN.' plugin enable '.$p->{'name'},
+            cmd     => $BIN.' plugin enable '.$name,
             like    => ['/enabled plugin/' ],
             exit    => 0,
         });
         $use_existing = 2;
-        if(-d 'plugins/plugins-available/'.$p->{'name'}.'/.git') {
+        if(-d 'plugins/plugins-available/'.$name.'/.git') {
             # run git pull if clean workspace
-            my($rc, $out) = Thruk::Utils::IO::cmd('cd plugins/plugins-available/'.$p->{'name'}.' && git status');
+            my($rc, $out) = Thruk::Utils::IO::cmd('cd plugins/plugins-available/'.$name.' && git status');
             if($out =~ m/\Qworking tree clean\E/mx) {
-                my($rc, $out) = Thruk::Utils::IO::cmd('cd plugins/plugins-available/'.$p->{'name'}.' && git pull');
+                my($rc, $out) = Thruk::Utils::IO::cmd('cd plugins/plugins-available/'.$name.' && git pull');
                 is($rc, 0, 'git pull exited with rc 0');
             } else {
                 fail("skipping git pull, workspace not clean");
@@ -88,7 +89,7 @@ for my $p (@{$plugins}) {
         }
     } else {
         TestUtils::test_command({
-            cmd     => $BIN.' plugin install '.$p->{'name'}.( $p->{'tarball'} ? ' '.$p->{'tarball'} : ''),
+            cmd     => $BIN.' plugin install '.$name.( $p->{'tarball'} ? ' '.$p->{'tarball'} : ''),
             like    => ['/Installed/',
                         '/successfully/'
                         ],
@@ -97,36 +98,36 @@ for my $p (@{$plugins}) {
     }
 
     # enable additional test config
-    if(-e 'plugins/plugins-enabled/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf') {
+    if(-e 'plugins/plugins-enabled/'.$name.'/t/data/'.$name.'.conf') {
         mkdir('thruk_local.d');
-        symlink('../plugins/plugins-enabled/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf', 'thruk_local.d/test-'.$p->{'name'}.'.conf');
+        symlink('../plugins/plugins-enabled/'.$name.'/t/data/'.$name.'.conf', 'thruk_local.d/test-'.$name.'.conf');
     }
 
     # run plugin test files
     TestUtils::clear();
-    for my $testfile (glob("plugins/plugins-enabled/".$p->{'name'}."/t/*.t"), @{$extra_tests}) {
+    for my $testfile (glob("plugins/plugins-enabled/".$name."/t/*.t"), @{$extra_tests}) {
         next if($p->{'skip_tests'} && $testfile =~ $p->{'skip_tests'});
         my $testsource = Thruk::Utils::IO::read($testfile);
         Thruk::Config::set_config_env();
-        my $rc = subtest $testfile => sub {
+        my $rc = subtest $testfile." (plugin: ".$name.")" => sub {
             # required for ex.: t/092-todo.t
-            local @ARGV = (sprintf("plugins/plugins-available/%s", $p->{'name'}));
+            local @ARGV = (sprintf("plugins/plugins-available/%s", $name));
             $testsource =~ s/^\Quse warnings;\E//gmx;
             no warnings qw(redefine);
-            eval("#line 1 $testfile\n".$testsource);
+            eval("#line 1 $testfile (plugin: $name)\n".$testsource);
         };
-        $failed->{$p->{'name'}}->{$testfile} = 1 unless $rc;
+        $failed->{$name}->{$testfile} = 1 unless $rc;
     }
 
     # remove additional test config again
-    if(-e 'plugins/plugins-enabled/'.$p->{'name'}.'/t/data/'.$p->{'name'}.'.conf') {
-        unlink('thruk_local.d/test-'.$p->{'name'}.'.conf');
+    if(-e 'plugins/plugins-enabled/'.$name.'/t/data/'.$name.'.conf') {
+        unlink('thruk_local.d/test-'.$name.'.conf');
     }
 
     # uninstall plugin
     if(!$use_existing) {
         TestUtils::test_command({
-            cmd     => $BIN.' plugin remove '.$p->{'name'},
+            cmd     => $BIN.' plugin remove '.$name,
             like    => ['/Removed plugin/',
                         '/successfully/'
                         ],
@@ -135,7 +136,7 @@ for my $p (@{$plugins}) {
     }
     elsif($use_existing == 2) {
         TestUtils::test_command({
-            cmd     => $BIN.' plugin disable '.$p->{'name'},
+            cmd     => $BIN.' plugin disable '.$name,
             like    => ['/disabled plugin/' ],
             exit    => 0,
         });
