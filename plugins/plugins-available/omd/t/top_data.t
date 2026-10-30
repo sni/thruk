@@ -3,7 +3,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    my $tests = 6;
+    my $tests = 7;
     plan tests => $tests;
 }
 
@@ -14,6 +14,7 @@ unshift @INC, 'plugins/plugins-available/omd/lib';
 SKIP: {
     skip 'external tests', 1 if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 
+    use_ok('Thruk::Base');
     use_ok('Thruk::OMD::Top::Parser::LinuxTop');
 };
 
@@ -118,7 +119,7 @@ sub test_file {
     my($file, $expected) = @_;
     my $basefile = Thruk::Base::basename($file);
     `cat $file | gzip > /tmp/$basefile.gz`;
-    my $d = Thruk::OMD::Top::Parser::LinuxTop::_extract_top_data(undef, ['/tmp/'.$file.'.gz']);
+    my $d = Thruk::OMD::Top::Parser::LinuxTop::_extract_top_data(undef, ['/tmp/'.$basefile.'.gz']);
     unlink('/tmp/'.$basefile.'.gz');
     my $data = $d->{(keys %{$d})[0]};
     delete $data->{'time'};
