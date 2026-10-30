@@ -225,6 +225,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "host_check_type",
      "type": "number",
@@ -513,7 +519,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -927,6 +933,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "service_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "service_check_type",
      "type": "number",
@@ -1209,7 +1221,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "service_last_update",
      "type": "time",
      "unit": ""
@@ -1545,6 +1557,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "host_check_type",
      "type": "number",
@@ -1833,7 +1851,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -2247,6 +2265,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "service_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "service_check_type",
      "type": "number",
@@ -2529,7 +2553,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "service_last_update",
      "type": "time",
      "unit": ""
@@ -3249,6 +3273,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "host_check_type",
      "type": "number",
@@ -3537,7 +3567,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -3945,6 +3975,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "service_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "service_check_type",
      "type": "number",
@@ -4227,7 +4263,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "service_last_update",
      "type": "time",
      "unit": ""
@@ -4569,6 +4605,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "host_check_type",
      "type": "number",
@@ -4857,7 +4899,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -5265,6 +5307,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "service_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "service_check_type",
      "type": "number",
@@ -5547,7 +5595,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "service_last_update",
      "type": "time",
      "unit": ""
@@ -6177,6 +6225,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -6465,7 +6519,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -6885,6 +6939,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -7173,7 +7233,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -7593,6 +7653,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -8037,7 +8103,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -8457,6 +8523,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -8901,7 +8973,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -9525,6 +9597,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Host check timeout",
+     "name": "current_host_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "Type of check (0: active, 1: passive)",
      "name": "current_host_check_type",
      "type": "number",
@@ -9813,7 +9891,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "current_host_last_update",
      "type": "time",
      "unit": ""
@@ -10209,6 +10287,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "current_service_check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "current_service_check_type",
      "type": "number",
@@ -10491,7 +10575,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "current_service_last_update",
      "type": "time",
      "unit": ""
@@ -11313,6 +11397,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -11562,6 +11652,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -11853,7 +11949,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -12297,7 +12393,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -12567,6 +12663,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -12816,6 +12918,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -13107,7 +13215,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -13551,7 +13659,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -13821,6 +13929,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -14070,6 +14184,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -14361,7 +14481,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -14805,7 +14925,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -15189,6 +15309,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -15438,6 +15564,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -15729,7 +15861,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -16173,7 +16305,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -16557,6 +16689,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -16806,6 +16944,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -17097,7 +17241,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -17697,7 +17841,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""
@@ -17967,6 +18111,12 @@ __DATA__
      "unit": ""
     },
     {
+     "description": "Service check timeout",
+     "name": "check_timeout",
+     "type": "number",
+     "unit": ""
+    },
+    {
      "description": "The type of the last check (0: active, 1: passive)",
      "name": "check_type",
      "type": "number",
@@ -18216,6 +18366,12 @@ __DATA__
      "description": "The source of the check",
      "name": "host_check_source",
      "type": "string",
+     "unit": ""
+    },
+    {
+     "description": "Host check timeout",
+     "name": "host_check_timeout",
+     "type": "number",
      "unit": ""
     },
     {
@@ -18507,7 +18663,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this host (Unix timestamp)",
+     "description": "Time of the last update of this host (Unix timestamp Microsecond Precision)",
      "name": "host_last_update",
      "type": "time",
      "unit": ""
@@ -19107,7 +19263,7 @@ __DATA__
      "unit": ""
     },
     {
-     "description": "Time of the last update of this service (Unix timestamp)",
+     "description": "Time of the last update of this service (Unix timestamp Microsecond Precision)",
      "name": "last_update",
      "type": "time",
      "unit": ""

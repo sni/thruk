@@ -6333,6 +6333,7 @@ var queryCodeCompletionData = {
         "check_command",
         "check_interval",
         "check_options",
+        "check_timeout",
         "check_period",
         "check_type",
         "checks_enabled",
