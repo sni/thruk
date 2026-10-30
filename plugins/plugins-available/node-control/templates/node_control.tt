@@ -159,7 +159,7 @@
                   [% last_section = s.section %]
                 </td>
               [% ELSIF col == "backend" %]
-                <td class="align-top clickable pr-px" onclick="openModalWindowUrl('node_control.cgi?action=peer_status&modal=1&peer=[% s.peer_key | html %]');" title="[% s.peer_key | html %]">
+                <td class="align-top clickable pr-px" onclick="openModalWindowUrl('node_control.cgi?action=peer_status&amp;modal=1&amp;peer=[% s.peer_key | html %]');" title="[% s.peer_key | html %]">
                   <div class="flex min-w-max">
                     <div class="flex-1">
                       [% s.peer_name | html %]
@@ -194,7 +194,7 @@
                   title="filter by omd version: [% s.omd_version.replace('-labs-edition', '') | html %][% IF s.omd_version && omd_default_version != s.omd_version %]&#013;node uses an outdated omd release, available:&#013;[% s.omd_versions.join("&#013;").replace('-labs-edition', '') %][% END %]"
                 >[% s.omd_version.replace('-labs-edition', '') | html %]</td>
               [% ELSIF col == "status" %]
-                <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&modal=1&peer=[% s.peer_key | html %]');">
+                <td class="align-top clickable" onclick="openModalWindowUrl('node_control.cgi?action=omd_status&amp;modal=1&amp;peer=[% s.peer_key | html %]');">
                   [% IF s.omd_status && s.omd_status.exists("OVERALL") %]
                     [% IF s.omd_status.OVERALL == 0 %]
                       <div class="badge OK">OK</div>
@@ -250,7 +250,7 @@
                   </div>
                 </td>
               [% ELSIF col == "virt" %]
-                <td class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&modal=1&peer=[% s.peer_key | html %]');" title="show facts">[% s.machine_type %]</td>
+                <td class="clickable" onclick="openModalWindowUrl('node_control.cgi?action=facts&amp;modal=1&amp;peer=[% s.peer_key | html %]');" title="show facts">[% s.machine_type %]</td>
               [% ELSIF col == "cpu" %]
                 <td class='align-top relative overflow-hidden'>
                   [% IF s.cpu_perc; %][%IF s.cpu_perc > 1; s.cpu_perc = 1; END %]
@@ -295,8 +295,8 @@
                                 {
                                     'icon':  "fa-file-lines [% IF s.logs.$l.failed; IF s.logs.$l.failed == 2; log_warn = 1 %]textWARN[% ELSE; log_failed = 1 %]textALERT[% END; END %]",
                                     'label': "<div class='flexrow flex-nowrap gap-x-1'><div class='w-20'>[% l | html %].log</div>[% IF s.logs.$l.time %]<div class='textHINTsoft text-right'>([% date_format(c, s.logs.$l.time) %])</div>[% END %]</div>",
-                                    'href':  "node_control.cgi?action=log&amp;type=[% l | html %]&peer=[% s.peer_key | html %]",
-                                    'onclick': "openModalWindowUrl('node_control.cgi?action=log&amp;type=[% l | html %]&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                                    'href':  "node_control.cgi?action=log&amp;type=[% l | html %]&amp;peer=[% s.peer_key | html %]",
+                                    'onclick': "openModalWindowUrl('node_control.cgi?action=log&amp;type=[% l | html %]&amp;peer=[% s.peer_key | html %]&amp;modal=1'); return false;"
                                 }[% UNLESS loop.last %],[% END %]
                               [% END %]
                             ];
@@ -388,9 +388,9 @@
                     colspan="[% loop.size - loop.index - 2 %]"
                     style="max-width: 30vw;"
                     [% IF error_lines.size > 1; clickable = 1 %]onclick="toggleElement('errors_[% s.peer_key | html %]'); jQuery('#errors_[% s.peer_key | html %]').removeClass('filter_hidden'); reapplyAllStripes(); return false;"
-                    [% ELSIF s.installing_failed && s.logs.defined("install"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=install&peer=[% s.peer_key | html %]&modal=1'); return false;"
-                    [% ELSIF s.updating_failed && s.logs.defined("update"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=update&peer=[% s.peer_key | html %]&modal=1'); return false;"
-                    [% ELSIF s.cleaning_failed && s.logs.defined("cleanup"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=cleanup&peer=[% s.peer_key | html %]&modal=1'); return false;"
+                    [% ELSIF s.installing_failed && s.logs.defined("install"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=install&amp;peer=[% s.peer_key | html %]&amp;modal=1'); return false;"
+                    [% ELSIF s.updating_failed && s.logs.defined("update"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=update&amp;peer=[% s.peer_key | html %]&amp;modal=1'); return false;"
+                    [% ELSIF s.cleaning_failed && s.logs.defined("cleanup"); clickable = 1 %]onclick="openModalWindowUrl('node_control.cgi?action=log&amp;type=cleanup&amp;peer=[% s.peer_key | html %]&amp;modal=1'); return false;"
                     [% END %]
                     class="align-top textALERT whitespace-pre truncate overflow-hidden[% IF clickable %] clickable[% END %]"
                   >

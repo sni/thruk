@@ -66,6 +66,7 @@ apt-get -y install \
     perl-doc \
     poppler-utils \
     rsync \
+    unzip \
     tofrodos \
     wget \
     zlib1g-dev \

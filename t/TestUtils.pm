@@ -615,6 +615,7 @@ sub tidy_lint {
         'trimming empty <i>',
         'trimming empty <span>',
         'trimming empty <tbody>',
+        'trimming empty <label>',
         "blank 'title' element",
     );
     if($skip_doc_type) {

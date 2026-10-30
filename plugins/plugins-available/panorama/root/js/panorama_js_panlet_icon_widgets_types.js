@@ -749,8 +749,8 @@ Ext.define('TP.DashboardStatusIcon', {
                         var type = ucfirst(p.iconType);
                         table += '<tr>';
                         table += '<th class="'+(type != lastType ? 'newType' : '')+'">'+(type != lastType ? type : '')+'<\/th>';
-                        table += '<td><a href="'+TP.getIconDetailsLink(p)+'" target="_blank">'+(p.getName ? p.getName() : '')+'</a><\/td>';
-                        table += '<td><div class="extinfostate '+pstatename.toUpperCase()+'">'+pstatename+'</div>';
+                        table += '<td><a href="'+TP.getIconDetailsLink(p)+'" target="_blank">'+(p.getName ? p.getName() : '')+'<\/a><\/td>';
+                        table += '<td><div class="extinfostate '+pstatename.toUpperCase()+'">'+pstatename+'<\/div>';
                         table += p.acknowledged ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_ack.png" style="vertical-align:text-bottom">'     : '';
                         table += p.downtime     ? ' <img src="'+url_prefix+'plugins/panorama/images/btn_downtime.png" style="vertical-align:text-bottom">' : '';
                         table += '<\/td>';

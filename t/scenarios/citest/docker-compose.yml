@@ -9,9 +9,14 @@ services:
         - .:/test:ro
         - ../../../var/tmp:/var/tmp:rw
         - "../../../.ci:/.ci:ro"
+        - ../../../docs:/var/lib/naemon/thruk/docs:ro
         - ../../../lib:/var/lib/naemon/thruk/lib:ro
+        - ../../../plugins/plugins-available:/var/lib/naemon/thruk/plugins/plugins-available:ro
+        - ../../../script:/var/lib/naemon/thruk/script:ro
+        - ../../../ssi:/var/lib/naemon/thruk/ssi:ro
+        - ../../../support:/var/lib/naemon/thruk/support:ro
+        - ../../../t:/var/lib/naemon/thruk/t:ro
         - ../../../templates:/var/lib/naemon/thruk/templates:ro
         - ../../../themes:/var/lib/naemon/thruk/themes:ro
-        - ../../../plugins/plugins-available:/var/lib/naemon/thruk/plugins/plugins-available:ro
     ports:
         - "3000:3000"

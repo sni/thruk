@@ -819,7 +819,7 @@ function bp_update_status(evt, node) {
     if(status == 2) { statusName = 'CRITICAL'; }
     if(status == 3) { statusName = 'UNKNOWN'; }
     if(status == 4) { statusName = 'PENDING'; }
-    jQuery('#bp_status_status').html('<div class="badge '+statusName+'">'+statusName+'</div>');
+    jQuery('#bp_status_status').html('<div class="badge '+statusName+'">'+statusName+'<\/div>');
     jQuery('#bp_status_label').html(n.label);
 
     var status_text = n.status_text.replace(/\|.*$/g, '');
@@ -1106,8 +1106,8 @@ function bp_render(containerId, nodes, edges) {
         dagre.layout(g);
         bp_graph_layout = g;
     } catch(e) {
-        var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.</span>';
-        if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'</div>'; }
+        var msg = '<span style="white-space: nowrap; color:red;">Please use Internet Explorer 9 or greater. Or preferable Firefox or Chrome.<\/span>';
+        if(thruk_debug_js) { msg += '<br><div style="width:500px; height: 400px; text-align: left;">Details:<br>'+e+'<\/div>'; }
         jQuery('.bp_zoom_container').css('height','500px');
         jQuery('#inner_'+containerId).html(msg);
         jQuery('#'+containerId).css("visibility", "");

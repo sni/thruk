@@ -119,6 +119,9 @@ if [ -n "$MISSING" ]; then
         else
             apt-get install -y libasound2
         fi
+        if apt-cache show libpango-1.0-0 >/dev/null 2>&1; then
+            apt-get install -y libpango-1.0-0
+        fi
     fi
 
     MISSING=$(ldd $DEST/chromium/chrome/*/chrome-*/chrome | grep "=> not found")

@@ -8,7 +8,9 @@ rsync -a --delete \
 chown -R naemon:naemon /var/lib/naemon/thruk 2>&1 | grep -v "Read-only file system" || :
 ln -sfn $(realpath /thruk/support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
 sudo su naemon -c -- bash -c 'cd ~/thruk && ./.ci/install_deps.sh'
-#/thruk/script/install_puppeteer.sh
+
+/thruk/script/install_puppeteer.sh
+
 sed -i /etc/naemon/naemon.cfg -e 's/.*check_workers=.*/check_workers=2/'
 service naemon start
 service mysql start

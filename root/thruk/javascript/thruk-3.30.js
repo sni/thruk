@@ -2254,12 +2254,12 @@ function create_site_panel_popup_panel() {
         jQuery(_site_panel_flat_peers(sites["sub"][subsection])).each(function(i, pd) {
             panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", toClsName(subsection), 'w-30');
             count++;
-            if(count > 15) { count = 0; panel += '</div><div class="flexcol gap-px">'; }
+            if(count > 15) { count = 0; panel += '<\/div><div class="flexcol gap-px">'; }
         });
-        panel += '<\/div><\/div></td>';
+        panel += '<\/div><\/div><\/td>';
     });
-    panel += '  </tr>';
-    panel += '</table>';
+    panel += '  <\/tr>';
+    panel += '<\/table>';
     return(panel);
 }
 
@@ -2298,14 +2298,14 @@ function create_site_panel_popup_collapsed() {
     jQuery(keys(sites.sub).sort()).each(function(i, sectionname) {
         if(i > 0) {
             panel += '  <tr>';
-            panel += '    <td><hr class="py-1"></td>';
-            panel += '  </tr>';
+            panel += '    <td><hr class="py-1"><\/td>';
+            panel += '  <\/tr>';
         }
         panel += '<tr>';
         panel += '<th class="borderDefault first:border-l-0 border-l p-0" onclick="toggleSection([\''+sectionname+'\']); return false;" title="'+sectionname+'">';
         panel += '<span class="inline-block w-full h-full p-1 rounded clickable hoverable">'+sectionname+'<\/span>';
         panel += '<\/th>';
-        panel += '</tr>';
+        panel += '<\/tr>';
         // show first two levels of sections
         panel += add_site_panel_popup_collapsed_section(sites["sub"][sectionname], [sectionname]);
         // including peers
@@ -2315,8 +2315,8 @@ function create_site_panel_popup_collapsed() {
             jQuery(sites["sub"][sectionname]["peers"]).each(function(i, pd) {
                 panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", toClsName(sectionname));
             });
-            panel += '    <\/div></td>';
-            panel += '  </tr>';
+            panel += '    <\/div><\/td>';
+            panel += '  <\/tr>';
         }
     });
 
@@ -2324,14 +2324,14 @@ function create_site_panel_popup_collapsed() {
     if(sites["peers"]) {
         panel += '  <tr>';
         panel += '    <td><hr class="py-1"></td>';
-        panel += '  </tr>';
+        panel += '  <\/tr>';
         panel += '  <tr>';
         panel += '    <td><div class="flexrow gap-px">';
         jQuery(sites["peers"]).each(function(i, pd) {
             panel += get_site_panel_backend_button(pd, "toggleBackend('"+pd+"')", "top");
         });
-        panel += '    <\/div></td>';
-        panel += '  </tr>';
+        panel += '    <\/div><\/td>';
+        panel += '  <\/tr>';
     }
 
     // add all other peers
@@ -2339,7 +2339,7 @@ function create_site_panel_popup_collapsed() {
         panel += add_site_panel_popup_collapsed_peers(sites["sub"][sectionname], [sectionname]);
     });
 
-    panel += '</table>';
+    panel += '<\/table>';
     return(panel);
 }
 
@@ -4576,37 +4576,37 @@ function thruk_message(rc, message, close_timeout) {
         + '  <div>'
         + '    <div class="w-5">';
     if(rc != 0) {
-        html +=   '<i class="fa-solid fa-exclamation round small yellow ml-2" title="Errors detected"></i>';
+        html +=   '<i class="fa-solid fa-exclamation round small yellow ml-2" title="Errors detected"><\/i>';
     }
     html += ''
-        + '    </div>'
+        + '    <\/div>'
         + '    <div class="flex-grow text-center font-semibold whitespace-nowrap overflow-auto">'
         + '      <span class="' + cls + '">' + message
-        + '      </span>';
+        + '      <\/span>';
 
     if(lines.length > 0) {
     html += ''
-        + '    <div class="mt-1"><a class="link" href="#" onclick="showElement(\'message_details\'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...</a></div>';
+        + '    <div class="mt-1"><a class="link" href="#" onclick="showElement(\'message_details\'); hideElement(this.parentNode); window.clearInterval(thruk_message_fade_timer); return false;">show details...<\/a><\/div>';
     }
 
     html += ''
-        + '    </div>'
+        + '    <\/div>'
         + '    <div class="w-5">'
-        + '      <button class="iconOnly medium" title="close this message" onclick="fade(\'thruk_message\', 500, true);return false;"><i class="uil uil-times"></i></button>'
-        + '    </div>'
-        + '  </div>';
+        + '      <button class="iconOnly medium" title="close this message" onclick="fade(\'thruk_message\', 500, true);return false;"><i class="uil uil-times"><\/i><\/button>'
+        + '    <\/div>'
+        + '  <\/div>';
 
     if(lines.length > 0) {
         html += ''
             + '    <div class="w-full flex justify-center">'
             + '      <pre class="'+cls+' max-w-full overflow-auto" style="display:none;" id="message_details">'
             + lines.join("\n") // joining with <br> breaks html output returned from server actions
-            + '      </pre>'
-            + '    </div>';
+            + '      <\/pre>'
+            + '    <\/div>';
     }
 
     html += ''
-        + '</div>';
+        + '<\/div>';
 
     // append to <main> if possible or body otherwise
     var container = jQuery("main") || jQuery("body");
@@ -4725,7 +4725,7 @@ function load_overcard_content(id, url, add_pre) {
             var el  = document.getElementById(id);
             var msg = getXHRerrorMsg('', textStatus, jqXHR, errorThrown);
             if(el) {
-                el.innerHTML = "<span class='textALERT'>"+msg+"</span>";
+                el.innerHTML = "<span class='textALERT'>"+msg+"<\/span>";
             }
             ajax_xhr_error_logonly(jqXHR, textStatus, errorThrown);
         }
@@ -5089,7 +5089,7 @@ function initStatusTableColumnSorting(pane_prefix, table_class) {
         if(th.tagName == "A") { th = th.parentNode; }
         var text = (th.innerText || '').replace(/\s*$/, '');
         jQuery(th).find("*").css("display", "none");
-        jQuery("<input type='text' class='header_inline_edit' value='"+text+"'></form>").appendTo(th);
+        jQuery("<input type='text' class='header_inline_edit' value='"+text+"'><\/form>").appendTo(th);
         window.setTimeout(function() {
             jQuery(th).find('INPUT').focus();
             var input = jQuery(th).find('INPUT')[0];
@@ -5937,10 +5937,10 @@ function tags_input_init(div) {
         // already initialized
         return;
     }
-    var inputDiv = jQuery('<div class="tags-input-container"></div>');
+    var inputDiv = jQuery('<div class="tags-input-container"><\/div>');
     jQuery(div).prepend(inputDiv);
     jQuery(input).detach().appendTo(inputDiv);
-    var tagsListDiv = jQuery('<div class="tags-list"></div>');
+    var tagsListDiv = jQuery('<div class="tags-list"><\/div>');
     jQuery(div).prepend(tagsListDiv);
     if(disabled) {
         jQuery(div).addClass("tags-disabled");
@@ -6237,7 +6237,7 @@ function codeComplete(el, token, idx, after, before, completionFn) {
     // add keywords first which start with the exact search pattern
     jQuery(keywords).each(function(i, v) {
         if(v.indexOf(completeFor) === 0) {
-            completionsFound.push([v, v.replace(completeFor, "<b class='hint'>"+completeFor+"</b>")]);
+            completionsFound.push([v, v.replace(completeFor, "<b class='hint'>"+completeFor+"<\/b>")]);
         }
     });
     // add keywords matching all characters anywhere
