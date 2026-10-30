@@ -2249,10 +2249,14 @@ sub _clean_columns {
 
     if(!$self->{'lmd_optimizations'} && !$self->{'naemon_optimizations'}) {
         # icinga 2 does not know about those columns
+        if($table eq 'hosts') {
+            $columns = Thruk::Base::array_remove($columns, "check_timeout");
+        }
         if($table eq 'services') {
             $columns = Thruk::Base::array_remove($columns, "depends_exec");
             $columns = Thruk::Base::array_remove($columns, "depends_notify");
             $columns = Thruk::Base::array_remove($columns, "parents");
+            $columns = Thruk::Base::array_remove($columns, "check_timeout");
         }
         if($table eq 'contacts') {
             $columns = Thruk::Base::array_remove($columns, "id");
