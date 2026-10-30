@@ -96,6 +96,11 @@ $Monitoring::Config::Object::Host::ShinkenSpecific = {
     'service_includes'            => { type => 'STRING', cat => 'Extended' },
 };
 
+# Naemon specific things
+$Monitoring::Config::Object::Host::NaemonSpecific = {
+    'check_timeout'                => { type => 'INT', cat => 'Checks' },
+};
+
 $Monitoring::Config::Object::Host::Defaults::standard_keys = [ 'host_name', 'use', 'alias', 'address', 'contact_groups' ];
 
 ##########################################################
@@ -122,6 +127,15 @@ sub BUILD {
             }
         }
 
+        if($coretype eq 'any' or $coretype eq 'naemon') {
+            for my $key (keys %{$Monitoring::Config::Object::Host::NaemonSpecific}) {
+                $Monitoring::Config::Object::Host::Defaults->{$key} = $Monitoring::Config::Object::Host::NaemonSpecific->{$key};
+            }
+        } else {
+            for my $key (keys %{$Monitoring::Config::Object::Host::NaemonSpecific}) {
+                delete $Monitoring::Config::Object::Host::Defaults->{$key};
+            }
+        }
         if($coretype eq 'any' or $coretype eq 'icinga') {
             $Monitoring::Config::Object::Host::Defaults->{'address6'} = { type => 'STRING', cat => 'Basic' };
         } else {

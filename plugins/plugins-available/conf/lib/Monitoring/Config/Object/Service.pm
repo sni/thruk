@@ -101,6 +101,7 @@ $Monitoring::Config::Object::Service::IcingaSpecific = {
 # Naemon specific things
 $Monitoring::Config::Object::Service::NaemonSpecific = {
     'parents'                      => { type => 'STRING', 'link' => 'service_description', cat => 'Extended' },
+    'check_timeout'                => { type => 'INT', cat => 'Checks' },
 };
 $Monitoring::Config::Object::Service::Restore = {};
 
