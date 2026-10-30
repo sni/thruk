@@ -308,7 +308,6 @@ sub _log {
     }
 
     for my $l (split/\n/mx, $line) {
-        $l = '[cron] '.$l if $ENV{'THRUK_CRON'};
         $l = $ENV{'THRUK_LOG_PREFIX'}.$l if $ENV{'THRUK_LOG_PREFIX'};
         if(   $lvl == ERROR)   { $log->error($l); }
         elsif($lvl == WARNING) { $log->warn($l);  }
@@ -670,11 +669,17 @@ sub get_screen_logger {
         };
         $use_color = 0 if $@;
     }
+    $prefix = " " unless $prefix;
+
+    if($ENV{'THRUK_CRON'}) {
+        $use_color = 0;
+        $withdate  = 1;
+        $prefix    = "[cron]".$prefix." ";
+    }
 
     my $timeformat = $withdate ? '%d{yyyy/MM/dd} %d{ABSOLUTE}' : '%d{ABSOLUTE}';
-    $prefix = " " unless $prefix;
-    my $format = '['.$timeformat.'][%p]'.$prefix.'%m{chomp}';
-    if($ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
+    my $format     = '['.$timeformat.'][%p]'.$prefix.'%m{chomp}';
+    if($ENV{'THRUK_CRON'} || $ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
         $format = '['.$timeformat.']['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U'.$prefix.'%m{chomp}';
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
@@ -688,7 +693,7 @@ sub get_screen_logger {
     }
 
     Log::Log4perl::Layout::PatternLayout::add_global_cspec('Q', \&_priority_error_warn_only);
-    if(!Thruk::Base->verbose() || (Thruk::Base->quiet() && !$ENV{'THRUK_CRON'})) {
+    if((!Thruk::Base->verbose() || Thruk::Base->quiet()) && !$ENV{'THRUK_CRON'}) {
         $format = '%Q%m{chomp}';
     }
 
