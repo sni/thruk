@@ -179,7 +179,7 @@
                 </a>
               </td>
               <td style="text-align: right;">[% format_number(t.total) %]</td>
-              <td style="text-align: right;">[% sprintf("%1.f", t.procent) %]%</td>
+              <td style="text-align: right;">[% sprintf("%1.f", t.percent) %]%</td>
             </tr>
             [% END %]
           </table>
