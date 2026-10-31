@@ -418,7 +418,7 @@ END
       <th class='pb-1'>Monitored by</th>
       <td class='pb-1'>
         [% IF c.check_user_roles('authorized_for_system_information') %]
-          <a href="extinfo.cgi?type=0&list=list#|[% peer_key | uri %]">[% pi_detail.$peer_key.peer_name %]</a>
+          <a href="extinfo.cgi?type=0&amp;list=list#|[% peer_key | uri %]">[% pi_detail.$peer_key.peer_name %]</a>
         [% ELSE %]
           [% pi_detail.$peer_key.peer_name %]
         [% END %]

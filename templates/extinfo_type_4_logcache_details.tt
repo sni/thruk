@@ -164,7 +164,7 @@
             [% FOREACH t = s.1 %]
             <tr>
               <td>
-                <a href="showlog.cgi?backend=[% peer_key %]&[% s.0 | uri %]=[% t.param | uri %]">
+                <a href="showlog.cgi?backend=[% peer_key %]&amp;[% s.0 | uri %]=[% t.param | uri %]">
                 [% IF t.param != "" %]
                   [% t.type | lc %]
                 [% ELSE %]
