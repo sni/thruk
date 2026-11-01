@@ -1,7 +1,7 @@
 ﻿[% USE date %]
 [% histou_frame_url = histou_url.replace('/dashboard/', '/dashboard-solo/').replace('/d/', '/d-solo/') %]
 <script>
-  var histou_url        = "[% histou_url %]";
+  var histou_url        = "[% histou_url.replace('&amp;', '&') %]";
   var histou_frame_url  = "[% histou_frame_url %]";
   var histou_source     = "[% histou_source %]";
 
