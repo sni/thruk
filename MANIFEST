@@ -2306,6 +2306,7 @@ script/thruk_fastcgi.pl
 script/thruk_fastcgi_server.sh
 script/thruk_format_perl_modules
 script/thruk_link_images.sh
+script/thruk_logcache_export.pl
 script/thruk_optimize_images.sh
 script/thruk_patch_makefile.pl
 script/thruk_server.pl
