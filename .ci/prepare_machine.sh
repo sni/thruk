@@ -106,6 +106,8 @@ fi
 # ensure we have a test database in place for tests
 service mariadb start
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
+# newer mariadb uses unix_socket auth for root@localhost, switch to password auth so tests can connect over TCP
+mysql -uroot -e "ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('root'); FLUSH PRIVILEGES;"
 
 chown -R naemon: .
 
