@@ -970,6 +970,9 @@ sub get_git_info {
 
     my(undef, $branch) = _cmd('cd '.$project_root.' && git branch --no-color 2>/dev/null');
     if($branch =~ s/^\*\s+(.*)$//mx) { $branch = $1; }
+    if($branch =~ m/\A\(/mx) { # detached head, ex. "(HEAD detached at pull/1538/merge)"
+        $branch = '';
+    }
     if(!$branch) {
         $git_info = '';
         return $git_info;
