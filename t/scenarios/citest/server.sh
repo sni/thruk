@@ -14,4 +14,4 @@ export TEST_AUTHOR=1
 export THRUK_AUTHOR=1
 export TEST_MYSQL="mysql://naemon:naemon@localhost:3306/test"
 
-exec stdbuf -o0 -e0 /usr/bin/env perl ./script/thruk_server.pl -r "$*"
+exec /usr/bin/env perl ./script/thruk_server.pl -r "$*"

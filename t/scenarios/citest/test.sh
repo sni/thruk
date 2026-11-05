@@ -45,7 +45,7 @@ while [ $# -gt 0 ]; do
         # single file may have options
         # ex.: make test_verbose t/800-plugins.t pansnaps
         if test -f "$FILES"; then
-            stdbuf -o0 -e0 /usr/bin/env perl $FILES $ARG $*
+            /usr/bin/env perl $FILES $ARG $*
             exit $?
         else
             echo "ERROR: unknown option: '$ARG'"
@@ -58,4 +58,4 @@ if [ "$FILES" == "" ]; then
     FILES="t/*.t t/xt/*/*.t"
 fi
 
-stdbuf -o0 -e0 /usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness($VERBOSE)" $FILES
+/usr/bin/env perl "-MExtUtils::Command::MM" "-e" "test_harness($VERBOSE)" $FILES

@@ -14,7 +14,6 @@ apt-get -y install \
     cpanminus \
     curl \
     debhelper \
-    expect \
     git \
     libclass-inspector-perl \
     libconfig-general-perl \
