@@ -41,6 +41,7 @@ apt-get -y install \
     libjpeg62-dev \
     liblog-log4perl-perl \
     libmariadb-dev \
+    mariadb-server \
     libmime-lite-perl \
     libmodule-build-tiny-perl \
     libmodule-install-perl \
@@ -103,7 +104,7 @@ else
 fi
 
 # ensure we have a test database in place for tests
-/etc/init.d/mysql start
+service mariadb start
 mysql -e "create database IF NOT EXISTS test;" -uroot -proot
 
 chown -R naemon: .
