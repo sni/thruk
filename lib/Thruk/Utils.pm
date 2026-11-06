@@ -1854,6 +1854,7 @@ sub get_perf_image {
     # create fake session
     my($sessionid) = get_fake_session($c);
     local $ENV{THRUK_SESSION_ID} = $sessionid;
+    local $ENV{THRUK_COOKIE_AUTH_DOMAIN} = $c->config->{'cookie_auth_domain'};
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {

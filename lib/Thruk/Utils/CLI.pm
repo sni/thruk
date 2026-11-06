@@ -180,6 +180,22 @@ sub request_url {
 
     # external url?
     if($url =~ m/^https?:/mx) {
+        # thruk_auth cookies are only valid on the local server or hosts within the configured cookie_auth_domain
+        if($cookies) {
+            my $domain = lc($c->config->{'cookie_auth_domain'} || '');
+            $domain =~ s/^\.(?=.)/''/mx;
+            my $host;
+            if($url =~ m{^https?://\[([^\]]+)\](?::\d+)?}mx) {
+                $host = $1; # ipv6
+            } elsif($url =~ m{^https?://([^:/]+)}mx) {
+                $host = $1;
+            }
+            my $trusted = $host && (lc($host) eq 'localhost'
+                              || $host eq '127.0.0.1'
+                              || $host eq '::1'
+                              || ($domain && (lc($host) eq $domain || lc($host) =~ m/\.\Q$domain\E\z/mx)));
+            $cookies = undef unless $trusted;
+        }
         my($response) = _external_request($c, $url, $cookies, $method, $postdata, $headers, $insecure);
         my $result = {
             code    => $response->code(),

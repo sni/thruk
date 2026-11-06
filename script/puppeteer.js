@@ -75,8 +75,16 @@ if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] 
   });
   const page = await browser.newPage();
   await page.setViewport({width: Number(width), height: Number(height)});
-  if(url.match(/^https?:/)) {
-    await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
+  // only send our session cookie to the local server or hosts within the configured cookie auth domain
+  let urlObj2;
+  try { urlObj2 = new URL(url); } catch (e) { }
+  if(urlObj2 && ["http:", "https:"].includes(urlObj2.protocol)) {
+    const host = urlObj2.hostname.replace(/^\[|\]$/g, "").toLowerCase();
+    const domain = (process.env.THRUK_COOKIE_AUTH_DOMAIN || "").toLowerCase().replace(/^\./, "");
+    if(host === "localhost" || host === "127.0.0.1" || host === "::1"
+       || (domain && (host === domain || host.endsWith("." + domain)))) {
+      await page.setCookie({name: "thruk_auth", value: sessionid, url: url});
+    }
   }
   page.on('response', async (response) => {
     const status = response.status();
