@@ -298,8 +298,7 @@ sub test_page {
             if(defined $opts->{'unlike'}) {
                 for my $unlike (@{_list($opts->{'unlike'})}) {
                     if($return->{'content'} =~ m/$unlike/mx) {
-                        fail("Content should not contain: ".(defined $1 ? $1 : $unlike)) or diag($opts->{'url'});
-                        return $return;
+                        fail("Content should not contain: ".(defined $1 ? $1 : $unlike)) or bail_out_req("failed unlike match, page shows error", $request, 1);
                     }
                 }
             }
