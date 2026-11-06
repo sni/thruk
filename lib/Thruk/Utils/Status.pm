@@ -366,7 +366,7 @@ sub do_filter {
     }
 
     # redirect lexical query like searches from menu search
-    if($params->{'s0_type'} && $params->{'s0_type'} eq 'search' && $params->{'s0_value'} && $params->{'s0_value'} =~ m/^.+([=~!<>]|like|unlike)+/mx) {
+    if($params->{'s0_type'} && $params->{'s0_type'} eq 'search' && $params->{'s0_value'} && _is_lexical_query($params->{'s0_value'})) {
         $params->{'q'} = delete $params->{'s0_value'};
         delete $params->{'s0_type'};
     }
@@ -449,6 +449,17 @@ sub do_filter {
     ($hostfilter, $servicefilter) = _append_totals_filter($params, $hostfilter, $servicefilter);
 
     return($hostfilter, $servicefilter, $hostgroupfilter, $servicegroupfilter, $c->stash->{'has_service_filter'}, $searches);
+}
+
+##############################################
+
+# returns true if search string looks like a lexical filter query, ex.: host_name ~ abc
+# requires "key operator value", like/unlike only count as whole words,
+# so plain search strings containing "like" (ex.: "galliker") stay plain searches
+sub _is_lexical_query {
+    my($str) = @_;
+    return(1) if $str =~ m/^[\s(]*\w+\s*(?:[=~!<>]+|\b(?:un)?like\b)\s*\S/mx;
+    return(0);
 }
 
 ##############################################

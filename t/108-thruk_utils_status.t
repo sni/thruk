@@ -4,7 +4,7 @@ use Cpanel::JSON::XS ();
 use Test::More;
 use utf8;
 
-plan tests => 75;
+plan tests => 85;
 
 BEGIN {
     use lib('t');
@@ -78,6 +78,14 @@ _test_filter('(host_name = 1) or (host_name = 2) or (host_name = 3)',
 _test_filter('(host_name = \'localhost\' or (type = \'EXTERNAL COMMAND\' and message ~~ \'(\s|;)localhost(;|$)\'))',
              "Filter: host_name = localhost\nFilter: type = EXTERNAL COMMAND\nFilter: message ~~ (\\s|;)localhost(;|\$)\nAnd: 2\nOr: 2",
              "host_name = 'localhost' or (type = 'EXTERNAL COMMAND' and message ~~ '(\\s|;)localhost(;|\$)')");
+
+# quick search: plain strings must not be treated as lexical queries
+for my $str ('galliker', 'dislike', 'server like', 'srv01') {
+    is(Thruk::Utils::Status::_is_lexical_query($str), 0, "'$str' is a plain search");
+}
+for my $str ('host like srv', 'host unlike srv', 'host_name ~ abc', 'state>0', '(host_name = a or host_name = b)', '_HOSTLOCATION = BA') {
+    is(Thruk::Utils::Status::_is_lexical_query($str), 1, "'$str' is a lexical query");
+}
 
 sub _test_filter {
     my($filter, $expect, $exp_ftext) = @_;
