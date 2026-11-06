@@ -11,6 +11,13 @@
 [ -e ~/.thruk              ] && . ~/.thruk
 [ -e ~/.profile            ] && . ~/.profile
 
+# raise the puppeteer timeouts by default, the browser may need longer on busy
+# machines. see script/puppeteer.js, values are in seconds.
+# can be overridden by /etc/thruk/thruk.env, ~/.thruk or the environment.
+: "${START_TIMEOUT:=120}"
+: "${WAIT_TIMEOUT:=120}"
+export START_TIMEOUT WAIT_TIMEOUT
+
 DIR=$(dirname "$BASH_SOURCE")
 export PATH=$PATH:$DIR
 
