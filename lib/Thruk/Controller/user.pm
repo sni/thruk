@@ -96,6 +96,7 @@ sub index {
             return $c->redirect_to('user.cgi');
         }
         if($action eq 'site_panel_bookmarks') {
+            return unless Thruk::Utils::check_csrf($c);
             if($c->req->parameters->{'save'}) {
                 my $data = Thruk::Utils::get_user_data($c);
                 $data->{'site_panel_bookmarks'} = [] unless $data->{'site_panel_bookmarks'};

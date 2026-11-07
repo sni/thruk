@@ -637,7 +637,8 @@ function initTabSorting() {
           type: 'POST',
           data: {
             reorder:  '1',
-            order:     order
+            order:     order,
+            CSRFtoken: CSRFtoken
           },
           success: function() {
             jQuery("#tabsavespinner").addClass("hidden");

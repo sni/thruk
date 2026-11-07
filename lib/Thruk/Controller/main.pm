@@ -121,6 +121,7 @@ sub index {
     }
 
     if($c->req->parameters->{'reorder'}) {
+        return unless Thruk::Utils::check_csrf($c);
         my $order = $c->req->parameters->{'order[]'};
         my $newviews = [];
         for my $tab (@{$order}) {
