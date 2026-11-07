@@ -2,6 +2,10 @@
 
 This file documents the revision history for the Monitoring WebUI Thruk.
 
+next:
+          - disable the shipped administrator password on fresh installs and package upgrades;
+            set a password with htpasswd /etc/thruk/htpasswd thrukadmin before login
+
 3.30     Thu Oct 22 19:28:17 CEST 2026
           - fix remote code vulnerability in grafana image export (GHSA-83cf-v4hm-pw6j)
           - fix mouse glitch on quick command menu (#1502)

@@ -41,7 +41,7 @@ Even when using the Cookie Authentication, it is still possible to use wget
 or curl for fetching pages.
 
 ------------
-  %> curl "http://thrukadmin:thrukadmin@localhost/thruk/cgi-bin/status.cgi?format=json"
+  %> curl --user thrukadmin "http://localhost/thruk/cgi-bin/status.cgi?format=json"
 ------------
 
 

@@ -41,8 +41,17 @@ All packages have the following filesystem structure:
   /var/lib/thruk                   stored user settings
 -------
 
-After installation, Thruk is available at http://your-host/thruk/ and
-has a default user 'thrukadmin' with password 'thrukadmin' configured.
+After installation, Thruk is available at http://your-host/thruk/.
+The 'thrukadmin' account is disabled until you set a password:
+
+-------
+  #> htpasswd /etc/thruk/htpasswd thrukadmin
+-------
+
+On package upgrades, the old shipped default password is disabled;
+operator-set passwords and other accounts are preserved. If you still used
+the default password, run the command above to restore access.
+
 You may need to change backend configuration. This should be done in
 the thruk_local.conf where all settings can be overridden.
 

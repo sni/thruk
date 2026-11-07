@@ -192,6 +192,15 @@ exit 0
 
 %post base
 set +e
+# Disable only the shipped legacy credential, preserving custom passwords.
+if [ -f /etc/thruk/htpasswd ]; then
+  sed -i 's/^thrukadmin:gylG8yxOCYkTE$/thrukadmin:!/' /etc/thruk/htpasswd || {
+    echo "Could not disable the public default Thruk password." >&2
+    exit 1
+  }
+  echo "If you used the public default password, set a new one with 'htpasswd /etc/thruk/htpasswd thrukadmin'."
+fi
+
 case "$*" in
   2)
     # Upgrading, restart apache webserver
@@ -256,7 +265,7 @@ case "$*" in
     /usr/bin/thruk -a clearcache,installcron --local > /dev/null
 
     echo "Thruk have been configured for http://$(hostname)/thruk/."
-    echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
+    echo "Before first login, set the 'thrukadmin' password with 'htpasswd /etc/thruk/htpasswd thrukadmin'."
   ;;
   *) echo case "$*" not handled in post
 esac
