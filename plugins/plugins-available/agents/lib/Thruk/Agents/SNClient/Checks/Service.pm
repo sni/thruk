@@ -58,7 +58,7 @@ sub get_checks {
                 my($f, $v) = Thruk::Agents::SNClient::make_filter("name", $m);
                 my $args;
                 if($v eq $svc->{'name'} || !$cfg->{'all_in_one'}) {
-                    $args = sprintf("service='%s'", $svc->{'name'});
+                    $args = { "service" => $svc->{'name'} };
                 } else {
                     $id   = $cfg->{'name'} // $id;
                     $args = sprintf('"filter=%s"', $f);

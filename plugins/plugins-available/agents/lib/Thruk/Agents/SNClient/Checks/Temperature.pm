@@ -43,7 +43,7 @@ sub get_checks {
             'id'        => 'temperature.'.Thruk::Utils::Agents::to_id($temp->{'name'}),
             'name'      => 'temperature '.$name,
             'check'     => 'check_temperature',
-            'args'      => [ "sensor='".$temp->{'name'}."'", $def_opts ],
+            'args'      => [ { "sensor" => $temp->{'name'} }, $def_opts ],
             'parent'    => 'agent version',
             'info'      => $temp,
             'disabled'  => Thruk::Utils::Agents::check_disable($temp, $disabled_config, 'temperature'),

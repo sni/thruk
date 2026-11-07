@@ -33,7 +33,7 @@ sub get_checks {
             'id'       => 'net.'.Thruk::Utils::Agents::to_id($net->{'name'}),
             'name'     => 'net '.$net->{'name'},
             'check'    => 'check_network',
-            'args'     => [ "device='".$net->{'name'}."'" ],
+            'args'     => { "device" => $net->{'name'} },
             'parent'   => 'agent version',
             'info'     => $net,
             'disabled' => Thruk::Utils::Agents::check_disable($net, $c->config->{'Thruk::Agents'}->{'snclient'}->{'disable'}, 'network'),

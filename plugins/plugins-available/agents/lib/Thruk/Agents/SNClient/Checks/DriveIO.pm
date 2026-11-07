@@ -38,7 +38,7 @@ sub get_checks {
             'id'       => 'drive_io.'.Thruk::Utils::Agents::to_id($drive->{'drive'}),
             'name'     => $prefix.' '.$drive->{'drive'},
             'check'    => 'check_drive_io',
-            'args'     => [ "drive='".$drive->{'drive'}."'", $def_opts ],
+            'args'     => [ { "drive" => $drive->{'drive'} }, $def_opts ],
             'parent'   => 'agent version',
             'info'     => $drive,
             'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $disabled_config, ['drive_io', $prefix]),

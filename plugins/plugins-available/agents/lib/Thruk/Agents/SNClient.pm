@@ -593,7 +593,7 @@ sub _extract_checks {
         my $proto = "https";
         $proto = "http" if($mode && $mode eq 'http');
         my $command = $chk->{'check_command'} // sprintf(
-                "check_thruk_agent!CHECK_NSC_WEB_PASSWORD='%s' %s\$USER1\$/check_nsc_web %s %s -u '%s://%s:%s' '%s'",
+                "check_thruk_agent!CHECK_NSC_WEB_PASSWORD='%s' %s\$USER1\$/check_nsc_web %s %s -u '%s://%s:%s' %s",
                 $svc_password,
                 $proxy_cmd,
                 _check_nsc_web_extra_options($c, $mode),
@@ -601,7 +601,7 @@ sub _extract_checks {
                 $proto,
                 '$HOSTADDRESS$',
                 '$_HOSTAGENT_PORT$',
-                $chk->{'check'},
+                _quote_shell_arg($chk->{'check'}),
         );
         my $current_args = [];
         my $interval = $config->{'check_interval'};
@@ -619,19 +619,18 @@ sub _extract_checks {
                 $interval = $config->{'os_updates_interval'};
             }
             if($chk->{'args'}) {
-                if(ref $chk->{'args'} eq 'ARRAY') {
-                    for my $arg (@{$chk->{'args'}}) {
-                        next unless defined $arg;
-                        $command .= sprintf(" %s", $arg);
+                # Hash entries are argument data; strings are administrator-defined shell fragments.
+                for my $arg (@{Thruk::Base::list($chk->{'args'})}) {
+                    next unless defined $arg;
+                    if(ref $arg eq 'HASH') {
+                        for my $key (sort keys %{$arg}) {
+                            push @{$current_args}, sprintf("%s=%s", $key, _quote_shell_arg($arg->{$key}));
+                        }
+                    } else {
                         push @{$current_args}, $arg;
                     }
-                } else {
-                    for my $arg (sort keys %{$chk->{'args'}}) {
-                        my $a = sprintf("%s='%s'", $arg, $chk->{'args'}->{$arg});
-                        $command .= " ".$a;
-                        push @{$current_args}, $a;
-                    }
                 }
+                $command .= " ".join(" ", @{$current_args});
             }
         }
 
@@ -669,6 +668,16 @@ sub _extract_checks {
     }
 
     return $checks;
+}
+
+##########################################################
+
+sub _quote_shell_arg {
+    my($value) = @_;
+    $value //= '';
+    die("invalid control character in agent command argument") if $value =~ /[\x00\r\n]/mx;
+    $value =~ s/'/'\\''/gmx;
+    return "'".$value."'";
 }
 
 ##########################################################
