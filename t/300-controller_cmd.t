@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2122;
+    plan tests => 2123;
 }
 
 BEGIN {
@@ -25,6 +25,41 @@ my($host,$service) = TestUtils::get_test_service();
 my $hostgroup      = TestUtils::get_test_hostgroup();
 my $servicegroup   = TestUtils::get_test_servicegroup();
 my $post           = { test_only => 1, cmd_mod => 2, host => $host, 'service' => $service, 'servicegroup' => $servicegroup, 'hostgroup' => $hostgroup };
+
+subtest 'bulk commands cannot contain additional command frames' => sub {
+    my @sent;
+    no warnings 'redefine';
+    local *Thruk::Controller::cmd::_bulk_send_backend = sub {
+        my(undef, $backend, $commands) = @_;
+        push @sent, [$backend, [@{$commands}]];
+        return 1;
+    };
+
+    my $valid = 'COMMAND [1] ADD_HOST_COMMENT;hostA;1;author;comment';
+    for my $separator ("\n", "\r", "\r\n", "\n\n") {
+        my @values = ($separator.$valid, $valid.$separator.'COMMAND [1] ADD_HOST_COMMENT;hostB;1;author;marker');
+        push @values, $valid.$separator unless $separator eq "\n";
+        for my $value (@values) {
+            @sent = ();
+            $c->stash->{'last_command_error'} = 'previous error';
+            $c->stash->{'last_command_lines'} = ['previous command'];
+            my $commands = {
+                first  => [$valid],
+                second => [(map { 'COMMAND [1] DEL_HOST_COMMENT;'.$_ } 1..101), $value],
+            };
+            ok(!Thruk::Controller::cmd::bulk_send($c, $commands), 'reject CR/LF remaining after chomp');
+            is_deeply(\@sent, [], 'no backend or earlier bucket was sent');
+            is($c->stash->{'last_command_error'}, 'command contains invalid CR/LF characters', 'report validation error');
+            is_deeply($c->stash->{'last_command_lines'}, [], 'no stale command lines reported');
+        }
+    }
+
+    my $commands = [$valid."\n", 'COMMAND [1] ADD_HOST_COMMENT;hostB;1;author;literal \\n;extra'];
+    ok(Thruk::Controller::cmd::bulk_send($c, { first => $commands }), 'allow trailing newline, separate commands and literal backslash-n');
+    is_deeply(\@sent, [['first', $commands]], 'preserve valid command entries');
+    ok(!defined $c->stash->{'last_command_error'}, 'clear previous error for a valid batch');
+    done_testing();
+};
 
 # test quick commands
 my $backends = $c->db->get_peers();
