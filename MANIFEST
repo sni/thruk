@@ -2365,6 +2365,7 @@ t/015-Thruk-Utils-APIKeys.t
 t/016-Thruk-Utils-Date.t
 t/017-Thruk-Utils-UserAgent.t
 t/018-Monitoring-Config-Object.t
+t/019-Thruk-Utils-OAuth.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/022-Thruk-Utils-Log.t

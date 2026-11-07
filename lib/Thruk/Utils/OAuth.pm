@@ -59,6 +59,13 @@ sub handle_oauth_login {
             $c->stats->profile(end => "handle_oauth_login");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?expired&".$referer);
         }
+        # The state in the callback URL alone does not identify the initiating browser.
+        my $browser_token = $c->cookies('thruk_oauth_'.$state);
+        if(!$browser_token || !$data->{'browser_token'} || $browser_token ne $data->{'browser_token'}) {
+            $c->stats->profile(end => "handle_oauth_login");
+            return $c->detach_error({msg => "oauth state does not match this browser", code => 400});
+        }
+        $c->cookie('thruk_oauth_'.$state, '', { expires => 0, httponly => 1 });
         # exchange code into token
         my $auth = $c->config->{'auth_oauth'}->{'provider'}->[$data->{'oauth'}];
         if(!$auth) {
@@ -185,11 +192,13 @@ sub handle_oauth_login {
     }
     # redirect to auth url
     $state = Thruk::Utils::Crypt::random_uuid([time()]);
+    my $browser_token = Thruk::Utils::Crypt::random_uuid();
 
     my $state_data = {
-        'time'    => time(),
-        'oauth'   => $id,
-        'referer' => $referer,
+        'time'          => time(),
+        'oauth'         => $id,
+        'referer'       => $referer,
+        'browser_token' => $browser_token,
     };
     my $login_data = {
         client_id             => $auth->{'client_id'},
@@ -210,6 +219,7 @@ sub handle_oauth_login {
 
     Thruk::Utils::IO::mkdir($auth_folder);
     Thruk::Utils::IO::json_lock_store($auth_folder."/".$state.".json", $state_data);
+    $c->cookie('thruk_oauth_'.$state, $browser_token, { expires => time() + 600, httponly => 1 });
     _cleanup_oauth_files($c, $auth_folder, 600);
     my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, $login_data, 1, $auth->{'auth_url'}, 1);
     _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
