@@ -3754,7 +3754,12 @@ sub _check_media_permissions {
     $file = Thruk::Utils::IO::realpath($file);
 
     # user is allowed to change the image if he has write access to all dashboards using this image
-    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    my $dashboards;
+    {
+        # Include private dashboards, but check write access below as the original user.
+        local $c->stash->{'is_admin'} = 1;
+        $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    }
     for my $d (@{$dashboards}) {
         # we are looking for dashboards without access which use this image,so skip the dashboard we have full access to
         next if Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $d->{'nr'}, $d) >= ACCESS_READWRITE;
