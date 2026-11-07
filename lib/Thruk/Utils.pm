@@ -2037,6 +2037,7 @@ sub get_fake_session {
     }
 
     # get intersection of roles
+    $roles = $c->user->{'roles_restriction'} unless defined $roles;
     if($roles && ref $roles eq 'ARRAY') {
         $roles = $c->user->clean_roles($roles);
     }
@@ -2050,6 +2051,8 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
+    # Keep empty ceilings distinct from legacy unrestricted session roles.
+    $sessiondata->{'roles_restriction'} = $roles if defined $c->user->{'roles_restriction'};
     if($extra) {
         for my $key (sort keys %{$extra}) {
             $sessiondata->{$key} = $extra->{$key};

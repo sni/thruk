@@ -465,6 +465,7 @@ sub _request_username {
         $username = $sessiondata->{'username'};
         $auth_src = "cookie";
         $roles    = $sessiondata->{'roles'} if($sessiondata->{'roles'} && scalar @{$sessiondata->{'roles'}} > 0);
+        $roles    = $sessiondata->{'roles_restriction'} if defined $sessiondata->{'roles_restriction'};
     }
     elsif(defined $c->config->{'use_ssl_authentication'} and $c->config->{'use_ssl_authentication'} >= 1 and defined $env->{'SSL_CLIENT_S_DN_CN'}) {
         $username = $env->{'SSL_CLIENT_S_DN_CN'};

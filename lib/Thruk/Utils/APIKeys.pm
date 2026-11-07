@@ -194,7 +194,7 @@ sub create_key_by_params {
     }
 
     # roles cannot exceed existing roles
-    my $roles;
+    my $roles = $c->user->{'roles_restriction'};
     if($params->{'roles'} && (!$params->{'restrict_only'} || $params->{'restrict'})) {
         $roles = [];
         for my $role (@{Thruk::Base::list($params->{'roles'})}) {
