@@ -108,14 +108,6 @@ sub _quote {
 }
 
 ##########################################################
-# MySQL backslash quoting (used in LIKE patterns)
-sub _quote_backslash {
-    my($self, $val) = @_;
-    $val =~ s/\\/\\\\/gmx;
-    return $val;
-}
-
-##########################################################
 
 =head2 _dbh
 
