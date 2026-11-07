@@ -260,6 +260,10 @@ TestUtils::test_command({
         $dbh->commit;
         eval { $provider->get_logs(collection => $prefix, options => { limit => 1 }); };
         is($@, '', 'get_logs works again after restoring the cache version');
+        for my $limit ('(SELECT 0)', '1 OFFSET (SELECT 0)', '1; SELECT 1 --', "1\n") {
+            eval { $provider->get_logs(collection => $prefix, options => { limit => $limit }); };
+            like($@, qr/invalid logcache limit/, 'get_logs rejects a non-integer limit');
+        }
         $dbh->commit;
     }
     ###########################################################

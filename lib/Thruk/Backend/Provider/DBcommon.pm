@@ -250,6 +250,7 @@ sub get_logs {
     my $limit = '';
     my $pager_limit;
     if(defined $options{'options'} && $options{'options'}->{'limit'}) {
+        confess("invalid logcache limit: expected a non-negative integer") unless $options{'options'}->{'limit'} =~ m/\A[0-9]+\z/mx;
         $limit = ' LIMIT '.$options{'options'}->{'limit'};
     } else {
         if($options{'pager'}) {
