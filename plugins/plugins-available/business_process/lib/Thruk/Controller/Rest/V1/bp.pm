@@ -189,7 +189,7 @@ sub _rest_get_thruk_bp_objects_recursive {
 
 sub _bp_objects_collect {
     my($c, $bp, $objects) = @_;
-    my $livedata = $bp->bulk_fetch_live_data($c, 1);
+    my $livedata = $bp->bulk_fetch_live_data($c, 1, 1);
 
     if($livedata->{'hosts'}) {
         for my $name (sort keys %{$livedata->{'hosts'}}) {
@@ -214,7 +214,7 @@ sub _bp_objects_recurse {
     return if $bp_lookup->{$bp_id};
     $bp_lookup->{$bp_id} = 1;
 
-    my $livedata = $bp->bulk_fetch_live_data($c, 1);
+    my $livedata = $bp->bulk_fetch_live_data($c, 1, 1);
     if($livedata->{'hosts'}) {
         for my $name (sort keys %{$livedata->{'hosts'}}) {
             my $h = $livedata->{'hosts'}->{$name};
