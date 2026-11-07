@@ -595,7 +595,7 @@ sub get_result {
         $end[9] = Time::HiRes::time();
         $err    = 'job was killed';
         _error('killed job: '.$dir);
-        my $folder = Thruk::Utils::IO::cmd("ls -la $dir");
+        my $folder = Thruk::Utils::IO::cmd(['ls', '-la', '--', $dir]);
         _error($folder);
     }
 
