@@ -116,7 +116,7 @@
               <div class='text-center'>[% state %]</div>
             </td>
             [% IF s.perf.keys.size == 0 %]
-              <td class='[% serviceclass %]' colspan=[% sortedkeys.size %]>[% s.plugin_output %]</td>
+              <td class='[% serviceclass %]' colspan=[% sortedkeys.size %]>[% IF thruk_escape_html_tags(s, escape_html_tags) %][% s.plugin_output | escape_html %][% ELSE %][% s.plugin_output %][% END %]</td>
             [% ELSE %]
               [% FOREACH key IN sortedkeys %]
               <td class='[% serviceclass %]' style="min-width:60px;">[% IF s.perf.exists(key) %][% s.$key %][% END %]</td>

@@ -230,7 +230,7 @@
             <tr>
               <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% h.name | uri %]">[% h.name | html %]</a></td>
               <td class="flex justify-center"><div class="badge [% hoststate %]">[% hoststate %]</div></td>
-              <td class="truncate w-1/2 max-w-0">[% h.plugin_output %]</td>
+              <td class="truncate w-1/2 max-w-0">[% IF thruk_escape_html_tags(h, escape_html_tags) %][% h.plugin_output | escape_html %][% ELSE %][% h.plugin_output %][% END %]</td>
               <td>[% duration(date.now - h.last_hard_state_change, 6) %]</td>
             </tr>
             [% END %]
@@ -274,7 +274,7 @@
               <td><a class="link" href="extinfo.cgi?type=1&amp;host=[% s.host_name | uri %]">[% s.host_name | html %]</a></td>
               <td><a class="link" href="extinfo.cgi?type=2&amp;host=[% s.host_name | uri %]&amp;service=[% s.description | uri %]&amp;backend=[% s.peer_key | uri %]">[% s.description | html %]</a></td>
               <td class="flex justify-center"><div class="badge [% state %]">[% state %]</div></td>
-              <td class="truncate w-1/2 max-w-0">[% s.plugin_output %]</td>
+              <td class="truncate w-1/2 max-w-0">[% IF thruk_escape_html_tags(s, escape_html_tags) %][% s.plugin_output | escape_html %][% ELSE %][% s.plugin_output %][% END %]</td>
               <td>[% duration(date.now - s.last_hard_state_change, 6) %]</td>
             </tr>
             [% END %]
