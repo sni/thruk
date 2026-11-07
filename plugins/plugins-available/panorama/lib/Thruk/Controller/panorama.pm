@@ -945,10 +945,10 @@ sub _task_load_dashboard {
             Thruk::Utils::IO::mkdir_r($usercontent_folder);
             die 'invalid media root' unless defined $usercontent_folder && -d $usercontent_folder;
             for my $file (sort keys %{$data->{'usercontent'}}) {
-                die 'invalid media filename' unless $file =~ m{\A(?:[a-z0-9_.\- ]+/)*[a-z0-9_\- ]+\.(?:jpeg|jpg|gif|png|svg)\z}xi;
+                die 'invalid media filename' unless $file =~ m{\A(?:[a-z0-9_.\- ]+/)*[a-z0-9_\- ]+\.(?:jpeg|jpg|gif|png|svg)\z}mxi;
                 die 'invalid media content' if ref $data->{'usercontent'}->{$file};
                 my $path = $usercontent_folder;
-                for my $part (split m{/}, $file) {
+                for my $part (split m{/}mx, $file) {
                     die 'invalid media path' if $part eq '.' || $part eq '..';
                     $path .= '/'.$part;
                     die 'symlink in media path' if -l $path;

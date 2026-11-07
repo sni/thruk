@@ -7,7 +7,7 @@ use utf8;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 6;
+    plan tests => 9;
 
     use lib('t');
     require TestUtils;
@@ -15,6 +15,9 @@ BEGIN {
 }
 
 use_ok('Thruk::Utils::APIKeys');
+use_ok('Thruk::Authentication::User');
+use_ok('Thruk::Utils');
+use_ok('Thruk::Request');
 
 #########################
 my $c = TestUtils::get_c();
