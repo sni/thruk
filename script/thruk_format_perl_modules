@@ -360,6 +360,7 @@ sub _parse_file {
             next if $m eq 'Thruk::Utils::PDF';         # virtual module, does not exist
             next if $m eq 'Thruk::Globals';            # virtual module, does not exist
             next if $m eq 'Thruk::Timer';              # handled specially
+            next if $m eq 'TestMysqlDBH::quote';       # handled specially
             if($file =~ m/thruk_format_perl_modules/mx) {
                 next if $m eq 'Thruk';
                 next if $m eq 'Digest';

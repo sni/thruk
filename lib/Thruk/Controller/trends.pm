@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::External ();
 
 =head1 NAME
 
