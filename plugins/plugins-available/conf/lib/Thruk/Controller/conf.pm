@@ -789,6 +789,7 @@ sub _process_teams_page {
     }
 
     if($action eq 'delete') {
+        return unless Thruk::Utils::check_csrf($c);
         my $old_data = Thruk::Authentication::User::read_team_data($c, $teamname, 0);
         if($old_data && $old_data->{'scripted_team'}) {
             Thruk::Utils::set_message( $c, 'fail_message', 'Cannot remove read-only team.' );
@@ -802,6 +803,7 @@ sub _process_teams_page {
     }
 
     if($action eq 'store') {
+        return unless Thruk::Utils::check_csrf($c);
         my $old_name = $c->req->parameters->{'team'};
         my $new_name = $c->req->parameters->{'new_name'};
         if(!$new_name || Thruk::Base::check_for_nasty_filename($new_name)) {
