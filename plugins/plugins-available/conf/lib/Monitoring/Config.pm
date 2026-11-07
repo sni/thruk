@@ -2576,11 +2576,15 @@ sub remote_file_sync {
         return $c->detach_error({msg => "syncing remote configuration files failed", code => 500, log => 1});
     }
 
+    # Validate the whole reply before writing or deleting any cached files.
+    for my $path (keys %{$remotefiles}) {
+        _remote_cache_path($localdir, $path);
+    }
     Thruk::Utils::IO::mkdir_r($localdir);
     for my $path (sort keys %{$remotefiles}) {
         my $f = $remotefiles->{$path};
         if(defined $f->{'content'}) {
-            my $localpath = $localdir.'/'.$path;
+            my $localpath = _remote_cache_path($localdir, $path);
             _debug('updating file: '.$path);
             my $dir       = $localpath;
             $dir          =~ s/\/[^\/]+$//mx;
@@ -2605,13 +2609,29 @@ sub remote_file_sync {
     if(scalar @{$self->{'files'}} == 0) {
         my $settings = $self->_remote_do($c, 'configsettings');
         return unless $settings;
-        Thruk::Utils::IO::mkdir_r($self->{'config'}->{'localdir'}.'/'.$settings->{'files_root'});
+        Thruk::Utils::IO::mkdir_r(_remote_cache_path($localdir, $settings->{'files_root'}));
         $self->{'config'}->{'files_root'} = $settings->{'files_root'}.'/';
         $self->{'config'}->{'files_root'} =~ s|/+|/|gmx;
     }
 
     $c->stats->profile(end => "remote_file_sync");
     return;
+}
+
+##########################################################
+sub _remote_cache_path {
+    my($localdir, $path) = @_;
+    confess("invalid remote configuration path") if !defined $path || ref $path || $path =~ m{\x00|(?:^|/)\.\.(?:/|$)}mx;
+
+    # Remote absolute paths are names inside the cache, not local absolute paths.
+    my $localpath = $localdir;
+    confess("symlink in remote configuration cache") if -l $localpath;
+    for my $part (split(m{/+}mx, $path)) {
+        next if $part eq '' || $part eq '.';
+        $localpath .= '/'.$part;
+        confess("symlink in remote configuration cache") if -l $localpath;
+    }
+    return $localpath;
 }
 
 ##########################################################
