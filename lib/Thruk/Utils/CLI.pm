@@ -736,7 +736,12 @@ sub _run_command_action {
 
     # restart process
     elsif($action eq 'restart' || $action eq 'stop') {
-        $data->{'output'} = _cmd_stop($c, $action);
+        if($src ne 'local' && !$c->check_user_roles('authorized_for_admin')) {
+            $data->{'output'} = "admin privileges required to run ".$action."\n";
+            $data->{'rc'} = 1;
+        } else {
+            $data->{'output'} = _cmd_stop($c, $action);
+        }
     }
 
     else {

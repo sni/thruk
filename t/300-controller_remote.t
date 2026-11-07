@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Test::More tests => 37;
+use Test::More tests => 61;
 
 BEGIN {
     use lib('t');
@@ -55,3 +55,43 @@ SKIP: {
         'unlike'       => ['ARRAY'],
     );
 };
+
+###########################################################
+# Lifecycle commands must never signal real workers in this test.
+{
+    require Thruk::Utils::CLI;
+    require Thruk::Authentication::User;
+    no warnings 'redefine';
+    my $stops = 0;
+    my $roles;
+    local *Thruk::stop_all = sub { $stops++; return 1; };
+    local *Thruk::Context::authenticate = sub {
+        my($ctx, %args) = @_;
+        return 0 unless $args{'apikey'} eq 'dummykey';
+        $ctx->{'user'} = bless({roles => $roles}, 'Thruk::Authentication::User');
+        return 1;
+    };
+    local $c->{'user'};
+
+    for my $role ([], ['authorized_for_read_only'], ['authorized_for_admin']) {
+        $roles = $role;
+        my $admin = grep { $_ eq 'authorized_for_admin' } @{$roles};
+        for my $action ('stop', 'restart') {
+            $stops = 0;
+            my $res = Thruk::Utils::CLI::from_fcgi($c,
+                '{"credential":"dummykey","options":{"action":"'.$action.'","src":"local"}}');
+            is($res->{'rc'}, $admin ? 0 : 1, $action.' remote exit status for '.join(',', @{$roles}));
+            like($res->{'output'}, $admin ? qr/^OK -/ : qr/admin privileges required/, $action.' remote output');
+            is($stops, $admin ? 1 : 0, $action.' only stops workers for remote admins');
+        }
+    }
+
+    $c->{'user'} = bless({roles => []}, 'Thruk::Authentication::User');
+    for my $action ('stop', 'restart') {
+        $stops = 0;
+        my $res = Thruk::Utils::CLI::_run_commands($c, {action => $action}, 'local');
+        is($res->{'rc'}, 0, $action.' local exit status');
+        like($res->{'output'}, qr/^OK -/, $action.' local output');
+        is($stops, 1, $action.' remains available to trusted local CLI');
+    }
+}
