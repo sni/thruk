@@ -17,7 +17,11 @@
       </div>
     [% END %]
     <div class="w-52">
-      <a href="bp.cgi?action=new" class="button [% IF allowed_for_edit %]green[% ELSE %]not-clickable disabled[% END %]"[% IF !allowed_for_edit %] onclick="return false;" title="c"[% END %]>create new business process</a>
+      <form action="bp.cgi" method="POST">
+        <input type="hidden" name="action" value="new">
+        <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+        <button type="submit" class="button [% IF allowed_for_edit %]green[% ELSE %]not-clickable disabled[% END %]"[% IF !allowed_for_edit %] disabled[% END %]>create new business process</button>
+      </form>
     </div>
   </div>
   <div class="mainTableHeader">

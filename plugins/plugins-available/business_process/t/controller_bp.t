@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 70;
+    plan tests => 72;
 }
 
 BEGIN {
@@ -14,11 +14,13 @@ BEGIN {
     import TestUtils;
 }
 
+TestUtils::set_test_user_token();
+
 ###########################################################
 # test some pages
 my $pages = [
     '/thruk/cgi-bin/bp.cgi',
-    { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { action => 'new', bp_label => 'New Test Business Process' }, follow => 1, like => 'New Test Business Process' },
 ];
 
 for my $url (@{$pages}) {

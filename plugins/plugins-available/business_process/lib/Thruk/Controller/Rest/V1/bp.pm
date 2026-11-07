@@ -53,7 +53,7 @@ sub _rest_get_thruk_bp_by_id {
 ##########################################################
 # REST PATH: POST /thruk/bp
 # create new business process.
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/bp$%mx, \&_rest_get_thruk_bp_new);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/bp$%mx, \&_rest_get_thruk_bp_new, ['authorized_for_business_processes']);
 sub _rest_get_thruk_bp_new {
     my($c) = @_;
     require Thruk::Utils::Reports;
@@ -89,7 +89,7 @@ sub _rest_get_thruk_bp_new {
 # update business processes configuration partially for given number.
 # REST PATH: DELETE /thruk/bp/<nr>
 # remove business processes for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1(['POST', 'PATCH','DELETE'], qr%^/thruk/bp/(\d+)$%mx, \&_rest_get_thruk_bp_by_id_crud);
+Thruk::Controller::rest_v1::register_rest_path_v1(['POST', 'PATCH','DELETE'], qr%^/thruk/bp/(\d+)$%mx, \&_rest_get_thruk_bp_by_id_crud, ['authorized_for_business_processes']);
 sub _rest_get_thruk_bp_by_id_crud {
     my($c, undef, $nr) = @_;
     require Thruk::BP::Utils;

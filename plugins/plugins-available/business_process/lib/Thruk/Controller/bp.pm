@@ -380,6 +380,11 @@ sub index {
 
     # new business process
     if($action eq 'new') {
+        if(!$allowed_for_edit) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'not authorized', code => 403 });
+            return _bp_start_page($c);
+        }
+        return unless Thruk::Utils::check_csrf($c);
         Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
         my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
         my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label'} || 'New Business Process');

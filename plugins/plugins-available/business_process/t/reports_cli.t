@@ -28,7 +28,7 @@ $BIN    = $BIN.' --local' unless defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
 ###########################################################
 # create test BP
 TestUtils::set_test_user_token();
-my $test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process');
+my $test = TestUtils::test_page(url => '/thruk/cgi-bin/bp.cgi', post => { action => 'new', bp_label => 'New Test Business Process' }, follow => 1, like => 'New Test Business Process');
 $test->{'content'} =~ m|\&amp;bp=(\d+)\&amp;|mx;
 my $bpid = $1;
 ok($bpid, "got bp id: ".$bpid) || die("got no bp id, cannot test");
