@@ -46,6 +46,9 @@ sub _rest_get_thruk_downtimes {
 
     my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';
     my $method = $c->req->method();
+    if($method ne 'GET' && Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
+        return({ 'message' => 'permission denied', code => 403 });
+    }
     if($method eq 'PATCH') {
         Thruk::Utils::IO::merge_deep($rd, $c->req->parameters);
         if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
@@ -75,9 +78,6 @@ sub _rest_get_thruk_downtimes {
         });
     }
     elsif($method eq 'DELETE') {
-        if(Thruk::Utils::RecurringDowntimes::check_downtime_permissions($c, $rd) != 2) {
-            return({ 'message' => 'permission denied', code => 403 });
-        }
         if(unlink($file)) {
             Thruk::Utils::RecurringDowntimes::update_cron_file($c);
             return({
