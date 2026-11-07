@@ -24,7 +24,7 @@ subtest 'REST input features require a local CLI origin' => sub {
     my $c = TestUtils::ctx_request('/');
     local $ENV{'THRUK_VERBOSE'} = 0;
     my @calls;
-    no warnings 'redefine';
+    no warnings qw/redefine once/;
     local *Thruk::Utils::IO::cmd = sub { push @calls, 'command'; return(0, 'canary', 'canary', ''); };
     local *Thruk::Utils::IO::read = sub { push @calls, 'file'; return('{}'); };
     local *Thruk::Utils::CLI::request_url = sub { push @calls, 'external'; return(200, {result => '{}'}); };
@@ -71,14 +71,14 @@ subtest 'REST output templates require a local CLI origin' => sub {
             'data:'.encode_base64("[% 'LOCAL_TEMPLATE' %]", ''),
             't/data/check_thruk_rest/nested.json',
         ) {
-            my $result = [{result => '{}', rc => 0, template => $template}];
+            my $result = [{result => '{}', rc => 0, warning => [], critical => [], rename => [], template => $template}];
             my($output, $rc) = Thruk::Utils::CLI::Rest::_create_output(undef, [], $result);
             if($origin && $origin eq 'CLI') {
                 is($rc, 0, "$name: template works");
                 like($output, qr/LOCAL_TEMPLATE|timestamp/mx, 'template was rendered');
             } else {
                 is($rc, 3, "$name: template rejected");
-                like($output, qr/only allowed from the local command line/mx, 'reports origin restriction');
+                like($output, qr/\Qonly allowed from the local command line\E/mx, 'reports origin restriction');
             }
         }
     }

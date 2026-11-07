@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1423;
+    plan tests => 1424;
 }
 
 BEGIN {
@@ -185,7 +185,7 @@ for my $url (@{$pages}) {
 
 subtest 'XLS and JSON enforce the same custom variable exposure policy' => sub {
     my $c = TestUtils::get_c();
-    no warnings 'redefine';
+    no warnings qw/redefine once/;
     local *Thruk::Utils::get_user_data = sub { return {}; };
     local *Thruk::Utils::Status::do_filter = sub { return ([], []); };
     local *Thruk::Utils::Status::set_comments_and_downtimes = sub { return; };
@@ -231,11 +231,10 @@ subtest 'XLS and JSON enforce the same custom variable exposure policy' => sub {
                       \&Thruk::Controller::status::_process_hostdetails_page,
                       \&Thruk::Controller::status::_process_combined_page) {
             for my $mode ('xls', 'json') {
-                local %{$c->req->parameters} = (
+                $c->req->parameters({
                     view_mode => $mode,
                     ($mode eq 'xls' ? (columns => [qw/Hostname Service TOPSECRET _TOPSECRET HOSTTOPSECRET _HOSTTOPSECRET PUBLIC_HOST PUBLIC_SERVICE HOSTPUBLIC_HOST/]) : ()),
-                );
-                local %{$c->stash} = %{$c->stash};
+                });
                 $c->stash->{'searches'} = { dfl_ => [] };
                 $c->stash->{'pi_detail'} = { dummy => { program_start => 0 } };
                 $c->stash->{'c'} = $c;
