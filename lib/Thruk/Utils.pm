@@ -3082,13 +3082,13 @@ make diff output beauty
 
 sub beautify_diff {
     my($text) = @_;
-    $text =~ s/^\-\-\-(.*)$/<font color="#0776E8"><b>---$1<\/b><\/font>/gmx;
+    $text =~ s/^\-\-\-(.*)$/<span style="color: #0776E8"><b>---$1<\/b><\/span>/gmx;
     $text =~ s/^\+\+\+(.*)$//gmx;
     $text =~ s/^index\ .*$//gmx;
     $text =~ s/^diff\ .*$//gmx;
-    $text =~ s/^\@\@(.*)$/<font color="#0776E8"><b>\@\@$1<\/b><\/font>/gmx;
-    $text =~ s/^\-(.*)$/<font color="red">-$1<\/font>/gmx;
-    $text =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
+    $text =~ s/^\@\@(.*)$/<span style="color: #0776E8"><b>\@\@$1<\/b><\/span>/gmx;
+    $text =~ s/^\-(.*)$/<span style="color: red">-$1<\/span>/gmx;
+    $text =~ s/^\+(.*)$/<span style="color: green">+$1<\/span>/gmx;
     return $text;
 }
 
