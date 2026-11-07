@@ -411,7 +411,8 @@ sub report_save {
         return if $old_report->{'readonly'};
     }
     my $report        = get_new_report($c, $data);
-    $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
+    # Runtime state must never come from submitted report data.
+    $report->{'var'}  = $old_report->{'var'} || {};
     my $fields = _get_required_fields($c, $report);
     if(!$fields) {
         Thruk::Utils::set_message( $c, 'fail_message', 'invalid report template');
