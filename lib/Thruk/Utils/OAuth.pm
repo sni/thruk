@@ -222,10 +222,10 @@ sub _send_error {
     my($c, $data) = @_;
     my $descr = $data->{'error_description'} // "";
     if($data->{'error_uri'}) {
-        $descr .= "<br>" if $descr;
-        $descr .= sprintf('<a class="link" target="_blank" href="%s"><i class="uil uil-external-link-alt text-sm"></i>%s</a>', $data->{'error_uri'}, $data->{'error_uri'});
+        $descr .= "\n" if $descr;
+        $descr .= $data->{'error_uri'};
     }
-    return $c->detach_error({msg => $data->{'error'}, descr => $descr, code => 500, skip_escape => 1});
+    return $c->detach_error({msg => $data->{'error'}, descr => $descr, code => 500});
 }
 
 ##########################################################
