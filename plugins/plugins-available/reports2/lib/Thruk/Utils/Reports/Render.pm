@@ -21,6 +21,7 @@ use File::Copy qw/move/;
 use MIME::Base64;
 
 use Thruk::Utils ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Avail ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::External ();
@@ -328,7 +329,7 @@ sub get_events {
 
     my $total_filter = Thruk::Utils::combine_filter('-and', \@filter);
     $c->db->renew_logcache($c, 1);
-    my $logs = $c->db->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
+    my $logs = $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
     if($c->req->parameters->{'reverse'}) {
         @{$logs} = reverse @{$logs};
