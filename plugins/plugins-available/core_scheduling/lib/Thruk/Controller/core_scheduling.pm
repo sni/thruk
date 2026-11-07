@@ -61,7 +61,11 @@ sub core_scheduling_page {
     my( $hostfilter, $servicefilter, $groupfilter ) = Thruk::Utils::Status::do_filter($c, undef, undef, 1);
     return if $c->stash->{'has_error'};
 
-    reschedule_everything($c, $hostfilter, $servicefilter) if $c->req->parameters->{'reschedule'};
+    if($c->req->parameters->{'reschedule'}) {
+        return $c->detach('/error/index/11') if $c->check_user_roles('authorized_for_read_only') || !$c->user->get('can_submit_commands');
+        return unless Thruk::Utils::check_csrf($c);
+        reschedule_everything($c, $hostfilter, $servicefilter);
+    }
 
     my $now           = time();
     my $group_seconds = $c->req->parameters->{'group_seconds'} || 1;
@@ -257,6 +261,11 @@ sub _reschedule_backend {
     my $data = $c->db->get_scheduling_queue($c, hostfilter => $hostfilter, servicefilter => $servicefilter);
     my $intervals = {};
     for my $d (@{$data}) {
+        if($d->{'description'}) {
+            next unless $c->check_cmd_permissions('service', $d->{'description'}, $d->{'host_name'});
+        } else {
+            next unless $c->check_cmd_permissions('host', $d->{'host_name'} // $d->{'name'});
+        }
         next unless $d->{'check_interval'};
         next unless $d->{'has_been_checked'};
         next unless $d->{'in_check_period'};
