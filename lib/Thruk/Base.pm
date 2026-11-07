@@ -426,13 +426,14 @@ sub expand_numeric_list {
     check_for_nasty_filename($filename)
 
 returns true unless the filename is a non-empty scalar without a leading dot,
-slashes, asterisks, question marks, newlines or NUL bytes
+slashes, asterisks, question marks, newlines, NUL bytes, glob brackets or shell
+metacharacters
 
 =cut
 sub check_for_nasty_filename {
     my($name) = @_;
     return(1) unless defined $name && !ref $name && length $name;
-    return(1) if $name =~ m%\A\.|[/*?\n\x00]%mx;
+    return(1) if $name =~ m%\A\.|[/*?\[\]{}`\$\;&|;<>\x00-\x1f\x7f"]%mx;
     return;
 }
 

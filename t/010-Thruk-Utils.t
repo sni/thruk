@@ -15,7 +15,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 123;
+    plan tests => 126;
 
     use lib('t');
     require TestUtils;
@@ -34,7 +34,8 @@ subtest 'single filename ids' => sub {
         ok(!Thruk::Base::check_for_nasty_filename($id), 'accepts '.$id);
     }
     for my $id (undef, '', [], {}, '.', '..', '.hidden', '/absolute', 'a/x.json',
-                'a/../../secret.key', "a\n/../../secret.key", "bad\x00.json") {
+                'a/../../secret.key', "a\n/../../secret.key", "bad\x00.json",
+                'a[b]', 'a{b}', 'a$b', 'a`b', 'a&b', 'a|b', 'a<b', 'a;b') {
         ok(Thruk::Base::check_for_nasty_filename($id), 'rejects invalid id');
     }
     done_testing();
@@ -152,6 +153,22 @@ my $befor_case = [
 ];
 my $sorted_case = $b->sort_result($befor_case, { 'ASC' => ['a','b'] });
 is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
+
+{
+    my $data = [ {a => 1}, {a => 2} ];
+    my $bad = '$a->{a};system("id")';
+    my $err = '';
+    eval { $b->sort_result($data, { 'ASC' => $bad }); 1; } or $err = $@;
+    like($err, qr/invalid sort key/, 'sort_result rejects sort key with shell metacharacters');
+    my $bad_arr = '$a->{a};';
+    $err = '';
+    eval { $b->sort_result($data, { 'ASC' => [$bad_arr] }); 1; } or $err = $@;
+    like($err, qr/invalid sort key/, 'sort_result rejects array sort keys with shell metacharacters');
+    my $bad_bt = 'a`id`b';
+    $err = '';
+    eval { $b->sort_result($data, { 'ASC' => $bad_bt }); 1; } or $err = $@;
+    like($err, qr/invalid sort key/, 'sort_result rejects sort key with backticks');
+}
 
 #########################
 SKIP: {
