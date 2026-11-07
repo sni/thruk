@@ -4,7 +4,7 @@ use Cpanel::JSON::XS ();
 use Test::More;
 use utf8;
 
-plan tests => 85;
+plan tests => 87;
 
 BEGIN {
     use lib('t');
@@ -19,6 +19,18 @@ use_ok('Thruk::Utils::Status');
 use_ok('Monitoring::Livestatus::Class::Lite');
 
 my $c = TestUtils::get_c();
+
+{
+    no warnings 'redefine';
+    local *Thruk::Utils::check_csrf = sub { return 0; };
+    local *Thruk::Context::check_user_roles = sub {
+        my($c, $role) = @_;
+        return $role eq 'authorized_for_read_only';
+    };
+    is_deeply([Thruk::Utils::Status::serveraction($c)], [1, 'permission denied for read only user'], 'read only users cannot run server actions');
+    local *Thruk::Context::check_user_roles = sub { return 0; };
+    is_deeply([Thruk::Utils::Status::serveraction($c)], [1, 'invalid request'], 'command users still require CSRF validation');
+}
 
 my $query = "name = 'test'";
 _test_filter($query, 'Filter: name = test');

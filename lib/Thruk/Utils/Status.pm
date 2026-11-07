@@ -2295,6 +2295,7 @@ sub serveraction {
     my($c, $macros) = @_;
     $macros = {} unless defined $macros;
 
+    return(1, 'permission denied for read only user') if $c->check_user_roles('authorized_for_read_only');
     return(1, 'invalid request') unless Thruk::Utils::check_csrf($c);
 
     my $host    = $c->req->parameters->{'host'};
