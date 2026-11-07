@@ -117,7 +117,7 @@ if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] 
       data = data.replace(/^[\s\S]*<br>\{/, '{');
       data = data.replace(/<br><\/pre>.*/, '');
       data = data.replace(/\n/g, '');
-      eval('data = '+data+";");
+      data = JSON.parse(data);
       data.rows.forEach(function(row, i) {
           row.panels.forEach(function(panel, j) {
             var title = panel.title;
@@ -153,7 +153,7 @@ if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] 
         data = data.replace(/.*<pre>/, '');
         data = data.replace(/<\/pre>.*/, '');
         data = data.replace(/\n/g, '');
-        eval('data = '+data+";");
+        data = JSON.parse(data);
         if(data && data["dashboard"] && data["dashboard"]["panels"]) {
           data.dashboard.panels.forEach(function(panel, j) {
             if(panel.id==panelId || panel.title.match(panelId)) {
