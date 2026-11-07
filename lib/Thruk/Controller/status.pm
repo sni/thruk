@@ -553,6 +553,17 @@ sub _process_details_page {
         }
     }
 
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $s (@{$services}) {
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
+    }
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'service');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
@@ -573,15 +584,6 @@ sub _process_details_page {
             }
         }
 
-        my $allowed      = $c->check_user_roles("admin");
-        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
-        my $show_full_commandline = $c->config->{'show_full_commandline'};
-        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
-        Thruk::Utils::fill_commands_cache($c);
-        for my $s (@{$services}) {
-            # remove custom macro colums which could contain confidential informations
-            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
-        }
         return $c->render(json => $services);
     }
     if ( $view_mode eq 'csv') {
@@ -698,6 +700,17 @@ sub _process_hostdetails_page {
                                 extra_columns => $extra_columns,
                         );
 
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $h (@{$hosts}) {
+            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
+    }
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['status_hostdetail_excel_'], 'host');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
@@ -716,15 +729,6 @@ sub _process_hostdetails_page {
                 delete $h->{'peer_key'}                unless $keep_peer_key;
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
-        }
-        my $allowed      = $c->check_user_roles("admin");
-        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
-        my $show_full_commandline = $c->config->{'show_full_commandline'};
-        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
-        Thruk::Utils::fill_commands_cache($c);
-        for my $h (@{$hosts}) {
-            # remove custom macro colums which could contain confidential informations
-            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
         }
         return $c->render(json => $hosts);
     }
@@ -1322,16 +1326,7 @@ sub _process_combined_page {
     $c->stash->{'hosts_limit_hit'}    = 0;
     $c->stash->{'services_limit_hit'} = 0;
 
-    if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
-        Thruk::Utils::Status::set_comments_and_downtimes($c);
-        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
-        $c->stash->{'hosts'}     = $hosts;
-        $c->stash->{'services'}  = $services;
-        $c->stash->{'template'}  = 'excel/status_combined.tt';
-        return $c->render_excel();
-    }
-    elsif ( $view_mode eq 'json' ) {
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
         my $allowed      = $c->check_user_roles("admin");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
@@ -1344,6 +1339,18 @@ sub _process_combined_page {
         for my $s (@{$services}) {
             Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
         }
+    }
+
+    if( $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
+        $c->stash->{'hosts'}     = $hosts;
+        $c->stash->{'services'}  = $services;
+        $c->stash->{'template'}  = 'excel/status_combined.tt';
+        return $c->render_excel();
+    }
+    elsif ( $view_mode eq 'json' ) {
         my $json = {
             'hosts'    => $hosts,
             'services' => $services,

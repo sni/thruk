@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s ($ENV{'THRUK_CONFIG'} || '.').'/thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 1422;
+    plan tests => 1423;
 }
 
 BEGIN {
@@ -14,6 +14,7 @@ BEGIN {
     import TestUtils;
 }
 BEGIN { use_ok 'Thruk::Controller::status' }
+BEGIN { use_ok 'Thruk::Views::ToolkitRenderer' }
 
 my($host,$service) = TestUtils::get_test_service();
 my $hostgroup      = TestUtils::get_test_hostgroup();
@@ -181,6 +182,81 @@ for my $url (@{$pages}) {
         'content_type' => 'application/x-msexcel',
     );
 }
+
+subtest 'XLS and JSON enforce the same custom variable exposure policy' => sub {
+    my $c = TestUtils::get_c();
+    no warnings 'redefine';
+    local *Thruk::Utils::get_user_data = sub { return {}; };
+    local *Thruk::Utils::Status::do_filter = sub { return ([], []); };
+    local *Thruk::Utils::Status::set_comments_and_downtimes = sub { return; };
+    local *Thruk::Utils::fill_commands_cache = sub { return; };
+    local *Thruk::Backend::Manager::get_hosts = sub {
+        return [{
+            name => 'dummy-export-host', peer_key => 'dummy', has_been_checked => 1, state => 0,
+            custom_variable_names  => ['TOPSECRET', 'PUBLIC_HOST'],
+            custom_variable_values => ['dummy-host-secret', 'dummy-host-public'],
+        }];
+    };
+    local *Thruk::Backend::Manager::get_services = sub {
+        return [{
+            host_name => 'dummy-export-host', description => 'dummy-export-service', peer_key => 'dummy',
+            has_been_checked => 1, state => 0,
+            custom_variable_names       => ['TOPSECRET', 'PUBLIC_SERVICE'],
+            custom_variable_values      => ['dummy-service-secret', 'dummy-service-public'],
+            host_custom_variable_names  => ['TOPSECRET', 'PUBLIC_HOST'],
+            host_custom_variable_values => ['dummy-host-secret', 'dummy-host-public'],
+        }];
+    };
+    # Inspect the actual worksheet XML before it is encoded as a binary workbook.
+    local *Thruk::Context::render_excel = sub {
+        my($ctx) = @_;
+        my $xml;
+        Thruk::Views::ToolkitRenderer::render($ctx, $ctx->stash->{'template'}, undef, \$xml);
+        return $xml;
+    };
+    local *Thruk::Context::render = sub {
+        my($ctx, %args) = @_;
+        return Cpanel::JSON::XS::encode_json($args{'json'});
+    };
+    local $Thruk::Globals::c = $c;
+    for my $policy ('none', 'exposed', 'defaults', 'admin') {
+        local *Thruk::Context::check_user_roles = sub {
+            return $_[1] eq 'admin' && $policy eq 'admin';
+        };
+        local $c->config->{'show_custom_vars'} = $policy eq 'exposed' ? ['_PUBLIC*'] : [];
+        local $c->config->{'expose_custom_vars'} = $policy eq 'exposed' ? ['_HOSTPUBLIC*'] : [];
+        local $c->config->{'default_host_columns'} = $policy eq 'defaults' ? 'name,cust_PUBLIC_HOST' : 'name';
+        local $c->config->{'default_service_columns'} = $policy eq 'defaults' ? 'description,cust_PUBLIC_SERVICE,cust_HOSTPUBLIC_HOST' : 'description';
+        for my $page (\&Thruk::Controller::status::_process_details_page,
+                      \&Thruk::Controller::status::_process_hostdetails_page,
+                      \&Thruk::Controller::status::_process_combined_page) {
+            for my $mode ('xls', 'json') {
+                local %{$c->req->parameters} = (
+                    view_mode => $mode,
+                    ($mode eq 'xls' ? (columns => [qw/Hostname Service TOPSECRET _TOPSECRET HOSTTOPSECRET _HOSTTOPSECRET PUBLIC_HOST PUBLIC_SERVICE HOSTPUBLIC_HOST/]) : ()),
+                );
+                local %{$c->stash} = %{$c->stash};
+                $c->stash->{'searches'} = { dfl_ => [] };
+                $c->stash->{'pi_detail'} = { dummy => { program_start => 0 } };
+                $c->stash->{'c'} = $c;
+                delete $c->stash->{'has_error'};
+                my $output = $page->($c);
+                like($output, qr/dummy-export-host/, "$mode keeps fixed columns ($policy)");
+                if($policy eq 'admin') {
+                    like($output, qr/dummy-(?:host|service)-secret/, "$mode keeps admin custom variables");
+                } else {
+                    unlike($output, qr/dummy-(?:host|service)-secret/, "$mode hides unexposed host and service values ($policy)");
+                }
+                if($policy eq 'none') {
+                    unlike($output, qr/dummy-(?:host|service)-public/, "$mode hides all custom values without exposure");
+                } else {
+                    like($output, qr/dummy-(?:host|service)-public/, "$mode keeps permitted custom values ($policy)");
+                }
+            }
+        }
+    }
+    done_testing();
+};
 
 $pages = [
 # view_mode json export which result in an Array
