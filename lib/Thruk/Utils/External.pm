@@ -689,6 +689,7 @@ sub job_page {
     return $c->detach('/error/index/22') unless defined $is_running;
 
     my $initwait = $c->req->parameters->{'initwait'} // 3;
+    $initwait = 3 if $initwait > 3;
     if(!$show_output) {
         # try to directly serve the request if it takes less than 3 seconds
         if($initwait > 0) {
