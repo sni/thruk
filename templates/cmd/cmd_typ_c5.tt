@@ -10,9 +10,10 @@
        description = 'This command is used to delete all downtimes associated with the specified host.'
     %]
 
-    [%# definition of the command send to your backend #%]
+    [%# definition of the command send to your backend, shared by host and service branch #%]
     [% BLOCK action %]
         [% host_name            = c.request.parameters.host %]
+        [% service_desc         = c.request.parameters.service %]
     [% END %]
 
     [%# definition of the html form data #%]
@@ -35,12 +36,6 @@
        request     = 'You are requesting to delete all downtimes for a service'
        description = 'This command is used to delete all downtimes associated with the specified service.'
     %]
-
-    [%# definition of the command send to your backend #%]
-    [% BLOCK action %]
-        [% host_name            = c.request.parameters.host %]
-        [% service_desc         = c.request.parameters.service %]
-    [% END %]
 
     [%# definition of the html form data #%]
 [% PROCESS _cmd_parts.tt %]
