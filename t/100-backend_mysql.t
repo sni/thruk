@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 use Data::Dumper;
-use Test::More tests => 75;
+use Test::More tests => 78;
 
 $Data::Dumper::Sortkeys = 1;
 
@@ -9,6 +9,7 @@ use_ok('Thruk::Backend::Provider::Mysql');
 
 my $m = Thruk::Backend::Provider::Mysql->new({options => {peer => 'mysql://test:test@host:3306/dbname', peer_key => 'abcd'}});
 isa_ok($m, 'Thruk::Backend::Provider::Mysql');
+$m->{'mysql'} = bless {}, 'TestMysqlDBH';
 
 #####################################################################
 # test some connection examples
@@ -314,9 +315,33 @@ test_filter(
 );
 
 #####################################################################
+test_filter(
+    'backslash before quote',
+    [{ 'message' => "\\' OR 1=1 -- " }],
+    " WHERE message = '" . ("\\" x 3) . "' OR 1=1 -- '",
+);
+test_filter(
+    'backslash before quote in regular expression',
+    [{ 'message' => { '~' => "\\' OR 1=1 -- " } }],
+    " WHERE message RLIKE '" . ("\\" x 3) . "' OR 1=1 -- '",
+);
+test_filter(
+    'numeric line is not a number',
+    [{ 'message' => "1\nOR 1=1" }],
+    " WHERE message = '1\nOR 1=1'",
+);
+
+#####################################################################
 # SUBS
 sub test_filter {
     my($name, $inp, $out) = @_;
     my($tst) = $m->_get_filter($inp);
     is_deeply($tst, $out, 'filter: '.$name) or diag("input:\n".Dumper($inp)."\nexpected:\n".Dumper($out)."\ngot:\n".Dumper($tst));
+}
+
+# Stand in for DBI quoting without opening a database connection.
+sub TestMysqlDBH::quote {
+    my(undef, $val) = @_;
+    $val =~ s/([\\'])/\\$1/gmx;
+    return "'".$val."'";
 }
