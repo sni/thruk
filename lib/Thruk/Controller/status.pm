@@ -1470,6 +1470,17 @@ sub _process_perfmap_page {
         push @{$data}, $svc;
     }
 
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $s (@{$data}) {
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
+    }
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, [''], 'service', ['Hostname', 'Service', 'Status', sort keys %{$keys}]);
         my $filename = 'performancedata.xls';

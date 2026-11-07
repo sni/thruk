@@ -95,6 +95,7 @@
 
     var bp_id       = [% bp.id %];
     var bp_name     = "[% escape_js(bp.name) %]";
+    var bp_csrf     = '[% get_user_token(c) %]';
     var bp_template = '[% bp.template %]';
     var editmode    = [% editmode %];
     var testmode    = [% testmode %];

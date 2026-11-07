@@ -205,6 +205,7 @@ subtest 'XLS and JSON enforce the same custom variable exposure policy' => sub {
             custom_variable_values      => ['dummy-service-secret', 'dummy-service-public'],
             host_custom_variable_names  => ['TOPSECRET', 'PUBLIC_HOST'],
             host_custom_variable_values => ['dummy-host-secret', 'dummy-host-public'],
+            perf_data => "response_time=0.1s;0.5,2.0",
         }];
     };
     # Inspect the actual worksheet XML before it is encoded as a binary workbook.
@@ -229,27 +230,37 @@ subtest 'XLS and JSON enforce the same custom variable exposure policy' => sub {
         local $c->config->{'default_service_columns'} = $policy eq 'defaults' ? 'description,cust_PUBLIC_SERVICE,cust_HOSTPUBLIC_HOST' : 'description';
         for my $page (\&Thruk::Controller::status::_process_details_page,
                       \&Thruk::Controller::status::_process_hostdetails_page,
-                      \&Thruk::Controller::status::_process_combined_page) {
+                      \&Thruk::Controller::status::_process_combined_page,
+                      \&Thruk::Controller::status::_process_perfmap_page) {
             for my $mode ('xls', 'json') {
+                my $xls_columns = $page eq \&Thruk::Controller::status::_process_perfmap_page
+                    ? [qw/Hostname Service Status/]
+                    : [qw/Hostname Service TOPSECRET _TOPSECRET HOSTTOPSECRET _HOSTTOPSECRET PUBLIC_HOST PUBLIC_SERVICE HOSTPUBLIC_HOST/];
                 $c->req->parameters({
                     view_mode => $mode,
-                    ($mode eq 'xls' ? (columns => [qw/Hostname Service TOPSECRET _TOPSECRET HOSTTOPSECRET _HOSTTOPSECRET PUBLIC_HOST PUBLIC_SERVICE HOSTPUBLIC_HOST/]) : ()),
+                    ($mode eq 'xls' ? (columns => $xls_columns) : ()),
                 });
                 $c->stash->{'searches'} = { dfl_ => [] };
                 $c->stash->{'pi_detail'} = { dummy => { program_start => 0 } };
                 $c->stash->{'c'} = $c;
                 delete $c->stash->{'has_error'};
                 my $output = $page->($c);
+                # the perfmap xls sheet only exports Hostname/Service/Status plus perf keys, no custom columns
+                my $renders_custom = $page ne \&Thruk::Controller::status::_process_perfmap_page || $mode ne 'xls';
                 like($output, qr/dummy-export-host/, "$mode keeps fixed columns ($policy)");
-                if($policy eq 'admin') {
-                    like($output, qr/dummy-(?:host|service)-secret/, "$mode keeps admin custom variables");
+                if($renders_custom) {
+                    if($policy eq 'admin') {
+                        like($output, qr/dummy-(?:host|service)-secret/, "$mode keeps admin custom variables");
+                    } else {
+                        unlike($output, qr/dummy-(?:host|service)-secret/, "$mode hides unexposed host and service values ($policy)");
+                    }
+                    if($policy eq 'none') {
+                        unlike($output, qr/dummy-(?:host|service)-public/, "$mode hides all custom values without exposure");
+                    } else {
+                        like($output, qr/dummy-(?:host|service)-public/, "$mode keeps permitted custom values ($policy)");
+                    }
                 } else {
-                    unlike($output, qr/dummy-(?:host|service)-secret/, "$mode hides unexposed host and service values ($policy)");
-                }
-                if($policy eq 'none') {
-                    unlike($output, qr/dummy-(?:host|service)-public/, "$mode hides all custom values without exposure");
-                } else {
-                    like($output, qr/dummy-(?:host|service)-public/, "$mode keeps permitted custom values ($policy)");
+                    unlike($output, qr/dummy-(?:host|service)-(?:secret|public)/, "$mode exports no custom values ($policy)");
                 }
             }
         }

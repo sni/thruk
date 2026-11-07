@@ -214,7 +214,7 @@ function bp_post_and_refresh(url, data, node_id) {
     jQuery.ajax({
         url:   url,
         type: 'POST',
-        data:  data,
+        data:  jQuery.extend({}, data, { 'CSRFtoken': bp_csrf }),
         success: function(data) {
             if(data && data.rc == 0) {
                 bp_refresh(bp_id, node_id);

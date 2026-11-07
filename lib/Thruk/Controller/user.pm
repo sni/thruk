@@ -64,6 +64,7 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to create API keys.' );
                 return $c->redirect_to('user.cgi?action=apikeys');
             }
+            return unless Thruk::Utils::check_csrf($c);
             my $keys = Thruk::Utils::APIKeys::get_keys($c, { user => $c->stash->{'remote_user'}});
             if(scalar @{$keys} >= $c->config->{'max_api_keys_per_user'}) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Maximum number of API keys ('.$c->config->{'max_api_keys_per_user'}.') for this user reached.' );
@@ -82,6 +83,7 @@ sub index {
                 Thruk::Utils::set_message( $c, 'fail_message', 'You have no permission to delete API keys.' );
                 return $c->redirect_to('user.cgi?action=apikeys');
             }
+            return unless Thruk::Utils::check_csrf($c);
             Thruk::Utils::APIKeys::remove_key($c, $c->stash->{'remote_user'}, $c->req->parameters->{'file'});
             Thruk::Utils::set_message( $c, 'success_message', 'API key removed' );
             return $c->redirect_to('user.cgi?action=apikeys');
