@@ -36,7 +36,7 @@ sub _rest_get_thruk_logcache_stats {
 ##########################################################
 # REST PATH: POST /thruk/logcache/update
 # runs the logcache delta update.
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/logcache/update$%mx, \&_rest_get_thruk_logcache_update);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/logcache/update$%mx, \&_rest_get_thruk_logcache_update, ['admin']);
 sub _rest_get_thruk_logcache_update {
     my($c) = @_;
 
