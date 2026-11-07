@@ -871,7 +871,7 @@ sub _task_save_dashboard {
         # type icon - iconset
         if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'iconset'}) {
             my $file = $p->{'xdata'}->{'appearance'}->{'iconset'};
-            if($file && $file !~ m|/|mx && $file !~ m|\.\.|mx) {
+            if(!Thruk::Base::check_for_nasty_filename($file) && $file !~ m|\.\.|mx) {
                 next if $file eq 'default'; # skip our default sets
                 next if $file eq 'default_64';
                 next if $file eq 'tfl';

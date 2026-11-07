@@ -81,8 +81,8 @@ sub index {
         if($action eq 'delete') {
             return unless Thruk::Utils::check_csrf($c);
 
-            my $id = $c->req->parameters->{'id'};
-            if($id =~ m/^[\.\/]+/mx) {
+            my $id = $c->req->parameters->{'id'} // '';
+            if(Thruk::Base::check_for_nasty_filename($id)) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be removed with that name' );
             } else {
                 unlink($c->config->{'var_path'}.'/broadcast/'.$id);
@@ -100,7 +100,7 @@ sub index {
             }
 
             my $broadcast = {};
-            my $id = $c->req->parameters->{'id'};
+            my $id = $c->req->parameters->{'id'} // '';
             if($id eq 'new') {
                 $id = POSIX::strftime('%Y-%m-%d-'.$c->stash->{'remote_user'}.'.json', localtime);
                 my $x  = 1;
@@ -109,7 +109,7 @@ sub index {
                     $x++;
                 }
             }
-            if($id =~ m/^[\.\/]+/mx) {
+            if(Thruk::Base::check_for_nasty_filename($id)) {
                 Thruk::Utils::set_message( $c, 'fail_message', 'Broadcast cannot be saved with that name' );
                 return $c->redirect_to('broadcast.cgi');
             }

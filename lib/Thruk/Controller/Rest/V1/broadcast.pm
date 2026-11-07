@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use POSIX ();
 
+use Thruk::Base ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::Filter ();
 use Thruk::Utils::IO ();
@@ -27,6 +28,9 @@ Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/broadcasts?$
 sub _rest_get_thruk_broadcast {
     my($c, undef, $file) = @_;
     require Thruk::Utils::Broadcast;
+    if($file && Thruk::Base::check_for_nasty_filename($file)) {
+        return({ 'message' => 'invalid file name', 'code' => 400 });
+    }
     $file = '*' unless $file;
     my @files  = glob($c->config->{'var_path'}.'/broadcast/'.$file.'.json');
     my $broadcasts = Thruk::Controller::rest_v1::load_json_files($c, {
@@ -120,7 +124,7 @@ sub _rest_get_thruk_broadcast_new {
             $x++;
         }
     }
-    if($file =~ m/^[\.\/]+/mx || $file =~ m%(?:\A|/)\.\.(?:/|\z)%mx) {
+    if(Thruk::Base::check_for_nasty_filename($file)) {
         return({
             'message' => 'invalid file name',
             'code'    => 400,

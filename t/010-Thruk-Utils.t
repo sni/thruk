@@ -7,6 +7,7 @@ use Encode qw/is_utf8/;
 use Test::More;
 use utf8;
 
+use Thruk::Base ();
 use Thruk::Config 'noautoload';
 use Thruk::Context ();
 use Thruk::Utils::Encode ();
@@ -14,7 +15,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 122;
+    plan tests => 123;
 
     use lib('t');
     require TestUtils;
@@ -27,6 +28,17 @@ use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
+
+subtest 'single filename ids' => sub {
+    for my $id ('0', 'new', 'test.json', 'test..json', '2026-11-07-user_1.json') {
+        ok(!Thruk::Base::check_for_nasty_filename($id), 'accepts '.$id);
+    }
+    for my $id (undef, '', [], {}, '.', '..', '.hidden', '/absolute', 'a/x.json',
+                'a/../../secret.key', "a\n/../../secret.key", "bad\x00.json") {
+        ok(Thruk::Base::check_for_nasty_filename($id), 'rejects invalid id');
+    }
+    done_testing();
+};
 
 #########################
 # sort
