@@ -170,19 +170,22 @@ test -f %{buildroot}/usr/share/thruk/root/thruk/cache/thruk-panorama-*.js || exi
 %{__rm} -rf %{buildroot}
 
 %pre base
+set -e
 # save themes, plugins and ssi so we don't reenable them on every update
-rm -rf /tmp/thruk_update
+# Keep staging outside /tmp and the web-server-owned /var/lib/thruk.
+rm -rf /var/lib/thruk-update
+mkdir -m 700 /var/lib/thruk-update
 if test -d /etc/thruk/themes/themes-enabled/. && test -n "$(ls -A /etc/thruk/themes/themes-enabled/)"; then
-  mkdir -p /tmp/thruk_update/themes
-  cp -rp /etc/thruk/themes/themes-enabled/* /tmp/thruk_update/themes/
+  mkdir -p /var/lib/thruk-update/themes
+  cp -rp /etc/thruk/themes/themes-enabled/* /var/lib/thruk-update/themes/
 fi
 if test -d /etc/thruk/plugins/plugins-enabled/. && test -n "$(ls -A /etc/thruk/plugins/plugins-enabled/)"; then
-  mkdir -p /tmp/thruk_update/plugins
-  cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
+  mkdir -p /var/lib/thruk-update/plugins
+  cp -rp /etc/thruk/plugins/plugins-enabled/* /var/lib/thruk-update/plugins/
 fi
 if test -d /etc/thruk/ssi/. && test -n "$(ls -A /etc/thruk/ssi/)"; then
-  mkdir -p /tmp/thruk_update/ssi
-  cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
+  mkdir -p /var/lib/thruk-update/ssi
+  cp -rp /etc/thruk/ssi/* /var/lib/thruk-update/ssi/
 fi
 
 exit 0
@@ -270,34 +273,34 @@ exit 0
 
 %posttrans base
 # restore themes and plugins
-if [ -d /tmp/thruk_update/themes/. ]; then
+if [ -d /var/lib/thruk-update/themes/. ]; then
   # do not remove the new default theme
-  test -h /tmp/thruk_update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light
-  test -h /tmp/thruk_update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
+  test -h /var/lib/thruk-update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light
+  test -h /var/lib/thruk-update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
   rm -f /etc/thruk/themes/themes-enabled/*
-  cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+  cp -rp /var/lib/thruk-update/themes/* /etc/thruk/themes/themes-enabled/
   test -h /etc/thruk/themes/themes-enabled/.Light && mv /etc/thruk/themes/themes-enabled/.Light /etc/thruk/themes/themes-enabled/Light
   test -h /etc/thruk/themes/themes-enabled/.Dark  && mv /etc/thruk/themes/themes-enabled/.Dark  /etc/thruk/themes/themes-enabled/Dark
 fi
 # remove broken/old symlinks
 for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link; done
-if [ -d /tmp/thruk_update/plugins/. ]; then
+if [ -d /var/lib/thruk-update/plugins/. ]; then
   rm -f /etc/thruk/plugins/plugins-enabled/*
-  cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+  cp -rp /var/lib/thruk-update/plugins/* /etc/thruk/plugins/plugins-enabled/
 fi
 # remove broken/old symlinks
 for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link; done
 echo "thruk plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
-if [ -d /tmp/thruk_update/ssi/. ]; then
+if [ -d /var/lib/thruk-update/ssi/. ]; then
   rm -f /etc/thruk/ssi/*
-  cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
+  cp -rp /var/lib/thruk-update/ssi/* /etc/thruk/ssi/
 fi
 # deactivate cookie in existing default ssl virtual hosts
 for file in /etc/httpd/conf.d/ssl.conf; do
   test -e $file && sed -i -e '/Include \/usr\/share\/thruk\/thruk_cookie_auth.include/d' $file
 done
 
-rm -rf /tmp/thruk_update
+rm -rf /var/lib/thruk-update
 exit 0
 
 %preun base
