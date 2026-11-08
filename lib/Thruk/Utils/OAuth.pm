@@ -92,8 +92,9 @@ sub handle_oauth_login {
             grant_type      => 'authorization_code',
         };
         if($auth->{'enable_pkce'}) {
+            # PKCE and client authentication are independent (rfc9700 2.1.1): keep the client_secret
+            # for confidential clients, it is simply optional for public ones.
             $token_data->{'code_verifier'} = $data->{'pkce_code'};
-            delete $token_data->{'client_secret'}; # client secret is not required when using pkce
         }
         $c->stats->profile(begin => "handle_oauth_login: post token");
         my $res = $ua->post($auth->{'token_url'}, $token_data);
