@@ -1292,7 +1292,7 @@ sub _clean_unstorable_refs {
         if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
             delete $var->{$key};
         }
-        if($key eq 'model_init') {
+        if($key eq 'model_init' || $key eq 'model_write_locks') {
             delete $var->{$key};
         }
     }

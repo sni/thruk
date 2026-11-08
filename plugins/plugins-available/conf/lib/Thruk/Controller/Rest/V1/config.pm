@@ -197,6 +197,10 @@ sub _rest_get_config {
     }
     my $data    = [];
     my $changed = 0;
+    if($method ne 'GET') {
+        my($backends) = $c->db->select_backends();
+        _model_write_locks($c, $backends);
+    }
     for my $l (@{$live}) {
         for my $peer_key (@{Thruk::Base::list($l->{'peer_key'})}) {
             $c->stash->{'param_backend'} = $peer_key;
@@ -309,6 +313,7 @@ sub _rest_get_config_objects_new {
             'code'        => 400,
         });
     }
+    _model_write_locks($c, $backends);
     my $objs = [];
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
@@ -348,6 +353,7 @@ sub _rest_get_config_objects_patch {
     my($backends) = $c->db->select_backends();
     local $ENV{'THRUK_BACKENDS'} = join(';', @{$backends}); # required for sub requests
     my $changed = 0;
+    _model_write_locks($c, $backends);
     my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
     for my $conf (@{$objs}) {
         my $peer_key = $conf->{':PEER_KEY'};
@@ -385,6 +391,7 @@ sub _rest_get_config_objects_delete {
             msg   => 'delete without any parameter would remove all objects, must specify at least one filter.',
         });
     }
+    _model_write_locks($c, $backends);
     my $objs = $c->sub_request('/r/config/objects', 'GET', $c->req->query_parameters);
     for my $conf (@{$objs}) {
         my $peer_key = $conf->{':PEER_KEY'};
@@ -416,6 +423,7 @@ sub _rest_get_config_objects_update {
     my($backends) = $c->db->select_backends();
     my $changed = 0;
     my $method = $c->req->method();
+    _model_write_locks($c, $backends);
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
         my $obj = $c->{'obj_db'}->get_object_by_id($id);
@@ -534,6 +542,7 @@ sub _rest_get_config_save {
     require Thruk::Utils::Conf;
     my($backends) = $c->db->select_backends();
     my $saved = 0;
+    _model_write_locks($c, $backends);
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key) || next;
         if($c->{'obj_db'}->commit($c)) {
@@ -603,6 +612,7 @@ sub _rest_get_config_revert {
     require Thruk::Utils::Conf;
     my($backends) = $c->db->select_backends();
     my $reverted = 0;
+    _model_write_locks($c, $backends);
     for my $peer_key (@{$backends}) {
         _set_object_model($c, $peer_key, 1) || next;
         $c->{'obj_db'}->discard_changes();
@@ -615,6 +625,16 @@ sub _rest_get_config_revert {
     });
 }
 
+##########################################################
+# serialize model changes for the duration of this request, see
+# Thruk::Utils::Conf::model_write_lock for details (#1497)
+sub _model_write_locks {
+    my($c, $backends) = @_;
+    require Thruk::Utils::Conf;
+    my $err = Thruk::Utils::Conf::model_write_lock($c, $backends);
+    $c->detach_error($err) if ref $err;
+    return;
+}
 ##########################################################
 sub _set_object_model {
     my($c, $peer_key, $skip_remote_sync) = @_;

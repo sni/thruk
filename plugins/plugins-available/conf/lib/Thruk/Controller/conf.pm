@@ -1086,6 +1086,22 @@ sub _process_objects_page {
         }
     }
 
+    # serialize model changes for the duration of this request, before the
+    # model is read, so we don't store changes on top of newer ones (#1497)
+    my $action = $c->stash->{action};
+    if(  (defined $c->req->parameters->{'apply'}
+             && ($c->req->parameters->{'save'} || $c->req->parameters->{'save_and_reload'}
+                || $c->req->parameters->{'reload'} || $c->req->parameters->{'discard'}))
+       || defined $c->req->parameters->{'start_edit'}
+       || $action =~ m/^(store|disable|enable|delete|move|movefile|clone|new|revert|savefile|deletefiles|undeletefiles)$/mx
+    ) {
+        my $backend = $c->stash->{'param_backend'};
+        if($backend) {
+            my $err = Thruk::Utils::Conf::model_write_lock($c, [$backend]);
+            return $c->detach_error($err) if ref $err;
+        }
+    }
+
     my $rc = Thruk::Utils::Conf::set_object_model($c, undef, undef, $skip_remote_sync);
     if($rc == -1) {
         $c->stash->{errorMessage}       = "config tool unavailable";

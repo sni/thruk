@@ -37,6 +37,8 @@ next:
             - validate query limits before SQL interpolation
           - Config Tool:
             - add naemon check_timeout attribute to hosts and services
+            - fix storable cache corruption when config tool retention data is read and written concurrently (#1497)
+            - serialize concurrent model changes (config tool web pages, REST and CLI) with automatic lock retrying
           - Agents:
             - quote SNClient inventory values in generated check commands
           - Business Process:
