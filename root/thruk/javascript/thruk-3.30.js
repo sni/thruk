@@ -8841,11 +8841,14 @@ function verify_op(event) {
   }
 }
 
-/* remove columns from get parameters when style has changed */
-function check_filter_style_changes(form, pageStyle, columnFieldId) {
+/*
+ * keep custom columns in the form when the filter changes, only reset them
+ * when the page style changes and it has a style select (fixes #1509)
+ */
+function check_filter_style_changes(form, pageStyle, columnFieldId, hasStyleSelect) {
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
-    if(s_data[i].name == "style" && s_data[i].value != pageStyle) {
+    if(s_data[i].name == "style" && s_data[i].value != pageStyle && hasStyleSelect) {
         jQuery('#'+columnFieldId).val("");
     }
   }

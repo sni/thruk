@@ -1,11 +1,13 @@
 ﻿[% IF show_form %]
-<form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% paneprefix %]columns') &amp;&amp; remove_empty_form_params(this) &amp;&amp; setFormBtnSpinner(this));">
+[%# prefill the columns field so custom columns survive form submissions, they get reset when the style changes (see check_filter_style_changes) #%]
+[% colparam = paneprefix _ 'columns' %]
+<form action="" method="GET" style="display: initial;" onsubmit="return(check_filter_style_changes(this, '[% style %]', '[% colparam %]', [% show_substyle_selector == 1 || 0 %]) &amp;&amp; remove_empty_form_params(this) &amp;&amp; setFormBtnSpinner(this));">
 [%# make sure IE can submit form by pressing enter #%]
 <input type="submit" style="position: absolute; left: -9999px; width: 1px; height: 1px;"/>
 <input type="hidden" name="nav" value="[% show_nav | html %]">
 [% IF entries %]<input type="hidden" name="entries" value="[% entries | html %]">[% END %]
 <input type="hidden" name="hidetop" id="hidetop" value="[% hidetop | html %]">
-<input type="hidden" name="[% paneprefix %]columns" id="[% paneprefix %]columns" value="">
+<input type="hidden" name="[% colparam %]" id="[% colparam %]" value="[% IF c.req.parameters.exists(colparam) %][% c.req.parameters.$colparam | html %][% END %]">
 [% END %]
 [% DEFAULT extra_params = [] %]
 [% FOREACH ep IN extra_params %]
