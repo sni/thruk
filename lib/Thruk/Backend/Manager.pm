@@ -2660,7 +2660,7 @@ sub sort_result {
     for my $key (@keys) {
         # the keys are interpolated into an eval'ed sort comparator
         # (see the same guard in rest_v1)
-        confess("invalid sort key") if !defined $key || ref $key || $key =~ m/[\\`\$>"'%\n\x00]/mx;
+        confess("invalid sort key") if !defined $key || ref $key || $key =~ m/[\\`\$>"'%\n\x00]/mx; # NO CRITIC BACKTICKS
 
         # add extra column for custom variables
         if($key =~ m/^cust__(.*)$/mx) {

@@ -61,7 +61,7 @@ SKIP: {
 {
     require Thruk::Utils::CLI;
     require Thruk::Authentication::User;
-    no warnings 'redefine';
+    no warnings qw/redefine once/;
     my $stops = 0;
     my $roles;
     local *Thruk::stop_all = sub { $stops++; return 1; };
