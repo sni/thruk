@@ -125,6 +125,8 @@ failed_test_info:
 			echo "**********************"; \
 			echo "*** $${svc}_$${index}:"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "**** $${svc}_$${index} - omd.log:"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/omd.log; \
 				echo "**** $${svc}_$${index} - apache/error_log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/apache/error_log; \
 				echo "**** $${svc}_$${index} - thruk.log:"; \
