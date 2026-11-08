@@ -433,7 +433,7 @@ metacharacters
 sub check_for_nasty_filename {
     my($name) = @_;
     return(1) unless defined $name && !ref $name && length $name;
-    return(1) if $name =~ m%\A\.|[/*?\[\]{}`\$\;&|;<>\x00-\x1f\x7f"]%mx;
+    return(1) if $name =~ m%\A\.|[/*?\[\]{}`\$\;&|;<>\x00-\x1f\x7f"]%mx; # NO CRITIC BACKTICKS
     return;
 }
 
