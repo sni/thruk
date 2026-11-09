@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Cpanel::JSON::XS qw/encode_json decode_json/;
+use Cpanel::JSON::XS qw/decode_json/;
 use HTML::Entities qw/decode_entities/;
 use Test::More;
 use URI::Escape qw/uri_escape_utf8/;
@@ -20,9 +20,10 @@ for my $params ('', '&host=unknownhost', '&start=-1h&end=now', '&start=100&end=1
     );
 }
 my($host, $service) = TestUtils::get_test_service();
+my $encoder = Cpanel::JSON::XS->new->allow_nonref;
 for my $filter (
     '&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.uri_escape_utf8($host),
-    '&q='.uri_escape_utf8('host_name = '.encode_json($host).' and description = '.encode_json($service)),
+    '&q='.uri_escape_utf8('host_name = '.$encoder->encode($host).' and description = '.$encoder->encode($service)),
 ) {
     my $page = TestUtils::test_page(
         url => '/thruk/cgi-bin/status.cgi?style=replay&start=-1h&end=now'.$filter,
