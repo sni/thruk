@@ -3,6 +3,7 @@
 This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
+          - add Status Replay with a playable log-based host and service status timeline
           - disable the shipped administrator password on fresh installs and package upgrades;
             set a password with htpasswd /etc/thruk/htpasswd thrukadmin before login
           - fix quick search treating strings containing "like" as lexical query (#1538)

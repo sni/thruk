@@ -10,6 +10,7 @@ use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Replay ();
 use Thruk::Utils::Status ();
 
 =head1 NAME
@@ -38,7 +39,7 @@ sub index {
                             'grid'       => 1, 'hostgrid'     => 1, 'servicegrid'     => 1,
                             'overview'   => 1, 'hostoverview' => 1, 'serviceoverview' => 1,
                             'summary'    => 1, 'hostsummary'  => 1, 'servicesummary'  => 1,
-                            'combined'   => 1, 'perfmap'      => 1,
+                            'combined'   => 1, 'perfmap'      => 1, 'replay' => 1,
                         };
     my $style = $c->req->parameters->{'style'} || '';
 
@@ -117,6 +118,10 @@ sub index {
     $c->stash->{'num_hosts'}   = 0;
     $c->stash->{'custom_vars'} = [];
 
+    if($style eq 'replay') {
+        return _process_replay_page($c);
+    }
+
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {
         $c->stash->{substyle} = 'host';
@@ -170,6 +175,49 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
+    return 1;
+}
+
+##########################################################
+sub _process_replay_page {
+    my($c) = @_;
+    my($start, $end) = Thruk::Utils::get_start_end_from_date_select_params($c);
+    $c->stash->{'status_search_add_default_filter'} = 'host';
+    $c->stash->{'show_substyle_selector'} = 0;
+    $c->stash->{'substyle'} = 'service';
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my $log_filter_error = 0;
+    for my $name (qw/pattern exclude_pattern/) {
+        my $pattern = $c->req->parameters->{$name} // '';
+        $c->stash->{$name} = $pattern;
+        if($pattern =~ m/\S/mx) {
+            # Keep literal spaces and anchor semantics in user-entered patterns.
+            my $valid = eval { local $SIG{'__DIE__'} = ''; qr/(?-mx)$pattern/imx; };
+            if(!$valid) {
+                Thruk::Utils::set_message($c, 'fail_message', 'Invalid regular expression in log filter.');
+                $log_filter_error++;
+            }
+        }
+    }
+
+    $c->stash->{'start'} = $start;
+    $c->stash->{'end'} = $end;
+    $c->stash->{'title'} = $c->stash->{'infoBoxTitle'} = 'Status Replay';
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'template'} = 'status_replay.tt';
+    if($log_filter_error) {
+        $c->stash->{'replay_error'} = 'Please correct the log filter pattern.';
+    } elsif($c->stash->{'has_error'}) {
+        $c->stash->{'replay_error'} = 'Please correct the display filter.';
+    } elsif($start >= $end) {
+        $c->stash->{'replay_error'} = 'Choose a non-empty time range.';
+    } else {
+        $c->db->renew_logcache($c);
+        $c->stash->{'replay'} = Thruk::Utils::Replay::load($c, $start, $end, $hostfilter, $servicefilter);
+        $c->stash->{'replay_error'} = $c->stash->{'replay'}->{'error'} // '';
+        Thruk::Utils::Replay::filter_logs($c->stash->{'replay'}, $c->stash->{'pattern'}, $c->stash->{'exclude_pattern'}) unless $c->stash->{'replay_error'};
+    }
+    Thruk::Utils::ssi_include($c);
     return 1;
 }
 

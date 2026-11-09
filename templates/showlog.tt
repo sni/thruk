@@ -14,6 +14,7 @@
       [% PROCESS _infobox.tt %]
       <div class="card min-w-[350px] overflow-hidden">
         <div class="actionbox less-padding">
+          <div><a href="status.cgi?style=replay&amp;host=[% host | uri %][% IF service != 'all' %]&amp;service=[% service | uri %][% END %]&amp;start=[% start %]&amp;end=[% end %][% add_request_backend %]">Replay Status For This Time Range</a></div>
           [% IF service != '' and host != 'all' %]
             [% IF service != 'all' %]
               <div><a class="flex" href="notifications.cgi?host=[% host | uri %]&amp;service=[% service | uri %][% add_request_backend %]">View Notifications For This Service</a></div>
