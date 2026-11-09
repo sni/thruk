@@ -281,6 +281,26 @@ TestUtils::test_command({
             return;
         };
 
+        # pause cron so a concurrent update cannot hold the global lock file
+        # and mask the per-database lock the tests verify
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env omd stop crontab',
+        });
+        # a cron update may still be running, wait until it finishes
+        # (both its global lock file and the db lock must be gone)
+        my $lockfile = $c->config->{'tmp_path'}."/logcache_import.lock";
+        my $is_alive = sub { return $_[0] && $_[0] ne $$ ? kill(0, $_[0]) : 0 };
+        my $running  = sub {
+            my $lpid  = Thruk::Utils::IO::saferead($lockfile);
+            my($dbpid) = @{$dbh->selectcol_arrayref('SELECT value FROM '.$qt->($status).' WHERE name = ? LIMIT 1', undef, 'update_pid')};
+            return $is_alive->($lpid) || $is_alive->($dbpid);
+        };
+        for (1..60) {
+            last unless $running->();
+            sleep(1);
+        }
+        ok(!$running->(), 'no logcache update running after cron stop');
+
         ###########################################################
         # a completed update clears all lock columns
         TestUtils::test_command({
@@ -379,10 +399,7 @@ TestUtils::test_command({
 
         ###########################################################
         # an incomplete cache is reported instead of failing with a database error
-        # pause cron so a logcache run cannot hit the missing status table
-        TestUtils::test_command({
-            cmd  => '/usr/bin/env omd stop crontab',
-        });
+        # (cron is paused at the start of this block, so no logcache run can hit the missing table)
         $dbh->do('DROP TABLE '.$qt->($status));
         $dbh->commit;
         TestUtils::test_command({
@@ -398,10 +415,11 @@ TestUtils::test_command({
         });
         $dbh->commit;
         is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($status)), 12, 'import restores all status rows');
-        TestUtils::test_command({
-            cmd  => '/usr/bin/env omd start crontab',
-        });
     }
+
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env omd start crontab',
+    });
 
 }
 
