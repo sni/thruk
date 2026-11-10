@@ -139,9 +139,13 @@ in scalar context returns this object as text.
 
 in list context, returns [$text, $nr_comment_lines, $nr_object_lines]
 
+An optional config hash exports alternate values without changing this object.
+
 =cut
 sub as_text {
-    my($self) = @_;
+    my($self, $conf) = @_;
+
+    local $self->{'conf'} = defined $conf ? Thruk::Utils::IO::dclone($conf) : $self->{'conf'};
 
     confess("uninitialized") unless $Monitoring::Config::format_values;
     my $disabled = $self->{'disabled'} ? '#' : '';

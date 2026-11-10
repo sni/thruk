@@ -45,6 +45,7 @@
               <a class="button" href="[% referer %]">back</a>
             [% END %]
           </div>
+          <div class="w-40 sub_3"></div>
           <div class="grow justify-center text-center">
             <h3 class="p-0 m-0">
               [% IF object.defined('file') %]
@@ -72,6 +73,9 @@
             [% IF ! readonly %]
             <button class="w-20" title="Apply changes to this object">apply</button>
             [% END %]
+          </div>
+          <div class="w-40 flexrow justify-end sub_3">
+            <button type="button" class="iconOnly px-1 copy_button" onclick="copyCode(event, 'computed_config'); return false;" title="Copy computed configuration in Naemon object definition format"><i class="uil uil-copy"></i></button>
           </div>
         </div>
 
@@ -137,6 +141,9 @@
         <div style="[% IF subcat != 'comp' %]display:none[% END %]" class="sub_3">
           [% SET duplicate_keys = {} %]
           [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
+          [% computed_text = object.as_text(obj_conf) %]
+          [%# copyCode decodes entities once more after the browser reads the textarea. %]
+          <textarea id="computed_config" style="display:none">[% computed_text.0 | html | html %]</textarea>
         </div>
 
         [% IF has_auth_section %]
