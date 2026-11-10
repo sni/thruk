@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Cpanel::JSON::XS qw/decode_json/;
+use Cpanel::JSON::XS ();
 use HTML::Entities qw/decode_entities/;
 use Test::More;
 use URI::Escape qw/uri_escape_utf8/;
@@ -20,20 +20,20 @@ for my $params ('', '&host=unknownhost', '&start=-1h&end=now', '&start=100&end=1
     );
 }
 my($host, $service) = TestUtils::get_test_service();
-my $encoder = Cpanel::JSON::XS->new->allow_nonref;
+my $json = Cpanel::JSON::XS->new->utf8->canonical;
 for my $filter (
     '&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.uri_escape_utf8($host),
-    '&q='.uri_escape_utf8('host_name = '.$encoder->encode($host).' and description = '.$encoder->encode($service)),
+    '&q='.uri_escape_utf8('host_name = "'.$host.'" and description = "'.$service.'"'),
 ) {
     my $page = TestUtils::test_page(
         url => '/thruk/cgi-bin/status.cgi?style=replay&start=-1h&end=now'.$filter,
         like => [qr/mainTableHeader.*?Display Filter.*?<h3 id="replay-time" class="text-default textTH tracking-wide"/s, 'Attempt', 'table-layout:fixed', 'jquery.flot.selection.js', 'id="replay-zoom-reset"', 'role="slider"', 'id="replay-event"', 'id="replay-event-prev"', 'id="replay-event-next"', 'id="replay-keyboard-mode"', 'id="replay-help-button"', 'role="separator"', qr/mainTableFooter[^<]*>.*?id="replay-object-summary"/s, qr/<script[^>]+status-replay\.js"\s+defer/],
         unlike => ['id="replay-zoom-in"', 'id="replay-zoom-out"', '<h1[^>]*>Status Replay</h1>', 'id="replay-prev-event"', 'id="replay-next-event"', 'id="replay-prev-time"', 'id="replay-next-time"', 'id="replay-time-step"'],
     );
-    my($json) = $page->{'content'} =~ m/data-replay="([^"]+)"/mx;
+    my($data_replay) = $page->{'content'} =~ m/data-replay="([^"]+)"/mx;
     like($page->{'content'}, qr/id="replay-play".*?for="replay-speed".*?id="replay-speed".*?id="replay-keyboard-mode"/s, 'speed selector follows play button');
     like($page->{'content'}, qr/id="replay-summary"\s+class="[^"]*ml-auto/, 'event counter aligns right');
-    my $data = decode_json(decode_entities($json));
+    my $data = $json->decode(decode_entities($data_replay));
     ok(@{$data->{'objects'}} > 0, 'display filter selects objects');
     is_deeply([grep { $_->{'host'} ne $host } @{$data->{'objects'}}], [], 'host filter applies to all replay objects');
     if($filter =~ m/^&q=/mx) {
@@ -49,7 +49,7 @@ my $filtered_page = TestUtils::test_page(
     like => ['Log Filter', 'name="pattern"', 'name="exclude_pattern"'],
 );
 my($filtered_json) = $filtered_page->{'content'} =~ m/data-replay="([^"]+)"/mx;
-my $filtered_data = decode_json(decode_entities($filtered_json));
+my $filtered_data = $json->decode(decode_entities($filtered_json));
 ok(exists $filtered_data->{'log_indices'}, 'filtered replay includes visible event indices');
 is_deeply([grep {
     $filtered_data->{'events'}->[$_]->{'log'} !~ m/SERVICE\ ALERT/mxi ||
