@@ -15,7 +15,8 @@ use strict;
 use Carp qw/confess/;
 use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;
-use File::Copy qw/move copy/;
+use Errno qw/EPERM/;
+use File::Copy qw/copy/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
 use Storable ();
@@ -237,8 +238,7 @@ sub perl {
     if($conf->{'log_archive'}) {
         eval {
             copy($conf->{'log_archive'}, $dir."/stdout.new") or die("copy failed: $!");
-            unlink($dir."/stdout");
-            move($dir."/stdout.new", $dir."/stdout");
+            rename($dir."/stdout.new", $dir."/stdout") or die("rename failed: $!");
         };
         if($@) {
             $err = ($err//"").$@;
@@ -1187,7 +1187,7 @@ sub _is_running {
 
     _reap_pending_childs();
 
-    if(kill(0, $pid) > 0) {
+    if(kill(0, $pid) > 0 || $! == EPERM) {
         return 1;
     }
     unlink($dir."/pid");
