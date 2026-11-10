@@ -88,7 +88,7 @@
             grid: {aboveData: true, hoverable: true, borderWidth: 1, color: themeColor('textTH'), markings: function() {
                 return [{xaxis: {from: position * 1000, to: position * 1000}, color: categories[0].color, lineWidth: 2}];
             }},
-            selection: {mode: 'x', color: categories[2].color}, legend: {show: false}
+            selection: {mode: 'x', color: categories[2].color}, crosshair: {mode: 'x', color: themeColor('textTH')}, legend: {show: false}
         });
         slider.setAttribute('aria-valuemin', viewStart);
         slider.setAttribute('aria-valuemax', viewEnd);

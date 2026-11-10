@@ -2,6 +2,7 @@
     'vendor/flot-d7c58b5/jquery.flot.js',
     'vendor/flot-d7c58b5/jquery.flot.time.js',
     'vendor/flot-d7c58b5/jquery.flot.selection.js',
+    'vendor/flot-d7c58b5/jquery.flot.crosshair.js',
     'vendor/flot-d7c58b5/jquery.flot.stack.js',
     'vendor/flot-d7c58b5/jquery.flot.resize.js'
 ] %]
