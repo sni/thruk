@@ -13,9 +13,6 @@ BEGIN {
     };
 }
 
-use Thruk::Utils::External ();
-use Thruk::Utils::IO ();
-
 my $dir = tempdir(CLEANUP => 1);
 for my $case (
     [1, 0,     1, 'live process'],
