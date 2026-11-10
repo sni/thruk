@@ -53,40 +53,72 @@
         return color;
     }
 
+    function eventCategory(event) {
+        if(/^(HOST|SERVICE) NOTIFICATION$/.test(event.type)) { return 2; }
+        if(/^(HOST|SERVICE) ALERT$/.test(event.type)) { return event.state === 0 ? 1 : 0; }
+        return 3;
+    }
+
     function drawTimeline() {
         shownLogs = logIndices.filter(function(index) { return data.events[index].time >= viewStart && data.events[index].time <= viewEnd; });
         logCursor = 0;
-        var counts = new Array(80).fill(0);
         var categories = [
             {label: 'Alerts', color: themeColor('textALERT')},
             {label: 'Recoveries', color: themeColor('textSUCCESS')},
             {label: 'Notifications', color: themeColor('textActive1')},
             {label: 'Other', color: themeColor('textHINTsoft')}
         ];
-        var width = (viewEnd - viewStart) / counts.length;
-        var bars = {show: true, align: 'center', barWidth: width * 900, fill: 0.8};
+        var width = (viewEnd - viewStart) / 80;
+        var bars = {show: true, align: 'center', barWidth: width * 200, fill: 0.8};
+        var maxCount = 1;
         categories.forEach(function(category) {
-            category.data = counts.map(function(count, index) { return [(viewStart + (index + 0.5) * width) * 1000, 0]; });
+            category.data = [];
             category.bars = bars;
             category.stack = true;
         });
-        shownLogs.forEach(function(index) {
-            var event = data.events[index];
-            if(event.time >= viewStart && event.time <= viewEnd) {
+        if (shownLogs.length <= 2000) {
+            // One bar per event timestamp so the position marker lands on the event's own bar.
+            var byTime = {}, byBucket = {};
+            shownLogs.forEach(function(index) {
+                var event = data.events[index];
+                byTime[event.time] = (byTime[event.time] || 0) + 1;
+                var key = event.time + '|' + eventCategory(event);
+                byBucket[key] = (byBucket[key] || 0) + 1;
+            });
+            Object.keys(byBucket).forEach(function(key) {
+                var parts = key.split('|');
+                categories[parts[1]].data.push([Number(parts[0]) * 1000, byBucket[key]]);
+            });
+            Object.keys(byTime).forEach(function(time) { maxCount = Math.max(maxCount, byTime[time]); });
+            categories.forEach(function(category) { category.data.sort(function(a, b) { return a[0] - b[0]; }); });
+        } else {
+            var counts = new Array(80).fill(0);
+            categories.forEach(function(category) {
+                category.data = counts.map(function(count, index) { return [(viewStart + (index + 0.5) * width) * 1000, 0]; });
+                category.sums = new Array(counts.length).fill(0);
+            });
+            shownLogs.forEach(function(index) {
+                var event = data.events[index];
                 var bin = Math.min(counts.length - 1, Math.floor((event.time - viewStart) / width));
-                var category = 3;
-                if(/^(HOST|SERVICE) NOTIFICATION$/.test(event.type)) { category = 2; }
-                else if(/^(HOST|SERVICE) ALERT$/.test(event.type)) { category = event.state === 0 ? 1 : 0; }
+                var category = eventCategory(event);
                 categories[category].data[bin][1]++;
+                categories[category].sums[bin] += event.time;
                 counts[bin]++;
-            }
-        });
+            });
+            // Center each bar on the mean time of its events instead of the bin center.
+            categories.forEach(function(category) {
+                category.data.forEach(function(point, bin) {
+                    if(point[1] > 0) { point[0] = category.sums[bin] / point[1] * 1000; }
+                });
+            });
+            maxCount = Math.max.apply(null, counts.concat([1]));
+        }
         plot = jQuery.plot(slider, categories, {
             xaxis: {mode: 'time', timezone: 'browser', min: viewStart * 1000, max: viewEnd * 1000, ticks: 5,
                     minTickSize: [1, 'second'], tickFormatter: function(value) { return formatTime(value / 1000); }},
-            yaxis: {min: 0, max: Math.min(100, Math.max.apply(null, counts.concat([1]))), tickDecimals: 0},
+            yaxis: {min: 0, max: Math.min(100, maxCount), tickDecimals: 0},
             grid: {aboveData: true, hoverable: true, borderWidth: 1, color: themeColor('textTH'), markings: function() {
-                return [{xaxis: {from: position * 1000, to: position * 1000}, color: categories[0].color, lineWidth: 2}];
+                return [{xaxis: {from: position * 1000, to: position * 1000}, color: themeColor('text-default'), lineWidth: 1.5}];
             }},
             selection: {mode: 'x', color: categories[2].color}, crosshair: {mode: 'x', color: themeColor('textTH')}, legend: {show: false}
         });
