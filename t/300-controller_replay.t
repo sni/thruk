@@ -20,7 +20,7 @@ for my $params ('', '&host=unknownhost', '&start=-1h&end=now', '&start=100&end=1
     );
 }
 my($host, $service) = TestUtils::get_test_service();
-my $json = Cpanel::JSON::XS->new->utf8->canonical;
+my $json = Cpanel::JSON::XS->new;
 for my $filter (
     '&dfl_s0_type=host&dfl_s0_op=%3D&dfl_s0_value='.uri_escape_utf8($host),
     '&q='.uri_escape_utf8('host_name = "'.$host.'" and description = "'.$service.'"'),
