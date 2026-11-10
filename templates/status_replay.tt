@@ -62,15 +62,23 @@
                 <button type="button" class="iconOnly medium" aria-label="Close help" onclick="toggleElement('replay-help'); document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); return false;"><i class="uil uil-times"></i></button>
               </div>
               <div class="body flexcol gap-2">
-                <p>Click the chart to select the closest log event, or drag to move freely through time. Hold Shift and drag across a time range to zoom. Home/End jump to the visible range boundaries.</p>
-                <p>Chart colors: red for alerts, green for recoveries, blue for notifications, gray for other events. Mixed time buckets are stacked.</p>
-                <p>The Arrow keys selector switches Left/Right between time and individual log events, including events with the same timestamp. Up/Down always step through events. Time steps use Speed: 1× steps one second, 60× steps one minute. These keys work in the chart and log display. Hover over the chart or log box and scroll to step through events. Over the chart, scroll down to go backward and up to go forward; the log box keeps normal scrolling direction.</p>
-                <p>Click a log entry to jump to that event. Drag the divider between logs and the status table to resize the panes. The focused divider can also be moved with Up/Down or Home/End.</p>
-                <p>Read-only recorded states, including soft states. No data means no starting state was found in up to 50000 preceding records per backend.</p>
-                <p>Filters select currently configured, authorized objects using their current attributes. Maximum attempts and passive-check settings use current configuration.</p>
-                <p>Log search and exclude patterns are case-insensitive regular expressions. They filter the log viewer, chart and event navigation; all state changes still apply to the status table.</p>
-                <p>Notifications counts notification log entries replayed for each object since the selected range began, including separate entries for individual contacts.</p>
-                <p>Moon icons indicate recorded downtime; otherwise none is assumed. Acknowledgements and active-check flags follow logged per-object commands; current flags fill gaps without command history. Group/global commands and unlogged changes cannot be reconstructed.</p>
+                <h4>Time chart</h4>
+                <p>Click the chart to jump to the closest log event. Drag to move the replay position freely through time. Hold Shift and drag a time range to zoom.</p>
+                <p>Red marks alerts, green recoveries, blue notifications and gray other events. Events of different categories stack in the same time bucket.</p>
+                <h4>Keyboard</h4>
+                <p>Home/End jump to the boundaries of the visible range.</p>
+                <p>The Arrow keys selector decides what Left/Right do: step by time or by individual log event. Up/Down always step by event, even if several events share a timestamp. Time steps use Speed: 1× steps one second, 60× steps one minute. These keys work in the chart and the log box.</p>
+                <p>Hover over the chart or the log box and scroll to step events. Over the chart, scroll down to go backward and up to go forward. The log box keeps the normal scroll direction.</p>
+                <h4>Panes</h4>
+                <p>Click a log entry to jump to that event.</p>
+                <p>Drag the divider between the log and the status table to resize the panes. If the divider is focused, Up/Down or Home/End also moves it.</p>
+                <h4>Data</h4>
+                <p>The page shows recorded states read-only, including soft states. No data means no starting state was found in up to 50000 preceding records per backend.</p>
+                <p>A moon icon marks recorded downtime. Without one, the page assumes no downtime. Acknowledgement and active-check flags follow the logged per-object commands. Current flags fill gaps without command history. Group commands and unlogged changes cannot be reconstructed.</p>
+                <p>Notifications counts the notification log entries replayed for each object since the range began. Entries for individual contacts count separately.</p>
+                <h4>Filters</h4>
+                <p>The filters select objects that are configured and authorized now. They use the current attributes, maximum attempts and passive-check settings of each object.</p>
+                <p>The log search and exclude patterns are case-insensitive regular expressions. They filter the log viewer, the chart and event navigation. The status table applies all state changes.</p>
               </div>
             </div>
           </div>
