@@ -4,6 +4,16 @@ use Errno qw/EPERM ESRCH/;
 use File::Temp qw/tempdir/;
 use Test::More;
 
+plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
+
+BEGIN {
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
+}
+
+use_ok 'Thruk::Utils::External';
+
 my($kill_result, $kill_errno);
 BEGIN {
     # Simulate process probes without requiring different user accounts.
