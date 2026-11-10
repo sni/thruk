@@ -467,6 +467,8 @@ sub test_page {
             is(scalar @{$errors} + scalar @{$warnings}, 0, "No errors (and warnings) found in HTML");
             my $html_only_content = $return->{'content'};
             $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
+            # copyCode needs two escaping layers in its computed configuration textarea.
+            $html_only_content =~ s/<textarea\b[^>]*\bid="computed_config"[^>]*>.*?<\/textarea>//gsmx;
             my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
             for my $m (@{$matches}) {
                 next if $m->{'match'} =~ m/abbr=/mx;
