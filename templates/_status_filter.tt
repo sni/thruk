@@ -58,13 +58,18 @@
                       <option value="perfmap" disabled>Performancedata</option>
                     [% END %]
                   </optgroup>
+                  <option value="replay"[% IF         style == 'replay' %] selected[% END %]>Replay</option>
                   [% FOREACH groupname = additional_views.keys.sort %]
-                    <optgroup label="[% groupname | html %]">
+                    [% showgroup = 1 %]
+                    [% IF additional_views.$groupname.options.keys.size == 1 %]
+                      [% showgroup = 0 %]
+                    [% END %]
+                    [% IF showgroup %]<optgroup label="[% groupname | html %]">[% END %]
                       [% FOREACH optname = additional_views.$groupname.options.keys.sort %]
                         [% opt = additional_views.$groupname.options.$optname %]
                         <option value="[% opt.value | html %]"[% IF style == opt.value %] selected[% END %]>[% opt.name | html %]</option>
                       [% END %]
-                    </optgroup>
+                    [% IF showgroup %]</optgroup>[% END %]
                   [% END %]
                 </select>
               [% END %]

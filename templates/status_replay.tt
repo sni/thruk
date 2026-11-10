@@ -74,7 +74,7 @@
             </div>
           </div>
         </div>
-        <div id="replay-position" class="w-full mt-2" style="height:80px" tabindex="0" role="slider"
+        <div id="replay-position" class="w-full mt-2 outline-none" style="height:80px" tabindex="0" role="slider"
              aria-label="Replay time"
              aria-valuemin="[% start %]" aria-valuemax="[% end %]" aria-valuenow="[% start %]"></div>
       </div>
@@ -83,7 +83,7 @@
 [% END %]
   <div id="replay-panes"[% UNLESS replay_error %] style="height:60vh;min-height:240px;display:grid;grid-template-rows:90px 8px minmax(120px,1fr)"[% END %]>
     [% UNLESS replay_error %]
-    <div id="replay-log-panel" class="card w-full h-full overflow-auto" tabindex="0" aria-label="Log event context">
+    <div id="replay-log-panel" class="card w-full h-full overflow-auto outline-none" tabindex="0" aria-label="Log event context">
       <div class="body flexcol gap-1 text-xs font-mono">
         <div id="replay-events-before" style="display:contents"></div>
         <div class="flex gap-2 min-w-0"><span class="w-20 shrink-0">Previous:</span><a id="replay-event-prev" class="truncate flex-1 text-inherit"></a></div>
@@ -92,9 +92,9 @@
         <div id="replay-events-after" style="display:contents"></div>
       </div>
     </div>
-    <div id="replay-splitter" class="hoverable flex items-center justify-center" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90"><span class="border-t borderDefault" style="width:48px;pointer-events:none"></span></div>
+    <div id="replay-splitter" class="hoverable flex items-center justify-center outline-none" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90"><span class="border-t borderDefault" style="width:48px;pointer-events:none"></span></div>
     [% END %]
-  <div id="replay-table-panel" class="card w-full h-full flex flex-col min-h-0">
+  <div id="replay-table-panel" class="card w-full flex flex-col min-h-0">
     <div class="mainTableHeader shrink-0">
       <div class="flex flex-nowrap gap-x-2 items-center">
         [% PROCESS _status_filter.tt show_form=0 paneprefix='dfl_' %]
