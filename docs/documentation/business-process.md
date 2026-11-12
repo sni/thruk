@@ -15,7 +15,8 @@ To change general options, such as hard or soft states, open any node's 'General
 ## How it works
 
 **Business process workflow**
-![Business Process Architecture](source/bp_arch.png)
+![Business Process Architecture](source/bp_arch.svg)
+
 
 - Cron usually runs 'Thruks Business Process Engine'. Thruk adds the cronjob automatically when you create your first business process.
 - 'Business Process Config' and 'Runtime Status' are JSON files that store objects and status.

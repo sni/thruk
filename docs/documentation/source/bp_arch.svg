@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 450" role="img" aria-label="Business Process Architecture" style="width:100%;max-width:640px;height:auto" font-family="system-ui, 'Segoe UI', Arial, sans-serif" font-size="14" text-anchor="middle">
+  <defs>
+    <marker id="bp_arrow" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+      <path d="M0,0 L9,3.5 L0,7 z" fill="currentColor"/>
+    </marker>
+  </defs>
+
+  <!-- arrows -->
+  <g stroke="currentColor" stroke-width="1.5" marker-end="url(#bp_arrow)">
+    <line x1="100" y1="81"  x2="100" y2="107"/>
+    <line x1="250" y1="79"  x2="293" y2="170"/>
+    <line x1="215" y1="78"  x2="163" y2="106"/>
+    <line x1="140" y1="156" x2="258" y2="281"/>
+    <line x1="95"  y1="156" x2="100" y2="341"/>
+    <line x1="412" y1="215" x2="446" y2="215"/>
+    <line x1="322" y1="283" x2="322" y2="258"/>
+    <line x1="322" y1="340" x2="322" y2="330"/>
+    <line x1="162" y1="375" x2="246" y2="375"/>
+    <line x1="404" y1="375" x2="460" y2="375"/>
+  </g>
+
+  <!-- cylinders -->
+  <g fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5">
+    <path d="M 40 28 V 72 A 60 9 0 0 0 160 72 V 28 A 60 9 0 0 1 40 28 Z"/>
+    <ellipse cx="100" cy="28" rx="60" ry="9"/>
+    <path d="M 185 28 V 72 A 60 9 0 0 0 305 72 V 28 A 60 9 0 0 1 185 28 Z"/>
+    <ellipse cx="245" cy="28" rx="60" ry="9"/>
+    <path d="M 40 353 V 397 A 60 9 0 0 0 160 397 V 353 A 60 9 0 0 1 40 353 Z"/>
+    <ellipse cx="100" cy="353" rx="60" ry="9"/>
+  </g>
+
+  <!-- process boxes -->
+  <g fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5">
+    <rect x="30" y="110" width="130" height="45"/>
+    <polygon points="280,175 410,175 380,255 250,255"/>
+    <rect x="245" y="285" width="155" height="40"/>
+    <polygon points="240,342 370,342 400,402 270,402"/>
+  </g>
+
+  <!-- terminal shapes -->
+  <g fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5">
+    <polygon points="450,175 560,175 590,215 560,255 450,255"/>
+    <path d="M465 342 H576 C583 348 571 354 579 360 C587 366 571 374 579 380 C587 386 571 394 578 402 H465 Z"/>
+  </g>
+
+  <!-- labels -->
+  <g fill="currentColor">
+    <text x="100" y="55">Business Process</text>
+    <text x="100" y="71">Config</text>
+    <text x="245" y="53">Runtime</text>
+    <text x="245" y="68">Status</text>
+    <text x="95"  y="129">Thruk Business</text>
+    <text x="95"  y="145">Process Engine</text>
+    <text x="330" y="208">Thruk</text>
+    <text x="330" y="224">Gui</text>
+    <text x="515" y="220">Display</text>
+    <text x="322" y="310">Livestatus</text>
+    <text x="100" y="380">Check Result</text>
+    <text x="100" y="396">Folder</text>
+    <text x="320" y="379">Naemon / Nagios</text>
+    <text x="518" y="379">Notification</text>
+  </g>
+</svg>
