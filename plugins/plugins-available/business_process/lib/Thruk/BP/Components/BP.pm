@@ -800,7 +800,15 @@ sub bulk_fetch_live_data {
         }
     }
 
-    if(scalar keys %{$hostfilter} > 0) {
+    # when expanding groups, members have to be fetched even if there is no
+    # direct status node for them, otherwise group statistics stay empty
+    my $need_hosts    = scalar keys %{$hostfilter} > 0
+                        || ($expand_groups && scalar keys %{$hostgroupfilter} > 0);
+    my $need_services = scalar keys %{$servicefilter} > 0
+                        || ($expand_groups && (scalar keys %{$servicegroupfilter} > 0
+                                            || scalar keys %{$hostgroupfilter} > 0));
+
+    if($need_hosts) {
         my @filter;
         for my $hostname (keys %{$hostfilter}) {
             push @filter, { name => $hostname };
@@ -816,7 +824,7 @@ sub bulk_fetch_live_data {
         my $data   = $c->db->get_hosts(filter => \@filters, extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $hostdata  = Thruk::Base::array2hash($data, 'name');
     }
-    if(scalar keys %{$servicefilter} > 0) {
+    if($need_services) {
         my @filter;
         for my $hostname (keys %{$servicefilter}) {
             for my $description (keys %{$servicefilter->{$hostname}}) {
