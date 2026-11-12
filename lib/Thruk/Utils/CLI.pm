@@ -468,7 +468,7 @@ sub _dummy_c {
     # The actual command saves the profile when it finishes. Otherwise a partial
     # profile stays behind and is shown instead of the real one if the command
     # dies before saving it.
-    local $ENV{'THRUK_JOB_DIR'};
+    delete local $ENV{'THRUK_JOB_DIR'};
     my($c) = _internal_request('/thruk/cgi-bin/remote.cgi');
     _debug2("create internal context done");
     return($c);
