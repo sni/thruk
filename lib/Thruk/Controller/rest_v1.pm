@@ -157,24 +157,6 @@ sub index {
         $c->user->set_dynamic_attributes($c);
     }
 
-    if($c->check_user_roles('authorized_for_read_only') && $c->req->method ne 'GET') {
-        my $data = {
-            'message'     => 'only GET requests allowed for readonly api keys.',
-            'code'        => 400,
-            'failed'      => Cpanel::JSON::XS::true,
-        };
-        return(_format_output($c, $format, $data));
-    }
-
-    if($c->config->{'demo_mode'} && $c->req->method ne 'GET') {
-        my $data = {
-            'message'     => 'only GET requests allowed in demo_mode.',
-            'code'        => 400,
-            'failed'      => Cpanel::JSON::XS::true,
-        };
-        return(_format_output($c, $format, $data));
-    }
-
     if($path_info =~ m/\.cgi$/mx) {
         my $uri = $c->env->{'thruk.request.url'} // $c->req->url();
         $uri =~ s/^.*?\/r\/(v1\/|)/\/cgi-bin\//gmx;
@@ -537,6 +519,22 @@ sub _fetch {
                 # matching path, but wrong protocol
                 push @{$protos}, $proto;
                 next;
+            }
+            # readonly/demo-mode users may only read. get-only paths requested
+            # via post are remapped to get later, so they never reach this check.
+            if($request_method ne 'GET' && $c->check_user_roles('authorized_for_read_only')) {
+                $data = { 'message'     => 'only GET requests allowed for readonly api keys.',
+                          'code'        => 400,
+                          'failed'      => Cpanel::JSON::XS::true };
+                $found = 1;
+                last;
+            }
+            if($request_method ne 'GET' && $c->config->{'demo_mode'}) {
+                $data = { 'message'     => 'only GET requests allowed in demo_mode.',
+                          'code'        => 400,
+                          'failed'      => Cpanel::JSON::XS::true };
+                $found = 1;
+                last;
             }
             if($request_method ne 'GET' && !Thruk::Utils::check_csrf($c, 1)) {
                 # make csrf protection mandatory for anything other than GET requests
