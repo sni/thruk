@@ -7,27 +7,53 @@
  *
  */
 
-var puppeteer;
-try {
-  // Prefer loading via fix-esm when available.
-  puppeteer = require("fix-esm").require("puppeteer");
-} catch (fixEsmErr) {
+// Load puppeteer so it works on node 16 through node 26 and with both
+// CommonJS and ES module versions.
+// 1) require() works for CJS puppeteer and honors NODE_PATH.
+// 2) Newer puppeteer is ESM and require() breaks when its deps (e.g. yargs)
+//    ship CJS files that node now classifies as ESM. A bare import() cannot
+//    resolve puppeteer via NODE_PATH, so resolve the entry with
+//    require.resolve() (pure path lookup, still honors NODE_PATH) and
+//    import() it as a file URL.
+const os           = require('os');
+const path         = require('path');
+const { pathToFileURL } = require('url');
+
+function loadPuppeteer() {
   try {
-    // Fall back to regular CommonJS loading.
-    puppeteer = require("puppeteer");
-  } catch (puppeteerErr) {
-    console.error("failed to load puppeteer.");
-    if (fixEsmErr && fixEsmErr.code !== 'MODULE_NOT_FOUND') {
-      console.error("loading through fix-esm failed: " + fixEsmErr.message);
-    }
-    console.error("please ensure the 'puppeteer' module is installed and available in NODE_PATH.");
-    console.error("error: " + puppeteerErr.message);
-    process.exit(1);
+    return Promise.resolve(require("puppeteer"));
+  } catch (reqErr) {
+    return (async () => {
+      let entry;
+      try {
+        entry = require.resolve("puppeteer");
+      } catch (resErr) {
+        // last resort: search NODE_PATH for the puppeteer entry ourselves
+        if (process.env.NODE_PATH) {
+          for (const dir of process.env.NODE_PATH.split(path.delimiter)) {
+            for (const name of ["puppeteer/index.js", "puppeteer/index.cjs", "puppeteer/index.mjs"]) {
+              const candidate = path.join(dir, name);
+              if (require('fs').existsSync(candidate)) { entry = candidate; break; }
+            }
+            if (entry) break;
+          }
+        }
+        if (!entry) {
+          throw new Error("cannot locate the puppeteer module: " + resErr.message);
+        }
+      }
+      const mod   = await import(pathToFileURL(entry).href);
+      // ESM exposes the API via .default, CJS exports it directly
+      return (mod.default && typeof mod.default === "object") ? mod.default : mod;
+    })().catch(esmErr => {
+      console.error("failed to load puppeteer.");
+      console.error("require() error: " + reqErr.message);
+      console.error("import() error:  " + esmErr.message);
+      console.error("please ensure the 'puppeteer' module is installed and available in NODE_PATH.");
+      process.exit(1);
+    });
   }
 }
-const os          = require('os');
-const path        = require('path');
-const { timeout } = require("puppeteer");
 
 var url           = process.argv[2];
 var output        = process.argv[3];
@@ -58,7 +84,19 @@ if (process.env['WAIT_TIMEOUT']) { waitTimeout = process.env['WAIT_TIMEOUT'] * 1
 // override browser start wait timeout from env (in seconds)
 if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] * 1000; }
 
+// self-test: verify the puppeteer module loads (used by CI to prove the
+// loader works on the node version under test, e.g. both node 16 and node 26).
+//   node puppeteer.js --self-test
+if (process.argv[2] === "--self-test") {
+  loadPuppeteer().then(
+    (p) => { console.log("puppeteer loaded OK (launch=" + !!(p && p.launch) + ")"); process.exit(0); },
+    ()  => { console.error("puppeteer self-test: module loaded but had no .launch"); process.exit(1); }
+  );
+  return;
+}
+
 (async () => {
+  const puppeteer = await loadPuppeteer();
   const browser = await puppeteer.launch({
           headless: "1", // keep old headless mode for now but disabled deprecation warning
           ignoreHTTPSErrors: true,

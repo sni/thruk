@@ -52,6 +52,8 @@ next:
             - fix log authorization in event reports
             - reject submitted report runtime state
             - fix remote response parsing in puppeteer renderer
+            - make puppeteer loader work on node 16 through 26 and with ESM
+              module layouts, so graph and PDF export keep working after the OMD node update
           - Trends:
             - fix authorization for saved graphs
 
