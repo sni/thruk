@@ -45,7 +45,8 @@ inc/File/Copy/Recursive.pm
 ^log4perl.conf$
 TODO
 docs/development
-^docs/documentation/(?!(configuration|cgi-cfg)\.md$)
+# rest_endpoints.md is parsed by t/095-doc_markdown.t
+^docs/documentation/(?!(configuration|cgi-cfg|rest_endpoints)\.md$)
 # vitepress build artifacts and npm dependencies must not be shipped
 ^docs/node_modules/
 ^docs/package(-lock)?\.json
@@ -103,7 +104,8 @@ rpsresults.html
 ^thruk_local.d/.*.conf
 t/600-scenarios.t
 t/610-scenario-.*\.t
-t/scenarios
+# keep the dashboard fixture parsed by t/095-doc_markdown.t
+^t/scenarios/(?!(cli_api/omd/skel/etc/thruk/panorama/1\.tab$)).*
 action_menus/*.js
 ^.ci/
 .github/

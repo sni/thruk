@@ -22,6 +22,7 @@ debian/thruk.dsc
 dist.ini
 docs/documentation/cgi-cfg.md
 docs/documentation/configuration.md
+docs/documentation/rest_endpoints.md
 docs/manpages/nagexp.3
 docs/manpages/nagimp.3
 docs/manpages/naglint.3
@@ -2561,6 +2562,7 @@ t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
 t/data/user_overrides/thruk.conf
 t/helper/create_test_logs
+t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab
 t/perlcriticrc
 t/test_request
 t/TestUtils.pm
