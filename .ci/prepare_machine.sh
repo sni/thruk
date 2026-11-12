@@ -63,6 +63,7 @@ apt-get -y install \
     libwww-mechanize-perl \
     lsb-release \
     npm \
+    pandoc \
     perl \
     perl-doc \
     poppler-utils \

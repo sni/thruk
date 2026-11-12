@@ -1,7 +1,0 @@
-$VAR1 = {
-          'alias' => 'test_contacts_alias',
-          'members' => [
-                         'test_contact'
-                       ],
-          'name' => 'test_contact'
-        };

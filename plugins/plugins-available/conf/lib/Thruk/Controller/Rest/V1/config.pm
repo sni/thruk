@@ -342,10 +342,12 @@ sub _rest_get_config_objects_new {
 ##########################################################
 # REST PATH: PATCH /config/objects
 # Change attributes for all matching objects.
-# This is a very powerful url, for example you could change all hosts which
-# have max_check_attempts=3 to max_check_attempts=5 with this command:
+# **CAUTION** Review the filters before submitting a bulk change.
+# This example changes all hosts with max_check_attempts=3 to max_check_attempts=5:
 #
+# ```sh
 #   thruk r -m PATCH -d max_check_attempts=5 '/config/objects?:TYPE=host&max_check_attempts=3'
+# ```
 Thruk::Controller::rest_v1::register_rest_path_v1('PATCH', qr%^/config/objects?$%mx, \&_rest_get_config_objects_patch, ["admin"]);
 sub _rest_get_config_objects_patch {
     my($c) = @_;
@@ -374,10 +376,13 @@ sub _rest_get_config_objects_patch {
 ##########################################################
 # REST PATH: DELETE /config/objects
 # Delete objects based on filters.
-# This is a very powerful url, without filter, all objects would be removed.
-# Ex.: remove all contacts matching a name:
+# **CAUTION:** A broad filter can select all objects. Confirm the filters before deleting.
+# Requests without query parameters are rejected.
+# This example removes all contacts matching a name:
 #
+# ```sh
 #   thruk r -m DELETE '/config/objects?contact_name=test'
+# ```
 Thruk::Controller::rest_v1::register_rest_path_v1('DELETE', qr%^/config/objects?$%mx, \&_rest_get_config_objects_delete, ["admin"]);
 sub _rest_get_config_objects_delete {
     my($c) = @_;

@@ -20,14 +20,14 @@ debian/thruk-plugin-reporting.postinst
 debian/thruk-plugin-reporting.prerm
 debian/thruk.dsc
 dist.ini
-docs/documentation/cgi-cfg.asciidoc
-docs/documentation/configuration.asciidoc
+docs/documentation/cgi-cfg.md
+docs/documentation/configuration.md
 docs/manpages/nagexp.3
 docs/manpages/nagimp.3
 docs/manpages/naglint.3
 docs/manpages/thruk.3
 docs/manpages/thruk.8
-docs/manpages/thruk8.txt
+docs/manpages/thruk8.md
 examples/action_wrapper
 examples/bp_filter.pm
 examples/bp_functions.pm
@@ -152,6 +152,7 @@ lib/Thruk/Utils/Cluster.pm
 lib/Thruk/Utils/CookieAuth.pm
 lib/Thruk/Utils/Crypt.pm
 lib/Thruk/Utils/DateTime.pm
+lib/Thruk/Utils/DocsMarkdown.pm
 lib/Thruk/Utils/Encode.pm
 lib/Thruk/Utils/External.pm
 lib/Thruk/Utils/Filter.pm
@@ -2313,6 +2314,7 @@ script/thruk_patch_makefile.pl
 script/thruk_server.pl
 script/thruk_set_standard_header
 script/thruk_update.sh
+script/thruk_update_docs.sh
 script/thruk_update_docs_rest.pl
 script/thruk_update_livestatus_docs.pl
 script/thruk_version.sh
@@ -2396,6 +2398,8 @@ t/092-todo.t
 t/093-manifest.t
 t/094-plugin-root-path.t
 t/095-doc_coverage.t
+t/095-doc_manpages.t
+t/095-doc_markdown.t
 t/095-doc_rest.t
 t/095-doc_roles_coverage.t
 t/096-makefile_requirements.t
@@ -2866,6 +2870,7 @@ themes/themes-available/Light/images/logo.svg
 themes/themes-available/Light/images/logo_thruk.png
 themes/themes-available/Light/images/logo_thruk_small.png
 themes/themes-available/Light/images/logo_thruk_small_icon.png
+themes/themes-available/Light/images/thruk.svg
 themes/themes-available/Light/images/README.md
 themes/themes-available/Light/src/Light.css
 themes/themes-available/Light/stylesheets/Light.css

@@ -2,15 +2,16 @@
 
 ## Reporting a Vulnerability
 
-Please report security-related issues here:
+Report security-related issues here:
 
 - https://github.com/sni/thruk/security/advisories
 - or by email at security (at) thruk.org
 
 ## Supported Versions
 
-This is an open source project and professional support is available from
+Thruk is an open source project. Professional support is available from:
 
 - https://www.consol.de/monitoring
 
-The latest stable release is always supported, but response times depend on the maintainer's available time.
+The latest stable release is always supported.
+Response times depend on the maintainer's available time.

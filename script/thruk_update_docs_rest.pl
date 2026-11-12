@@ -44,6 +44,7 @@ use Thruk::Action::AddDefaults ();
 use Thruk::Controller::cmd ();
 use Thruk::Controller::rest_v1 ();
 use Thruk::Utils::CLI ();
+use Thruk::Utils::DocsMarkdown qw/md_escape_cell md_heading md_slug md_description _parse_attribute_docs _parse_additional_attributes/;
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::OAuth ();
 
@@ -71,9 +72,11 @@ Thruk::Utils::OAuth::store_oauth_session($c, "docs-update", ["example-team"]);
 
 my $root = $c->config->{'project_root'};
 my $cmds = _update_cmds($c);
-_update_docs($c, $root."/docs/documentation/rest.asciidoc",        $root."/lib/Thruk/Controller/Rest/V1/docs.pm");
-_update_docs($c, $root."/docs/documentation/rest_commands.asciidoc");
-_update_cmds_list($c, $root."/docs/documentation/commands.html", $cmds);
+# rest.md is hand-maintained prose; the endpoint list (and the runtime column
+# JSON) is generated into rest_endpoints.md
+_update_docs($c, $root."/docs/documentation/rest_endpoints.md", $root."/lib/Thruk/Controller/Rest/V1/docs.pm");
+_update_docs($c, $root."/docs/documentation/rest_commands.md");
+_update_cmds_list($c, $root."/docs/documentation/commands.md", $cmds);
 unlink($c->config->{'var_path'}.'/cluster/nodes');
 $c->sub_request('/r/config/revert', 'POST', {});
 exit 0;
@@ -351,11 +354,26 @@ sub _update_docs {
 
     my $root = $c->config->{'project_root'};
     my($paths, $keys, $docs) = Thruk::Controller::rest_v1::get_rest_paths($c);
-    `mkdir -p bp;            cp $root/t/scenarios/cli_api/omd/skel/etc/thruk/bp/1.tbp        bp/9999.tbp`;
-    `mkdir -p panorama;      cp $root/t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab  panorama/9999.tab`;
-    `mkdir -p var/broadcast; cp $root/t/scenarios/rest_api/omd/broadcast.json                var/broadcast/broadcast.json`;
-    `mkdir -p var/downtimes; cp $root/t/scenarios/cli_api/omd/skel/var/thruk/downtimes/1.tsk var/downtimes/9999.tsk`;
-    `mkdir -p var/reports;   cp $root/t/scenarios/cli_api/omd/skel/var/thruk/reports/1.rpt   var/reports/9999.rpt`;
+    my $etc_path = $c->config->{'etc_path'};
+    my $var_path = $c->config->{'var_path'};
+    my $dashboard_file = $etc_path.'/panorama/9999.tab';
+    my $bp_file = $etc_path.'/bp/9999.tbp';
+    my $broadcast_file = $var_path.'/broadcast/broadcast.json';
+    my $downtime_file = $var_path.'/downtimes/9999.tsk';
+    my $report_file = $var_path.'/reports/9999.rpt';
+    for my $file ($dashboard_file, $bp_file, $broadcast_file, $downtime_file, $report_file) {
+        die("refusing to overwrite existing documentation fixture: $file\n") if -e $file || -l $file;
+    }
+    `mkdir -p "$etc_path/panorama" && cp "$root/t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab" "$dashboard_file"`;
+    die("cannot copy documentation dashboard to $dashboard_file\n") if $?;
+    `mkdir -p "$etc_path/bp" && cp "$root/t/scenarios/cli_api/omd/skel/etc/thruk/bp/1.tbp" "$bp_file"`;
+    die("cannot copy documentation BP to $bp_file\n") if $?;
+    `mkdir -p "$var_path/broadcast" && cp "$root/t/scenarios/rest_api/omd/broadcast.json" "$broadcast_file"`;
+    die("cannot copy documentation broadcast to $broadcast_file\n") if $?;
+    `mkdir -p "$var_path/downtimes" && cp "$root/t/scenarios/cli_api/omd/skel/var/thruk/downtimes/1.tsk" "$downtime_file"`;
+    die("cannot copy documentation downtime to $downtime_file\n") if $?;
+    `mkdir -p "$var_path/reports" && cp "$root/t/scenarios/cli_api/omd/skel/var/thruk/reports/1.rpt" "$report_file"`;
+    die("cannot copy documentation report to $report_file\n") if $?;
     my $system_api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', system => '1', roles => 'admin', force_user => 'test'});
     die("failed to create system api_key: ".($system_api_key->{'message'} || 'unknown error')."\n") unless $system_api_key && $system_api_key->{'private_key'};
     my $api_key = $c->sub_request('/r/v1/thruk/api_keys', 'POST', {comment => 'test', username => 'restapidocs'});
@@ -364,11 +382,11 @@ sub _update_docs {
     # fake usage
     Thruk::Utils::IO::json_lock_store($api_key->{'file'}.".stats", { last_used => time(), last_from => "127.0.0.1" });
     # fake error message
-    Thruk::Utils::IO::json_lock_patch('var/downtimes/9999.tsk', { error => "test" });
+    Thruk::Utils::IO::json_lock_patch($downtime_file, { error => "test" });
     # fake error message
-    Thruk::Utils::IO::json_lock_patch('var/reports/9999.rpt', { error => "test" });
+    Thruk::Utils::IO::json_lock_patch($report_file, { error => "test" });
     # fake panorama maintmode
-    Thruk::Utils::IO::json_lock_patch('panorama/9999.tab', { maintenance => "test" });
+    Thruk::Utils::IO::json_lock_patch($dashboard_file, { maintenance => "test" });
     # refresh business processes so /thruk/stats lists the business_process_* columns
     # (a real "bp all" calculation is the only thing that writes those metrics)
     my($rc, $bp_out) = Thruk::Utils::IO::cmd("$root/script/thruk bp all 2>&1");
@@ -382,8 +400,9 @@ sub _update_docs {
     # set fake logcache
     $c->config->{'logcache'} = 'mysql://user:pw@localhost:3306/thruk' unless $c->config->{'logcache'};
 
-    # create fake outages
-    if($output_file =~ m/rest.asciidoc/mx) {
+    # create fake outages so _fetch_keys can read live availability/outage columns;
+    # the endpoint reference (and the live column fetch) now lives in rest_endpoints.md
+    if($output_file =~ m/rest_endpoints\.md$/mx) {
         local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
         local $ENV{'THRUK_TEST_NO_LOG'}       = "";
         my $host         = uri_escape($host_name);
@@ -407,8 +426,15 @@ sub _update_docs {
     my $additional = _parse_additional_attributes($content);
     my $attributes = _parse_attribute_docs($content);
     $content =~ s/^(\QSee examples and detailed description for\E.*?:).*$/$1\n\n/gsmx;
+    # the endpoint list lives on its own page; the generated sections are
+    # appended behind the marker so the header with the filter box is kept
+    if($output_file =~ m/rest_endpoints\.md$/mx) {
+        my($head) = $content =~ m/^(.*\Q<!--GENERATED-ENDPOINTS-->\E)/sx or die "no generator marker in $output_file\n";
+        # the first appended heading starts on the line after the marker
+        $content = $head."\n";
+    }
 
-    # add generic cmd url with cross links to command page
+    # add generic cmd url with in-page links to the individual commands below
     my $raw_json = {};
     my $command_urls = {};
     for my $url (sort keys %{$paths}) {
@@ -420,31 +446,29 @@ sub _update_docs {
     }
     for my $url (sort keys %{$command_urls}) {
         my $doc = [
-            "external commands are documented in detail on a separate commands page.",
             "list of supported commands:",
             "",
         ];
         for my $cmd (@{$command_urls->{$url}}) {
             my $name = $cmd;
             $name =~ s%.*/cmd/%%gmx;
-            my $link = $cmd;
-            $link =~ s%[/<>]+%%gmx;
-            $link =~ s%[^a-z_]+%-%gmx;
-            push @{$doc}, " - link:rest_commands.html#post-".$link."[".$name."]";
+            # one slug code path for heading id and link target, the post-
+            # prefix keeps the old asciidoc anchors working
+            push @{$doc}, " - [".lc($name)."](#".md_slug('POST '.$cmd).")";
         }
         $docs->{$url.'/...'}->{'POST'} = $doc;
         $paths->{$url.'/...'}->{'POST'} = 1;
     }
 
+    # all endpoints (including the individual /cmd/<name> commands) live on the
+    # endpoints page; the commands page keeps only the hand-maintained prose
     for my $url (sort keys %{$paths}) {
-        if($output_file =~ m/_commands/mx) {
-            next if($url !~ m%/cmd/%mx || $url =~ m%/cmd/\.\.\.%mx);
-        } else {
-            next if($url =~ m%/cmd/%mx && $url !~ m%/cmd/\.\.\.%mx);
-        }
+        next if $output_file !~ m/rest_endpoints\.md$/mx;
         for my $proto (sort _sort_by_proto (keys %{$paths->{$url}})) {
-            $content .= "=== $proto $url\n\n";
-            my $doc   = $docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '';
+            # the explicit heading id is the link target of the generic cmd
+            # sections, ex.: post-hostsnamecmdnote
+            $content .= md_heading($proto, $url)."\n\n";
+            my $doc   = md_description($docs->{$url}->{$proto} ? join("\n", @{$docs->{$url}->{$proto}})."\n\n" : '');
             $content .= $doc;
 
             if(!$keys->{$url}->{$proto}) {
@@ -476,9 +500,8 @@ sub _update_docs {
                     }
                     $raw_json->{$url}->{$proto}->{inherits} = $inherits if @{$inherits};
                 }
-                $content .= '[options="header"]'."\n";
-                $content .= "|===========================================\n";
-                $content .= sprintf("|%-33s | %-10s | %-8s | %s\n", 'Attribute', 'Type', 'Unit', 'Description');
+                $content .= "| Attribute | Type | Unit | Description |\n";
+                $content .= "|-----------|------|------|-------------|\n";
                 for my $doc (@{$keys->{$url}->{$proto}}) {
                     my $name =  $doc->[0];
                     my $typ  = Thruk::Base::trim_whitespace($doc->[1] || $attributes->{$url}->{$proto}->{$name}->[0] || '' );
@@ -500,10 +523,10 @@ sub _update_docs {
                     }
                     next if $name eq 'page_profiles';
                     _warn("no documentation on url %s for attribute %s\n", $url, $name) unless $desc;
-                    $content .= sprintf("|%-33s | %-10s | %-8s | %s\n", $name, $typ, $unit, $desc);
+                    $content .= sprintf("| %s | %s | %s | %s |\n", map { md_escape_cell($_) } ('`'.$name.'`', $typ, $unit, $desc));
                     push @{$raw_json->{$url}->{$proto}->{'columns'}}, { 'type' => $typ, 'unit' => $unit, 'name' => $name, 'description' => $desc };
                 }
-                $content .= "|===========================================\n\n\n";
+                $content .= "\n\n";
             }
         }
     }
@@ -526,11 +549,11 @@ sub _update_docs {
         close($fh);
     }
 
-    unlink('bp/9999.tbp');
-    unlink('panorama/9999.tab');
-    unlink('var/broadcast/broadcast.json');
-    unlink('var/downtimes/9999.tsk');
-    unlink('var/reports/9999.rpt');
+    unlink($bp_file);
+    unlink($dashboard_file);
+    unlink($broadcast_file);
+    unlink($downtime_file);
+    unlink($report_file);
     unlink($api_key->{'file'});
     unlink($api_key->{'file'}.'.stats');
     unlink($system_api_key->{'file'});
@@ -540,24 +563,19 @@ sub _update_docs {
 sub _update_cmds_list {
     my($c, $file, $cmds) = @_;
     my $content = Thruk::Utils::IO::read($file);
-    $content =~ s/^<\!\-\-DATA\-\->\n.*$/<!--DATA-->\n/gsmx;
+    $content =~ s/^<!--DATA-->\n.*$/<!--DATA-->\n/gsmx;
 
-    $content .= "<tbody>\n";
+    $content .= "| Nr  | Category      | Name                             | Details      |\n";
+    $content .= "|-----|---------------|----------------------------------|--------------|\n";
     for my $cat (qw/hosts services all_host_service hostgroups servicegroups contacts contactgroups system/) {
         for my $name (sort keys %{$cmds->{$cat}}) {
             my $cmd = $cmds->{$cat}->{$name};
             next if !$cmd->{'nr'};
             next if $cmd->{'nr'} == -1;
-            $content .= "<tr>";
-            $content .= sprintf("<td>%s</td>", $cmd->{'nr'});
-            $content .= sprintf("<td>%s</td>", $cat);
-            $content .= sprintf("<td>%s</td>", $name);
-            $content .= sprintf("<td><a href=\"https://www.naemon.io/documentation/developer/externalcommands/%s.html\" target=\"_blank\">details</a></td>", $name);
-            $content .= "</tr>\n";
+            my $link = sprintf("https://www.naemon.io/documentation/developer/externalcommands/%s.html", $name);
+            $content .= sprintf("| %s | %s | %s | [%s](%s) |\n", $cmd->{'nr'}, $cat, $name, 'details', $link);
         }
     }
-    $content .= "</tbody>\n";
-    $content .= "</table>\n";
 
     $file = $file.'.tst' if $ENV{'TEST_MODE'};
     open(my $fh, '>', $file) or die("cannot write to ".$file.': '.$@);
@@ -652,51 +670,5 @@ sub _sort_by_proto {
     ($weight->{$a}//99) <=> ($weight->{$b}//99);
 }
 
-################################################################################
-sub _parse_attribute_docs {
-    my($content) = @_;
-    my $attributes = {};
-    my($url, $proto);
-    for my $line (split/\n/mx, $content) {
-        if($line =~ m%^=%mx) {
-            $url = undef;
-        }
-        if($line =~ m%^===\ (\w+)\ (/.*)$%mx) {
-            $proto = $1;
-            $url   = $2;
-        }
-        # Parses the attributes in the asciidoc table like this:
-        # |host                              | string     |          | host name
-        # |plugin_output                     | string     |          | last plugin output during outage
-        if($url && $line =~ m%^\|([^\|]+?)\s*\|([^\|]+?)\s*\|([^\|]+?)\s*\|\s*(.*)$%mx) {
-            next if $1 eq 'Attribute';
-            $attributes->{$url}->{$proto}->{$1} = [$2, $3, $4];
-        }
-        elsif($url && $line =~ m%^\|([^\|]+?)\s*\|\s*(.*)$%mx) {
-            next if $1 eq 'Attribute';
-            $attributes->{$url}->{$proto}->{$1} = ["", "", $2];
-        }
-    }
-    return $attributes;
-}
-
-################################################################################
-sub _parse_additional_attributes {
-    my($content) = @_;
-    my $additional = {};
-    my $last_url;
-    my $last_proto;
-    for my $line (split/\n/mx, $content) {
-        if($line =~ m%^===\ (\w+)\ (/.*)$%mx) {
-            $last_url   = $2;
-            $last_proto = $1;
-        }
-        # Beware this line if its present, then add it to description
-        if($line eq 'Additional attributes added by Thruk:') {
-            $additional->{$last_url}->{$last_proto} = $line."\n\n";
-        }
-    }
-    return $additional;
-}
 
 ################################################################################

@@ -1,0 +1,115 @@
+---
+title: OAuth2
+---
+
+# OAuth2
+
+<Badge type="tip" text="New in Thruk 2.36" />
+OAuth2 lets you use external services for authentication.
+The examples below configure common OAuth2 providers.
+
+For configuration details, see [Configuration](configuration.html#_oauth2-authentication-settings).
+
+### Github
+
+Create a new OAuth2 application here: https://github.com/settings/developers
+
+```
+<auth_oauth>
+  <provider>
+    login = "Login with GitHub"
+    icon = "uil uil-github"
+    client_id = ...
+    client_secret = ...
+    scopes = openid profile email groups
+    auth_url = https://github.com/login/oauth/authorize
+    token_url = https://github.com/login/oauth/access_token
+    api_url = https://api.github.com/user
+    login_field = login
+  </provider>
+</auth_oauth>
+```
+
+### Google
+
+Create a new "OAuth 2.0 Client ID" here: https://console.cloud.google.com/apis/credentials
+
+```
+<auth_oauth>
+  <provider>
+    login         = "Google Account Login"
+    icon          = "uil uil-google"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile email"
+    auth_url      = "https://accounts.google.com/o/oauth2/v2/auth"
+    token_url     = "https://oauth2.googleapis.com/token"
+    api_url       = "https://openidconnect.googleapis.com/v1/userinfo"
+    login_field   = "email"
+  </provider>
+</auth_oauth>
+```
+
+### Okta
+
+```
+<auth_oauth>
+  <provider>
+    login         = "Login with Okta"
+    icon          = "uil uil-okta"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile email groups"
+    auth_url      = "https://dev-....okta.com/oauth2/v1/authorize"
+    token_url     = "https://dev-....okta.com/oauth2/v1/token"
+    api_url       = "https://dev-....okta.com/oauth2/v1/userinfo"
+    login_field   = "email"
+  </provider>
+</auth_oauth>
+```
+
+### Microsoft AD FS
+
+Create a new Application Group in the AD FS Management Console.
+Configure Issuance Transformation Rules that release User-Principal-Name.
+AD FS requires Crypt::JWT to decode and validate attribute assertions.
+
+Get available scopes from https://.../adfs/.well-known/openid-configuration
+
+```
+<auth_oauth>
+  <provider>
+    login         = "Login with AD FS"
+    icon          = "uil uil-windows"
+    client_id     = "..."
+    client_secret = "..."
+    scopes        = "openid profile"
+    auth_url      = "https://fs.contoso.com/adfs/oauth2/authorize/?resource=urn:microsoft:userinfo"
+    token_url     = "https://fs.contoso.com/adfs/oauth2/token/"
+    jwks_url      = "https://fs.contoso.com/adfs/discovery/keys"
+    # You can also configure explicit key trust for the JWK signing key:
+    # jwk_key = {"kty":"RSA","n":"0vx7agoebG...L6tSoc_BJECP","e":"AQAB"}
+    login_field   = "upn"
+  </provider>
+</auth_oauth>
+```
+
+### Microsoft Entra ID (Azure AD)
+
+Get supported scopes here: https://login.microsoftonline.com/$TENANT/.well-known/openid-configuration
+
+```
+<auth_oauth>
+  <provider name>
+    login         = "Login with $COMPANY SSO"
+    icon          = "uil uil-windows"
+    client_id     = "$APPLICATIONID"
+    client_secret = "$SECRET"
+    scopes        = "openid profile email"
+    auth_url      = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/authorize"
+    token_url     = "https://login.microsoftonline.com/$TENANT/oauth2/v2.0/token"
+    jwks_url      = "https://login.microsoftonline.com/$TENANT/discovery/v2.0/keys"
+    login_field   = "preferred_username"
+  </provider>
+</auth_oauth>
+```

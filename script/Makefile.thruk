@@ -66,18 +66,17 @@ docs:
 	$(MAKE) docs_check_thruk_rest
 
 docs_check_thruk_rest:
-	sed '/```/,$$d' docs/documentation/check_thruk_rest.asciidoc > docs/documentation/check_thruk_rest.asciidoc.tmp
-	mv docs/documentation/check_thruk_rest.asciidoc.tmp docs/documentation/check_thruk_rest.asciidoc
-	echo '```' >> docs/documentation/check_thruk_rest.asciidoc
-	./script/check_thruk_rest.sh --help >> docs/documentation/check_thruk_rest.asciidoc 2>&1 || :
-	sed '/AUTHOR/,$$d' docs/documentation/check_thruk_rest.asciidoc > docs/documentation/check_thruk_rest.asciidoc.tmp
-	mv docs/documentation/check_thruk_rest.asciidoc.tmp docs/documentation/check_thruk_rest.asciidoc
-	echo '```' >> docs/documentation/check_thruk_rest.asciidoc
+	sed '/```/,$$d' docs/documentation/check_thruk_rest.md > docs/documentation/check_thruk_rest.md.tmp
+	mv docs/documentation/check_thruk_rest.md.tmp docs/documentation/check_thruk_rest.md
+	echo '```' >> docs/documentation/check_thruk_rest.md
+	./script/check_thruk_rest.sh --help >> docs/documentation/check_thruk_rest.md 2>&1 || :
+	sed '/AUTHOR/,$$d' docs/documentation/check_thruk_rest.md > docs/documentation/check_thruk_rest.md.tmp
+	mv docs/documentation/check_thruk_rest.md.tmp docs/documentation/check_thruk_rest.md
+	echo '```' >> docs/documentation/check_thruk_rest.md
 
 
 docs_server:
 	$(MAKE) -C docs server
-	$(MAKE) -C docs clean
 
 staticfiles:
 	script/thruk_create_combined_static_content.pl

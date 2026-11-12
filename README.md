@@ -1,11 +1,10 @@
 Thruk - Monitoring Web Interface
 ===============================
 
-Thruk is a multi-backend monitoring web interface that currently
-supports Naemon, Icinga, Shinken and Nagios as backends using the Livestatus
-API. It is designed to be a drop-in replacement, covering the original
-features and adding enhancements for large installations, improved
-usability and many useful add-ons.
+Thruk is a monitoring web interface for multiple backends. It supports
+Naemon, Icinga, Shinken and Nagios through the Livestatus API.
+It is designed as a drop-in replacement that covers the original features.
+It adds support for large installations, usability improvements and add-ons.
 
 ![Thruk Startpage](https://thruk.org/images/galleries/01_main-thumb.png "Thruk Startpage")
 ![Thruk Panorama](https://thruk.org/images/galleries/geomaps-thumb.png "Thruk Panorama")
@@ -14,7 +13,9 @@ usability and many useful add-ons.
 
 Documentation
 -------------
-All documentation is under `docs/`.
+The Markdown documentation is under `docs/`.
+Start with [first steps](docs/guides/first-steps.md) or the
+[documentation development guide](docs/README.md).
 
 Support
 -------
@@ -26,7 +27,7 @@ Support
   * Chat with developers on [IRC Libera #thruk](irc://irc.libera.chat/thruk) ([Webchat](https://web.libera.chat/?nick=Guest?#thruk)).
 
 
-Main Features / Advantages
+Main features
 --------------------------
 
   * Multiple backends
@@ -45,15 +46,15 @@ Main Features / Advantages
   * Mobile interface included
   * SLA Reports in PDF format
   * Recurring Downtimes
-  * Fully Featured Dashboard
+  * Full-featured dashboard
   * Independent of the monitoring core, can be installed on a remote host
   * Easy to extend with plugins
 
 ### Contributions
 
-Thanks to all the amazing [community contributors for sending PRs](https://github.com/sni/thruk/graphs/contributors) and keeping this project updated. :heart:
+Thanks to the [community contributors for sending PRs](https://github.com/sni/thruk/graphs/contributors) and keeping this project updated.
 
-If you have an idea for an improvement, you are welcome to contribute to the project. Feel free to submit a pull request.
+To suggest an improvement, submit a pull request.
 
 <p align="center">
 <a href="https://github.com/sni/thruk/graphs/contributors">

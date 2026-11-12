@@ -85,7 +85,7 @@ __END__
 
 =head1 DESCRIPTION
 
-This module renders L<use Excel::Template> data.
+This module renders L<Excel::Template> data.
 
 =head1 SEE ALSO
 

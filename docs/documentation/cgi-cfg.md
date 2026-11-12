@@ -1,0 +1,317 @@
+---
+title: cgi.cfg
+---
+
+# cgi.cfg
+
+Thruk uses mostly the same cgi.cfg settings as Nagios or Icinga.
+It supports only the parameters listed below.
+
+<Badge type="tip" text="New in Thruk 2.32" />
+You can also set these values in thruk_local.conf, except for roles and authentication settings.
+
+<Badge type="tip" text="New in Thruk 3.28" />
+From v3.28, you can also set cgi.cfg values in the thruk_local.d folder.
+
+## show_context_help
+
+<Badge type="warning" text="DEPRECATED: setting this has no effect with Thruk 3.x or later" />
+
+Displays an icon with context specific help on most pages.
+
+ex.:
+
+```
+show_context_help = 1
+```
+
+## use_authentication
+
+Controls authentication. If enabled, Thruk uses REMOTE_USER from the Apache
+environment as the authenticated username.
+The webserver must authenticate the user. Thruk handles authorization.
+
+ex.:
+
+```
+use_authentication = 1
+```
+
+## use_ssl_authentication
+
+If enabled, the authenticated username is taken from the
+SSL_CLIENT_S_DN_CN environment instead of the remote user.
+
+ex.:
+
+```
+use_ssl_authentication = 1
+```
+
+## default_user_name
+
+The default user will be used if no username has been provided by the
+webserver. You don't have to set a default user.
+
+ex.:
+
+```
+default_user_name = thrukadmin
+```
+
+### refresh_rate
+
+Number of seconds after which most pages are refreshed automatically.
+
+ex.:
+
+```
+refresh_rate = 90
+```
+
+### escape_html_tags
+
+Determines whether html output from plugins is escaped or not.
+
+This can be overridden for a single host or service with the
+`_THRUK_ESCAPE_HTML_TAGS` custom variable. A value of `0` renders the plugin
+output as raw html, a value of `1` keeps it escaped.
+
+::: info
+Disabling escaping renders plugin output without sanitizing it and
+inserts it directly into the page. Only use this for plugins you trust. It can
+influence or restyle the rest of the interface.
+:::
+
+ex.:
+
+```
+escape_html_tags = 1
+
+# render raw html plugin output for a single service
+define service {
+  ...
+  _THRUK_ESCAPE_HTML_TAGS 0
+}
+```
+
+### action_url_target
+
+Sets the target of the action url links.
+
+ex.:
+
+```
+action_url_target = _blank
+```
+
+### notes_url_target
+
+Sets the target of the notes url links.
+
+ex.:
+
+```
+notes_url_target = _blank
+```
+
+### lock_author_names
+
+If enabled, user are not allowed to change the author name for
+commands.
+
+ex.:
+
+```
+lock_author_names = 1
+```
+
+## roles
+
+There are several roles available through the `authorized_for_` options. Each
+role can also be assigned with the corresponding contact_group option `authorized_contactgroup_for_`.
+
+You can use the the `*` asterisk to assign everyone to a certain role.
+
+Starting with Thruk v2.46 you can use full wildcard support and so something like:
+
+```
+authorized_for_admin = *admin
+```
+
+### authorized_for_admin
+
+List of usernames who have privileged access to everything. These contacts will
+receive all other roles except the read_only role.
+
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_admin = thrukadmin
+```
+
+Note: For historical reasons (there was no explicit admin role in the past), any user
+which has the `authorized_for_system_commands` and the `authorized_for_configuration_information`
+role will also gain the full admin role.
+This is considered deprecated and might change in the future.
+Change this behavior with the 'admin_role_from_system_and_conf' setting.
+
+### authorized_for_system_information
+
+List of usernames who have access to the system and process
+information pages.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_system_information = thrukadmin
+```
+
+### authorized_for_configuration_information
+
+List of usernames who have access to the configuration
+information pages.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_configuration_information = thrukadmin
+```
+
+### authorized_for_system_commands
+
+List of usernames who are allowed to send system commands.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_system_commands = thrukadmin
+```
+
+### authorized_for_all_services
+
+List of usernames who are authorized to view all services.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_all_services = thrukadmin
+```
+
+### authorized_for_all_hosts
+
+List of usernames who are authorized to view all hosts.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_all_hosts = thrukadmin
+```
+
+### authorized_for_all_service_commands
+
+List of usernames who are authorized to send commands for all
+services.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_all_service_commands = thrukadmin
+```
+
+### authorized_for_all_host_commands
+
+List of usernames who are authorized to send commands for all
+hosts.
+You may use wildcards here.
+
+ex.:
+
+```
+authorized_for_all_host_commands = thrukadmin
+```
+
+### authorized_for_public_bookmarks
+
+A comma-delimited list of usernames that can manage public bookmarks.
+
+ex.:
+
+```
+authorized_for_public_bookmarks = thrukadmin
+```
+
+### authorized_for_broadcasts
+
+A comma-delimited list of usernames that can manage broadcasts.
+
+ex.:
+
+```
+authorized_for_broadcasts = thrukadmin
+```
+
+### authorized_for_business_processes
+
+A comma-delimited list of usernames that have the permission to create and
+edit business processes.
+
+ex.:
+
+```
+authorized_for_business_processes = thrukadmin
+```
+
+### authorized_for_panorama_view_media_manager
+
+A comma-delimited list of usernames that have the permission to upload and
+overwrite status icon sets and background images in panorama view dashboards.
+
+ex.:
+
+```
+authorized_for_panorama_view_media_manager = thrukadmin
+```
+
+### authorized_for_debug_profiles
+
+A comma-delimited list of usernames that have the permission to show
+extended information in the debug profiles, ex.: livestatus queries.
+
+ex.:
+
+```
+authorized_for_debug_profiles = thrukadmin
+```
+
+### authorized_for_reports
+
+A comma-delimited list of usernames that have full access to the reporting
+feature.
+
+ex.:
+
+```
+authorized_for_reports = thrukadmin
+```
+
+### authorized_for_read_only
+
+A comma-delimited list of usernames that have read-only rights in
+the CGIs.  This will block any service or host commands normally shown
+on the extinfo CGI pages. It will also block comments from being shown
+to read-only users.
+
+ex.:
+
+```
+authorized_for_read_only = viewer
+```

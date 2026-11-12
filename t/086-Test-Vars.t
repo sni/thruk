@@ -26,4 +26,5 @@ all_vars_ok(ignore_vars => [qw($sec $min $hour $wday $yday $isdst $dow $doy $dst
                                $dev $ino $mode $nlink $uid $gid $rdev $size
                                $atime $mtime $ctime $blksize $blocks
                                $hfilter $controller $test $ct
+                               $cell
                           )]);

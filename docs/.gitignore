@@ -1,1 +1,3 @@
-.thruk_org
+node_modules
+.vitepress/cache
+.vitepress/dist

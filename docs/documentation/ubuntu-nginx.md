@@ -1,0 +1,105 @@
+---
+title: Running Thruk with nginx on Ubuntu or Debian
+---
+
+# Installation
+
+These instructions assume that you installed Thruk from the official
+
+`.deb` packages at thruk.org.
+
+## Nginx
+
+Install the required packages:
+
+```
+    #> apt-get install nginx-full uwsgi-plugin-psgi
+```
+
+Put the example configuration file in /etc/nginx/sites-available/thruk
+and enable it with:
+
+```
+    #> ln -s /etc/nginx/sites-available/thruk /etc/nginx/sites-enabled/thruk
+```
+
+Replace the example SSL certificates with real certificates.
+Use htpasswd to create /etc/nginx/users.
+
+Example configuration:
+
+```
+server {
+    server_name thruk.example.com;
+
+    # SSL configuration
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    ssl_certificate /etc/nginx/ssl/thruk.example.com.crt;
+    ssl_certificate_key /etc/nginx/ssl/thruk.example.com.key;
+
+    root /usr/share/thruk/root;
+
+    location /thruk/documentation.html {
+         alias /usr/share/thruk/root/thruk/documentation.html;
+    }
+    location ~ ^/thruk/plugins/(.*?)/(.*)$ {
+         alias /etc/thruk/plugins/plugins-enabled/$1/root/$2;
+    }
+    location /thruk/themes/ {
+         alias /etc/thruk/themes/themes-enabled/;
+    }
+
+    index index.cgi index.html;
+
+    location @thruk {
+        uwsgi_pass       127.0.0.1:4040;
+        uwsgi_param      REMOTE_USER $remote_user;
+        uwsgi_modifier1  5;
+        include uwsgi_params;
+    }
+
+    location / {
+        auth_basic              "Thruk server authentication";
+        auth_basic_user_file    /etc/nginx/users;
+
+        # First attempt to serve request as file, then
+        # as directory, then fall back to displaying a 404.
+        try_files $uri @thruk;
+    }
+    location /thruk/cgi-bin/remote.cgi {
+        try_files $uri @thruk;
+    }
+    location /thruk/r/ {
+        try_files $uri @thruk;
+    }
+}
+```
+
+## Thruk
+
+Put the ini file in /etc/uwsgi/apps-available/thruk.ini
+and enable it with:
+
+```
+    #> ln -s /etc/uwsgi/apps-available/thruk.ini /etc/uwsgi/apps-enabled/thruk.ini
+```
+
+```
+[uwsgi]
+plugin = perl #or psgi (@Debian 10)
+socket = 127.0.0.1:4040
+master = True
+processes = 1
+threads = 2
+env = THRUK_CONFIG=/etc/thruk/
+env = PERL5LIB=$PERL5LIB:/usr/share/thruk/lib/:/usr/lib/thruk/perl5
+psgi = /usr/share/thruk/script/thruk.psgi
+```
+
+## Startup
+
+```
+    #> /etc/init.d/nginx start
+```

@@ -28,7 +28,6 @@ logs/thruk.log
 ssi/extinfo-header.ssi$
 ssi/status-header.ssi$
 script/thruk.lib
-script/thruk_update_docs.sh
 script/wkhtmltopdf
 t/xt
 root/thruk/plugins/.*
@@ -46,7 +45,15 @@ inc/File/Copy/Recursive.pm
 ^log4perl.conf$
 TODO
 docs/development
-docs/documentation/(?!(configuration|cgi-cfg).asciidoc)
+^docs/documentation/(?!(configuration|cgi-cfg)\.md$)
+# vitepress build artifacts and npm dependencies must not be shipped
+^docs/node_modules/
+^docs/package(-lock)?\.json
+^docs/\.vitepress/
+^docs/check/
+^docs/guides/
+^docs/(index|README)\.md$
+^docs/dist/
 docs/.thruk_org
 docs/docker-compose.yaml
 docs/Makefile

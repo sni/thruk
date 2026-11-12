@@ -4,7 +4,7 @@ use File::Temp qw/tempfile/;
 use Test::More;
 
 # ensure that all config options are well documented
-my $src = "docs/documentation/configuration.asciidoc";
+my $src = "docs/documentation/configuration.md";
 
 plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' unless $ENV{TEST_AUTHOR};
 
@@ -43,17 +43,17 @@ sub get_thruk_conf {
 }
 
 
+# Collect option headings without their presentation or anchor IDs.
 sub get_docs {
     my $doc_header;
     open(my $ph, '<', $src) or die("cannot open ".$src.": ".$!);
     while(<$ph>) {
-    my $line = $_;
-        if($line =~ m/^===\s+(.*)$/) {
-            $doc_header->{$1} = 1;
-        }
-        if($line =~ m/^==\s+(.*)$/) {
-            $doc_header->{$1} = 1;
-        }
+        next unless /^#{2,3}\s+(.*)$/;
+        my $text = $1;
+        $text =~ s/\s+\{#[^}]+\}\s*\z//;
+        $text =~ s/`//g;    # strip code ticks
+        $text =~ s/\s+\z//;
+        $doc_header->{$text} = 1;
     }
     close($ph);
     return $doc_header;
