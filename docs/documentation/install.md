@@ -138,7 +138,7 @@ Then use the socket as 'peer' parameter in your backend configuration.
 ![Thruk Backends Manager](source/backends.png)
 
 **Livestatus architecture**
-![Livestatus Architecture](source/livestatus.png)
+![Livestatus Architecture](source/livestatus.svg)
 
 **thruk_local.conf:**
 
@@ -251,7 +251,7 @@ Use HTTPS for remote connections.
 ```
 
 **HTTP architecture**
-![HTTP Architecture](source/livestatus_http.png)
+![HTTP Architecture](source/livestatus_http.svg)
 
 **thruk_local.conf:**
 

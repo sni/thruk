@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 555" role="img" aria-label="Livestatus over HTTP: the user's browser talks to a local web server running Apache and mod_fcgid. The web server starts a local Fast CGI application that runs Perl and Thruk. That Fast CGI application reads live data from the local Naemon / Nagios Livestatus NEB module. A second site uses the same layout and reaches the first site's web server over HTTP(S), so its Fast CGI application talks to the local Livestatus NEB module instead." style="width:100%;max-width:1060px;height:auto" fill="currentColor" font-family="system-ui, 'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="lvh_arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor"/></marker>
+  </defs>
+
+  <!-- title -->
+  <text x="10" y="24" font-size="20" font-weight="bold">Livestatus over HTTP</text>
+  <line x1="10" y1="34" x2="1050" y2="34" stroke="currentColor" stroke-width="1"/>
+
+  <!-- User stick figure -->
+  <g fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="80" cy="90" r="10" fill="var(--vp-c-bg, #fff)"/>
+    <path d="M80 100 V130 M58 107 H102 M80 130 L68 168 M80 130 L92 168"/>
+  </g>
+  <text x="80" y="192" font-size="20" text-anchor="middle">User</text>
+
+  <!-- Browser -->
+  <rect x="150" y="70" width="190" height="130" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="162" y="94" font-size="20">Browser</text>
+  <rect x="185" y="110" width="120" height="50" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="245" y="142" font-size="20" text-anchor="middle">HTML / JS</text>
+
+  <!-- Web Server (top) -->
+  <rect x="440" y="40" width="250" height="200" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="452" y="64" font-size="20">Web Server</text>
+  <rect x="470" y="75" width="190" height="145" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="490" y="102" font-size="20">Apache</text>
+  <rect x="520" y="150" width="125" height="44" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="582.5" y="179" font-size="20" text-anchor="middle">mod_fcgid</text>
+
+  <!-- Fast CGI Application (top) -->
+  <rect x="780" y="40" width="270" height="200" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="792" y="64" font-size="20">Fast CGI Application</text>
+  <rect x="810" y="75" width="220" height="145" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="830" y="102" font-size="20">Perl</text>
+  <rect x="930" y="150" width="70" height="40" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="965" y="177" font-size="20" text-anchor="middle">Thruk</text>
+
+  <!-- Naemon / Nagios (bottom) -->
+  <rect x="40" y="330" width="250" height="200" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="52" y="354" font-size="20">Naemon / Nagios</text>
+  <rect x="90" y="395" width="160" height="90" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="170" y="430" font-size="20" text-anchor="middle">Livestatus</text>
+  <text x="170" y="456" font-size="20" text-anchor="middle">NEB Module</text>
+
+  <!-- Fast CGI Application (bottom) -->
+  <rect x="440" y="330" width="250" height="200" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="452" y="354" font-size="20">Fast CGI Application</text>
+  <rect x="470" y="365" width="190" height="145" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="490" y="392" font-size="20">Perl</text>
+  <rect x="580" y="440" width="70" height="40" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="615" y="467" font-size="20" text-anchor="middle">Thruk</text>
+
+  <!-- Web Server (bottom) -->
+  <rect x="780" y="330" width="270" height="200" fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="792" y="354" font-size="20">Web Server</text>
+  <rect x="810" y="365" width="220" height="145" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="830" y="392" font-size="20">Apache</text>
+  <rect x="885" y="450" width="125" height="44" fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5"/>
+  <text x="947.5" y="479" font-size="20" text-anchor="middle">mod_fcgid</text>
+
+  <!-- connections; bidirectional links use two paths so each end gets an arrowhead -->
+  <g fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M108 130 H148" marker-end="url(#lvh_arrow)"/>
+    <path d="M342 130 H438" marker-end="url(#lvh_arrow)"/>
+    <path d="M692 130 H778" marker-end="url(#lvh_arrow)"/>
+    <path d="M778 130 H692" marker-end="url(#lvh_arrow)"/>
+    <path d="M915 328 V242" marker-end="url(#lvh_arrow)"/>
+    <path d="M1025 242 V328" marker-end="url(#lvh_arrow)"/>
+    <path d="M780 440 H692" marker-end="url(#lvh_arrow)"/>
+    <path d="M692 440 H780" marker-end="url(#lvh_arrow)"/>
+    <path d="M440 440 H292" marker-end="url(#lvh_arrow)"/>
+    <path d="M292 440 H440" marker-end="url(#lvh_arrow)"/>
+  </g>
+  <text x="390" y="120" font-size="20" font-style="italic" text-anchor="middle">HTTP(S)</text>
+  <text x="735" y="120" font-size="20" text-anchor="middle">Socket</text>
+  <text x="970" y="283" font-size="20" font-style="italic" text-anchor="middle">HTTP(S)</text>
+  <text x="735" y="432" font-size="20" text-anchor="middle">Socket</text>
+  <text x="365" y="432" font-size="20" font-style="italic" text-anchor="middle">Livestatus</text>
+</svg>
