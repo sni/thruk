@@ -211,10 +211,18 @@ function bp_confirmed_rename(node) {
 
 /* post url and refresh on success*/
 function bp_post_and_refresh(url, data, node_id) {
+    // keep the name/value array from serializeArray() intact, jQuery.extend
+    // would convert it into numeric keys and the form fields would be lost
+    var postdata;
+    if(Array.isArray(data)) {
+        postdata = data.concat([{ name: 'CSRFtoken', value: bp_csrf }]);
+    } else {
+        postdata = jQuery.extend({}, data, { 'CSRFtoken': bp_csrf });
+    }
     jQuery.ajax({
         url:   url,
         type: 'POST',
-        data:  jQuery.extend({}, data, { 'CSRFtoken': bp_csrf }),
+        data:  postdata,
         success: function(data) {
             if(data && data.rc == 0) {
                 bp_refresh(bp_id, node_id);

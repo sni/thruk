@@ -350,7 +350,7 @@
         <div class="p-2 flexcol">
           <div class="grow-0 text-center">Add input/output filter for this node only or globally for all nodes.</div>
           <div class="grow">
-            <table>
+            <table class="bp_filter">
               <thead>
                 <tr>
                   <th></th>
