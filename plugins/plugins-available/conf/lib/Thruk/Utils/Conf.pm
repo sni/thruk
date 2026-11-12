@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp qw/confess/;
 use Data::Dumper qw/Dumper/;
+use Fcntl qw/:flock :mode/;
 use Scalar::Util qw/weaken/;
 use Storable qw/store retrieve/;
 use Time::HiRes qw(stat);
@@ -647,6 +648,62 @@ sub read_htpasswd {
 
 ##########################################################
 
+=head2 model_write_lock
+
+acquire exclusive write locks for the object models of given backends.
+
+model changes (ex.: REST /config/objects or the config tool cgi pages)
+are read-modify-write on the shared storable retention files, so
+concurrent requests from other FCGI workers or forked jobs would race
+and drop each others objects (see #1497). This lock serializes the whole
+read-modify-write for the duration of the current request, the short
+file locks in get_model_retention()/store_model_retention() only protect
+the storable files themselves.
+
+Retry a few times before failing, so short concurrent writes get
+serialized instead of an error. The returned error is a hash which can be
+passed to $c->detach_error (rest: 409), or used as is for html error
+pages (503).
+
+Returns 1 on success, the error hash on failure.
+The locks are released when the filehandles get destroyed at the end of
+the request (including when detach_error() dies).
+
+=cut
+sub model_write_lock {
+    my($c, $backends) = @_;
+    my $retries = 10;
+    my $sleep   = 0.3;
+    my $dir     = $c->config->{'var_path'};
+    for my $peer_key (@{$backends}) {
+        my $lock_file = $dir."/obj_retention.".$peer_key.".write.lock";
+        my $fh;
+        sysopen($fh, $lock_file, Fcntl::O_RDWR() | Fcntl::O_CREAT(), 0660)
+            or die("cannot open model write lock $lock_file: $!\n");
+        my $locked = 0;
+        for(1..$retries) {
+            if(flock($fh, Fcntl::LOCK_EX() | Fcntl::LOCK_NB())) {
+                $locked = 1;
+                last;
+            }
+            # another request is writing the model right now, wait for it to finish
+            Time::HiRes::sleep($sleep);
+        }
+        if(!$locked) {
+            CORE::close($fh);
+            return({
+                code  => 409,
+                msg   => 'configuration is being changed right now, try again in a few moments',
+                descr => 'another request is modifying the configuration of backend '.$peer_key.' right now.',
+            });
+        }
+        push @{$c->stash->{'model_write_locks'}}, $fh;
+    }
+    return 1;
+}
+
+##########################################################
+
 =head2 store_model_retention
 
 store object model in storable
@@ -663,18 +720,23 @@ sub store_model_retention {
     # store changes/stashed changes to local user, unchanged config can be stored in a generic file
     my $file      = $c->config->{'conf_retention_file'};
     my $user_file = $c->config->{'var_path'}."/obj_retention.".$backend.".".$user_id.".dat";
+    my $generic_file = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
     if(!$file) {
-        $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
-    }
-    if($model->{'configs'}->{$backend}->{'needs_commit'} || $c->stash->{'use_user_model_retention_file'}) {
-        $file = $user_file;
-    } else {
-        unlink($user_file);
-        $file  = $c->config->{'var_path'}."/obj_retention.".$backend.".dat";
+        $file  = $generic_file;
     }
 
     confess("no such backend") unless defined $model->{'configs'}->{$backend};
 
+    if($model->{'configs'}->{$backend}->{'needs_commit'} || $c->stash->{'use_user_model_retention_file'}) {
+        $file = $user_file;
+    } else {
+        unlink($user_file);
+        $file  = $generic_file;
+    }
+    # exclusive lock on the file we're about to write, so concurrent
+    # get_model_retention()/store_model_retention() calls (ex.: parallel
+    # REST /config/objects) can't corrupt the storable (#1497)
+    my($fh, $lock_fh) = Thruk::Utils::IO::file_lock($file);
     # try to save retention data
     eval {
         # do not store some references
@@ -695,6 +757,7 @@ sub store_model_retention {
         $model->{'configs'}->{$backend}->{'stats'}      = $stats if $stats;
         $model->{'configs'}->{$backend}->{'remotepeer'} = $rpeer if $rpeer;
     };
+    Thruk::Utils::IO::file_unlock($file, $fh, $lock_fh);
     if($@) {
         _error($@);
         $c->stats->profile(end => "store_model_retention($backend)");
@@ -756,6 +819,17 @@ sub get_model_retention {
     $c->config->{'conf_retention_file'} = $file;
     $c->config->{'conf_retention_hex'}  = $c->cluster->is_clustered() ? Thruk::Utils::Crypt::hexdigest(Thruk::Utils::IO::read($file)) : '';
 
+    # shared lock on the file while reading it, so a concurrent
+    # store_model_retention() (ex.: parallel REST /config/objects) can't
+    # corrupt the storable (#1497)
+    my $fh;
+    eval { $fh = Thruk::Utils::IO::file_rlock($file); };
+    if(!$fh) {
+        # file gone or cannot be locked, let caller reparse the config
+        _debug("cannot lock retention file $file, will reparse: $@");
+        $c->stats->profile(end => "get_model_retention($backend)");
+        return;
+    }
     # try to retrieve retention data
     my $rc = 1;
     eval {
@@ -778,9 +852,9 @@ sub get_model_retention {
             _debug('removed old retention file: version '.Dumper($data->{'version'}).' - date '.Dumper($data->{'release_date'}));
             unlink($file);
             undef $rc;
-            return;
         }
     };
+    CORE::close($fh) or die("cannot close retention file ".$file.": $!\n"); # closing releases the shared lock
     if($@) {
         unlink($file);
         _error($@);

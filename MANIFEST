@@ -164,6 +164,7 @@ lib/Thruk/Utils/Pidfile.pm
 lib/Thruk/Utils/Plugin.pm
 lib/Thruk/Utils/RecurringDowntimes.pm
 lib/Thruk/Utils/References.pm
+lib/Thruk/Utils/Replay.pm
 lib/Thruk/Utils/Scripts.pm
 lib/Thruk/Utils/SelfCheck.pm
 lib/Thruk/Utils/Status.pm
@@ -725,6 +726,7 @@ root/thruk/cache/thruk-3.30.js
 root/thruk/cache/thruk-panorama-3.30.js
 root/thruk/images/trendshost.png
 root/thruk/images/trendssvc.png
+root/thruk/javascript/status-replay.js
 root/thruk/javascript/thruk-3.30.js
 root/thruk/media/critical.webm
 root/thruk/media/ok.webm
@@ -2365,6 +2367,7 @@ t/015-Thruk-Utils-APIKeys.t
 t/016-Thruk-Utils-Date.t
 t/017-Thruk-Utils-UserAgent.t
 t/018-Monitoring-Config-Object.t
+t/019-Thruk-Utils-OAuth.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/022-Thruk-Utils-Log.t
@@ -2379,6 +2382,7 @@ t/086-Test-Vars.t
 t/087-trailing_whitespace.t
 t/088-remove_after.t
 t/089-patches.t
+t/090-external-status.t
 t/090-external.t
 t/090-io-race-test.t
 t/090-io.t
@@ -2424,6 +2428,7 @@ t/106-thruk_context.t
 t/107-thruk_utils_avail.t
 t/108-thruk_utils_status.t
 t/109-thruk-rest-utils.t
+t/109-thruk_utils_replay.t
 t/110-thruk_authentication_user.t
 t/111-thruk_utils.t
 t/112-thruk_utils_filter.t
@@ -2449,6 +2454,7 @@ t/300-controller_notifications.t
 t/300-controller_outages.t
 t/300-controller_parts.t
 t/300-controller_remote.t
+t/300-controller_replay.t
 t/300-controller_rest_v1.t
 t/300-controller_Root.t
 t/300-controller_showlog.t
@@ -2813,6 +2819,7 @@ templates/status_grid.tt
 templates/status_hostdetail.tt
 templates/status_overview.tt
 templates/status_perfmap.tt
+templates/status_replay.tt
 templates/status_summary.tt
 templates/summary_report.tt
 templates/summary_report_alert_producer.tt

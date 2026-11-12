@@ -66,7 +66,6 @@ sub index {
     my $login   = $c->req->parameters->{'login'}    || '';
     my $pass    = $c->req->parameters->{'password'} || '';
     my $referer = $c->req->parameters->{'referer'}  || '';
-    $referer    =~ s#^//#/#gmx;         # strip double slashes
     $referer    = $keywords || $c->stash->{'url_prefix'} unless $referer;
     # append slash for omd sites, IE and chrome wont send the login cookie otherwise
     if(($ENV{'OMD_SITE'} and $referer eq '/'.$ENV{'OMD_SITE'})
@@ -88,6 +87,11 @@ sub index {
     # replace first & with ? (so we don't have to use encoded %3f which breaks apache rewrites)
     if($referer && $referer !~ m/\?/mx) {
         $referer =~ s|&|?|mx;
+    }
+
+    # Validate after decoding and removing keywords, before any redirect uses the referer.
+    if($referer =~ m{\A\s*(?:[a-z][a-z0-9+.-]*:|[/\\]{2}|\\)|[\x00-\x1f\x7f]}imx) {
+        $referer = $c->stash->{'url_prefix'};
     }
 
     $c->stash->{'referer'}       = $referer;

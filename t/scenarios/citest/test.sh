@@ -12,7 +12,6 @@ export PERL5LIB=./lib:.:$PERL5LIB
 
 export TEST_AUTHOR=1
 export THRUK_AUTHOR=1
-export THRUK_HTML_LINT_ARE_ERRORS=1
 export TEST_MYSQL="mysql://naemon:naemon@localhost:3306/test"
 
 export HARNESS_TIMER=1

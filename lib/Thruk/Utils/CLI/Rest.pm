@@ -97,7 +97,7 @@ sub _fetch_results {
 
         # Support template toolkit syntax in the url itself ( if url starts with [%... )
         # But for security reasons only from the command line
-        if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} && $url =~ m/^\s*\[%/mx) {
+        if(($ENV{'THRUK_CLI_SRC'} // '') eq 'CLI' && $url =~ m/^\s*\[%/mx) {
             $url = _replace_url_template($url, $opts);
         }
 
@@ -105,7 +105,7 @@ sub _fetch_results {
 
         # Support local files and remote urls as well.
         # But for security reasons only from the command line
-        if($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'}) {
+        if(($ENV{'THRUK_CLI_SRC'} // '') eq 'CLI') {
             # text data
             if($opt->{'string'}) {
                 $opt->{'result'} = Cpanel::JSON::XS->new->pretty->encode({
@@ -449,6 +449,7 @@ sub _create_output {
             $totals->{'output'} = $r->{'output'};
         }
         if($r->{'template'}) {
+            return("--template is only allowed from the local command line.\n", 3) unless ($ENV{'THRUK_CLI_SRC'} // '') eq 'CLI';
             if($totals->{'template'}) {
                 return("multiple --template parameter are not supported.", 3);
             }

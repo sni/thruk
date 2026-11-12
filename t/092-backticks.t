@@ -22,7 +22,7 @@ for my $cmd (@{$cmds}) {
     $line =~ s/'.*?'//gmx;
     next if $line =~ m/nasty\ chars/mx;
     next if $line =~ m/\Qcontains invalid characters\E/mx;
-    next if $line =~ m/NO\ CRITIC\ BACKTICKS/mx;
+    next if $line =~ m/\QNO CRITIC BACKTICKS\E/mx;
     $line =~ s/\#.*$//gmx;
     next if($filter && $line !~ m%$filter%mx);
     next if $line =~ m%\QThruk/Utils/IO.pm:\E%mx;

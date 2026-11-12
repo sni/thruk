@@ -48,36 +48,45 @@ setup_apache2() {
   deb-systemd-invoke condreload apache2 || true
 
   echo "Thruk have been configured for http://$(hostname)/thruk/."
-  echo "The default user is 'thrukadmin' with password 'thrukadmin'. You can usually change that by 'htpasswd /etc/thruk/htpasswd thrukadmin'"
+  echo "Before first login, set the 'thrukadmin' password with 'htpasswd /etc/thruk/htpasswd thrukadmin'."
 }
 
 
 case "$1" in
     configure)
+        # Disable only the shipped legacy credential, preserving custom passwords.
+        if [ -f /etc/thruk/htpasswd ]; then
+          sed -i 's/^thrukadmin:gylG8yxOCYkTE$/thrukadmin:!/' /etc/thruk/htpasswd || {
+            echo "Could not disable the public default Thruk password." >&2
+            exit 1
+          }
+          echo "If you used the public default password, set a new one with 'htpasswd /etc/thruk/htpasswd thrukadmin'."
+        fi
+
         # restore themes, plugins and ssi
-        if [ -d /tmp/thruk_update/themes/. ]; then
+        if [ -d /var/lib/thruk-update/themes/. ]; then
           # do not remove the new default themes
-          test -h /tmp/thruk_update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light
-          test -h /tmp/thruk_update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
+          test -h /var/lib/thruk-update/themes/Light || mv /etc/thruk/themes/themes-enabled/Light /etc/thruk/themes/themes-enabled/.Light
+          test -h /var/lib/thruk-update/themes/Dark  || mv /etc/thruk/themes/themes-enabled/Dark  /etc/thruk/themes/themes-enabled/.Dark
           rm -f /etc/thruk/themes/themes-enabled/*
-          cp -rp /tmp/thruk_update/themes/* /etc/thruk/themes/themes-enabled/
+          cp -rp /var/lib/thruk-update/themes/* /etc/thruk/themes/themes-enabled/
           test -h /etc/thruk/themes/themes-enabled/.Light && mv /etc/thruk/themes/themes-enabled/.Light /etc/thruk/themes/themes-enabled/Light
           test -h /etc/thruk/themes/themes-enabled/.Dark  && mv /etc/thruk/themes/themes-enabled/.Dark  /etc/thruk/themes/themes-enabled/Dark
           # remove broken/old symlinks
           for link in /etc/thruk/themes/themes-enabled/*; do test -e $link/. || rm $link; done
         fi
-        if [ -d /tmp/thruk_update/plugins/. ]; then
+        if [ -d /var/lib/thruk-update/plugins/. ]; then
           rm -f /etc/thruk/plugins/plugins-enabled/*
-          cp -rp /tmp/thruk_update/plugins/* /etc/thruk/plugins/plugins-enabled/
+          cp -rp /var/lib/thruk-update/plugins/* /etc/thruk/plugins/plugins-enabled/
         fi
         # remove broken/old symlinks
         for link in /etc/thruk/plugins/plugins-enabled/*; do test -e $link/. || rm $link; done
         echo "thruk plugins enabled:" $(ls /etc/thruk/plugins/plugins-enabled/)
-        if [ -d /tmp/thruk_update/ssi/. ]; then
+        if [ -d /var/lib/thruk-update/ssi/. ]; then
           rm -f /etc/thruk/ssi/*
-          cp -rp /tmp/thruk_update/ssi/* /etc/thruk/ssi/
+          cp -rp /var/lib/thruk-update/ssi/* /etc/thruk/ssi/
         fi
-        rm -rf /tmp/thruk_update
+        rm -rf /var/lib/thruk-update
 
         # set permissions
         mkdir -p /var/lib/thruk \

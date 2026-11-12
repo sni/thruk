@@ -63,6 +63,9 @@ sub _rest_get_thruk_panorama_maint {
     if(!$dashboard) {
         return({ 'message' => 'no such dashboard', code => 404 });
     }
+    if(Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $id, $dashboard) < Thruk::Utils::Panorama::ACCESS_READWRITE()) {
+        return({ 'message' => 'permission denied', code => 403 });
+    }
 
     my $name   = $dashboard->{'tab'}->{'xdata'}->{'title'} // 'no name';
     my $method = $c->req->method;

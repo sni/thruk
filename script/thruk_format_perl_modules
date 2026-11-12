@@ -196,6 +196,7 @@ sub _parse_file {
         $test =~ s%(die|confess)\("[^"]*"%%gmx;
         $test =~ s%(die|confess)\('[^']*'%%gmx;
         $test =~ s%<Component.*?>%%gmx;
+        $test =~ s%local\s+\*Thruk::[:\w]*\s+%%gmx; # local redefines, probably in tests
 
         # split by BEGIN blocks, there might be a reason to load some modules after the BEGIN block
         if($test =~ m/^BEGIN/mx && $lastblock) {
@@ -359,6 +360,10 @@ sub _parse_file {
             next if $m eq 'Thruk::Utils::PDF';         # virtual module, does not exist
             next if $m eq 'Thruk::Globals';            # virtual module, does not exist
             next if $m eq 'Thruk::Timer';              # handled specially
+            next if $m =~ m/^TestMysqlDBH::/;          # internal module
+            next if $m =~ m/^FakeUA::/;                # internal module
+            next if $m =~ m/^ReplayTestDB/;            # internal module
+            next if $m =~ m/^ReplayTestContext/;       # internal module
             if($file =~ m/thruk_format_perl_modules/mx) {
                 next if $m eq 'Thruk';
                 next if $m eq 'Digest';

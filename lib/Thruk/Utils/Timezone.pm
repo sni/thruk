@@ -29,11 +29,15 @@ use Thruk::Utils::Log qw/:all/;
 =cut
 sub set_timezone {
     my($config, $timezone) = @_;
-    $config->{'_server_timezone'} = detect_timezone() unless $config->{'_server_timezone'};
-
     if(!defined $timezone) {
-        $timezone = $config->{'server_timezone'} || $config->{'use_timezone'} || $config->{'_server_timezone'};
+        # prefer explicitly configured timezone over os detection,
+        # else a first thread in a multithreaded server may cache
+        # the os timezone as _server_timezone (see issue #1467)
+        $timezone = $config->{'server_timezone'} || $config->{'use_timezone'};
+        $timezone = detect_timezone($timezone) unless $timezone;
     }
+
+    $config->{'_server_timezone'} = $timezone unless $config->{'_server_timezone'};
 
     ## no critic
     $ENV{'TZ'} = $timezone;

@@ -1455,8 +1455,8 @@ sub _apply_sort {
 
         $key = $alias_columns->{$key}->{'orig'} if defined $alias_columns->{$key};
 
-        # check for nasty chars
-        die("sort key contains invalid characters") if($key =~ m/[`\$>'"]/mx);
+        # Backslashes can escape the quotes in the generated comparator.
+        die("sort key contains invalid characters") if($key =~ m/[\\`\$>'"]/mx);
 
         # sort numeric
         if( defined $data->[0]->{$key} and Thruk::Backend::Manager::looks_like_number($data->[0]->{$key}) ) {

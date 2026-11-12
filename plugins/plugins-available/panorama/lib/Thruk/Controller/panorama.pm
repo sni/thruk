@@ -871,7 +871,7 @@ sub _task_save_dashboard {
         # type icon - iconset
         if($p->{'xdata'}->{'appearance'} && $p->{'xdata'}->{'appearance'}->{'iconset'}) {
             my $file = $p->{'xdata'}->{'appearance'}->{'iconset'};
-            if($file && $file !~ m|/|mx && $file !~ m|\.\.|mx) {
+            if(!Thruk::Base::check_for_nasty_filename($file) && $file !~ m|\.\.|mx) {
                 next if $file eq 'default'; # skip our default sets
                 next if $file eq 'default_64';
                 next if $file eq 'tfl';
@@ -929,7 +929,7 @@ sub _task_load_dashboard {
     eval {
         $data = decode_json($content);
     };
-    if($@) {
+    if($@ || ref $data ne 'HASH' || (defined $data->{'usercontent'} && ref $data->{'usercontent'} ne 'HASH')) {
         # must be text/html result, otherwise extjs form result handler dies
         $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'This is not a valid dashboard', success => Cpanel::JSON::XS::false });
         return;
@@ -939,17 +939,37 @@ sub _task_load_dashboard {
 
     if($data->{'usercontent'}) {
         require MIME::Base64;
-        my $usercontent_folder = $c->stash->{'usercontent_folder'}.'/';
+        my $usercontent_folder = Cwd::abs_path($c->stash->{'usercontent_folder'});
+        # Validate the entire import before writing, including existing symlink components.
+        eval {
+            Thruk::Utils::IO::mkdir_r($usercontent_folder);
+            die 'invalid media root' unless defined $usercontent_folder && -d $usercontent_folder;
+            for my $file (sort keys %{$data->{'usercontent'}}) {
+                die 'invalid media filename' unless $file =~ m{\A(?:[a-z0-9_.\- ]+/)*[a-z0-9_\- ]+\.(?:jpeg|jpg|gif|png|svg)\z}mxi;
+                die 'invalid media content' if ref $data->{'usercontent'}->{$file};
+                my $path = $usercontent_folder;
+                for my $part (split m{/}mx, $file) {
+                    die 'invalid media path' if $part eq '.' || $part eq '..';
+                    $path .= '/'.$part;
+                    die 'symlink in media path' if -l $path;
+                }
+            }
+        };
+        if($@) {
+            $c->stash->{text} = Thruk::Utils::Filter::json_encode({ 'msg' => 'Dashboard contains an invalid usercontent path or file.', success => Cpanel::JSON::XS::false });
+            return;
+        }
+        $usercontent_folder .= '/';
         for my $file (sort keys %{$data->{'usercontent'}}) {
             my $size = -s $usercontent_folder.$file;
             next if $c->config->{'demo_mode'};
             next if $size && !_check_media_permissions($c, $usercontent_folder.$file); # overwrite only if user is allowed to
             my $content = MIME::Base64::decode_base64($data->{'usercontent'}->{$file});
             next if($size && length($content) == $size);
-            my $dir     = $file;
+            my $dir     = $usercontent_folder.$file;
             $dir        =~ s|/[^/]+$||mx;
             eval {
-                Thruk::Utils::IO::mkdir_r($usercontent_folder.$dir);
+                Thruk::Utils::IO::mkdir_r($dir);
                 Thruk::Utils::IO::write($usercontent_folder.$file,$content);
             };
             if($@) {
@@ -3734,7 +3754,12 @@ sub _check_media_permissions {
     $file = Thruk::Utils::IO::realpath($file);
 
     # user is allowed to change the image if he has write access to all dashboards using this image
-    my $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    my $dashboards;
+    {
+        # Include private dashboards, but check write access below as the original user.
+        local $c->stash->{'is_admin'} = 1;
+        $dashboards = Thruk::Utils::Panorama::get_dashboard_list($c, 'all', 1);
+    }
     for my $d (@{$dashboards}) {
         # we are looking for dashboards without access which use this image,so skip the dashboard we have full access to
         next if Thruk::Utils::Panorama::is_authorized_for_dashboard($c, $d->{'nr'}, $d) >= ACCESS_READWRITE;

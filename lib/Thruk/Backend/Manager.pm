@@ -2658,6 +2658,10 @@ sub sort_result {
     }
 
     for my $key (@keys) {
+        # the keys are interpolated into an eval'ed sort comparator
+        # (see the same guard in rest_v1)
+        confess("invalid sort key") if !defined $key || ref $key || $key =~ m/[\\`\$>"'%\n\x00]/mx; # NO CRITIC BACKTICKS
+
         # add extra column for custom variables
         if($key =~ m/^cust__(.*)$/mx) {
             my $cust = $1;
@@ -2705,72 +2709,6 @@ sub sort_result {
 
 # keep alias for backwards compatibility
 *_sort = \&sort_result;
-
-########################################
-
-=head2 _sort_nr
-
-  _sort_nr($data, $sortby)
-
-sort a array of array by array nr
-
-  sortby must be an array
-
-  [<nr>, <direction>]
-
-  ex.:
-
-  [5, 'asc']
-  [5, 'asc', 13, 'desc']
-
-=cut
-
-sub _sort_nr {
-    my($data, $sortby) = @_;
-
-    if(ref $data ne 'ARRAY') { confess("Not an ARRAY reference: ".Dumper($data)); }
-    if(scalar @{$data} == 0) {
-        return([]);
-    }
-
-    my @compares;
-    while(@{$sortby}) {
-        my $nr  = shift @{$sortby};
-        my $dir = shift @{$sortby};
-
-        # sort numeric
-        if( defined $data->[0]->[$nr] and $data->[0]->[$nr] =~ m/^[\d\.\-]+$/xm ) {
-            if(lc $dir eq 'asc') {
-                push @compares, '$a->["'.$nr.'"] <=> $b->["'.$nr.'"]';
-            } else {
-                push @compares, '$b->["'.$nr.'"] <=> $a->["'.$nr.'"]';
-            }
-        }
-
-        # sort alphanumeric
-        else {
-            if(lc $dir eq 'asc') {
-                push @compares, '$a->["'.$nr.'"] cmp $b->["'.$nr.'"]';
-            } else {
-                push @compares, '$b->["'.$nr.'"] cmp $a->["'.$nr.'"]';
-            }
-        }
-    }
-    my $sortstring = join( ' || ', @compares );
-
-    my @sorted;
-    ## no critic
-    no warnings;    # sorting by undef values generates lots of errors
-    eval '@sorted = sort {'.$sortstring.'} @{$data};';
-    use warnings;
-    ## use critic
-
-    if(scalar @sorted == 0 && $@) {
-        confess(Dumper($sortstring, $sortby, $@));
-    }
-
-    return(\@sorted);
-}
 
 ########################################
 

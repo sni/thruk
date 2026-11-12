@@ -2,9 +2,10 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/decode_json/;
 use HTTP::Request ();
+use MIME::Base64 qw/encode_base64/;
 use Test::More;
 
-plan tests => 37;
+plan tests => 39;
 
 BEGIN {
     use lib('t');
@@ -18,6 +19,71 @@ use_ok 'Thruk::Utils';
 
 _test_replace_output();
 _test_get_filter();
+
+subtest 'REST input features require a local CLI origin' => sub {
+    my $c = TestUtils::ctx_request('/');
+    local $ENV{'THRUK_VERBOSE'} = 0;
+    my @calls;
+    no warnings qw/redefine once/;
+    local *Thruk::Utils::IO::cmd = sub { push @calls, 'command'; return(0, 'canary', 'canary', ''); };
+    local *Thruk::Utils::IO::read = sub { push @calls, 'file'; return('{}'); };
+    local *Thruk::Utils::CLI::request_url = sub { push @calls, 'external'; return(200, {result => '{}'}); };
+    local *Thruk::Utils::CLI::Rest::_replace_url_template = sub { push @calls, 'template'; return('hosts'); };
+    local *Thruk::Context::sub_request = sub {
+        my($ctx, $url) = @_;
+        push @calls, $url;
+        $ctx->res->body('{}');
+        $ctx->res->code(200);
+        return $ctx;
+    };
+
+    for my $origin ('CLI', 'FCGI', '', undef, 'other') {
+        local $ENV{'THRUK_CLI_SRC'} = $origin;
+        my $name = $origin // 'unset';
+        for my $test (
+            [['--command', 'printf canary'], ['command']],
+            [['t/data/check_thruk_rest/nested.json'], ['file']],
+            [['https://example.invalid/'], ['external']],
+            [["[% 'hosts' %]"], ['template', '/r/v1/hosts']],
+            [['--string', 'canary'], []],
+            [['{}'], []],
+            [['/hosts'], ['/r/v1/hosts']],
+        ) {
+            my($args, $local_calls) = @{$test};
+            my $opts = Thruk::Utils::CLI::Rest::_parse_args([@{$args}], $origin && $origin eq 'CLI' ? 'local' : 'fcgi');
+            @calls = ();
+            my $result = Thruk::Utils::CLI::Rest::_fetch_results($c, $opts, {});
+            my $url = $args->[-1];
+            $url =~ s|^/||mx;
+            is_deeply(\@calls, $origin && $origin eq 'CLI' ? $local_calls : ['/r/v1/'.$url], "$name: @{$args}");
+            is($result->[0]->{'rc'}, 0, 'request completes');
+        }
+    }
+    done_testing();
+};
+
+subtest 'REST output templates require a local CLI origin' => sub {
+    for my $origin ('CLI', 'FCGI', '', undef, 'other') {
+        local $ENV{'THRUK_CLI_SRC'} = $origin;
+        my $name = $origin // 'unset';
+        for my $template (
+            "[% 'LOCAL_TEMPLATE' %]",
+            'data:'.encode_base64("[% 'LOCAL_TEMPLATE' %]", ''),
+            't/data/check_thruk_rest/nested.json',
+        ) {
+            my $result = [{result => '{}', rc => 0, warning => [], critical => [], rename => [], template => $template}];
+            my($output, $rc) = Thruk::Utils::CLI::Rest::_create_output(undef, [], $result);
+            if($origin && $origin eq 'CLI') {
+                is($rc, 0, "$name: template works");
+                like($output, qr/LOCAL_TEMPLATE|timestamp/mx, 'template was rendered');
+            } else {
+                is($rc, 3, "$name: template rejected");
+                like($output, qr/\Qonly allowed from the local command line\E/mx, 'reports origin restriction');
+            }
+        }
+    }
+    done_testing();
+};
 
 subtest 'Livestatus column metadata' => sub {
     for my $test (

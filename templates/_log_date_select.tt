@@ -2,7 +2,8 @@
 
 [% DEFAULT date_select_title="Log File Navigation" %]
 [% DEFAULT skip_update_btn = 0 %]
-<div class="card min-w-[400px]">
+[% DEFAULT extra_classes = "" %][% IF extra_classes %][% SET extra_classes =  " " _ extra_classes %][% END %]
+<div class="card min-w-[400px] [% extra_classes %]">
   <div class="head justify-center">
     <h3>[% date_select_title %]</h3>
   </div>

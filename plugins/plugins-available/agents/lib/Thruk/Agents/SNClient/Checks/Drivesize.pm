@@ -67,7 +67,7 @@ sub get_checks {
                 'id'       => 'df.'.Thruk::Utils::Agents::to_id($drive->{'drive_or_id'}),
                 'name'     => $prefix.' '.$drive->{'drive_or_id'},
                 'check'    => 'check_drivesize',
-                'args'     => [ "drive='".$drive->{'drive_or_id'}."'", $def_opts ],
+                'args'     => [ { "drive" => $drive->{'drive_or_id'} }, $def_opts ],
                 'parent'   => 'agent version',
                 'info'     => $drive,
                 'disabled' => !$drive->{'drive'} ? 'drive has no name' : Thruk::Utils::Agents::check_disable($drive, $disabled_config, ['drivesize', $prefix]),

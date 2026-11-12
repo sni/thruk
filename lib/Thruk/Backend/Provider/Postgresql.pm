@@ -108,13 +108,6 @@ sub _quote {
 }
 
 ##########################################################
-# PostgreSQL does not need backslash quoting in LIKE
-sub _quote_backslash {
-    my($self, $val) = @_;
-    return $val;
-}
-
-##########################################################
 
 =head2 _dbh
 

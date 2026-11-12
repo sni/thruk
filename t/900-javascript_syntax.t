@@ -13,6 +13,7 @@ BEGIN {
 #################################################
 my $filter = $ARGV[0];
 my @jsfiles = glob('root/thruk/javascript/thruk-*.js
+                    root/thruk/javascript/status-replay.js
                     plugins/plugins-available/*/root/*.js
                     plugins/plugins-available/panorama/templates/panorama_js.tt
                     plugins/plugins-available/panorama/templates/_panorama_js_*.tt

@@ -13,6 +13,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::BP::Components::Node ();
 use Thruk::BP::Utils ();
 use Thruk::Utils ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Status ();
 
@@ -740,9 +741,11 @@ sub make_new_node_id {
 
 return all live data needed for this business process
 
+Set authorized_only when exporting objects to enforce the current user's object permissions.
+
 =cut
 sub bulk_fetch_live_data {
-    my($self, $c, $expand_groups) = @_;
+    my($self, $c, $expand_groups, $authorized_only) = @_;
 
     # check if have filters in place which requires fetching all hosts / services for group filters
     my $has_filters = 0;
@@ -808,7 +811,9 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->db->get_hosts(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        my @filters = ($filter);
+        push @filters, Thruk::Utils::Auth::get_auth_filter($c, 'hosts') if $authorized_only;
+        my $data   = $c->db->get_hosts(filter => \@filters, extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $hostdata  = Thruk::Base::array2hash($data, 'name');
     }
     if(scalar keys %{$servicefilter} > 0) {
@@ -844,7 +849,9 @@ sub bulk_fetch_live_data {
             }
         }
         my $filter = Thruk::Utils::combine_filter( '-or', \@filter );
-        my $data   = $c->db->get_services(filter => [$filter], extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
+        my @filters = ($filter);
+        push @filters, Thruk::Utils::Auth::get_auth_filter($c, 'services') if $authorized_only;
+        my $data   = $c->db->get_services(filter => \@filters, extra_columns => [qw/long_plugin_output last_hard_state last_hard_state_change/]);
         $servicedata = Thruk::Base::array2hash($data, 'host_name', 'description');
     }
     if(!$expand_groups) {

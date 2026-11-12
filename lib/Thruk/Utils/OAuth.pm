@@ -59,6 +59,13 @@ sub handle_oauth_login {
             $c->stats->profile(end => "handle_oauth_login");
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/login.cgi?expired&".$referer);
         }
+        # The state in the callback URL alone does not identify the initiating browser.
+        my $browser_token = $c->cookies('thruk_oauth_'.$state);
+        if(!$browser_token || !$data->{'browser_token'} || $browser_token ne $data->{'browser_token'}) {
+            $c->stats->profile(end => "handle_oauth_login");
+            return $c->detach_error({msg => "oauth state does not match this browser", code => 400});
+        }
+        $c->cookie('thruk_oauth_'.$state, '', { expires => 0, httponly => 1 });
         # exchange code into token
         my $auth = $c->config->{'auth_oauth'}->{'provider'}->[$data->{'oauth'}];
         if(!$auth) {
@@ -85,8 +92,9 @@ sub handle_oauth_login {
             grant_type      => 'authorization_code',
         };
         if($auth->{'enable_pkce'}) {
+            # PKCE and client authentication are independent (rfc9700 2.1.1): keep the client_secret
+            # for confidential clients, it is simply optional for public ones.
             $token_data->{'code_verifier'} = $data->{'pkce_code'};
-            delete $token_data->{'client_secret'}; # client secret is not required when using pkce
         }
         $c->stats->profile(begin => "handle_oauth_login: post token");
         my $res = $ua->post($auth->{'token_url'}, $token_data);
@@ -185,11 +193,13 @@ sub handle_oauth_login {
     }
     # redirect to auth url
     $state = Thruk::Utils::Crypt::random_uuid([time()]);
+    my $browser_token = Thruk::Utils::Crypt::random_uuid();
 
     my $state_data = {
-        'time'    => time(),
-        'oauth'   => $id,
-        'referer' => $referer,
+        'time'          => time(),
+        'oauth'         => $id,
+        'referer'       => $referer,
+        'browser_token' => $browser_token,
     };
     my $login_data = {
         client_id             => $auth->{'client_id'},
@@ -210,6 +220,7 @@ sub handle_oauth_login {
 
     Thruk::Utils::IO::mkdir($auth_folder);
     Thruk::Utils::IO::json_lock_store($auth_folder."/".$state.".json", $state_data);
+    $c->cookie('thruk_oauth_'.$state, $browser_token, { expires => time() + 600, httponly => 1 });
     _cleanup_oauth_files($c, $auth_folder, 600);
     my $oauth_login_url = Thruk::Utils::Filter::uri_with($c, $login_data, 1, $auth->{'auth_url'}, 1);
     _debug("oauth login step1: redirecting to ".$oauth_login_url) if Thruk::Base->verbose;
@@ -222,10 +233,10 @@ sub _send_error {
     my($c, $data) = @_;
     my $descr = $data->{'error_description'} // "";
     if($data->{'error_uri'}) {
-        $descr .= "<br>" if $descr;
-        $descr .= sprintf('<a class="link" target="_blank" href="%s"><i class="uil uil-external-link-alt text-sm"></i>%s</a>', $data->{'error_uri'}, $data->{'error_uri'});
+        $descr .= "\n" if $descr;
+        $descr .= $data->{'error_uri'};
     }
-    return $c->detach_error({msg => $data->{'error'}, descr => $descr, code => 500, skip_escape => 1});
+    return $c->detach_error({msg => $data->{'error'}, descr => $descr, code => 500});
 }
 
 ##########################################################

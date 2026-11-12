@@ -2,6 +2,59 @@
 
 This file documents the revision history for the Monitoring WebUI Thruk.
 
+next:
+          - add Status Replay with a playable log-based host and service status timeline
+          - disable the shipped administrator password on fresh installs and package upgrades;
+            set a password with htpasswd /etc/thruk/htpasswd thrukadmin before login
+          - fix quick search treating strings containing "like" as lexical query (#1538)
+          - improve summary page performance by fetching only required columns (#1536)
+          - add check_timeout to livestatus columns
+          - add date and time to cron.log
+          - improve graph popup positioning and hover behavior
+          - Security:
+            - fix insecure package restore staging
+            - do not send thruk_auth session cookies to external hosts
+            - fix login referer open redirect after decoding
+            - preserve role restrictions in derived credentials
+            - fix CSRF protection for profile preferences and team changes
+            - enforce command permissions and CSRF checks for core rescheduling
+            - enforce read-only restrictions for server actions
+            - fix authorization when replacing recurring downtimes
+            - fix custom variable exposure in status XLS exports
+            - fix plugin output escaping on landing page and performance map
+            - fix path traversal in broadcast IDs
+            - confine remote configuration sync paths to the peer cache
+            - require admin permission for remote CLI stop and restart
+            - prevent shell interpretation in job diagnostics
+            - reject embedded newlines in external command frames
+          - OAuth:
+            - add team_regex and team_filter options to transform and filter team names
+            - bind callbacks to the browser which initiated the login
+          - Rest:
+            - restrict privileged REST CLI features to local execution
+            - require admin authorization for logcache updates
+          - Log Cache:
+            - remove redundant joins in service authorization queries (#1537)
+            - validate query limits before SQL interpolation
+          - Config Tool:
+            - add naemon check_timeout attribute to hosts and services
+            - fix storable cache corruption when config tool retention data is read and written concurrently (#1497)
+            - serialize concurrent model changes (config tool web pages, REST and CLI) with automatic lock retrying
+          - Agents:
+            - quote SNClient inventory values in generated check commands
+          - Business Process:
+            - fix authorization for changes and REST exports
+          - Panorama:
+            - require write access for dashboard maintenance changes
+            - validate dashboard import media paths
+            - fix media overwrite checks for private dashboards
+          - Reports:
+            - fix log authorization in event reports
+            - reject submitted report runtime state
+            - fix remote response parsing in puppeteer renderer
+          - Trends:
+            - fix authorization for saved graphs
+
 3.30     Thu Oct 22 19:28:17 CEST 2026
           - fix remote code vulnerability in grafana image export (GHSA-83cf-v4hm-pw6j)
           - fix mouse glitch on quick command menu (#1502)

@@ -15,7 +15,8 @@ use strict;
 use Carp qw/confess/;
 use Cwd qw/abs_path/;
 use Data::Dumper qw/Dumper/;
-use File::Copy qw/move copy/;
+use Errno qw/EPERM/;
+use File::Copy qw/copy/;
 use IO::Handle ();
 use POSIX ":sys_wait_h";
 use Storable ();
@@ -237,8 +238,7 @@ sub perl {
     if($conf->{'log_archive'}) {
         eval {
             copy($conf->{'log_archive'}, $dir."/stdout.new") or die("copy failed: $!");
-            unlink($dir."/stdout");
-            move($dir."/stdout.new", $dir."/stdout");
+            rename($dir."/stdout.new", $dir."/stdout") or die("rename failed: $!");
         };
         if($@) {
             $err = ($err//"").$@;
@@ -310,7 +310,7 @@ return true if process is still running
 =cut
 sub is_running {
     my($c, $id, $nouser) = @_;
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
@@ -335,7 +335,7 @@ returns true if successfully canceled
 =cut
 sub cancel {
     my($c, $id, $nouser) = @_;
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user" ) {
@@ -449,7 +449,7 @@ return status of a job
 =cut
 sub get_status {
     my($c, $id) = @_;
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     return unless -d $dir;
@@ -517,7 +517,7 @@ return json status of a job
 =cut
 sub get_json_status {
     my($c, $id, $job) = @_;
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     $job = read_job($c, $id) unless defined $job;
     return unless $job;
@@ -545,7 +545,7 @@ return result of a job
 =cut
 sub get_result {
     my($c, $id, $nouser) = @_;
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     my $dir = $c->config->{'var_path'}."/jobs/".$id;
     if(!$nouser && -f $dir."/user") {
@@ -595,7 +595,7 @@ sub get_result {
         $end[9] = Time::HiRes::time();
         $err    = 'job was killed';
         _error('killed job: '.$dir);
-        my $folder = Thruk::Utils::IO::cmd("ls -la $dir");
+        my $folder = Thruk::Utils::IO::cmd(['ls', '-la', '--', $dir]);
         _error($folder);
     }
 
@@ -655,7 +655,7 @@ sub job_page {
     my $json   = $c->req->parameters->{'json'}   || 0;
     my $cancel = $c->req->parameters->{'cancel'} || 0;
     $c->stash->{no_auto_reload} = 1;
-    return $c->detach('/error/index/22') unless defined $job;
+    return $c->detach('/error/index/22') if Thruk::Base::check_for_nasty_filename($job);
 
     if($peerid) {
         my $peer = $c->db->get_peer_by_key($peerid);
@@ -689,6 +689,7 @@ sub job_page {
     return $c->detach('/error/index/22') unless defined $is_running;
 
     my $initwait = $c->req->parameters->{'initwait'} // 3;
+    $initwait = 3 if $initwait > 3;
     if(!$show_output) {
         # try to directly serve the request if it takes less than 3 seconds
         if($initwait > 0) {
@@ -783,7 +784,7 @@ sub wait_for_peer_job {
     my $end = time() + $max_wait;
     my $jobdata;
     _debug("waiting for job %s on peer %s (%s), timeout: %ss",$job, $peer->{'name'}, $peer->{'key'}, $max_wait);
-    if(length($job) < 2) {
+    if(Thruk::Base::check_for_nasty_filename($job) || length($job) < 2) {
         confess("invalid job id: $job");
     }
 
@@ -980,7 +981,7 @@ do all parent things after a fork
 sub do_parent_stuff {
     my($c, $dir, $id, $conf) = @_;
 
-    confess("got no id") unless $id;
+    confess("invalid job id") if Thruk::Base::check_for_nasty_filename($id);
 
     # write hostname file
     Thruk::Utils::IO::write($dir."/hostname", $Thruk::Globals::NODE_ID."\n".$Thruk::Globals::HOSTNAME."\n");
@@ -1186,7 +1187,7 @@ sub _is_running {
 
     _reap_pending_childs();
 
-    if(kill(0, $pid) > 0) {
+    if(kill(0, $pid) > 0 || $! == EPERM) {
         return 1;
     }
     unlink($dir."/pid");
@@ -1291,7 +1292,7 @@ sub _clean_unstorable_refs {
         if($ref ne '' && $ref ne 'HASH' && $ref ne 'ARRAY') {
             delete $var->{$key};
         }
-        if($key eq 'model_init') {
+        if($key eq 'model_init' || $key eq 'model_write_locks') {
             delete $var->{$key};
         }
     }

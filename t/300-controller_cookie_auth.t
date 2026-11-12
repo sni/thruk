@@ -6,7 +6,7 @@ BEGIN {
     eval "use Test::Cmd";
     plan skip_all => 'Test::Cmd required' if $@;
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 67;
+    plan tests => 94;
 
     use lib('t');
     require TestUtils;
@@ -26,6 +26,9 @@ my $pages = [
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi', 'redirect' => 1, location => 'tac.cgi', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi&test=blah', 'redirect' => 1, location => 'tac.cgi\?test=blah', like => 'This item has moved' },
     { url => '/thruk/cgi-bin/login.cgi?logout/thruk/cgi-bin/tac.cgi&test=blah&test2=blub', 'redirect' => 1, location => 'tac.cgi\?test=blah&test2=blub', like => 'This item has moved' },
+    { url => '/thruk/cgi-bin/login.cgi?setsession&referer=%252F%252Fattacker.invalid%252Fthruk%252F', redirect => 1, location => '^/(?!/)(?:[^/]+/)*thruk/$' },
+    { url => '/thruk/cgi-bin/login.cgi?setsession&%2F%2Fattacker.invalid/thruk/', redirect => 1, location => '^/(?!/)(?:[^/]+/)*thruk/$' },
+    { url => '/thruk/cgi-bin/login.cgi?setsession&referer=%2Fthruk%2Fcgi-bin%2Ftac.cgi', redirect => 1, location => '^/(?!/)(?:[^/]+/)*thruk/cgi-bin/tac\.cgi$' },
 ];
 
 for my $url (@{$pages}) {

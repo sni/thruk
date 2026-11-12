@@ -285,6 +285,9 @@ sub _process_recurring_downtimes_page {
     my $service      = $c->req->parameters->{'service'}      || '';
     my $servicegroup = $c->req->parameters->{'servicegroup'} || '';
     my $nr           = $c->req->parameters->{'nr'};
+    if(defined $nr && $nr ne '' && Thruk::Base::check_for_nasty_filename($nr)) {
+        return $c->detach_error({msg => 'invalid downtime id', code => 400});
+    }
 
     my $default_rd = Thruk::Utils::RecurringDowntimes::get_default_recurring_downtime($c, $host, $service, $hostgroup, $servicegroup);
     $default_rd->{'target'} = $target;
@@ -378,6 +381,9 @@ sub _process_recurring_downtimes_page {
             } split(/\s*~~\s*/mx, $c->req->parameters->{'selected_ids'}))];
         } else {
             $numbers = [$nr];
+        }
+        if(grep { Thruk::Base::check_for_nasty_filename($_) } @{$numbers}) {
+            return $c->detach_error({msg => 'invalid downtime id', code => 400});
         }
         for my $nr (@{$numbers}) {
             my $file = $c->config->{'var_path'}.'/downtimes/'.$nr.'.tsk';

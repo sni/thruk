@@ -3,7 +3,7 @@ export THRUK_CONFIG=$(shell pwd)
 export TEST_AUTHOR=1
 THRUK=cd ../../.. && ./script/thruk
 STARTUPWAIT=300
-ERROR_TAIL=50
+ERROR_TAIL=500
 EXPECTED_BACKENDS=1
 INTERACTIVE:=$(shell [ -t 0 ] && echo 1)
 ifdef INTERACTIVE
@@ -122,22 +122,27 @@ failed_test_info:
 		index=0; \
 		for container in $$(docker compose ps -q $$svc); do \
 			index=$$(( index + 1 )); \
+			echo "**********************"; \
 			echo "*** $${svc}_$${index}:"; \
 			if docker exec -t --user root $$container test -d /opt/omd/sites/demo; then \
+				echo "**** $${svc}_$${index} - omd.log:"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/omd.log; \
 				echo "**** $${svc}_$${index} - apache/error_log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/apache/error_log; \
 				echo "**** $${svc}_$${index} - thruk.log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/thruk.log; \
+				echo "**** $${svc}_$${index} - thruk cron.log:"; \
+				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/thruk/cron.log; \
 				echo "**** $${svc}_$${index} - naemon.log:"; \
 				docker exec -t --user root $$container tail -$(ERROR_TAIL) /opt/omd/sites/demo/var/log/naemon.log; \
 				echo "**** $${svc}_$${index} - report logs:"; \
-				docker exec --user root $$container sh -c 'find /opt/omd/sites/demo/var/thruk/reports -type f -name "*.log" 2>/dev/null | head -n 20 | while read f; do echo "----- $$f:"; tail -n 100 "$$f"; done'; \
+				docker exec --user root $$container sh -c 'find /opt/omd/sites/demo/var/thruk/reports -type f -name "*.log" 2>/dev/null | head -n 20 | while read f; do echo "----- $$f:"; tail -n $(ERROR_TAIL) "$$f"; done'; \
 				echo "**** $${svc}_$${index} - job stderr:"; \
-				docker exec --user root $$container sh -c 'find /opt/omd/sites/demo/var/thruk/jobs -type f -name "stderr" 2>/dev/null | head -n 20 | while read f; do echo "----- $$f:"; tail -n 100 "$$f"; done'; \
+				docker exec --user root $$container sh -c 'find /opt/omd/sites/demo/var/thruk/jobs -type f -name "stderr" 2>/dev/null | head -n 20 | while read f; do echo "----- $$f:"; tail -n $(ERROR_TAIL) "$$f"; done'; \
 				echo "**** $${svc}_$${index} - thruk.log errors:"; \
-				docker exec --user root $$container sh -c 'grep -aE "\[ERROR\]|died|confess" /opt/omd/sites/demo/var/log/thruk.log 2>/dev/null | tail -n 100'; \
+				docker exec --user root $$container sh -c 'grep -aE "\[ERROR\]|died|confess" /opt/omd/sites/demo/var/log/thruk.log 2>/dev/null | tail -n $(ERROR_TAIL)'; \
 			fi; \
-			echo "***"; \
+			echo "*****"; \
 		done; \
 	done
 	-test -e thruk.conf && $(THRUK) -vvv -l

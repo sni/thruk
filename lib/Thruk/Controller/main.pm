@@ -121,6 +121,7 @@ sub index {
     }
 
     if($c->req->parameters->{'reorder'}) {
+        return unless Thruk::Utils::check_csrf($c);
         my $order = $c->req->parameters->{'order[]'};
         my $newviews = [];
         for my $tab (@{$order}) {
@@ -227,14 +228,14 @@ sub index {
     # host and service problems
     my $problemhosts    = $c->db->get_hosts(
         filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'hosts'),    $hostfilter,    'last_hard_state_change' => { ">" => 0 }, 'state' => 1, 'has_been_checked' => 1, 'acknowledged' => 0, 'hard_state' => 1, 'scheduled_downtime_depth' => 0 ],
-        columns    => ['name','state','plugin_output','last_hard_state_change'],
+        columns    => ['name','state','plugin_output','last_hard_state_change','custom_variable_names','custom_variable_values'],
         sort       => { ASC => 'last_hard_state_change' },
         limit      => 5,
         debug_hint => 'host problems',
      );
     my $problemservices = $c->db->get_services(
         filter     => [ Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter, 'last_hard_state_change' => { ">" => 0 }, 'state' => { "!=" => 0 }, 'has_been_checked' => 1, 'acknowledged' => 0, 'state_type' => 1, 'scheduled_downtime_depth' => 0 ],
-        columns    => ['host_name','description','state','plugin_output','last_hard_state_change'],
+        columns    => ['host_name','description','state','plugin_output','last_hard_state_change','custom_variable_names','custom_variable_values'],
         sort       => { ASC => 'last_hard_state_change' },
         limit      => 5,
         debug_hint => 'service problems',

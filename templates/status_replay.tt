@@ -1,0 +1,137 @@
+﻿[% PROCESS _header.tt js => [
+    'vendor/flot-d7c58b5/jquery.flot.js',
+    'vendor/flot-d7c58b5/jquery.flot.time.js',
+    'vendor/flot-d7c58b5/jquery.flot.selection.js',
+    'vendor/flot-d7c58b5/jquery.flot.crosshair.js',
+    'vendor/flot-d7c58b5/jquery.flot.stack.js',
+    'vendor/flot-d7c58b5/jquery.flot.resize.js'
+] %]
+[% PROCESS _message.tt %]
+
+<form action="status.cgi" method="GET" id="date_form">
+  <input type="hidden" name="style" value="replay">
+  [% FOREACH backend IN param_backend.list %]
+    <input type="hidden" name="backend" value="[% backend | html %]">
+  [% END %]
+  <div class="flexrow gap-2">
+    <div class="flex flex-1">[% PROCESS _infobox.tt extra_classes="min-h-[150px]" %]</div>
+    <div class="flex justify-center">[% PROCESS _log_date_select.tt date_select_title='Replay Time Range' extra_classes="min-h-[150px]" %]</div>
+    <div class="flex flex-1 justify-end">
+      <div class="card w-64 min-h-[150px]">
+        <div class="head"><h3>Log Filter</h3></div>
+        <div class="body flexcol gap-1">
+          <div class="flex items-center gap-2">
+            <label for="replay-pattern" class="w-28 shrink-0 whitespace-nowrap">Search pattern</label>
+            <input type="text" id="replay-pattern" name="pattern" class="min-w-0 flex-1" value="[% pattern | html %]" placeholder="search pattern">
+          </div>
+          <div class="flex items-center gap-2">
+            <label for="replay-exclude-pattern" class="w-28 shrink-0 whitespace-nowrap">Exclude pattern</label>
+            <input type="text" id="replay-exclude-pattern" name="exclude_pattern" class="min-w-0 flex-1" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
+          </div>
+          <button type="submit" class="self-end">Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+[% IF replay_error %]
+  <div role="alert" class="alerttext">[% replay_error | html %]</div>
+[% END %]
+[% UNLESS replay_error %]
+  <div id="status-replay" class="w-full mt-2" data-date-format="[% datetime_format | html %]" data-replay="[% json_encode(replay) | html %]">
+    <div class="card w-full mb-2">
+      <div class="body flexcol gap-2">
+        <div class="relative flex flex-wrap gap-2 items-center pr-9">
+          <button type="button" id="replay-reset" style="width:70px;flex-shrink:0">Reset</button>
+          <button type="button" id="replay-play" style="width:70px;flex-shrink:0" aria-pressed="false">Play</button>
+          <label for="replay-speed">Speed</label>
+          <select id="replay-speed">
+            <option value="1">1×</option><option value="60" selected>60×</option>
+            <option value="600">600×</option><option value="3600">3600×</option>
+          </select>
+          <label for="replay-keyboard-mode">Arrow keys</label>
+          <select id="replay-keyboard-mode"><option value="time">Step by time</option><option value="event" selected>Step by event</option></select>
+          <button type="button" id="replay-zoom-reset" style="display:none">Reset zoom</button>
+          <span id="replay-summary" class="text-xs ml-auto whitespace-nowrap" role="status"></span>
+          <div class="absolute top-0 right-0">
+            <button type="button" id="replay-help-button" class="round small gray text-lg" title="Replay help" aria-label="Replay help" aria-controls="replay-help" aria-expanded="false"
+                    onclick="this.setAttribute('aria-expanded', toggleElement('replay-help', undefined, true, undefined, function() { document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); }) ? 'true' : 'false'); return false;"><i class="uil uil-info"></i></button>
+            <div id="replay-help" class="card shadow-float absolute z-20 top-7 right-0" style="display:none;width:480px;max-width:90vw" role="dialog" aria-labelledby="replay-help-title">
+              <div class="head justify-between">
+                <h3 id="replay-help-title">Status Replay Help</h3>
+                <button type="button" class="iconOnly medium" aria-label="Close help" onclick="toggleElement('replay-help'); document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); return false;"><i class="uil uil-times"></i></button>
+              </div>
+              <div class="body flexcol gap-2">
+                <h4>Time chart</h4>
+                <p>Click the chart to jump to the closest log event. Drag to move the replay position freely through time. Hold Shift and drag a time range to zoom.</p>
+                <p>Red marks alerts, green recoveries, blue notifications and gray other events. Events of different categories stack in the same time bucket.</p>
+                <h4>Keyboard</h4>
+                <p>Home/End jump to the boundaries of the visible range.</p>
+                <p>The Arrow keys selector decides what Left/Right do: step by time or by individual log event. Up/Down always step by event, even if several events share a timestamp. Time steps use Speed: 1× steps one second, 60× steps one minute. These keys work in the chart and the log box.</p>
+                <p>Hover over the chart or the log box and scroll to step events. Over the chart, scroll down to go backward and up to go forward. The log box keeps the normal scroll direction.</p>
+                <h4>Panes</h4>
+                <p>Click a log entry to jump to that event.</p>
+                <p>Drag the divider between the log and the status table to resize the panes. If the divider is focused, Up/Down or Home/End also moves it.</p>
+                <h4>Data</h4>
+                <p>The page shows recorded states read-only, including soft states. No data means no starting state was found in up to 50000 preceding records per backend.</p>
+                <p>A moon icon marks recorded downtime. Without one, the page assumes no downtime. Acknowledgement and active-check flags follow the logged per-object commands. Current flags fill gaps without command history. Group commands and unlogged changes cannot be reconstructed.</p>
+                <p>Notifications counts the notification log entries replayed for each object since the range began. Entries for individual contacts count separately.</p>
+                <h4>Filters</h4>
+                <p>The filters select objects that are configured and authorized now. They use the current attributes, maximum attempts and passive-check settings of each object.</p>
+                <p>The log search and exclude patterns are case-insensitive regular expressions. They filter the log viewer, the chart and event navigation. The status table applies all state changes.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="replay-position" class="w-full mt-2 outline-none" style="height:80px" tabindex="0" role="slider"
+             aria-label="Replay time"
+             aria-valuemin="[% start %]" aria-valuemax="[% end %]" aria-valuenow="[% start %]"></div>
+      </div>
+    </div>
+  </div>
+[% END %]
+  <div id="replay-panes"[% UNLESS replay_error %] style="height:60vh;min-height:240px;display:grid;grid-template-rows:90px 8px minmax(120px,1fr)"[% END %]>
+    [% UNLESS replay_error %]
+    <div id="replay-log-panel" class="card w-full h-full overflow-auto outline-none" tabindex="0" aria-label="Log event context">
+      <div class="body flexcol gap-1 text-xs font-mono">
+        <div id="replay-events-before" style="display:contents"></div>
+        <div class="flex gap-2 min-w-0"><span class="w-20 shrink-0">Previous:</span><a id="replay-event-prev" class="truncate flex-1 text-inherit"></a></div>
+        <div class="flex gap-2 min-w-0 font-semibold" role="status"><span class="w-20 shrink-0">Current:</span><a id="replay-event" class="truncate flex-1 text-inherit"></a></div>
+        <div class="flex gap-2 min-w-0"><span class="w-20 shrink-0">Next:</span><a id="replay-event-next" class="truncate flex-1 text-inherit"></a></div>
+        <div id="replay-events-after" style="display:contents"></div>
+      </div>
+    </div>
+    <div id="replay-splitter" class="hoverable flex items-center justify-center outline-none" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90"><span class="border-t borderDefault" style="width:48px;pointer-events:none"></span></div>
+    [% END %]
+  <div id="replay-table-panel" class="card w-full flex flex-col min-h-0">
+    <div class="mainTableHeader shrink-0">
+      <div class="flex flex-nowrap gap-x-2 items-center">
+        [% PROCESS _status_filter.tt show_form=0 paneprefix='dfl_' %]
+      </div>
+      <div class="flex flex-1 items-center justify-center whitespace-nowrap">
+        [% UNLESS replay_error %]<h3 id="replay-time" class="text-default textTH tracking-wide"></h3>[% END %]
+      </div>
+      <div></div>
+    </div>
+    <div class="mainTable flex-1 min-h-0" style="scrollbar-gutter:stable;max-height:none">
+      <table class="mainTable" style="table-layout:fixed;width:100%">
+        <colgroup>
+          <col style="width:8%"><col style="width:14%"><col style="width:14%"><col style="width:7%">
+          <col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:12%"><col style="width:24%">
+        </colgroup>
+        <thead><tr>
+          [% FOREACH column IN ['Site', 'Host', 'Service', 'Status', 'State Type', 'Attempt', 'Notifications', 'Last Recorded State', 'Status Information'] %]
+            <th class="truncate" title="[% column | html %]">[% column | html %]</th>
+          [% END %]
+        </tr></thead>
+        <tbody id="replay-objects"></tbody>
+      </table>
+    </div>
+    <div class="mainTableFooter shrink-0"><span id="replay-object-summary" class="textPager font-medium leading-7">0 objects</span></div>
+  </div>
+  </div>
+</form>
+[% UNLESS replay_error %]
+  <script src="[% url_prefix %]javascript/status-replay.js" defer></script>
+[% END %]
+[% PROCESS _footer.tt %]

@@ -1854,6 +1854,7 @@ sub get_perf_image {
     # create fake session
     my($sessionid) = get_fake_session($c);
     local $ENV{THRUK_SESSION_ID} = $sessionid;
+    local $ENV{THRUK_COOKIE_AUTH_DOMAIN} = $c->config->{'cookie_auth_domain'};
 
     # call login hook, because it might transfer our sessions to remote graphers
     if($c->config->{'cookie_auth_login_hook'}) {
@@ -2036,6 +2037,7 @@ sub get_fake_session {
     }
 
     # get intersection of roles
+    $roles = $c->user->{'roles_restriction'} unless defined $roles;
     if($roles && ref $roles eq 'ARRAY') {
         $roles = $c->user->clean_roles($roles);
     }
@@ -2049,6 +2051,8 @@ sub get_fake_session {
     if($roles && ref $roles eq 'ARRAY') {
         $sessiondata->{'roles'} = $roles;
     }
+    # Keep empty ceilings distinct from legacy unrestricted session roles.
+    $sessiondata->{'roles_restriction'} = $roles if defined $c->user->{'roles_restriction'};
     if($extra) {
         for my $key (sort keys %{$extra}) {
             $sessiondata->{$key} = $extra->{$key};
@@ -3081,13 +3085,13 @@ make diff output beauty
 
 sub beautify_diff {
     my($text) = @_;
-    $text =~ s/^\-\-\-(.*)$/<font color="#0776E8"><b>---$1<\/b><\/font>/gmx;
+    $text =~ s/^\-\-\-(.*)$/<span style="color: #0776E8"><b>---$1<\/b><\/span>/gmx;
     $text =~ s/^\+\+\+(.*)$//gmx;
     $text =~ s/^index\ .*$//gmx;
     $text =~ s/^diff\ .*$//gmx;
-    $text =~ s/^\@\@(.*)$/<font color="#0776E8"><b>\@\@$1<\/b><\/font>/gmx;
-    $text =~ s/^\-(.*)$/<font color="red">-$1<\/font>/gmx;
-    $text =~ s/^\+(.*)$/<font color="green">+$1<\/font>/gmx;
+    $text =~ s/^\@\@(.*)$/<span style="color: #0776E8"><b>\@\@$1<\/b><\/span>/gmx;
+    $text =~ s/^\-(.*)$/<span style="color: red">-$1<\/span>/gmx;
+    $text =~ s/^\+(.*)$/<span style="color: green">+$1<\/span>/gmx;
     return $text;
 }
 

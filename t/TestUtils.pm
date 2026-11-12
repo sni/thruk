@@ -464,19 +464,11 @@ sub test_page {
             my $content = $return->{'content'};
             utf8::decode($content) if defined $content;
             my ($errors, $warnings) = tidy_lint($content, $opts->{'url'}, $opts->{'skip_doctype'});
-            if(scalar @{$errors} > 0) {
-                push @{$errors}, @{$warnings};
-                is(scalar @{$errors}, 0, "No errors (and warnings) found in HTML");
-            } elsif(scalar @{$warnings} > 0) {
-                TODO: {
-                    local $TODO = "fix tidy warnings" unless $ENV{'THRUK_HTML_LINT_ARE_ERRORS'};
-                    is(scalar @{$warnings}, 0, "No errors (and warnings) found in HTML");
-                }
-            } else {
-                ok(1, "No errors (and warnings) found in HTML");
-            }
+            is(scalar @{$errors} + scalar @{$warnings}, 0, "No errors (and warnings) found in HTML");
             my $html_only_content = $return->{'content'};
             $html_only_content =~ s/<script[^>]*>.+?<\/script>//gsmxio;
+            # copyCode needs two escaping layers in its computed configuration textarea.
+            $html_only_content =~ s/<textarea\b[^>]*\bid="computed_config"[^>]*>.*?<\/textarea>//gsmx;
             my $matches = get_matches_with_meta($html_only_content, qr/^(.*\&amp;amp.*)$/mx);
             for my $m (@{$matches}) {
                 next if $m->{'match'} =~ m/abbr=/mx;

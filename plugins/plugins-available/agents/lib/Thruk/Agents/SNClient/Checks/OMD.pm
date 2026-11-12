@@ -36,7 +36,7 @@ sub get_checks {
             'id'       => 'omd.'.Thruk::Utils::Agents::to_id($omd->{'site'}),
             'name'     => 'omd site '.$omd->{'site'},
             'check'    => 'check_omd',
-            'args'     => [ "site='".$omd->{'site'}."'", $def_opts ],
+            'args'     => [ { "site" => $omd->{'site'} }, $def_opts ],
             'parent'   => 'agent version',
             'info'     => $omd,
             'disabled' => Thruk::Utils::Agents::check_disable($omd, $disabled_config, 'omd'),

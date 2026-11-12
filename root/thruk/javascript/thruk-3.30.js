@@ -2530,7 +2530,8 @@ function create_site_panel_popup_tree_make_bookmarks_sortable() {
                 data: {
                     action:   'site_panel_bookmarks',
                     reorder:  '1',
-                    order:     order
+                    order:     order,
+                    CSRFtoken: CSRFtoken
                 }
             });
         }
@@ -2697,7 +2698,8 @@ function site_panel_bookmark_save() {
             save:     '1',
             name:      name,
             backends:  backends,
-            sections:  sections
+            sections:  sections,
+            CSRFtoken: CSRFtoken
         },
         success: function(data) {
             setBtnSuccess("#site_panel_bookmark_new_save", "bookmark saved");
@@ -2725,7 +2727,8 @@ function setBackends(backends, sections, btn) {
             data: {
                 action:   'site_panel_bookmarks',
                 remove:   '1',
-                index:     btn.dataset["index"]
+                index:     btn.dataset["index"],
+                CSRFtoken: CSRFtoken
             },
             success: function(data) {
                 jQuery(btn).remove();
@@ -8838,11 +8841,14 @@ function verify_op(event) {
   }
 }
 
-/* remove columns from get parameters when style has changed */
-function check_filter_style_changes(form, pageStyle, columnFieldId) {
+/*
+ * keep custom columns in the form when the filter changes, only reset them
+ * when the page style changes and it has a style select (fixes #1509)
+ */
+function check_filter_style_changes(form, pageStyle, columnFieldId, hasStyleSelect) {
   var s_data = jQuery(form).serializeArray();
   for(var i=0; i<s_data.length; i++){
-    if(s_data[i].name == "style" && s_data[i].value != pageStyle) {
+    if(s_data[i].name == "style" && s_data[i].value != pageStyle && hasStyleSelect) {
         jQuery('#'+columnFieldId).val("");
     }
   }

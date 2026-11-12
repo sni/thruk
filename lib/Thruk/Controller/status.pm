@@ -10,6 +10,7 @@ use Thruk::Backend::Provider::Livestatus ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Replay ();
 use Thruk::Utils::Status ();
 
 =head1 NAME
@@ -38,7 +39,7 @@ sub index {
                             'grid'       => 1, 'hostgrid'     => 1, 'servicegrid'     => 1,
                             'overview'   => 1, 'hostoverview' => 1, 'serviceoverview' => 1,
                             'summary'    => 1, 'hostsummary'  => 1, 'servicesummary'  => 1,
-                            'combined'   => 1, 'perfmap'      => 1,
+                            'combined'   => 1, 'perfmap'      => 1, 'replay' => 1,
                         };
     my $style = $c->req->parameters->{'style'} || '';
 
@@ -117,6 +118,10 @@ sub index {
     $c->stash->{'num_hosts'}   = 0;
     $c->stash->{'custom_vars'} = [];
 
+    if($style eq 'replay') {
+        return _process_replay_page($c);
+    }
+
     $c->stash->{substyle}     = undef;
     if($c->stash->{'hostgroup'}) {
         $c->stash->{substyle} = 'host';
@@ -170,6 +175,49 @@ sub index {
 
     Thruk::Utils::ssi_include($c);
 
+    return 1;
+}
+
+##########################################################
+sub _process_replay_page {
+    my($c) = @_;
+    my($start, $end) = Thruk::Utils::get_start_end_from_date_select_params($c);
+    $c->stash->{'status_search_add_default_filter'} = 'host';
+    $c->stash->{'show_substyle_selector'} = 0;
+    $c->stash->{'substyle'} = 'service';
+    my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
+    my $log_filter_error = 0;
+    for my $name (qw/pattern exclude_pattern/) {
+        my $pattern = $c->req->parameters->{$name} // '';
+        $c->stash->{$name} = $pattern;
+        if($pattern =~ m/\S/mx) {
+            # Keep literal spaces and anchor semantics in user-entered patterns.
+            my $valid = eval { local $SIG{'__DIE__'} = ''; qr/(?-mx)$pattern/imx; };
+            if(!$valid) {
+                Thruk::Utils::set_message($c, 'fail_message', 'Invalid regular expression in log filter.');
+                $log_filter_error++;
+            }
+        }
+    }
+
+    $c->stash->{'start'} = $start;
+    $c->stash->{'end'} = $end;
+    $c->stash->{'title'} = $c->stash->{'infoBoxTitle'} = 'Status Replay';
+    $c->stash->{'no_auto_reload'} = 1;
+    $c->stash->{'template'} = 'status_replay.tt';
+    if($log_filter_error) {
+        $c->stash->{'replay_error'} = 'Please correct the log filter pattern.';
+    } elsif($c->stash->{'has_error'}) {
+        $c->stash->{'replay_error'} = 'Please correct the display filter.';
+    } elsif($start >= $end) {
+        $c->stash->{'replay_error'} = 'Choose a non-empty time range.';
+    } else {
+        $c->db->renew_logcache($c);
+        $c->stash->{'replay'} = Thruk::Utils::Replay::load($c, $start, $end, $hostfilter, $servicefilter);
+        $c->stash->{'replay_error'} = $c->stash->{'replay'}->{'error'} // '';
+        Thruk::Utils::Replay::filter_logs($c->stash->{'replay'}, $c->stash->{'pattern'}, $c->stash->{'exclude_pattern'}) unless $c->stash->{'replay_error'};
+    }
+    Thruk::Utils::ssi_include($c);
     return 1;
 }
 
@@ -553,6 +601,17 @@ sub _process_details_page {
         }
     }
 
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $s (@{$services}) {
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
+    }
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['status_detail_excel_'], 'service');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
@@ -573,15 +632,6 @@ sub _process_details_page {
             }
         }
 
-        my $allowed      = $c->check_user_roles("admin");
-        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
-        my $show_full_commandline = $c->config->{'show_full_commandline'};
-        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
-        Thruk::Utils::fill_commands_cache($c);
-        for my $s (@{$services}) {
-            # remove custom macro colums which could contain confidential informations
-            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
-        }
         return $c->render(json => $services);
     }
     if ( $view_mode eq 'csv') {
@@ -698,6 +748,17 @@ sub _process_hostdetails_page {
                                 extra_columns => $extra_columns,
                         );
 
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $h (@{$hosts}) {
+            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
+    }
+
     if( $view_mode eq 'xls' ) {
         Thruk::Utils::Status::set_selected_columns($c, ['status_hostdetail_excel_'], 'host');
         Thruk::Utils::Status::set_comments_and_downtimes($c);
@@ -716,15 +777,6 @@ sub _process_hostdetails_page {
                 delete $h->{'peer_key'}                unless $keep_peer_key;
                 delete $h->{'last_state_change_order'} unless $keep_last_state;
             }
-        }
-        my $allowed      = $c->check_user_roles("admin");
-        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
-        my $show_full_commandline = $c->config->{'show_full_commandline'};
-        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
-        Thruk::Utils::fill_commands_cache($c);
-        for my $h (@{$hosts}) {
-            # remove custom macro colums which could contain confidential informations
-            Thruk::Utils::set_allowed_rows_data($h, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
         }
         return $c->render(json => $hosts);
     }
@@ -1322,16 +1374,7 @@ sub _process_combined_page {
     $c->stash->{'hosts_limit_hit'}    = 0;
     $c->stash->{'services_limit_hit'} = 0;
 
-    if( $view_mode eq 'xls' ) {
-        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
-        Thruk::Utils::Status::set_comments_and_downtimes($c);
-        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
-        $c->stash->{'hosts'}     = $hosts;
-        $c->stash->{'services'}  = $services;
-        $c->stash->{'template'}  = 'excel/status_combined.tt';
-        return $c->render_excel();
-    }
-    elsif ( $view_mode eq 'json' ) {
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
         my $allowed      = $c->check_user_roles("admin");
         my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
         my $show_full_commandline = $c->config->{'show_full_commandline'};
@@ -1344,6 +1387,18 @@ sub _process_combined_page {
         for my $s (@{$services}) {
             Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
         }
+    }
+
+    if( $view_mode eq 'xls' ) {
+        Thruk::Utils::Status::set_selected_columns($c, ['host_', 'service_']);
+        Thruk::Utils::Status::set_comments_and_downtimes($c);
+        $c->res->headers->header( 'Content-Disposition', 'attachment; filename="status.xls"' );
+        $c->stash->{'hosts'}     = $hosts;
+        $c->stash->{'services'}  = $services;
+        $c->stash->{'template'}  = 'excel/status_combined.tt';
+        return $c->render_excel();
+    }
+    elsif ( $view_mode eq 'json' ) {
         my $json = {
             'hosts'    => $hosts,
             'services' => $services,
@@ -1461,6 +1516,17 @@ sub _process_perfmap_page {
             }
         }
         push @{$data}, $svc;
+    }
+
+    if($view_mode eq 'xls' || $view_mode eq 'json') {
+        my $allowed      = $c->check_user_roles("admin");
+        my $allowed_list = Thruk::Utils::get_exposed_custom_vars($c->config);
+        my $show_full_commandline = $c->config->{'show_full_commandline'};
+        my $has_conf_info         = $c->check_user_roles("authorized_for_configuration_information");
+        Thruk::Utils::fill_commands_cache($c);
+        for my $s (@{$data}) {
+            Thruk::Utils::set_allowed_rows_data($s, $allowed, $allowed_list, $show_full_commandline, $has_conf_info);
+        }
     }
 
     if( $view_mode eq 'xls' ) {

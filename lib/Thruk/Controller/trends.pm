@@ -4,6 +4,7 @@ use warnings;
 use strict;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::External ();
 
 =head1 NAME
 
@@ -47,7 +48,11 @@ sub index {
 
     if(exists $c->req->parameters->{'createimage'}) {
         if(exists $c->req->parameters->{'job_id'}) {
-            my $dir = $c->config->{'var_path'}."/jobs/".$c->req->parameters->{'job_id'};
+            my $job = $c->req->parameters->{'job_id'};
+            return $c->detach('/error/index/22') if Thruk::Base::check_for_nasty_filename($job);
+            my($is_running) = Thruk::Utils::External::get_status($c, $job);
+            return $c->detach('/error/index/22') unless defined $is_running;
+            my $dir = $c->config->{'var_path'}."/jobs/".$job;
             $c->stash->{gd_image} = Thruk::Utils::Trends::get_image($dir."/graph.png");
         } else {
             $c->stash->{gd_image} = Thruk::Utils::Trends::create_image($c, IMAGE_MODE);

@@ -22,6 +22,7 @@ use POSIX ();
 use Time::HiRes qw/sleep time/;
 
 use Thruk::Action::AddDefaults ();
+use Thruk::Utils::CLI::Maintenance ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
 use Thruk::Utils::Reports::Render ();
@@ -411,7 +412,8 @@ sub report_save {
         return if $old_report->{'readonly'};
     }
     my $report        = get_new_report($c, $data);
-    $report->{'var'}  = $old_report->{'var'}  if defined $old_report->{'var'};
+    # Runtime state must never come from submitted report data.
+    $report->{'var'}  = $old_report->{'var'} || {};
     my $fields = _get_required_fields($c, $report);
     if(!$fields) {
         Thruk::Utils::set_message( $c, 'fail_message', 'invalid report template');
@@ -1797,6 +1799,10 @@ sub _convert_to_pdf {
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
+
+    # remove old puppeteer/chromium temp folders left in /tmp by previous reports
+    eval { Thruk::Utils::CLI::Maintenance::cleanup_puppeteer_folders($c); };
+    _warn("cleanup_puppeteer_folders failed: %s", $@) if $@;
 
     $c->stats->profile(end => "_convert_to_pdf()");
     return;

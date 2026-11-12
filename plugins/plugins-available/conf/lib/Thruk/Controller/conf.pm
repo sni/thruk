@@ -789,6 +789,7 @@ sub _process_teams_page {
     }
 
     if($action eq 'delete') {
+        return unless Thruk::Utils::check_csrf($c);
         my $old_data = Thruk::Authentication::User::read_team_data($c, $teamname, 0);
         if($old_data && $old_data->{'scripted_team'}) {
             Thruk::Utils::set_message( $c, 'fail_message', 'Cannot remove read-only team.' );
@@ -802,6 +803,7 @@ sub _process_teams_page {
     }
 
     if($action eq 'store') {
+        return unless Thruk::Utils::check_csrf($c);
         my $old_name = $c->req->parameters->{'team'};
         my $new_name = $c->req->parameters->{'new_name'};
         if(!$new_name || Thruk::Base::check_for_nasty_filename($new_name)) {
@@ -1081,6 +1083,22 @@ sub _process_objects_page {
     if($c->req->parameters->{'apply'}) {
         if($c->req->parameters->{'check'} || $c->req->parameters->{'reload'} || $c->req->parameters->{'discard'}) {
             $skip_remote_sync = 1;
+        }
+    }
+
+    # serialize model changes for the duration of this request, before the
+    # model is read, so we don't store changes on top of newer ones (#1497)
+    my $action = $c->stash->{action};
+    if(  (defined $c->req->parameters->{'apply'}
+             && ($c->req->parameters->{'save'} || $c->req->parameters->{'save_and_reload'}
+                || $c->req->parameters->{'reload'} || $c->req->parameters->{'discard'}))
+       || defined $c->req->parameters->{'start_edit'}
+       || $action =~ m/^(store|disable|enable|delete|move|movefile|clone|new|revert|savefile|deletefiles|undeletefiles)$/mx
+    ) {
+        my $backend = $c->stash->{'param_backend'};
+        if($backend) {
+            my $err = Thruk::Utils::Conf::model_write_lock($c, [$backend]);
+            return $c->detach_error($err) if ref $err;
         }
     }
 

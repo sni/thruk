@@ -81,7 +81,7 @@ sub cmd {
     ($total, $removed) = Thruk::Utils::External::cleanup_job_folders($c, 1);
     _info("  - %-20s: removed %5d / %5d old job folders", "jobs", $removed, $total);
 
-    ($total, $removed) = _cleanup_puppeteer_folders($c, 1);
+    ($total, $removed) = cleanup_puppeteer_folders($c, 1);
     _info("  - %-20s: removed %5d / %5d old puppeteer folders", "reports", $removed, $total);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
@@ -147,14 +147,23 @@ sub clean_old_user_files {
 }
 
 ##############################################
-sub _cleanup_puppeteer_folders {
+
+=head2 cleanup_puppeteer_folders
+
+    cleanup_puppeteer_folders($c, [$verbose])
+
+removes old puppeteer/chromium temp folders from /tmp that are
+no longer in use (older than 2 hours)
+
+=cut
+sub cleanup_puppeteer_folders {
     my($c, $verbose) = @_;
 
-    $c->stats->profile(begin => "_cleanup_puppeteer_folders");
+    $c->stats->profile(begin => "cleanup_puppeteer_folders");
 
     my($total, $removed) = (0, 0);
     my $max_age      = time() - 7200;      # keep them for two hours
-    for my $olddir (glob("/tmp/puppeteer_dev_chrome_profile-*")) {
+    for my $olddir (glob("/tmp/puppeteer_dev_chrome_profile-*"), glob("/tmp/org.chromium.Chromium.*")) {
         $total++;
         my @stat = stat($olddir);
         if($stat[9] < $max_age) {
@@ -166,7 +175,7 @@ sub _cleanup_puppeteer_folders {
         }
     }
 
-    $c->stats->profile(end => "_cleanup_puppeteer_folders");
+    $c->stats->profile(end => "cleanup_puppeteer_folders");
     return($total, $removed);
 }
 

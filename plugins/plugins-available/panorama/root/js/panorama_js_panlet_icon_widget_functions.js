@@ -548,17 +548,13 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions, host,
                 }
                 return(TP.iconClickHandlerExec(id, i.action, panel, target, i, extraOptions));
             };
-            var listeners = {};
+            var listeners = {}, onclickFn = null;
             for(var key in i) {
                 if(key != "icon" && key != "action" && key != "menu" && key != "label") {
                     if(key.match(/^on/)) {
                         var fn = new Function(i[key]);
                         if(key == "onclick") {
-                            listeners[key.substring(2)] = function() {
-                                if(fn()) {
-                                    handler();
-                                }
-                            }
+                            onclickFn = fn;
                         } else {
                             listeners[key.substring(2)] = fn;
                         }
@@ -567,10 +563,14 @@ TP.parseActionMenuItems = function(items, id, panel, target, extraOptions, host,
                     }
                 }
             }
-            if(!i.onclick) {
-                //listeners["click"] = handler;
-                menuItem.handler = handler;
-            }
+            // always use handler (not a click listener): the menu is destroyed
+            // synchronously on click (clickHideDelay 0) which clears listeners
+            menuItem.handler = function(This, evt) {
+                if(onclickFn && !onclickFn()) {
+                    return;
+                }
+                return(handler(This, evt));
+            };
             menuItem.listeners = listeners;
 
             if(i.html) {

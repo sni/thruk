@@ -51,7 +51,7 @@ my $pages = [
     { url => '/thruk/cgi-bin/bp.cgi?action=refresh&edit=1&bp='.$bpid, like => 'newnodetest', skip_doctype => 1 },
     { url => '/thruk/cgi-bin/bp.cgi?action=clone&bp='.$bpid, follow => 1, like => 'Clone of Test App' },
     { url => '/thruk/cgi-bin/bp.cgi', post => { 'action' => 'remove', 'bp' => $bpid }, follow => 1 },
-    { url => '/thruk/cgi-bin/bp.cgi?action=new&bp_label=New Test Business Process', follow => 1, like => 'New Test Business Process' },
+    { url => '/thruk/cgi-bin/bp.cgi', post => { action => 'new', bp_label => 'New Test Business Process' }, follow => 1, like => 'New Test Business Process' },
     { url => '/thruk/cgi-bin/bp.cgi?bp='.$bpid, like => ['Business Process', 'no such business process' ], fail => 1, fail_message_ok => 1 },
 ];
 

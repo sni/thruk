@@ -861,7 +861,19 @@ sub bulk_send {
     my($c, $commands) = @_;
 
     delete $c->stash->{'last_command_error'};
-    delete $c->stash->{'last_command_lines'};
+    $c->stash->{'last_command_lines'} = [];
+
+    # Validate the entire batch before sending anything; each entry must be one command frame.
+    for my $cmds (values %{$commands}) {
+        for my $cmd (@{$cmds}) {
+            chomp(my $line = $cmd);
+            if($line =~ m/[\r\n]/mx) {
+                $c->stash->{'last_command_error'} = 'command contains invalid CR/LF characters';
+                return 0;
+            }
+        }
+    }
+
     my $rc = 1;
     for my $backends (keys %{$commands}) {
         # remove duplicate commands

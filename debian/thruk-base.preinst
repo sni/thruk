@@ -4,18 +4,20 @@ set -u
 set -e
 
 # save themes and plugins so we don't reenable them on every update
-rm -rf /tmp/thruk_update
+# Keep staging outside /tmp and the web-server-owned /var/lib/thruk.
+rm -rf /var/lib/thruk-update
+mkdir -m 700 /var/lib/thruk-update
 if test -d /etc/thruk/themes/themes-enabled/. && test -n "$(ls -A /etc/thruk/themes/themes-enabled/)"; then
-  mkdir -p /tmp/thruk_update/themes
-  cp -rp /etc/thruk/themes/themes-enabled/* /tmp/thruk_update/themes/
+  mkdir -p /var/lib/thruk-update/themes
+  cp -rp /etc/thruk/themes/themes-enabled/* /var/lib/thruk-update/themes/
 fi
 if test -d /etc/thruk/plugins/plugins-enabled/. && test -n "$(ls -A /etc/thruk/plugins/plugins-enabled/)"; then
-  mkdir -p /tmp/thruk_update/plugins
-  cp -rp /etc/thruk/plugins/plugins-enabled/* /tmp/thruk_update/plugins/
+  mkdir -p /var/lib/thruk-update/plugins
+  cp -rp /etc/thruk/plugins/plugins-enabled/* /var/lib/thruk-update/plugins/
 fi
 if test -d /etc/thruk/ssi/. && test -n "$(ls -A /etc/thruk/ssi/)"; then
-  mkdir -p /tmp/thruk_update/ssi
-  cp -rp /etc/thruk/ssi/* /tmp/thruk_update/ssi/
+  mkdir -p /var/lib/thruk-update/ssi
+  cp -rp /etc/thruk/ssi/* /var/lib/thruk-update/ssi/
 fi
 
 exit 0

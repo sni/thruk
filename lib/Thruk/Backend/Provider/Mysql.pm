@@ -100,19 +100,11 @@ sub _quote {
     if(ref $val eq 'ARRAY') {
         return [ map { $self->_quote($_) } @{$val} ];
     }
-    if($val =~ m/^\-?(\d+|\d+\.\d+)$/mx) {
+    if($val =~ m/\A-?([0-9]+|[0-9]+\.[0-9]+)\z/mx) {
         return $val;
     }
-    $val =~ s/'/\\'/gmx;
-    return "'".$val."'";
-}
-
-##########################################################
-# MySQL backslash quoting (used in LIKE patterns)
-sub _quote_backslash {
-    my($self, $val) = @_;
-    $val =~ s/\\/\\\\/gmx;
-    return $val;
+    my $dbh = $self->{'mysql'} || $self->_dbh();
+    return $dbh->quote($val);
 }
 
 ##########################################################

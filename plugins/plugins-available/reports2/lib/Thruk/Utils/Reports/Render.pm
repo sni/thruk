@@ -21,6 +21,7 @@ use File::Copy qw/move/;
 use MIME::Base64;
 
 use Thruk::Utils ();
+use Thruk::Utils::Auth ();
 use Thruk::Utils::Avail ();
 use Thruk::Utils::CLI ();
 use Thruk::Utils::External ();
@@ -328,7 +329,7 @@ sub get_events {
 
     my $total_filter = Thruk::Utils::combine_filter('-and', \@filter);
     $c->db->renew_logcache($c, 1);
-    my $logs = $c->db->get_logs(filter => [$total_filter], sort => {'DESC' => 'time'});
+    my $logs = $c->db->get_logs(filter => [$total_filter, Thruk::Utils::Auth::get_auth_filter($c, 'log')], sort => {'DESC' => 'time'});
 
     if($c->req->parameters->{'reverse'}) {
         @{$logs} = reverse @{$logs};
@@ -400,6 +401,7 @@ sub get_url {
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
         Thruk::Utils::External::update_status($ENV{'THRUK_JOB_DIR'}, 80, 'converting') if $ENV{'THRUK_JOB_DIR'};
         local $ENV{THRUK_SESSION_ID} = $sessionid;
+        local $ENV{THRUK_COOKIE_AUTH_DOMAIN} = $c->config->{'cookie_auth_domain'};
         my($rc, $out) = Thruk::Utils::IO::cmd([$c->config->{home}.'/script/html2pdf.sh', $url, $c->stash->{'attachment'}.'.pdf']);
         if(!-e $c->stash->{'attachment'}.'.pdf') {
             die("error: ".$out);

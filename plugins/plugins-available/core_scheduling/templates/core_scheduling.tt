@@ -20,10 +20,12 @@
 <div class="card mx-auto w-[1000px] mt-5">
   <div class="head justify-between">
     [% PROCESS _status_filter.tt %]
+    [% IF !c.check_user_roles('authorized_for_read_only') && c.user.get('can_submit_commands') %]
     <button id="reschedule_btn" class="header-button">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
       balance all hosts and services
     </button>
+    [% END %]
   </div>
   <div class="body">
     <div id="queue_graph" class="w-full h-[350px]"></div>
@@ -268,7 +270,8 @@ function updateGraph(reschedule) {
         look_ahead: jQuery('#look_ahead').val(),
         look_back: jQuery('#look_back').val(),
         group_seconds: jQuery('#group_seconds').val(),
-        reschedule: reschedule
+        reschedule: reschedule,
+        CSRFtoken: CSRFtoken
       },
       dataType: "json",
       success:  function(data) {

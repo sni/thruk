@@ -5,7 +5,7 @@ use strict;
 use Test::More;
 
 BEGIN {
-    plan tests => 32;
+    plan tests => 33;
 
     use lib('t');
     require TestUtils;
@@ -25,6 +25,11 @@ my $c = TestUtils::get_c();
 # test timezone detection
 my $tz = Thruk::Utils::Timezone::detect_timezone();
 ok($tz, "got a timezone: ".($tz || '<none>'));
+
+# a configured server_timezone must win over os detection (issue #1467)
+my $config1467 = { server_timezone => 'America/New_York' };
+Thruk::Utils::Timezone::set_timezone($config1467);
+is($config1467->{_server_timezone}, 'America/New_York', "configured server_timezone wins over os detection");
 
 # tests need a fixed timezone
 Thruk::Utils::Timezone::set_timezone($c->config, "Europe/Berlin");

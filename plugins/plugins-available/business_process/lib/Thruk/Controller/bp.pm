@@ -231,6 +231,7 @@ sub index {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi");
         }
         elsif($action eq 'clone') {
+            return unless Thruk::Utils::check_csrf($c);
             my($new_file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
             my $label = Thruk::BP::Utils::make_uniq_label($c, 'Clone of '.$bp->{'name'});
             $bp->set_label($c, $label);
@@ -241,6 +242,7 @@ sub index {
             return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/bp.cgi?action=details&edit=1&bp=".$newid);
         }
         elsif($action eq 'rename_node' and $nodeid) {
+            return unless Thruk::Utils::check_csrf($c);
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
                 my $json = { rc => 1, 'message' => 'ERROR: no such node' };
                 return $c->render(json => $json);
@@ -257,6 +259,7 @@ sub index {
             return $c->render(json => $json);
         }
         elsif($action eq 'remove_node' and $nodeid) {
+            return unless Thruk::Utils::check_csrf($c);
             if(!$bp->{'nodes_by_id'}->{$nodeid}) {
                 my $json = { rc => 1, 'message' => 'ERROR: no such node' };
                 return $c->render(json => $json);
@@ -268,6 +271,7 @@ sub index {
             return $c->render(json => $json);
         }
         elsif($action eq 'clone_node' and $nodeid) {
+            return unless Thruk::Utils::check_csrf($c);
             my $node = $bp->get_node($nodeid); # node from the 'node' parameter
             if(!$node) {
                 my $json = { rc => 1, 'message' => 'ERROR: no such node' };
@@ -287,6 +291,7 @@ sub index {
             return $c->render(json => $json);
         }
         elsif($action eq 'edit_node' and $nodeid) {
+            return unless Thruk::Utils::check_csrf($c);
             my $type = lc($c->req->parameters->{'bp_function'} || '');
             my $node = $bp->get_node($nodeid); # node from the 'node' parameter
             if(!$node) {
@@ -380,6 +385,11 @@ sub index {
 
     # new business process
     if($action eq 'new') {
+        if(!$allowed_for_edit) {
+            Thruk::Utils::set_message( $c, { style => 'fail_message', msg => 'not authorized', code => 403 });
+            return _bp_start_page($c);
+        }
+        return unless Thruk::Utils::check_csrf($c);
         Thruk::BP::Utils::clean_orphaned_edit_files($c, 86400);
         my($file, $newid) = Thruk::BP::Utils::next_free_bp_file($c);
         my $label = Thruk::BP::Utils::clean_nasty($c->req->parameters->{'bp_label'} || 'New Business Process');

@@ -164,7 +164,12 @@
         </div>
         <div class="actionbox">
           <div>
-            <a href='bp.cgi?action=clone&amp;bp=[% bp.id %]'><i class="fa-solid fa-copy"></i>Clone this Business Process</a>
+            <form action='bp.cgi' method='POST' style="display: inline;">
+              <input type='hidden' name='action' value='clone'>
+              <input type="hidden" name="bp" value="[% bp.id %]">
+              <input type="hidden" name="CSRFtoken" value="[% get_user_token(c) %]">
+              <a href='bp.cgi' onClick="jQuery(this).closest('FORM').submit(); return false;"><i class="fa-solid fa-copy"></i>Clone this Business Process</a>
+            </form>
           </div>
           <div>
             <form action='bp.cgi' method='POST' style="display: inline;">
