@@ -9,6 +9,8 @@ title: LMD - Livestatus Multitool Daemon
 It fetches live data from remote sites/backends and combines it in one Livestatus API for Thruk.
 When enabled, LMD manages all backend connections and combines their Livestatus data.
 
+![Thruk queries LMD, which connects to monitoring backends and combines their data.](source/lmd.svg)
+
 LMD provides these benefits:
 
 - Faster access to many remote locations

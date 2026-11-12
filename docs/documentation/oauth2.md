@@ -10,6 +10,8 @@ The examples below configure common OAuth2 providers.
 
 For configuration details, see [Configuration](configuration.html#_oauth2-authentication-settings).
 
+![OAuth2 login: the browser follows redirects. Thruk exchanges the code and gets the user identity server-side before it creates a session.](source/oauth2.svg)
+
 ### Github
 
 Create a new OAuth2 application here: https://github.com/settings/developers

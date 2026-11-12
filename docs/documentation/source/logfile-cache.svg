@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 460" role="img" aria-label="Thruk imports log data from monitoring backends or archive files into a MariaDB or PostgreSQL logfile cache database. Thruk reads and writes the database through one connection and supplies cached logfiles to reports and logfile pages. PostgreSQL support is experimental." style="width:100%;max-width:740px;height:auto" fill="currentColor" font-family="system-ui, 'Segoe UI', Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="logcache_arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor"/></marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#logcache_arrow)">
+    <path d="M210 90 H245 V160 H290"/>
+    <path d="M210 235 H245 V200 H290"/>
+    <path d="M370 230 V340"/>
+    <path d="M450 180 H510 V90 H550"/>
+    <path d="M510 180 V235 H550"/>
+  </g>
+  <g fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5">
+    <rect x="20" y="50" width="190" height="80" rx="8"/>
+    <rect x="20" y="195" width="190" height="80" rx="8"/>
+    <rect x="290" y="130" width="160" height="100" rx="8"/>
+    <rect x="550" y="55" width="170" height="70" rx="8"/>
+    <rect x="550" y="200" width="170" height="70" rx="8"/>
+    <rect x="250" y="340" width="240" height="85" rx="8"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="115" y="82">Monitoring backends</text>
+    <text x="115" y="104">Log data via Livestatus</text>
+    <text x="115" y="227">Log archive files</text>
+    <text x="115" y="249">Direct file import</text>
+    <text x="370" y="172">Thruk</text>
+    <text x="370" y="196">Import / update / read</text>
+    <text x="635" y="95">Reports</text>
+    <text x="635" y="240">Logfile pages</text>
+    <text x="370" y="370.5" dominant-baseline="middle">Logfile cache database</text>
+    <text x="370" y="394.5" dominant-baseline="middle">MariaDB / PostgreSQL</text>
+  </g>
+  <text x="520" y="165">Cached logfiles</text>
+  <text x="385" y="290">Read / write</text>
+  <text x="20" y="445">Updates run on demand or from cron. File imports need scheduled updates.</text>
+</svg>

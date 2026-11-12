@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 500" role="img" aria-label="A browser connects through a load balancer to either Thruk node. Each node keeps tmp_path local. Both nodes access the same shared storage for etc_path and var_path." style="width:100%;max-width:740px;height:auto" fill="currentColor" font-family="system-ui, 'Segoe UI', Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="cluster_arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor"/></marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#cluster_arrow)">
+    <path d="M370 60 V100"/>
+    <path d="M370 150 V180 H195 V215"/>
+    <path d="M370 180 H545 V215"/>
+    <path d="M195 340 V375 H310 V405"/>
+    <path d="M545 340 V375 H430 V405"/>
+  </g>
+  <g fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5">
+    <rect x="270" y="15" width="200" height="45" rx="8"/>
+    <rect x="270" y="100" width="200" height="50" rx="8"/>
+    <rect x="70" y="215" width="250" height="125" rx="8"/>
+    <rect x="420" y="215" width="250" height="125" rx="8"/>
+    <rect x="235" y="405" width="270" height="65" rx="8"/>
+  </g>
+  <g fill="var(--vp-c-bg, #fff)" stroke="currentColor" stroke-width="1.5">
+    <rect x="90" y="270" width="210" height="50"/>
+    <rect x="440" y="270" width="210" height="50"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="370" y="43">Browser</text>
+    <text x="370" y="130">Load balancer</text>
+    <text x="195" y="245">Thruk node 1</text>
+    <text x="545" y="245">Thruk node 2</text>
+    <text x="195" y="300">Local tmp_path</text>
+    <text x="545" y="300">Local tmp_path</text>
+    <text x="370" y="431">Shared storage</text>
+    <text x="370" y="452">etc_path and var_path</text>
+  </g>
+</svg>

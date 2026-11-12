@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 770" role="img" aria-label="OAuth2 login sequence between a browser, Thruk and an identity provider. The browser follows redirects to sign in and returns a code and state to Thruk. Thruk checks the state and browser cookie, exchanges the code server-side for tokens, and gets the user identity from api_url or ID token claims. Thruk then creates a login session." style="width:100%;max-width:740px;height:auto" fill="currentColor" font-family="system-ui, 'Segoe UI', Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="oauth_arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor"/></marker>
+  </defs>
+  <g fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5">
+    <rect x="15" y="15" width="150" height="45" rx="8"/>
+    <rect x="295" y="15" width="150" height="45" rx="8"/>
+    <rect x="575" y="15" width="150" height="45" rx="8"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="90" y="43">Browser</text>
+    <text x="370" y="43">Thruk</text>
+    <text x="650" y="43">Identity provider</text>
+  </g>
+  <g stroke="currentColor" stroke-width="1" stroke-dasharray="5 5">
+    <path d="M90 60 V735"/>
+    <path d="M370 60 V735"/>
+    <path d="M650 60 V735"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#oauth_arrow)">
+    <path d="M90 110 H370"/>
+    <path d="M370 170 H90"/>
+    <path d="M90 230 H650"/>
+    <path d="M650 290 H90"/>
+    <path d="M90 350 H370"/>
+    <path d="M370 420 H650"/>
+    <path d="M650 475 H370"/>
+    <path d="M370 545 H650"/>
+    <path d="M650 595 H370"/>
+    <path d="M370 715 H90"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="230" y="100">Start OAuth2 login</text>
+    <text x="230" y="160">Redirect to provider</text>
+    <text x="370" y="220">Sign in at auth_url</text>
+    <text x="370" y="280">Redirect to Thruk callback</text>
+    <text x="230" y="340">Callback: code and state</text>
+    <text x="510" y="410">Exchange code at token_url</text>
+    <text x="510" y="465">Tokens</text>
+    <text x="510" y="535">Fetch user details at api_url</text>
+    <text x="510" y="585">User details</text>
+    <text x="230" y="705">Create session; set session cookie</text>
+  </g>
+  <text x="385" y="377">Check state and browser cookie</text>
+  <rect x="345" y="495" width="370" height="120" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="5 5"/>
+  <text x="355" y="515">Only when api_url is configured</text>
+  <text x="385" y="650">Otherwise: use ID token claims</text>
+  <text x="20" y="760">Token and user-information requests run server-side in Thruk.</text>
+</svg>

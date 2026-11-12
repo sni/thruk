@@ -12,6 +12,8 @@ Thruk can use a separate logfile cache to speed up logfile access and reports.
 For maximum performance, install the logfile cache database on the Thruk server
 or at least in the same network.
 
+![Thruk reads and writes a MariaDB or PostgreSQL cache database and supplies cached logfiles to reports and logfile pages.](source/logfile-cache.svg)
+
 The cache is intended to store complete log data for about half a year.
 It can also store up to 2 years of compacted logfiles for SLA reports.
 

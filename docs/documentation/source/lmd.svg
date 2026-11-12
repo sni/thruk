@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 420" role="img" aria-label="Thruk queries LMD through one Livestatus API. LMD manages connections to monitoring sites through Livestatus or remote Thruk HTTP backends and combines their live data." style="width:100%;max-width:740px;height:auto" fill="currentColor" font-family="system-ui, 'Segoe UI', Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="lmd_arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8" fill="currentColor"/></marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.5" marker-end="url(#lmd_arrow)">
+    <path d="M170 210 H280"/>
+    <path d="M430 210 H480 V70 H535"/>
+    <path d="M480 210 H535"/>
+    <path d="M480 210 V350 H535"/>
+  </g>
+  <g fill="var(--vp-c-bg-soft, #e2e8f0)" stroke="currentColor" stroke-width="1.5">
+    <rect x="20" y="170" width="150" height="80" rx="8"/>
+    <rect x="280" y="170" width="150" height="80" rx="8"/>
+    <rect x="535" y="30" width="185" height="80" rx="8"/>
+    <rect x="535" y="170" width="185" height="80" rx="8"/>
+    <rect x="535" y="310" width="185" height="80" rx="8"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="95" y="215">Thruk</text>
+    <text x="355" y="202">LMD</text>
+    <text x="355" y="224">Livestatus proxy</text>
+    <text x="225" y="155">One Livestatus API</text>
+    <text x="627.5" y="62">Monitoring site 1</text>
+    <text x="627.5" y="84">Livestatus</text>
+    <text x="627.5" y="202">Monitoring site 2</text>
+    <text x="627.5" y="224">Livestatus</text>
+    <text x="627.5" y="342">Remote Thruk</text>
+    <text x="627.5" y="364">HTTP backend</text>
+  </g>
+  <text x="20" y="310">Arrows show query paths.</text>
+  <text x="20" y="334">LMD combines the returned data.</text>
+  <text x="20" y="380">Thruk generates lmd.ini from its backend configuration.</text>
+</svg>

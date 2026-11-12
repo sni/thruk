@@ -9,6 +9,8 @@ Clusters improve availability and performance but add complexity.
 All Thruk nodes in a cluster must share storage for `etc_path` and `var_path`.
 Keep `tmp_path` local.
 
+![Thruk nodes behind a load balancer share etc_path and var_path. Each node keeps tmp_path local.](source/cluster.svg)
+
 ### Setup
 
 - Create shared storage for `etc_path` and `var_path`
