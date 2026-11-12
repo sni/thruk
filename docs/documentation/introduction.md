@@ -48,7 +48,7 @@ The Apache webserver provides authentication, for example with
 mod_auth_basic, mod_auth_ldap or mod_auth_mysql.
 
 **Thruk architecture**
-![Thruk Architecture](source/arch_preview.png)
+![Thruk Architecture](source/arch.svg)
 
 ## Reasons to choose Thruk
 
