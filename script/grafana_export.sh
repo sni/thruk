@@ -50,7 +50,7 @@ if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
     fi
 fi
 
-$NODE $DIR/puppeteer.js "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
+$NODE $DIR/puppeteer.cjs "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
 rc=$?
 if [ -e "$TEMPFILE.png" ]; then
     mv "$TEMPFILE.png" "$TEMPFILE"

@@ -2295,7 +2295,7 @@ script/nagimp
 script/naglint
 script/pnp_export.sh
 script/print_post_variables.sh
-script/puppeteer.js
+script/puppeteer.cjs
 script/reenable_actions
 script/templates_cleanup.pl
 script/test_cpan_modules.pl

@@ -1,7 +1,11 @@
 /*
  * save html/url/grafana dashboards as png / pdf
  *
- * usage: node puppeteer.js <url> <output file> <width> <height> <sessionid>
+ * usage: node puppeteer.cjs <url> <output file> <width> <height> <sessionid>
+ *
+ * note: the .cjs extension is required, OMD may ship a package.json with
+ * "type": "module" in its node tree, which would make node parse a plain
+ * .js file as an ES module and leave require() undefined.
  *
  * docs: https://github.com/puppeteer/puppeteer/blob/main/docs/api/index.md
  *
@@ -86,7 +90,7 @@ if (process.env['START_TIMEOUT']) { startTimeout = process.env['START_TIMEOUT'] 
 
 // self-test: verify the puppeteer module loads (used by CI to prove the
 // loader works on the node version under test, e.g. both node 16 and node 26).
-//   node puppeteer.js --self-test
+//   node puppeteer.cjs --self-test
 if (process.argv[2] === "--self-test") {
   loadPuppeteer().then(
     (p) => { console.log("puppeteer loaded OK (launch=" + !!(p && p.launch) + ")"); process.exit(0); },
