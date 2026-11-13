@@ -116,6 +116,14 @@ failed_test: non_interactive_only
 failed_test_info:
 	@echo "### $@: $$(date "+%FT%T.%N")"
 	-echo "ERROR: test failed"
+	-echo "**** host - logs:"
+	-for f in ../../../logs/*.log ../../../var/*.log /tmp/thruk_test_error.log /tmp/thruk_test_debug.log; do \
+		if [ -f "$$f" ]; then echo "----- $$f:"; tail -n $(ERROR_TAIL) "$$f"; fi; \
+	done
+	-echo "**** host - report logs:"
+	-find ../../../var/reports -type f -name "*.log" 2>/dev/null | head -n 20 | while read -r f; do echo "----- $$f:"; tail -n $(ERROR_TAIL) "$$f"; done
+	-echo "**** host - job stderr:"
+	-find ../../../var/jobs -type f -name "stderr" 2>/dev/null | head -n 20 | while read -r f; do echo "----- $$f:"; tail -n $(ERROR_TAIL) "$$f"; done
 	-docker ps
 	-docker compose logs --tail=30 $(DOCKER_COMPOSE_LOGS) -t | sort
 	for svc in $$(docker compose config --services | sort); do \
