@@ -36,7 +36,9 @@ if [ $ARCH != "x86_64" -a $ARCH != "aarch64" ]; then
     exit 1
 fi
 
-if [ $(id -u) != "0" ]; then
+mkdir -p $DEST >/dev/null
+
+if [ ! -w $DEST ] && [ $(id -u) != "0" ]; then
     echo "ERROR: automatic puppeteer installation requires root permissions."
     exit 1
 fi
