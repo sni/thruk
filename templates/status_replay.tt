@@ -101,7 +101,9 @@
         <div id="replay-events-after" style="display:contents"></div>
       </div>
     </div>
-    <div id="replay-splitter" class="hoverable flex items-center justify-center outline-none" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90"><span class="border-t borderDefault" style="width:48px;pointer-events:none"></span></div>
+    <div id="replay-splitter" class="hoverable flex items-center justify-center outline-none" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90">
+        <span style="pointer-events:none;display:inline-block;padding:2px 14px;border-radius:4px"><i class="fa-solid fa-grip-lines textTH" aria-hidden="true"></i></span>
+    </div>
     [% END %]
   <div id="replay-table-panel" class="card w-full flex flex-col min-h-0">
     <div class="mainTableHeader shrink-0">

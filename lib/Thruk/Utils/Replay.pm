@@ -172,26 +172,6 @@ sub build {
     return {objects => \@objects, events => \@changes};
 }
 
-=head2 filter_logs
-
-Select displayed log indices without discarding state changes needed by replay.
-
-=cut
-
-sub filter_logs {
-    my($data, $pattern, $exclude_pattern) = @_;
-    # Keep literal spaces and anchor semantics in user-entered patterns.
-    my $include = $pattern =~ m/\S/mx ? qr/(?-mx)$pattern/imx : undef;
-    my $exclude = $exclude_pattern =~ m/\S/mx ? qr/(?-mx)$exclude_pattern/imx : undef;
-    return $data unless $include || $exclude;
-    my $events = $data->{'events'};
-    $data->{'log_indices'} = [grep {
-        my $message = $events->[$_]->{'log'} // '';
-        (!$include || $message =~ $include) && (!$exclude || $message !~ $exclude)
-    } 0..$#{$events}];
-    return $data;
-}
-
 sub _command {
     my($log) = @_;
     my $options = $log->{'options'} // $log->{'message'} // '';

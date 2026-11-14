@@ -185,6 +185,8 @@ sub _process_replay_page {
     $c->stash->{'status_search_add_default_filter'} = 'host';
     $c->stash->{'show_substyle_selector'} = 0;
     $c->stash->{'substyle'} = 'service';
+    # the replay page has no totals box
+    $c->stash->{'no_totals'} = 1;
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
     my $log_filter_error = 0;
     for my $name (qw/pattern exclude_pattern/) {
@@ -215,7 +217,6 @@ sub _process_replay_page {
         $c->db->renew_logcache($c);
         $c->stash->{'replay'} = Thruk::Utils::Replay::load($c, $start, $end, $hostfilter, $servicefilter);
         $c->stash->{'replay_error'} = $c->stash->{'replay'}->{'error'} // '';
-        Thruk::Utils::Replay::filter_logs($c->stash->{'replay'}, $c->stash->{'pattern'}, $c->stash->{'exclude_pattern'}) unless $c->stash->{'replay_error'};
     }
     Thruk::Utils::ssi_include($c);
     return 1;

@@ -30,24 +30,7 @@ is($data->{'events'}->[0]->{'object'}, 1, 'same host on different sites stays se
 is($data->{'events'}->[1]->{'object'}, 2, 'service state separate from host');
 is($data->{'events'}->[1]->{'output'}, '<script>', 'output kept as text');
 is_deeply(Thruk::Utils::Replay::build([], [], [], []), {objects => [], events => []}, 'empty result');
-my $filtered = {events => [
-    {log => 'HOST ALERT: host;DOWN;SOFT;2;down'},
-    {log => 'SERVICE ALERT: host;service;CRITICAL;HARD;3;critical'},
-    {log => 'SERVICE NOTIFICATION: admin;host;service;CRITICAL;mail;critical'},
-    {log => 'EXTERNAL COMMAND: DISABLE_SVC_CHECK;host;service'},
-]};
-Thruk::Utils::Replay::filter_logs($filtered, 'alert|notification', 'soft');
-is_deeply($filtered->{'log_indices'}, [1, 2], 'include and exclude patterns are case insensitive');
-is(scalar @{$filtered->{'events'}}, 4, 'log filtering preserves all state changes');
-Thruk::Utils::Replay::filter_logs($filtered, 'SERVICE ALERT', '');
-is_deeply($filtered->{'log_indices'}, [1], 'spaces in a search pattern are literal');
-Thruk::Utils::Replay::filter_logs($filtered, '', 'NOTIFICATION');
-is_deeply($filtered->{'log_indices'}, [0, 1, 3], 'exclude pattern works independently');
-Thruk::Utils::Replay::filter_logs($filtered, 'not present', '');
-is_deeply($filtered->{'log_indices'}, [], 'unmatched search selects no log entries');
-my $unfiltered = {events => $filtered->{'events'}};
-Thruk::Utils::Replay::filter_logs($unfiltered, ' ', '');
-ok(!exists $unfiltered->{'log_indices'}, 'blank patterns do not filter logs');
+
 
 sub downtime {
     my($time, $service, $transition) = @_;

@@ -4,6 +4,8 @@
     if(!root) { return; }
     var data = JSON.parse(root.getAttribute('data-replay'));
     var dateFormat = root.getAttribute('data-date-format');
+    var form = document.getElementById('date_form');
+    var alert = document.querySelector('[role="alert"].alerttext, #thruk_message');
     var slider = document.getElementById('replay-position');
     var play = document.getElementById('replay-play');
     var speed = document.getElementById('replay-speed');
@@ -23,7 +25,7 @@
     var resizing = null;
     var position = data.start;
     var cursor = 0;
-    var logIndices = data.log_indices || data.events.map(function(event, index) { return index; });
+    var logIndices = [];
     var shownLogs = [];
     var logCursor = 0;
     var timer = null;
@@ -371,6 +373,46 @@
             if(position >= viewEnd) { pause(); }
         }, 100);
     });
+    // Log patterns are applied client-side; the page embeds all events in data-replay.
+    var appliedPatterns = null;
+    var initialFormValues = Array.prototype.map.call(form.querySelectorAll('input,select'), function(field) {
+        return field.type === 'submit' ? 'submit' : field.name + ':' + field.value;
+    });
+    function applyPatterns() {
+        var include = document.getElementById('replay-pattern').value;
+        var exclude = document.getElementById('replay-exclude-pattern').value;
+        var invalid = null;
+        var regexes = [];
+        [include, exclude].forEach(function(pattern, index) {
+            if(!pattern || !/\S/.test(pattern)) { return; }
+            try {
+                // Keep literal spaces and anchor semantics in user-entered patterns.
+                regexes[index] = new RegExp(pattern, 'im');
+            } catch(error) {
+                invalid = index === 0 ? 'replay-pattern' : 'replay-exclude-pattern';
+            }
+        });
+        if(invalid) {
+            document.getElementById(invalid).focus();
+            root.style.display = 'none';
+            if(alert) { alert.textContent = 'Please correct the log filter pattern.'; alert.style.display = ''; }
+            return;
+        }
+        root.style.display = '';
+        if(alert) { alert.style.display = 'none'; }
+        logIndices = data.events.map(function(event, index) { return index; });
+        if(regexes[0] || regexes[1]) {
+            logIndices = logIndices.filter(function(index) {
+                var message = (data.events[index].log || '');
+                return (!regexes[0] || regexes[0].test(message)) && (!regexes[1] || !regexes[1].test(message));
+            });
+        }
+        var initial = appliedPatterns === null;
+        appliedPatterns = [include, exclude];
+        drawTimeline();
+        seek(position, initial);
+    }
+
     function scrub(event, snap) {
         var time = plot.c2p({left: event.pageX - plot.offset().left, top: 0}).x / 1000;
         if(snap) {
@@ -473,7 +515,18 @@
     slider.addEventListener('wheel', wheelStep, {passive: false});
     document.getElementById('replay-zoom-reset').addEventListener('click', function() { setWindow(data.start, data.end); });
     window.addEventListener('pagehide', pause);
-    drawTimeline();
+    ['replay-pattern', 'replay-exclude-pattern'].forEach(function(id) {
+        document.getElementById(id).addEventListener('input', applyPatterns);
+    });
+    form.addEventListener('submit', function(event) {
+        // Patterns change instantly client-side; only other filter changes (time range, status filter) need a reload.
+        var values = Array.prototype.map.call(form.querySelectorAll('input,select'), function(field) {
+            return field.type === 'submit' ? 'submit' : field.name + ':' + field.value;
+        });
+        if(values.join('\n') === initialFormValues.join('\n')) { return; }
+        event.preventDefault();
+        applyPatterns();
+    });
+    applyPatterns();
     resizePanes();
-    seek(data.start, true);
 }());
