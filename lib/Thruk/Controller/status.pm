@@ -183,7 +183,7 @@ sub _process_replay_page {
     my($c) = @_;
     # system logs are included by default; the hidden form field submits 0 when the checkbox is unchecked
     my $is_param = $c->req->parameters->{'includesystem'};
-    my $includesystem = grep { $_ eq '1' } ref $is_param eq 'ARRAY' ? @{$is_param} : ($is_param);
+    my $includesystem = grep { defined $_ && $_ eq '1' } ref $is_param eq 'ARRAY' ? @{$is_param} : ($is_param);
     $includesystem = 1 unless defined $is_param;
     my($start, $end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     $c->stash->{'status_search_add_default_filter'} = 'host';
