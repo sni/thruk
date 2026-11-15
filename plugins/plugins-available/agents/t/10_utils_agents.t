@@ -80,7 +80,7 @@ subtest 'inventory values remain literal shell arguments' => sub {
         check_service       => ["service=".$value],
         check_kernel_stats  => ["type=".$value],
         check_connections   => ["inet=".$value],
-        check_pagefile      => ["filter='name=".$value."'"],
+        check_pagefile      => ["filter=name=".$value],
     );
     for my $chk (@{$checks}) {
         next if $chk->{'id'} eq 'svc'; # generic service check has no inventory argument
