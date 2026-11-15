@@ -181,6 +181,10 @@ sub index {
 ##########################################################
 sub _process_replay_page {
     my($c) = @_;
+    # system logs are included by default; the hidden form field submits 0 when the checkbox is unchecked
+    my $is_param = $c->req->parameters->{'includesystem'};
+    my $includesystem = grep { $_ eq '1' } ref $is_param eq 'ARRAY' ? @{$is_param} : ($is_param);
+    $includesystem = 1 unless defined $is_param;
     my($start, $end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     $c->stash->{'status_search_add_default_filter'} = 'host';
     $c->stash->{'show_substyle_selector'} = 0;
@@ -204,6 +208,7 @@ sub _process_replay_page {
 
     $c->stash->{'start'} = $start;
     $c->stash->{'end'} = $end;
+    $c->stash->{'includesystem'} = $includesystem;
     $c->stash->{'title'} = $c->stash->{'infoBoxTitle'} = 'Status Replay';
     $c->stash->{'no_auto_reload'} = 1;
     $c->stash->{'template'} = 'status_replay.tt';
@@ -215,7 +220,8 @@ sub _process_replay_page {
         $c->stash->{'replay_error'} = 'Choose a non-empty time range.';
     } else {
         $c->db->renew_logcache($c);
-        $c->stash->{'replay'} = Thruk::Utils::Replay::load($c, $start, $end, $hostfilter, $servicefilter);
+        # load() pages the objects first and only fetches logs for the current page.
+        $c->stash->{'replay'} = Thruk::Utils::Replay::load($c, $start, $end, $hostfilter, $servicefilter, $includesystem);
         $c->stash->{'replay_error'} = $c->stash->{'replay'}->{'error'} // '';
     }
     Thruk::Utils::ssi_include($c);

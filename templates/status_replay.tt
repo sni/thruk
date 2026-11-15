@@ -13,6 +13,7 @@
   [% FOREACH backend IN param_backend.list %]
     <input type="hidden" name="backend" value="[% backend | html %]">
   [% END %]
+  [% UNLESS replay_error %]<input type="hidden" name="page" value="[% pager.page | html %]">[% END %]
   <div class="flexrow gap-2">
     <div class="flex flex-1">[% PROCESS _infobox.tt extra_classes="min-h-[150px]" %]</div>
     <div class="flex justify-center">[% PROCESS _log_date_select.tt date_select_title='Replay Time Range' extra_classes="min-h-[150px]" %]</div>
@@ -28,6 +29,11 @@
             <label for="replay-exclude-pattern" class="w-28 shrink-0 whitespace-nowrap">Exclude pattern</label>
             <input type="text" id="replay-exclude-pattern" name="exclude_pattern" class="min-w-0 flex-1" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
           </div>
+          <div class="flex items-center gap-2">
+            <input type="hidden" name="includesystem" value="0">
+            <input type="checkbox" id="replay-includesystem" name="includesystem" value="1"[% IF includesystem %] checked[% END %]>
+            <label for="replay-includesystem">Include system log entries</label>
+          </div>
           <button type="submit" class="self-end">Apply</button>
         </div>
       </div>
@@ -42,17 +48,22 @@
     <div class="card w-full mb-2">
       <div class="body flexcol gap-2">
         <div class="relative flex flex-wrap gap-2 items-center pr-9">
-          <button type="button" id="replay-reset" style="width:70px;flex-shrink:0">Reset</button>
-          <button type="button" id="replay-play" style="width:70px;flex-shrink:0" aria-pressed="false">Play</button>
-          <label for="replay-speed">Speed</label>
-          <select id="replay-speed">
-            <option value="1">1×</option><option value="60" selected>60×</option>
-            <option value="600">600×</option><option value="3600">3600×</option>
-          </select>
-          <label for="replay-keyboard-mode">Arrow keys</label>
-          <select id="replay-keyboard-mode"><option value="time">Step by time</option><option value="event" selected>Step by event</option></select>
-          <button type="button" id="replay-zoom-reset" style="display:none">Reset zoom</button>
-          <span id="replay-summary" class="text-xs ml-auto whitespace-nowrap" role="status"></span>
+          <div class="flex flex-nowrap gap-2 items-center">
+            <button type="button" id="replay-reset" style="width:70px;flex-shrink:0">Reset</button>
+            <button type="button" id="replay-play" style="width:70px;flex-shrink:0" aria-pressed="false">Play</button>
+            <label for="replay-speed">Speed</label>
+            <select id="replay-speed">
+              <option value="1">1×</option><option value="60" selected>60×</option>
+              <option value="600">600×</option><option value="3600">3600×</option>
+            </select>
+            <label for="replay-keyboard-mode">Arrow keys</label>
+            <select id="replay-keyboard-mode"><option value="time">Step by time</option><option value="event" selected>Step by event</option></select>
+            <button type="button" id="replay-zoom-reset" style="display:none">Reset zoom</button>
+          </div>
+          <div class="flex flex-1 items-center justify-center whitespace-nowrap">
+            <h3 id="replay-time" class="text-default textTH tracking-wide"></h3>
+          </div>
+          <span id="replay-summary" class="text-xs whitespace-nowrap" role="status"></span>
           <div class="absolute top-0 right-0">
             <button type="button" id="replay-help-button" class="round small gray text-lg" title="Replay help" aria-label="Replay help" aria-controls="replay-help" aria-expanded="false"
                     onclick="this.setAttribute('aria-expanded', toggleElement('replay-help', undefined, true, undefined, function() { document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); }) ? 'true' : 'false'); return false;"><i class="uil uil-info"></i></button>
@@ -73,12 +84,14 @@
                 <p>Click a log entry to jump to that event.</p>
                 <p>Drag the divider between the log and the status table to resize the panes. If the divider is focused, Up/Down or Home/End also moves it.</p>
                 <h4>Data</h4>
-                <p>The page shows recorded states read-only, including soft states. No data means no starting state was found in up to 50000 preceding records per backend.</p>
+                <p>The page shows recorded states read-only, including soft states. Starting states are read from the log back to 0:00 of the replay start; older objects without a recorded state show no data.</p>
                 <p>A moon icon marks recorded downtime. Without one, the page assumes no downtime. Acknowledgement and active-check flags follow the logged per-object commands. Current flags fill gaps without command history. Group commands and unlogged changes cannot be reconstructed.</p>
                 <p>Notifications counts the notification log entries replayed for each object since the range began. Entries for individual contacts count separately.</p>
                 <h4>Filters</h4>
                 <p>The filters select objects that are configured and authorized now. They use the current attributes, maximum attempts and passive-check settings of each object.</p>
                 <p>The log search and exclude patterns are case-insensitive regular expressions. They filter the log viewer, the chart and event navigation. The status table applies all state changes.</p>
+                <p>The log viewer, chart and navigation only cover the objects of the current table page; system log entries are always shown. Page through the table to browse other objects.</p>
+                <p>System log entries (program start, config checks, log rotation and similar host-independent messages) are included by default. Uncheck the checkbox to hide them.</p>
               </div>
             </div>
           </div>
@@ -111,9 +124,19 @@
         [% PROCESS _status_filter.tt show_form=0 paneprefix='dfl_' %]
       </div>
       <div class="flex flex-1 items-center justify-center whitespace-nowrap">
-        [% UNLESS replay_error %]<h3 id="replay-time" class="text-default textTH tracking-wide"></h3>[% END %]
+        [% UNLESS replay_error %][% PROCESS _pager.tt %][% END %]
       </div>
-      <div></div>
+      <div class="flex flex-nowrap gap-x-2 items-center">
+        [% UNLESS replay_error %]
+          <select id="replay-entries" name="entries" onChange="this.form.submit()" class="w-36 text-sm border-0 font-medium pager-entries">
+            [% FOR step IN paging_steps %]
+              [% IF step == "all" %]<option value="all"[% IF pager.entries == "all" %] selected[% END %]>all on one page</option>
+              [% ELSE %]<option value="[% step | html %]"[% IF pager.entries == step %] selected[% END %]>[% step | html %] per page</option>
+              [% END %]
+            [% END %]
+          </select>
+        [% END %]
+      </div>
     </div>
     <div class="mainTable flex-1 min-h-0" style="scrollbar-gutter:stable;max-height:none">
       <table class="mainTable" style="table-layout:fixed;width:100%">

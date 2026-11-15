@@ -4,7 +4,9 @@ use warnings;
 use strict;
 use Cpanel::JSON::XS qw/encode_json/;
 
+use Thruk::Utils ();
 use Thruk::Utils::Auth ();
+use Thruk::Utils::DateTime ();
 
 =head1 NAME
 
@@ -19,7 +21,7 @@ Load authorized objects, starting states and events for a replay.
 =cut
 
 sub load {
-    my($c, $start, $end, $hostfilter, $servicefilter) = @_;
+    my($c, $start, $end, $hostfilter, $servicefilter, $includesystem) = @_;
     my $services = $c->db->get_services(
         filter => [Thruk::Utils::Auth::get_auth_filter($c, 'services'), $servicefilter],
         columns => [qw/host_name description max_check_attempts acknowledged active_checks_enabled accept_passive_checks/], limit => 5001,
@@ -38,35 +40,78 @@ sub load {
     }
     my $data = {objects => [], events => [], start => $start, end => $end};
     return $data unless @{$hosts} || @{$services};
-    my @objects = (
-        (map { {host_name => $_->{'name'}, service_description => undef} } @{$hosts}),
-        (map { {host_name => $_->{'host_name'}, service_description => $_->{'description'}} } @{$services}),
-    );
-    my $types = {-or => [map { {type => $_} } ('HOST ALERT', 'SERVICE ALERT',
-            'INITIAL HOST STATE', 'INITIAL SERVICE STATE', 'CURRENT HOST STATE', 'CURRENT SERVICE STATE',
-            'HOST DOWNTIME ALERT', 'SERVICE DOWNTIME ALERT', 'HOST NOTIFICATION', 'SERVICE NOTIFICATION')]};
-    my %command_hosts = map { ($_->{'host_name'} // $_->{'name'}) => 1 } (@{$hosts}, @{$services});
-    my $commands = '(ACKNOWLEDGE_(HOST|SVC)_PROBLEM(_EXPIRE)?|REMOVE_(HOST|SVC)_ACKNOWLEDGEMENT|(ENABLE|DISABLE)_(HOST|SVC)_CHECK);('
-                   .join('|', map { quotemeta($_) } sort keys %command_hosts).');';
+    # Page the objects before fetching logs so the log query only covers the hosts of the
+    # current page (the usual paging workflow: page_data slices, here before get_logs).
+    # build() emits objects in (@hosts, @services) order, so each row's index there is its
+    # position in the full graph; hidden (host) rows are excluded from paging.
+    my @display;
+    my $i = 0;
+    push @display, {name => $_->{'name'}, service => '', backend => $_->{'peer_key'},
+                    hidden => $_->{'replay_hidden'} ? 1 : 0, index => $i++} for @{$hosts};
+    push @display, {name => $_->{'host_name'}, service => $_->{'description'}, backend => $_->{'peer_key'},
+                    hidden => $_->{'replay_hidden'} ? 1 : 0, index => $i++} for @{$services};
+    my @visible = grep { !$_->{hidden} } @display;
+    @visible = sort {
+        $a->{name} cmp $b->{name}
+        || $a->{service} cmp $b->{service}
+        || ($a->{backend} // '') cmp ($b->{backend} // '')
+    } @visible;
+    Thruk::Utils::set_paging_steps($c, '*10,25,50,100,all');
+    my $page = Thruk::Utils::page_data($c, \@visible, undef, scalar @visible, 0);
+    return $data unless @{$page};
+    # Scope the log query by the hosts of the paged objects only: build() filters to the exact
+    # authorized services, and the log table has no service-table columns to query.
+    my %hnames = map { $_->{name} => 1 } @{$page};
+    my @or = map { {host_name => $_} } sort keys %hnames;
+    my @classes = ({class => {'>=' => 1}});
+    if($includesystem) {
+        # system (program) log entries have no host, so include them explicitly
+        push @or, {class => 2};
+        push @classes, {class => 2};
+    }
     my @filter = (
         Thruk::Utils::Auth::get_auth_filter($c, 'log'),
-        {-or => [{-and => [$types, {-or => \@objects}]},
-                 {-and => [{type => 'EXTERNAL COMMAND'}, {message => {'~~' => $commands}}]}]},
+        {-or => \@or},
+        # class 0 (event handlers) and class 2 (program) rows are not needed for replay unless requested
+        {-or => \@classes},
     );
-    my $columns = [qw/time type host_name service_description state state_type plugin_output options message/];
-    my $events = $c->db->get_logs(
-        filter => [@filter, {time => {'>=' => $start}}, {time => {'<' => $end}}],
-        columns => $columns, sort => {ASC => 'time'}, limit => 50001,
+    my $columns = [qw/time type class host_name service_description state state_type plugin_output options message/];
+    # The day boundary (not the range start) seeds the initial states for the paged objects.
+    my $logs = $c->db->get_logs(
+        filter => [@filter, {time => {'>=' => Thruk::Utils::DateTime::start_of_day($start)}}, {time => {'<' => $end}}],
+        columns => $columns, sort => {ASC => 'time'}, options => {limit => 50001},
     );
-    if(@{$events} > 50000) {
+    if(@{$logs} > 50000) {
         return {error => 'More than 50000 events match. Please narrow the time range or select a host or service.'};
     }
-    # shortcut: scan 50000 preceding records per backend; use per-object lookups if this leaves too many gaps.
-    my $before = $c->db->get_logs(
-        filter => [@filter, {type => {'!=' => 'HOST NOTIFICATION'}}, {type => {'!=' => 'SERVICE NOTIFICATION'}}, {time => {'<' => $start}}],
-        columns => $columns, sort => {DESC => 'time'}, limit => 50000,
-    );
+    # Notifications before the range must not seed the per-range counters.
+    my $before = [grep { $_->{'time'} < $start && ($_->{'type'} // '') !~ m/^(?:HOST|SERVICE) NOTIFICATION$/mx } @{$logs}];
+    my $events = [grep { $_->{'time'} >= $start } @{$logs}];
+    # build() the full authorized graph so host_object always resolves (a page service's
+    # host downtime/ack icon may reference a host on another page), then slice to the page.
     $data = build($hosts, $services, $before, $events);
+    # the page rows (stash data, in display order) each carry their index into the full graph
+    my (%remap, @page_objects);
+    my $p = 0;
+    for my $row (@{$c->stash->{'data'}}) {
+        $remap{$row->{index}} = $p;
+        push @page_objects, $data->{'objects'}->[$row->{index}];
+        $p++;
+    }
+    # renumber event.object and host_object into the page-local indices; drop events for
+    # objects not on this page, keep hostless system entries (object < 0).
+    my @events;
+    for my $e (@{$data->{'events'}}) {
+        my $o = $e->{'object'};
+        next if defined $o && $o >= 0 && !exists $remap{$o};
+        push @events, defined $o && $o >= 0 ? {%$e, object => $remap{$o}} : $e;
+    }
+    $data->{'events'} = \@events;
+    for my $obj (@page_objects) {
+        my $h = $obj->{'host_object'};
+        $obj->{'host_object'} = defined $h ? ($remap{$h} // undef) : undef;
+    }
+    $data->{'objects'} = \@page_objects;
     $data->{'start'} = $start;
     $data->{'end'} = $end;
     return $data;
@@ -127,7 +172,13 @@ sub build {
         for my $log (@{$set}) {
             my $service = $log->{'service_description'} // '';
             my $key = encode_json([$log->{'peer_key'}, $log->{'host_name'}, $service]);
-            next unless exists $index{$key};
+            if(!exists $index{$key}) {
+                # system (program) entries have no object; keep them for the log view only
+                next unless $set == $sets[1] && ($log->{'class'} // 0) == 2;
+                push @changes, {time => 0 + $log->{'time'}, object => -1,
+                                type => $log->{'type'} // 'STATE', log => $log->{'message'} // ''};
+                next;
+            }
             my $id = $index{$key};
             my $options = $log->{'options'} // $log->{'message'} // '';
             $options =~ s/^(?:\[\d+\]\s*)?[^:]+:\s*//mx if !defined $log->{'options'};

@@ -241,6 +241,7 @@
     }
 
     function paint(index, state) {
+        if(index < 0) { return; }
         var object = data.objects[index];
         currentStates[index] = state;
         refreshFlags(index, state);
@@ -252,8 +253,8 @@
         cells[3].textContent = name;
         cells[3].className = checked ? 'state ' + name : '';
         cells[4].textContent = checked ? state.state_type : '—';
-        cells[5].textContent = (checked && state.check_attempts != null ? state.check_attempts : '—') + '/' + (object.max_attempts == null ? '—' : object.max_attempts);
-        cells[6].textContent = state && state.notification_count || 0;
+        cells[5].textContent = checked && state.check_attempts != null ? state.check_attempts + '/' + (object.max_attempts == null ? '—' : object.max_attempts) : '—';
+        cells[6].textContent = state && state.notification_count ? state.notification_count : '—';
         cells[6].title = 'Notification log entries replayed in this time range';
         cells[7].textContent = checked ? formatTime(state.last_check || state.time) : '—';
         cells[8].textContent = checked ? state.output : '';
@@ -376,7 +377,7 @@
     // Log patterns are applied client-side; the page embeds all events in data-replay.
     var appliedPatterns = null;
     var initialFormValues = Array.prototype.map.call(form.querySelectorAll('input,select'), function(field) {
-        return field.type === 'submit' ? 'submit' : field.name + ':' + field.value;
+        return field.type === 'submit' ? 'submit' : field.name + ':' + (field.type === 'checkbox' ? (field.checked ? '1' : '0') : field.value);
     });
     function applyPatterns() {
         var include = document.getElementById('replay-pattern').value;
@@ -519,11 +520,22 @@
         document.getElementById(id).addEventListener('input', applyPatterns);
     });
     form.addEventListener('submit', function(event) {
-        // Patterns change instantly client-side; only other filter changes (time range, status filter) need a reload.
-        var values = Array.prototype.map.call(form.querySelectorAll('input,select'), function(field) {
-            return field.type === 'submit' ? 'submit' : field.name + ':' + field.value;
-        });
-        if(values.join('\n') === initialFormValues.join('\n')) { return; }
+        // Log patterns apply instantly client-side, so only intercept a submit whose changes
+        // are confined to the two pattern fields. Any other change (time range, page size,
+        // system log toggle) must reload so the server re-runs the query; the hidden page
+        // field carries the current page across the reload.
+        var fields = form.querySelectorAll('input,select');
+        var changed = false;
+        var patternOnly = true;
+        for(var i = 0; i < fields.length; i++) {
+            var f = fields[i];
+            if(f.type === 'submit') { continue; }
+            var value = f.type === 'checkbox' ? (f.checked ? '1' : '0') : f.value;
+            if(f.name + ':' + value === initialFormValues[i]) { continue; }
+            changed = true;
+            if(f.name !== 'pattern' && f.name !== 'exclude_pattern') { patternOnly = false; break; }
+        }
+        if(!changed || !patternOnly) { return; }
         event.preventDefault();
         applyPatterns();
     });
