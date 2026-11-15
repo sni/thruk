@@ -35,7 +35,7 @@ sub get_checks {
             'id'       => 'pagefile.'.Thruk::Utils::Agents::to_id($page->{'name'}),
             'name'     => $page->{'name'} eq 'total' ? 'pagefile' : 'pagefile '.$page->{'name'},
             'check'    => 'check_pagefile',
-            'args'     => { "filter" => "name='".$page->{'name'}."'" },
+            'args'     => { "filter" => "name=".$page->{'name'} },
             'parent'   => 'agent version',
             'info'     => $page,
             'disabled' => Thruk::Utils::Agents::check_disable($page, $disabled_config, 'pagefile'),
