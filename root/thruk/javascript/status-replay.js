@@ -1,45 +1,47 @@
+/* vim: expandtab:ts=4:sw=4:syntax=js */
+
 (function() {
     'use strict';
     var root = document.getElementById('status-replay');
     if(!root) { return; }
-    var data = JSON.parse(root.getAttribute('data-replay'));
-    var dateFormat = root.getAttribute('data-date-format');
-    var form = document.getElementById('date_form');
-    var alert = document.querySelector('[role="alert"].alerttext, #thruk_message');
-    var slider = document.getElementById('replay-position');
-    var play = document.getElementById('replay-play');
-    var speed = document.getElementById('replay-speed');
-    var clock = document.getElementById('replay-time');
-    var summary = document.getElementById('replay-summary');
-    var body = document.getElementById('replay-objects');
-    var currentLog = document.getElementById('replay-event');
-    var previousLog = document.getElementById('replay-event-prev');
-    var nextLog = document.getElementById('replay-event-next');
+    var data         = JSON.parse(root.getAttribute('data-replay'));
+    var dateFormat   = root.getAttribute('data-date-format');
+    var form         = document.getElementById('date_form');
+    var alert        = document.querySelector('[role="alert"].alerttext, #thruk_message');
+    var slider       = document.getElementById('replay-position');
+    var play         = document.getElementById('replay-play');
+    var speed        = document.getElementById('replay-speed');
+    var clock        = document.getElementById('replay-time');
+    var summary      = document.getElementById('replay-summary');
+    var body         = document.getElementById('replay-objects');
+    var currentLog   = document.getElementById('replay-event');
+    var previousLog  = document.getElementById('replay-event-prev');
+    var nextLog      = document.getElementById('replay-event-next');
     var eventsBefore = document.getElementById('replay-events-before');
-    var eventsAfter = document.getElementById('replay-events-after');
+    var eventsAfter  = document.getElementById('replay-events-after');
     var keyboardMode = document.getElementById('replay-keyboard-mode');
-    var logPanel = document.getElementById('replay-log-panel');
-    var panes = document.getElementById('replay-panes');
-    var splitter = document.getElementById('replay-splitter');
-    var logHeight = 90;
-    var resizing = null;
-    var position = data.start;
-    var cursor = 0;
-    var logIndices = [];
-    var shownLogs = [];
-    var logCursor = 0;
-    var timer = null;
+    var logPanel     = document.getElementById('replay-log-panel');
+    var panes        = document.getElementById('replay-panes');
+    var splitter     = document.getElementById('replay-splitter');
+    var logHeight    = 90;
+    var resizing     = null;
+    var position     = data.start;
+    var cursor       = 0;
+    var logIndices   = [];
+    var shownLogs    = [];
+    var logCursor    = 0;
+    var timer        = null;
     var lastTick;
-    var hostIndicators = data.objects.map(function() { return []; });
+    var hostIndicators    = data.objects.map(function() { return []; });
     var serviceIndicators = [];
-    var currentStates = [];
-    var viewStart = data.start;
-    var viewEnd = data.end;
-    var viewFirst = 0;
+    var currentStates     = [];
+    var viewStart         = data.start;
+    var viewEnd           = data.end;
+    var viewFirst         = 0;
     var plot;
-    var dragging = false;
+    var dragging          = false;
     var dragStartX;
-    var dragMoved = false;
+    var dragMoved         = false;
 
     function formatTime(time) {
         return new Date(time * 1000).strftime(dateFormat);
@@ -78,9 +80,10 @@
             category.bars = bars;
             category.stack = true;
         });
-        if (shownLogs.length <= 2000) {
+        if(shownLogs.length <= 2000) {
             // One bar per event timestamp so the position marker lands on the event's own bar.
-            var byTime = {}, byBucket = {};
+            var byTime = {};
+            var byBucket = {};
             shownLogs.forEach(function(index) {
                 var event = data.events[index];
                 byTime[event.time] = (byTime[event.time] || 0) + 1;
@@ -116,13 +119,28 @@
             maxCount = Math.max.apply(null, counts.concat([1]));
         }
         plot = jQuery.plot(slider, categories, {
-            xaxis: {mode: 'time', timezone: 'browser', min: viewStart * 1000, max: viewEnd * 1000, ticks: 5,
-                    minTickSize: [1, 'second'], tickFormatter: function(value) { return formatTime(value / 1000); }},
+            xaxis: {
+                mode: 'time',
+                timezone: 'browser',
+                min: viewStart * 1000,
+                max: viewEnd * 1000,
+                ticks: 5,
+                minTickSize: [1, 'second'],
+                tickFormatter: function(value) { return formatTime(value / 1000); }
+            },
             yaxis: {min: 0, max: Math.min(100, maxCount), tickDecimals: 0},
-            grid: {aboveData: true, hoverable: true, borderWidth: 1, color: themeColor('textTH'), markings: function() {
-                return [{xaxis: {from: position * 1000, to: position * 1000}, color: themeColor('text-default'), lineWidth: 1.5}];
-            }},
-            selection: {mode: 'x', color: categories[2].color}, crosshair: {mode: 'x', color: themeColor('textTH')}, legend: {show: false}
+            grid: {
+                aboveData: true,
+                hoverable: true,
+                borderWidth: 1,
+                color: themeColor('textTH'),
+                markings: function() {
+                    return [{xaxis: {from: position * 1000, to: position * 1000}, color: themeColor('text-default'), lineWidth: 1.5}];
+                }
+            },
+            selection: {mode: 'x', color: categories[2].color},
+            crosshair: {mode: 'x', color: themeColor('textTH')},
+            legend: {show: false}
         });
         slider.setAttribute('aria-valuemin', viewStart);
         slider.setAttribute('aria-valuemax', viewEnd);
@@ -132,7 +150,10 @@
     function setWindow(start, end) {
         start = Math.max(data.start, start);
         end = Math.min(data.end, end);
-        if(end <= start) { plot.clearSelection(true); return; }
+        if(end <= start) {
+            plot.clearSelection(true);
+            return;
+        }
         pause();
         viewStart = start;
         viewEnd = end;
@@ -321,7 +342,10 @@
             var message = (event.log || event.output || '').replace(/^\[\d+(?:\.\d+)?\]\s*/, '');
             element.textContent = '[' + formatTime(event.time) + '] ' + message;
             element.href = '#';
-            element.onclick = function(click) { click.preventDefault(); jumpToEvent(index); };
+            element.onclick = function(click) {
+                click.preventDefault();
+                jumpToEvent(index);
+            };
         } else {
             element.textContent = '—';
             element.removeAttribute('href');
@@ -350,8 +374,11 @@
         var index = direction > 0 ? logCursor : previousEventIndex();
         var rawIndex = shownLogs[index];
         var event = data.events[rawIndex];
-        if(event) { seek(event.time, false, rawIndex + 1); }
-        else if(direction < 0) { seek(viewStart, true, viewFirst); }
+        if(event) {
+            seek(event.time, false, rawIndex + 1);
+        } else if(direction < 0) {
+            seek(viewStart, true, viewFirst);
+        }
     }
 
     function pause() {
@@ -362,7 +389,10 @@
     }
 
     play.addEventListener('click', function() {
-        if(timer !== null) { pause(); return; }
+        if(timer !== null) {
+            pause();
+            return;
+        }
         if(position >= viewEnd) { seek(viewStart, true); }
         lastTick = performance.now();
         play.textContent = 'Pause';
@@ -379,6 +409,7 @@
     var initialFormValues = Array.prototype.map.call(form.querySelectorAll('input,select'), function(field) {
         return field.type === 'submit' ? 'submit' : field.name + ':' + (field.type === 'checkbox' ? (field.checked ? '1' : '0') : field.value);
     });
+
     function applyPatterns() {
         var include = document.getElementById('replay-pattern').value;
         var exclude = document.getElementById('replay-exclude-pattern').value;
@@ -396,7 +427,10 @@
         if(invalid) {
             document.getElementById(invalid).focus();
             root.style.display = 'none';
-            if(alert) { alert.textContent = 'Please correct the log filter pattern.'; alert.style.display = ''; }
+            if(alert) {
+                alert.textContent = 'Please correct the log filter pattern.';
+                alert.style.display = '';
+            }
             return;
         }
         root.style.display = '';
@@ -426,7 +460,10 @@
                     distance = Math.abs(log.time - time);
                 }
             });
-            if(closest >= 0) { seek(data.events[closest].time, false, closest + 1); return; }
+            if(closest >= 0) {
+                seek(data.events[closest].time, false, closest + 1);
+                return;
+            }
         }
         seek(time);
     }
@@ -449,16 +486,23 @@
         if(resizing) { setSplit(resizing.height + event.clientY - resizing.y); }
     });
     document.addEventListener('mouseup', function(event) {
-        if(dragging) { dragging = false; if(dragMoved) { scrub(event); } }
+        if(dragging) {
+            dragging = false;
+            if(dragMoved) { scrub(event); }
+        }
         resizing = null;
     });
-    window.addEventListener('blur', function() { dragging = false; resizing = null; });
+    window.addEventListener('blur', function() {
+        dragging = false;
+        resizing = null;
+    });
     jQuery(slider).on('plotselected', function(event, ranges) {
         setWindow(ranges.xaxis.from / 1000, ranges.xaxis.to / 1000);
     });
     jQuery(slider).on('plothover', function(event, point, item) {
         slider.title = item ? formatTime(item.datapoint[0] / 1000) + ': ' + item.series.data[item.dataIndex][1] + ' ' + item.series.label.toLowerCase() : '';
     });
+
     function navigate(event) {
         if(event.altKey || event.ctrlKey || event.metaKey) { return; }
         if(event.key === 'ArrowUp' || event.key === 'ArrowDown' ||
@@ -492,6 +536,7 @@
         panes.style.height = Math.max(240, window.innerHeight - panes.getBoundingClientRect().top - 16) + 'px';
         setSplit(logHeight);
     }
+
     splitter.addEventListener('mousedown', function(event) {
         if(event.button !== 0) { return; }
         event.preventDefault();
@@ -506,12 +551,17 @@
         }
     });
     window.addEventListener('resize', resizePanes);
-    document.getElementById('replay-reset').addEventListener('click', function() { pause(); seek(viewStart, true, viewFirst); });
+    document.getElementById('replay-reset').addEventListener('click', function() {
+        pause();
+        seek(viewStart, true, viewFirst);
+    });
+
     function wheelStep(event) {
         if(event.ctrlKey || event.deltaY === 0) { return; }
         event.preventDefault();
         stepEvent((event.deltaY > 0 ? 1 : -1) * (event.currentTarget === slider ? -1 : 1));
     }
+
     logPanel.addEventListener('wheel', wheelStep, {passive: false});
     slider.addEventListener('wheel', wheelStep, {passive: false});
     document.getElementById('replay-zoom-reset').addEventListener('click', function() { setWindow(data.start, data.end); });
@@ -533,7 +583,10 @@
             var value = f.type === 'checkbox' ? (f.checked ? '1' : '0') : f.value;
             if(f.name + ':' + value === initialFormValues[i]) { continue; }
             changed = true;
-            if(f.name !== 'pattern' && f.name !== 'exclude_pattern') { patternOnly = false; break; }
+            if(f.name !== 'pattern' && f.name !== 'exclude_pattern') {
+                patternOnly = false;
+                break;
+            }
         }
         if(!changed || !patternOnly) { return; }
         event.preventDefault();

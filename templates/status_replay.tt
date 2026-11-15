@@ -13,13 +13,17 @@
   [% FOREACH backend IN param_backend.list %]
     <input type="hidden" name="backend" value="[% backend | html %]">
   [% END %]
-  [% UNLESS replay_error %]<input type="hidden" name="page" value="[% pager.page | html %]">[% END %]
+  [% UNLESS replay_error %]
+  <input type="hidden" name="page" value="[% pager.page | html %]">
+  [% END %]
   <div class="flexrow gap-2">
     <div class="flex flex-1">[% PROCESS _infobox.tt extra_classes="min-h-[150px]" %]</div>
     <div class="flex justify-center">[% PROCESS _log_date_select.tt date_select_title='Replay Time Range' extra_classes="min-h-[150px]" %]</div>
     <div class="flex flex-1 justify-end">
       <div class="card w-64 min-h-[150px]">
-        <div class="head"><h3>Log Filter</h3></div>
+        <div class="head">
+          <h3>Log Filter</h3>
+        </div>
         <div class="body flexcol gap-1">
           <div class="flex items-center gap-2">
             <label for="replay-pattern" class="w-28 shrink-0 whitespace-nowrap">Search pattern</label>
@@ -53,11 +57,16 @@
             <button type="button" id="replay-play" style="width:70px;flex-shrink:0" aria-pressed="false">Play</button>
             <label for="replay-speed">Speed</label>
             <select id="replay-speed">
-              <option value="1">1×</option><option value="60" selected>60×</option>
-              <option value="600">600×</option><option value="3600">3600×</option>
+              <option value="1">1×</option>
+              <option value="60" selected>60×</option>
+              <option value="600">600×</option>
+              <option value="3600">3600×</option>
             </select>
             <label for="replay-keyboard-mode">Arrow keys</label>
-            <select id="replay-keyboard-mode"><option value="time">Step by time</option><option value="event" selected>Step by event</option></select>
+            <select id="replay-keyboard-mode">
+              <option value="time">Step by time</option>
+              <option value="event" selected>Step by event</option>
+            </select>
             <button type="button" id="replay-zoom-reset" style="display:none">Reset zoom</button>
           </div>
           <div class="flex flex-1 items-center justify-center whitespace-nowrap">
@@ -115,45 +124,60 @@
       </div>
     </div>
     <div id="replay-splitter" class="hoverable flex items-center justify-center outline-none" style="cursor:row-resize;touch-action:none" tabindex="0" role="separator" title="Drag to resize logs and table" aria-label="Resize log and status panes" aria-orientation="horizontal" aria-controls="replay-log-panel replay-table-panel" aria-valuemin="80" aria-valuemax="112" aria-valuenow="90">
-        <span style="pointer-events:none;display:inline-block;padding:2px 14px;border-radius:4px"><i class="fa-solid fa-grip-lines textTH" aria-hidden="true"></i></span>
+      <span style="pointer-events:none;display:inline-block;padding:2px 14px;border-radius:4px"><i class="fa-solid fa-grip-lines textTH" aria-hidden="true"></i></span>
     </div>
     [% END %]
-  <div id="replay-table-panel" class="card w-full flex flex-col min-h-0">
-    <div class="mainTableHeader shrink-0">
-      <div class="flex flex-nowrap gap-x-2 items-center">
-        [% PROCESS _status_filter.tt show_form=0 paneprefix='dfl_' %]
-      </div>
-      <div class="flex flex-1 items-center justify-center whitespace-nowrap">
-        [% UNLESS replay_error %][% PROCESS _pager.tt %][% END %]
-      </div>
-      <div class="flex flex-nowrap gap-x-2 items-center">
-        [% UNLESS replay_error %]
-          <select id="replay-entries" name="entries" onChange="this.form.submit()" class="w-36 text-sm border-0 font-medium pager-entries">
-            [% FOR step IN paging_steps %]
-              [% IF step == "all" %]<option value="all"[% IF pager.entries == "all" %] selected[% END %]>all on one page</option>
-              [% ELSE %]<option value="[% step | html %]"[% IF pager.entries == step %] selected[% END %]>[% step | html %] per page</option>
-              [% END %]
-            [% END %]
-          </select>
-        [% END %]
-      </div>
-    </div>
-    <div class="mainTable flex-1 min-h-0" style="scrollbar-gutter:stable;max-height:none">
-      <table class="mainTable" style="table-layout:fixed;width:100%">
-        <colgroup>
-          <col style="width:8%"><col style="width:14%"><col style="width:14%"><col style="width:7%">
-          <col style="width:6%"><col style="width:7%"><col style="width:8%"><col style="width:12%"><col style="width:24%">
-        </colgroup>
-        <thead><tr>
-          [% FOREACH column IN ['Site', 'Host', 'Service', 'Status', 'State Type', 'Attempt', 'Notifications', 'Last Recorded State', 'Status Information'] %]
-            <th class="truncate" title="[% column | html %]">[% column | html %]</th>
+    <div id="replay-table-panel" class="card w-full flex flex-col min-h-0">
+      <div class="mainTableHeader shrink-0">
+        <div class="flex flex-nowrap gap-x-2 items-center">
+          [% PROCESS _status_filter.tt show_form=0 paneprefix='dfl_' %]
+        </div>
+        <div class="flex flex-1 items-center justify-center whitespace-nowrap">
+          [% UNLESS replay_error %]
+            [% PROCESS _pager.tt %]
           [% END %]
-        </tr></thead>
-        <tbody id="replay-objects"></tbody>
-      </table>
+        </div>
+        <div class="flex flex-nowrap gap-x-2 items-center">
+          [% UNLESS replay_error %]
+            <select id="replay-entries" name="entries" onChange="this.form.submit()" class="w-36 text-sm border-0 font-medium pager-entries">
+              [% FOR step IN paging_steps %]
+                [% IF step == "all" %]
+                  <option value="all"[% IF pager.entries == "all" %] selected[% END %]>all on one page</option>
+                [% ELSE %]
+                  <option value="[% step | html %]"[% IF pager.entries == step %] selected[% END %]>[% step | html %] per page</option>
+                [% END %]
+              [% END %]
+            </select>
+          [% END %]
+        </div>
+      </div>
+      <div class="mainTable flex-1 min-h-0" style="scrollbar-gutter:stable;max-height:none">
+        <table class="mainTable" style="table-layout:fixed;width:100%">
+          <colgroup>
+            <col style="width:8%">
+            <col style="width:14%">
+            <col style="width:14%">
+            <col style="width:7%">
+            <col style="width:6%">
+            <col style="width:7%">
+            <col style="width:8%">
+            <col style="width:12%">
+            <col style="width:24%">
+          </colgroup>
+          <thead>
+            <tr>
+              [% FOREACH column IN ['Site', 'Host', 'Service', 'Status', 'State Type', 'Attempt', 'Notifications', 'Last Recorded State', 'Status Information'] %]
+                <th class="truncate" title="[% column | html %]">[% column | html %]</th>
+              [% END %]
+            </tr>
+          </thead>
+          <tbody id="replay-objects"></tbody>
+        </table>
+      </div>
+      <div class="mainTableFooter shrink-0">
+        <span id="replay-object-summary" class="textPager font-medium leading-7">0 objects</span>
+      </div>
     </div>
-    <div class="mainTableFooter shrink-0"><span id="replay-object-summary" class="textPager font-medium leading-7">0 objects</span></div>
-  </div>
   </div>
 </form>
 [% UNLESS replay_error %]

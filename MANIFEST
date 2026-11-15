@@ -2433,7 +2433,6 @@ t/106-thruk_context.t
 t/107-thruk_utils_avail.t
 t/108-thruk_utils_status.t
 t/109-thruk-rest-utils.t
-t/109-thruk_utils_replay.t
 t/110-thruk_authentication_user.t
 t/111-thruk_utils.t
 t/112-thruk_utils_filter.t

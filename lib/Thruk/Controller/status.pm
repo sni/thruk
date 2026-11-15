@@ -187,8 +187,8 @@ sub _process_replay_page {
     $includesystem = 1 unless defined $is_param;
     my($start, $end) = Thruk::Utils::get_start_end_from_date_select_params($c);
     $c->stash->{'status_search_add_default_filter'} = 'host';
-    $c->stash->{'show_substyle_selector'} = 0;
-    $c->stash->{'substyle'} = 'service';
+    $c->stash->{'show_substyle_selector'}           = 0;
+    $c->stash->{'substyle'}                        = 'service';
     # the replay page has no totals box
     $c->stash->{'no_totals'} = 1;
     my($hostfilter, $servicefilter) = Thruk::Utils::Status::do_filter($c);
@@ -206,12 +206,12 @@ sub _process_replay_page {
         }
     }
 
-    $c->stash->{'start'} = $start;
-    $c->stash->{'end'} = $end;
+    $c->stash->{'start'}         = $start;
+    $c->stash->{'end'}           = $end;
     $c->stash->{'includesystem'} = $includesystem;
-    $c->stash->{'title'} = $c->stash->{'infoBoxTitle'} = 'Status Replay';
+    $c->stash->{'title'}         = $c->stash->{'infoBoxTitle'} = 'Status Replay';
     $c->stash->{'no_auto_reload'} = 1;
-    $c->stash->{'template'} = 'status_replay.tt';
+    $c->stash->{'template'}      = 'status_replay.tt';
     if($log_filter_error) {
         $c->stash->{'replay_error'} = 'Please correct the log filter pattern.';
     } elsif($c->stash->{'has_error'}) {
