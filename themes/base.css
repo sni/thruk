@@ -683,7 +683,8 @@ BODY.topNavOpen {
     DIV.navsectionlinks > UL > LI {
       @apply relative left-[5px] top-0 min-h-[50px] border border-transparent;
     }
-    DIV.navsectionlinks > UL > LI:hover {
+    DIV.navsectionlinks > UL > LI:hover,
+    DIV.navsectionlinks > UL:not(:has(> LI:hover)) > LI:focus-within {
       @apply w-[200px];
       I:first-child {
         @apply borderActive;
