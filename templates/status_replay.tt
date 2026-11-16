@@ -76,31 +76,16 @@
           <div class="absolute top-0 right-0">
             <button type="button" id="replay-help-button" class="round small gray text-lg" title="Replay help" aria-label="Replay help" aria-controls="replay-help" aria-expanded="false"
                     onclick="this.setAttribute('aria-expanded', toggleElement('replay-help', undefined, true, undefined, function() { document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); }) ? 'true' : 'false'); return false;"><i class="uil uil-info"></i></button>
-            <div id="replay-help" class="card shadow-float absolute z-20 top-7 right-0" style="display:none;width:480px;max-width:90vw" role="dialog" aria-labelledby="replay-help-title">
+            <div id="replay-help" class="card shadow-float absolute z-20 top-7 right-0" style="display:none;width:380px;max-width:90vw" role="dialog" aria-labelledby="replay-help-title">
               <div class="head justify-between">
                 <h3 id="replay-help-title">Status Replay Help</h3>
                 <button type="button" class="iconOnly medium" aria-label="Close help" onclick="toggleElement('replay-help'); document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); return false;"><i class="uil uil-times"></i></button>
               </div>
-              <div class="body flexcol gap-2">
-                <h4>Time chart</h4>
-                <p>Click the chart to jump to the closest log event. Drag to move the replay position freely through time. Hold Shift and drag a time range to zoom.</p>
-                <p>Red marks alerts, green recoveries, blue notifications and gray other events. Events of different categories stack in the same time bucket.</p>
-                <h4>Keyboard</h4>
-                <p>Home/End jump to the boundaries of the visible range.</p>
-                <p>The Arrow keys selector decides what Left/Right do: step by time or by individual log event. Up/Down always step by event, even if several events share a timestamp. Time steps use Speed: 1× steps one second, 60× steps one minute. These keys work in the chart and the log box.</p>
-                <p>Hover over the chart or the log box and scroll to step events. Over the chart, scroll down to go backward and up to go forward. The log box keeps the normal scroll direction.</p>
-                <h4>Panes</h4>
-                <p>Click a log entry to jump to that event.</p>
-                <p>Drag the divider between the log and the status table to resize the panes. If the divider is focused, Up/Down or Home/End also moves it.</p>
-                <h4>Data</h4>
-                <p>The page shows recorded states read-only, including soft states. Starting states are read from the log back to 0:00 of the replay start; older objects without a recorded state show no data.</p>
-                <p>A moon icon marks recorded downtime. Without one, the page assumes no downtime. Acknowledgement and active-check flags follow the logged per-object commands. Current flags fill gaps without command history. Group commands and unlogged changes cannot be reconstructed.</p>
-                <p>Notifications counts the notification log entries replayed for each object since the range began. Entries for individual contacts count separately.</p>
-                <h4>Filters</h4>
-                <p>The filters select objects that are configured and authorized now. They use the current attributes, maximum attempts and passive-check settings of each object.</p>
-                <p>The log search and exclude patterns are case-insensitive regular expressions. They filter the log viewer, the chart and event navigation. The status table applies all state changes.</p>
-                <p>The log viewer, chart and navigation only cover the objects of the current table page; system log entries are always shown. Page through the table to browse other objects.</p>
-                <p>System log entries (program start, config checks, log rotation and similar host-independent messages) are included by default. Uncheck the checkbox to hide them.</p>
+              <div class="body flexcol gap-2 text-sm">
+                <p>The page shows recorded states read-only. A moon icon marks downtime, other flags follow logged commands.</p>
+                <p>Click the chart or a log entry to jump, drag on the chart to move the position, Shift-drag to zoom.</p>
+                <p>Arrow keys step by time or by event (see the selector), Up/Down always by event, Home/End to the range boundaries.</p>
+                <p>Drag the divider between the log and the table to resize the panes.</p>
               </div>
             </div>
           </div>

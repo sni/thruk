@@ -181,6 +181,7 @@ sub index {
 ##########################################################
 sub _process_replay_page {
     my($c) = @_;
+    return if Thruk::Utils::External::render_page_in_background($c);
     # system logs are included by default; the hidden form field submits 0 when the checkbox is unchecked
     my $is_param = $c->req->parameters->{'includesystem'};
     my $includesystem = grep { defined $_ && $_ eq '1' } ref $is_param eq 'ARRAY' ? @{$is_param} : ($is_param);
