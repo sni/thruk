@@ -27,12 +27,13 @@ for my $filter (
 ) {
     my $page = TestUtils::test_page(
         url => '/thruk/cgi-bin/status.cgi?style=replay&start=-1h&end=now'.$filter,
-        like => [qr/mainTableHeader.*?Display Filter/s, qr/id="replay-time"\s+class="text-default textTH tracking-wide"/, 'Attempt', 'table-layout:fixed', 'jquery.flot.selection.js', 'id="replay-zoom-reset"', 'role="slider"', 'id="replay-event"', 'id="replay-event-prev"', 'id="replay-event-next"', 'id="replay-keyboard-mode"', 'id="replay-help-button"', 'role="separator"', 'fa-grip-lines', qr/mainTableFooter[^<]*>.*?id="replay-object-summary"/s, qr/<script[^>]+status-replay\.js"\s+defer/],
+        like => [qr/mainTableHeader.*?Display Filter/s, qr/id="replay-time"\s+class="[^"]*text-center[^"]*textTH[^"]*"/, 'Attempt', 'table-layout:fixed', 'jquery.flot.selection.js', 'id="replay-zoom-reset"', 'role="slider"', 'id="replay-event"', 'id="replay-event-prev"', 'id="replay-event-next"', 'id="replay-keyboard-mode"', 'id="replay-help-button"', 'id="replay-settings-button"', 'role="separator"', 'fa-grip-lines', qr/mainTableFooter[^<]*>.*?id="replay-object-summary"/s, qr/<script[^>]+status-replay\.js"\s+defer/],
         unlike => ['id="replay-zoom-in"', 'id="replay-zoom-out"', '<h1[^>]*>Status Replay</h1>', 'id="replay-prev-event"', 'id="replay-next-event"', 'id="replay-prev-time"', 'id="replay-next-time"', 'id="replay-time-step"'],
     );
     my($data_replay) = $page->{'content'} =~ m/data-replay="([^"]+)"/mx;
     like($page->{'content'}, qr/id="replay-play".*?for="replay-speed".*?id="replay-speed".*?id="replay-keyboard-mode"/s, 'speed selector follows play button');
-    like($page->{'content'}, qr/id="replay-summary"\s+class="[^"]*whitespace-nowrap"\s+role="status"/, 'event counter is a status element');
+    like($page->{'content'}, qr/id="replay-summary"\s+class="[^"]*"\s+role="status"/, 'event counter is a status element');
+    like($page->{'content'}, qr/id="replay-settings"[^>]*style="display:none".*?id="replay-speed".*?id="replay-keyboard-mode".*?<\/select>\s*<\/div>\s*<\/div>/s, 'speed and arrow key settings are in the dropdown');
     my $data = $json->decode(decode_entities($data_replay));
     ok(@{$data->{'objects'}} > 0, 'display filter selects objects');
     is_deeply([grep { $_->{'host'} ne $host } @{$data->{'objects'}}], [], 'host filter applies to all replay objects');

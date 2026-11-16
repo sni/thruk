@@ -126,7 +126,8 @@
                 max: viewEnd * 1000,
                 ticks: 5,
                 minTickSize: [1, 'second'],
-                tickFormatter: function(value) { return formatTime(value / 1000); }
+                // the last label at the window end would stick out of the right chart border and wrap
+                tickFormatter: function(value) { return value >= viewEnd * 1000 - 500 ? '' : formatTime(value / 1000); }
             },
             yaxis: {min: 0, max: Math.min(100, maxCount), tickDecimals: 0},
             grid: {
@@ -533,7 +534,10 @@
     }
 
     function resizePanes() {
-        panes.style.height = Math.max(240, window.innerHeight - panes.getBoundingClientRect().top - 16) + 'px';
+        var main = panes.closest('main');
+        var top = panes.getBoundingClientRect().top - main.getBoundingClientRect().top + main.scrollTop;
+        var bottomPadding = parseFloat(window.getComputedStyle(main).paddingBottom) || 0;
+        panes.style.height = Math.max(240, main.clientHeight - top - bottomPadding) + 'px';
         setSplit(logHeight);
     }
 

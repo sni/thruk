@@ -20,25 +20,25 @@
     <div class="flex flex-1">[% PROCESS _infobox.tt extra_classes="min-h-[150px]" %]</div>
     <div class="flex justify-center">[% PROCESS _log_date_select.tt date_select_title='Replay Time Range' extra_classes="min-h-[150px]" %]</div>
     <div class="flex flex-1 justify-end">
-      <div class="card w-64 min-h-[150px]">
+      <div class="card w-80 min-h-[150px]">
         <div class="head">
           <h3>Log Filter</h3>
         </div>
         <div class="body flexcol gap-1">
           <div class="flex items-center gap-2">
-            <label for="replay-pattern" class="w-28 shrink-0 whitespace-nowrap">Search pattern</label>
-            <input type="text" id="replay-pattern" name="pattern" class="min-w-0 flex-1" value="[% pattern | html %]" placeholder="search pattern">
+            <input type="text" id="replay-pattern" name="pattern" class="min-w-0 w-32" value="[% pattern | html %]" placeholder="search pattern">
+            <div class="flex items-center gap-2">
+              <input type="hidden" name="includesystem" value="0">
+              <input type="checkbox" id="replay-includesystem" name="includesystem" value="1"[% IF includesystem %] checked[% END %]>
+              <label for="replay-includesystem">Include system logs</label>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <label for="replay-exclude-pattern" class="w-28 shrink-0 whitespace-nowrap">Exclude pattern</label>
-            <input type="text" id="replay-exclude-pattern" name="exclude_pattern" class="min-w-0 flex-1" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
+          <div class="flex flexrow gap-2">
+            <input type="text" id="replay-exclude-pattern" name="exclude_pattern" class="min-w-0 w-32" value="[% exclude_pattern | html %]" placeholder="exclude pattern">
           </div>
-          <div class="flex items-center gap-2">
-            <input type="hidden" name="includesystem" value="0">
-            <input type="checkbox" id="replay-includesystem" name="includesystem" value="1"[% IF includesystem %] checked[% END %]>
-            <label for="replay-includesystem">Include system log entries</label>
+          <div class="flex flexrow justify-center">
+            <input type='submit' value='Apply' class="w-24 mt-auto">
           </div>
-          <button type="submit" class="self-end">Apply</button>
         </div>
       </div>
     </div>
@@ -51,29 +51,35 @@
   <div id="status-replay" class="w-full mt-2" data-date-format="[% datetime_format | html %]" data-replay="[% json_encode(replay) | html %]">
     <div class="card w-full mb-2">
       <div class="body flexcol gap-2">
-        <div class="relative flex flex-wrap gap-2 items-center pr-9">
-          <div class="flex flex-nowrap gap-2 items-center">
+        <div class="flex flexrow gap-2 justify-between">
+          <div class="flex flexrow gap-1">
             <button type="button" id="replay-reset" style="width:70px;flex-shrink:0">Reset</button>
             <button type="button" id="replay-play" style="width:70px;flex-shrink:0" aria-pressed="false">Play</button>
-            <label for="replay-speed">Speed</label>
-            <select id="replay-speed">
-              <option value="1">1×</option>
-              <option value="60" selected>60×</option>
-              <option value="600">600×</option>
-              <option value="3600">3600×</option>
-            </select>
-            <label for="replay-keyboard-mode">Arrow keys</label>
-            <select id="replay-keyboard-mode">
-              <option value="time">Step by time</option>
-              <option value="event" selected>Step by event</option>
-            </select>
+            <div class="relative">
+              <button type="button" id="replay-settings-button" aria-controls="replay-settings" aria-expanded="false"
+                      onclick="this.setAttribute('aria-expanded', toggleElement('replay-settings', undefined, true, undefined, function() { document.getElementById('replay-settings-button').setAttribute('aria-expanded', 'false'); }) ? 'true' : 'false'); return false;"><i class="uil uil-setting mr-0" aria-hidden="true"></i></button>
+              <div id="replay-settings" class="card shadow-float absolute z-20 top-full left-0 mt-1" style="display:none" role="group" aria-label="Replay settings">
+                <div class="body flexcol gap-2">
+                  <label for="replay-speed">Speed</label>
+                  <select id="replay-speed">
+                    <option value="1">1×</option>
+                    <option value="60" selected>60×</option>
+                    <option value="600">600×</option>
+                    <option value="3600">3600×</option>
+                  </select>
+                  <label for="replay-keyboard-mode">Arrow keys</label>
+                  <select id="replay-keyboard-mode">
+                    <option value="time">Step by time</option>
+                    <option value="event" selected>Step by event</option>
+                  </select>
+                </div>
+              </div>
+            </div>
             <button type="button" id="replay-zoom-reset" style="display:none">Reset zoom</button>
           </div>
-          <div class="flex flex-1 items-center justify-center whitespace-nowrap">
-            <h3 id="replay-time" class="text-default textTH tracking-wide"></h3>
-          </div>
-          <span id="replay-summary" class="text-xs whitespace-nowrap" role="status"></span>
-          <div class="absolute top-0 right-0">
+          <h3 id="replay-time" class="order-first col-span-2 md:order-none md:col-span-1 text-center whitespace-nowrap text-default textTH tracking-wide"></h3>
+          <div class="relative flex flex-wrap items-center justify-end gap-2 min-w-0">
+            <span id="replay-summary" class="text-xs" role="status"></span>
             <button type="button" id="replay-help-button" class="round small gray text-lg" title="Replay help" aria-label="Replay help" aria-controls="replay-help" aria-expanded="false"
                     onclick="this.setAttribute('aria-expanded', toggleElement('replay-help', undefined, true, undefined, function() { document.getElementById('replay-help-button').setAttribute('aria-expanded', 'false'); }) ? 'true' : 'false'); return false;"><i class="uil uil-info"></i></button>
             <div id="replay-help" class="card shadow-float absolute z-20 top-7 right-0" style="display:none;width:380px;max-width:90vw" role="dialog" aria-labelledby="replay-help-title">
