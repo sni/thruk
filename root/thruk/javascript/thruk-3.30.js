@@ -1117,6 +1117,19 @@ function setNavigationStyle(val) {
     cookieSave('thruk_side', toQueryString(menuState));
 }
 
+function popOutMainFrame() {
+    var frame = jQuery('#mainframe > iframe').get(0);
+    if(!frame) { return false; }
+    var url = frame.src;
+    try {
+        url = frame.contentWindow.location.href;
+    } catch(err) {
+        // Cross-origin frames only expose their original src.
+    }
+    window.location.href = url;
+    return true;
+}
+
 /* initialize navigation buttons */
 function initNavigation() {
     // make them toggle
@@ -1147,7 +1160,7 @@ function initNavigation() {
 
     // button to collapse side menu
     jQuery('.js-menu-collapse').off("click").on("click", function() {
-        if(preventDblEvents(this)) { return; }
+        if(preventDblEvents(this) || popOutMainFrame()) { return; }
         jQuery('#nav-container').toggleClass('collapsed');
         if(jQuery('#nav-container').hasClass('collapsed')) {
             setNavigationStyle(1);
@@ -1157,7 +1170,7 @@ function initNavigation() {
     });
     // button to enable overlay menu
     jQuery('.js-menu-hide').off("click").on("click", function() {
-        if(preventDblEvents(this)) { return; }
+        if(preventDblEvents(this) || popOutMainFrame()) { return; }
         jQuery('BODY').toggleClass('topnav');
         if(jQuery('BODY').hasClass('topnav')) {
             setNavigationStyle(2);
