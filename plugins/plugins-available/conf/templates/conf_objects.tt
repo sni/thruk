@@ -75,7 +75,15 @@
             [% END %]
           </div>
           <div class="w-40 flexrow justify-end sub_3" style="[% IF subcat != 'comp' %]display:none[% END %]">
-            <button type="button" class="iconOnly px-1 copy_button" onclick="copyCode(event, 'computed_config'); return false;" title="Copy computed configuration in Naemon object definition format"><i class="uil uil-copy"></i></button>
+            <div class="relative">
+              <button type="button" class="iconOnly px-1 copy_button" title="Copy configuration in Naemon object definition format" onclick="toggleElement('copy_config_menu', undefined, true); return false;"><i class="uil uil-copy"></i></button>
+              <div class="card absolute z-30 shadow-float right-0 overflow-hidden" style="display:none;" id="copy_config_menu">
+                <div class="actionbox">
+                  <div><a class="clickable" onclick="copyCode(event, 'computed_config'); fade('copy_config_menu', 1000);  return false;">computed</a></div>
+                  <div><a class="clickable" onclick="copyCode(event, 'current_config'); fade('copy_config_menu', 1000); return false;">current</a></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -142,8 +150,10 @@
           [% SET duplicate_keys = {} %]
           [% PROCESS _conf_object_view.tt obj = object conf = "computed" %]
           [% computed_text = object.as_text(obj_conf) %]
+          [% current_text = object.as_text() %]
           [%# copyCode decodes entities once more after the browser reads the textarea. %]
           <textarea id="computed_config" style="display:none">[% computed_text.0 | html | html %]</textarea>
+          <textarea id="current_config" style="display:none">[% current_text.0 | html | html %]</textarea>
         </div>
 
         [% IF has_auth_section %]
