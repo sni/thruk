@@ -37,11 +37,19 @@
   shell: "sudo su - {{ site }} -c 'cpanm -n File::ChangeNotify'"
   args:
     creates: "/omd/sites/{{ site }}/local/lib/perl5/lib/perl5/File/ChangeNotify.pm"
+  register: cpanm_result
+  retries: 5
+  delay: 30
+  until: cpanm_result.rc == 0
 
 - name: "git clone omd_utils"
   shell: "sudo su - {{ site }} -c 'cd ~/local/share && git clone --depth=1 --branch=master https://github.com/sni/omd_utils.git'"
   args:
     creates: "/omd/sites/{{ site }}/local/share/omd_utils"
+  register: git_clone_result
+  retries: 5
+  delay: 30
+  until: git_clone_result.rc == 0
 
 - stat: path=/thruk
   register: thruk_path
