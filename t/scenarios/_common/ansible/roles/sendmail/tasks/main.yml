@@ -12,5 +12,46 @@
     creates:
       - /usr/sbin/sendmail
 
-- name: "start sendmail"
-  shell: '/usr/sbin/sendmail -bd "-q1h" &'
+# no package provides /etc/mail/aliases, but the sendmail daemon FATALs without it
+# touch creates it only if missing, so a real aliases file is never clobbered
+- name: "ensure aliases file exists"
+  file:
+    path: /etc/mail/aliases
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+
+# sendmail 8.16.1-13+ moved the spool dirs out of the RPM into systemd-tmpfiles
+# (RHEL-156034), which never runs in a container
+- name: "run systemd tmpfiles"
+  shell: systemd-tmpfiles --create
+  ignore_errors: true
+
+# fallback for distros without the tmpfiles entries
+# mqueue: must match the daemon's QueueOwners (root:mail on RHEL 9), the daemon
+# re-owns it on startup and queue commits fail with EPERM if owned by another user
+# clientmqueue: client drop dir (373)
+- name: "ensure mail queue dirs exist"
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /var/spool/mqueue, owner: root, group: mail, mode: "0700" }
+    - { path: /var/spool/clientmqueue, owner: smmsp, group: smmsp, mode: "373" }
+
+# smtphost daemonizes itself, the trailing & is not needed
+# verify the whole mail path: client queueing AND daemon local delivery,
+# client exit 0 alone only proves queueing, not delivery
+- name: "start sendmail and probe mail delivery"
+  shell: |
+    /usr/sbin/sendmail -bd -q1h
+    printf 'To: root\nSubject: thruk test probe\n\nprobe\n' | /usr/sbin/sendmail root
+    for i in $(seq 30); do
+      grep -q "thruk test probe" /var/spool/mail/root /var/mail/root 2>/dev/null && exit 0
+      sleep 1
+    done
+    exit 1
