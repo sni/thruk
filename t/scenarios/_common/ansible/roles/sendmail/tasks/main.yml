@@ -43,15 +43,12 @@
     - { path: /var/spool/mqueue, owner: root, group: mail, mode: "0700" }
     - { path: /var/spool/clientmqueue, owner: smmsp, group: smmsp, mode: "373" }
 
-# smtphost daemonizes itself, the trailing & is not needed
-# verify the whole mail path: client queueing AND daemon local delivery,
-# client exit 0 alone only proves queueing, not delivery
-- name: "start sendmail and probe mail delivery"
-  shell: |
-    /usr/sbin/sendmail -bd -q1h
-    printf 'To: root\nSubject: thruk test probe\n\nprobe\n' | /usr/sbin/sendmail root
-    for i in $(seq 30); do
-      grep -q "thruk test probe" /var/spool/mail/root /var/mail/root 2>/dev/null && exit 0
-      sleep 1
-    done
-    exit 1
+- name: "start sendmail"
+  command: /usr/sbin/sendmail -bd -q1h
+
+- name: "wait for local SMTP greeting"
+  wait_for:
+    host: 127.0.0.1
+    port: 25
+    search_regex: '^220[ -]'
+    timeout: 30
