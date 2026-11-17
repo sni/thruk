@@ -2399,8 +2399,13 @@ sub _object_new {
     $c->stash->{'new_file'} = '';
     my $standard_keys;
     my $default_values = {};
-    if($c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}}) {
-        $standard_keys = [split(/\s+/mx, $c->config->{'Thruk::Plugin::ConfigTool'}->{'default_keys_'.$c->stash->{'type'}})];
+    my $config = $c->config->{'Thruk::Plugin::ConfigTool'};
+    my $default_keys = $config->{'default_keys_'.$c->stash->{'type'}};
+    # templates can have their own default keys
+    $default_keys = $config->{'default_keys_'.$c->stash->{'type'}.'_template'} if $c->req->parameters->{'template'}
+        && $config->{'default_keys_'.$c->stash->{'type'}.'_template'};
+    if(defined $default_keys) {
+        $standard_keys = [split(/\s+/mx, $default_keys)];
         for my $k (@{$standard_keys}) {
             my $v;
             ($k,$v) = split(/:/mx, $k, 2);

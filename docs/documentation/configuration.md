@@ -3291,7 +3291,11 @@ obj_readonly              = readonly files regular expression
 # default_keys_host       = host_name use:generic-host alias address contact_groups:example
 # default_keys_service    = service_description use host_name check_command contact_groups
 # default_keys_contact    = contact_name use alias email can_submit_commands
-# default_keys_...        = ... # set default keys for any type
+# default_keys_...        = ... # set space separated default keys for any type
+# default_keys_host_template    = use:generic-host name
+# default_keys_service_template = use:generic-service name
+# default_keys_contact_template = use:generic-contact name
+# default_keys_..._template     = ... # set space separated default keys for any template type
 </Component>
 ```
 
@@ -3405,6 +3409,24 @@ see `default_keys_host`.
 ### default_keys_contact
 
 see `default_keys_host`.
+
+### default_keys_host_template
+
+Same as `default_keys_host` but used when creating a new template
+(the `(new template)` button). If not set, `default_keys_host` is
+used instead.
+
+```
+default_keys_host_template  = use:generic-host
+```
+
+### default_keys_service_template
+
+see `default_keys_host_template`.
+
+### default_keys_contact_template
+
+see `default_keys_host_template`.
 
 ## Component Thruk::Plugin::Panorama
 
