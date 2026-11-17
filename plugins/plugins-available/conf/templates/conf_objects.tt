@@ -45,7 +45,7 @@
               <a class="button" href="[% referer %]">back</a>
             [% END %]
           </div>
-          <div class="w-40 sub_3"></div>
+          <div class="w-40 sub_3" style="[% IF subcat != 'comp' %]display:none[% END %]"></div>
           <div class="grow justify-center text-center">
             <h3 class="p-0 m-0">
               [% IF object.defined('file') %]
@@ -74,7 +74,7 @@
             <button class="w-20" title="Apply changes to this object">apply</button>
             [% END %]
           </div>
-          <div class="w-40 flexrow justify-end sub_3">
+          <div class="w-40 flexrow justify-end sub_3" style="[% IF subcat != 'comp' %]display:none[% END %]">
             <button type="button" class="iconOnly px-1 copy_button" onclick="copyCode(event, 'computed_config'); return false;" title="Copy computed configuration in Naemon object definition format"><i class="uil uil-copy"></i></button>
           </div>
         </div>
