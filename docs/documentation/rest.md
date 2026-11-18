@@ -7,14 +7,16 @@ title: REST API
 <Badge type="tip" text="New in Thruk 2.24" />
 The Thruk REST API provides access to Thruk and Livestatus information.
 
+- Start with the [REST API quickstart](../guides/rest-quickstart.md).
+- Download the [OpenAPI 3.1 description](https://www.thruk.org/openapi-v1.json) for use with API tools.
 - All endpoints with a filter to find them quickly are on the [REST API endpoints page](rest_endpoints.html).
 - For examples, see the [REST API examples page](rest_examples.html).
 - A list of external commands is here: [REST API commands](rest_commands.html).
 
 Access the API through HTTP(S) at http://your_webserver/thruk/r/ or through the CLI client:
 
-```
-  %> thruk r /hostgroups
+```sh
+thruk r /hostgroups
 ```
 
 ## Versions
@@ -31,8 +33,8 @@ The REST API supports basic authentication, but API keys are recommended.
 The Apache configuration cannot both set a supplied remote user and pass through
 requests that have no remote user.
 
-```
-  %> curl -gk 'https://username:password@localhost/thruk/r/hosts'
+```sh
+curl --user username 'https://localhost/thruk/r/hosts'
 ```
 
 ### Cookie Auth
@@ -46,9 +48,8 @@ The web REST API accepts API keys through an HTTP header.
 If `api_keys_enabled` is enabled, create keys on the user profile page.
 You can also create keys through the `/thruk/api_keys` endpoint.
 
-```
-  %> curl -H 'X-Thruk-Auth-Key: apikey' \
-          -gk 'https://localhost/thruk/r/hosts'
+```sh
+curl -H 'X-Thruk-Auth-Key: apikey' 'https://localhost/thruk/r/hosts'
 ```
 
 ### Superuser API Key
@@ -59,11 +60,11 @@ These keys are not bound to a user. Set a username through the
 Handle superuser API keys with the same care as the secret key because they grant broad access.
 You can still restrict a superuser key to specific roles.
 
-```
-  %> curl -H 'X-Thruk-Auth-Key: apikey' \
+```sh
+curl -H 'X-Thruk-Auth-Key: apikey' \
           -H 'X-Thruk-Auth-User: automation' \
-          -d 'comment=test' \
-          -gk 'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime'
+          -d 'comment_data=test' \
+          'https://localhost/thruk/r/hosts/localhost/cmd/schedule_host_downtime'
 ```
 
 ### Secret Key
@@ -71,10 +72,10 @@ You can still restrict a superuser key to specific roles.
 The web REST API accepts the secret key through an HTTP header.
 The key is usually in `/var/lib/thruk/secret.key` or, for OMD, `var/thruk/secret.key`.
 
-```
-  %> curl -H 'X-Thruk-Auth-Key: secretkey' \
+```sh
+curl -H 'X-Thruk-Auth-Key: secretkey' \
           -H 'X-Thruk-Auth-User: thrukadmin' \
-          -gk 'https://localhost/thruk/r/hosts'
+          'https://localhost/thruk/r/hosts'
 ```
 
 The secret key grants superadmin access.
@@ -84,8 +85,8 @@ Use the `X-Thruk-Auth-User` HTTP header to set the result's user context to any 
 
 With the CLI client, use `-A`:
 
-```
-  %> thruk -A user r /
+```sh
+thruk -A user r /
 ```
 
 Command line access also grants superadmin access.
@@ -98,57 +99,56 @@ With the CLI tool, use `-d` to pass key/value pairs, JSON data or both.
 
 use key/value pairs:
 
-```
-  %> thruk r -m PATCH -d max_check_attempts=3 -d first_notification_delay=10 /hosts/localhost/config
+```sh
+thruk r -m PATCH -d max_check_attempts=3 -d first_notification_delay=10 /hosts/localhost/config
 ```
 
 use json structure:
 
-```
-  %> thruk r -m PATCH -d "{'max_check_attempts':3, 'first_notification_delay':10}" /hosts/localhost/config
+```sh
+thruk r -m PATCH -d '{"max_check_attempts":3,"first_notification_delay":10}' /hosts/localhost/config
 ```
 
-Using curl, you can set parameters like this:
+To update the same host with curl, set `api` and `key` as in the quickstart. Choose either form data:
 
-```
-  %> curl -d "alias=test" -d "max_check_attempts=3" http://your_webserver/thruk/r/hosts/localhost/config
+```sh
+curl -X PATCH -H "X-Thruk-Auth-Key: $key" \
+  -d 'max_check_attempts=3' -d 'first_notification_delay=10' "$api/hosts/localhost/config"
 ```
 
 or you can use json data as well:
 
-```
-  %> curl --header "Content-Type: application/json" \
-          --X PATCH \
-          --data '{"max_check_attempts":3, "first_notification=delay":10}' \
-          http://your_webserver/thruk/r/hosts/localhost/config
+```sh
+curl -X PATCH -H "X-Thruk-Auth-Key: $key" -H 'Content-Type: application/json' \
+  --data '{"max_check_attempts":3,"first_notification_delay":10}' "$api/hosts/localhost/config"
 ```
 
 ## Filtering
 
 All pages offer filtering using query parameters:
 
-```
-  %> thruk r '/hosts?name=localhost'
+```sh
+thruk r '/hosts?name=localhost'
 ```
 
 Use bracket syntax for operators other than equals, such as regular expressions:
 
 ex.: return all hosts starting with literal `m`:
 
-```
-  %> thruk r '/hosts?name[regex]=^m'
+```sh
+thruk r '/hosts?name[regex]=^m'
 ```
 
 ex.: list all services which are currently in a downtime:
 
-```
-  %> thruk r '/services?scheduled_downtime_depth[gte]=1'
+```sh
+thruk r '/services?scheduled_downtime_depth[gte]=1'
 ```
 
-Curl requires you to set the `globoff` option:
+When the URL contains a literal bracket filter such as `name[regex]`, quote the URL for the shell and use `-g` (`--globoff`) to stop curl from interpreting the brackets as a range:
 
-```
-  %> curl -gk 'https://user:pass@localhost/thruk/r/hosts?name[regex]=^t'
+```sh
+curl -g -H "X-Thruk-Auth-Key: $key" "$api/hosts?name[regex]=^t"
 ```
 
 ex.: numeric filter using the operators `<`, `>`, `>=` or `+++<=+++` will be expanded
@@ -156,8 +156,8 @@ like described in [relative timestamps](rest_commands.html#relative-timestamps).
 
 list session which had been active within the last 10minutes
 
-```
-  %> thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
+```sh
+thruk r '/thruk/sessions?columns=username,max(active)&active[gte]=-10m'
 ```
 
 Possible operators with their alias:
@@ -185,32 +185,32 @@ Pass the URL-encoded query through `q`.
 Alternatively, enclose the query in `+***+` to encode it automatically.
 You must still quote the query correctly.
 
-```
-  %> thruk r '/hosts?q=***name = "test" or name = "other"***'
+```sh
+thruk r '/hosts?q=***name = "test" or name = "other"***'
 ```
 
 Another example, fetch all hosts from hostgroups linux and windows which are not ok.
 
-```
-  %> thruk r '/hosts?q=***(groups >= "linux" or groups >= "windows") and status != 0***'
+```sh
+thruk r '/hosts?q=***(groups >= "linux" or groups >= "windows") and status != 0***'
 ```
 
 Example using curl:
 
-```
-  %> curl -d 'q=***name = "test"***' 'http://.../thruk/r/hosts'
+```sh
+curl -G -H "X-Thruk-Auth-Key: $key" --data-urlencode 'q=name = "test"' "$api/hosts"
 ```
 
 If you need `***` in the query itself, any other three characters will do as well:
 
-```
-  %> thruk r '/notifications?q=///message = "test" or name = "other"///
+```sh
+thruk r '/notifications?q=///message = "test" or name = "other"///'
 ```
 
 Lexical filters support the same time expansion as normal filters:
 
-```
-  %> thruk r '/services?q=***last_check <= "-7d"***'
+```sh
+thruk r '/services?q=***last_check <= "-7d"***'
 ```
 
 This selects services with a `last_check` date earlier than `now - 7 days`.
@@ -224,8 +224,8 @@ The order is ascending unless the column has a minus prefix.
 
 ex.: sort by name ascending and status descending:
 
-```
-  %> thruk r /hosts?sort=name,-state
+```sh
+thruk r '/hosts?sort=name,-state'
 ```
 
 ## Limits
@@ -235,8 +235,8 @@ All pages support `limit` and `offset`.
 The offset starts at 0. Setting offset=1 skips the first item and starts with the second.
 For example, show 10 hosts starting at item 101:
 
-```
-  %> thruk r /hosts?limit=10&offset=100
+```sh
+thruk r '/hosts?limit=10&offset=100'
 ```
 
 ## Columns
@@ -245,32 +245,32 @@ Use `columns` to select columns on any page.
 
 ex.: return name and state for all hosts:
 
-```
-  %> thruk r /hosts?columns=name,state
+```sh
+thruk r '/hosts?columns=name,state'
 ```
 
 Rename columns by appending `:name` like this:
 
-```
-  %> thruk r /hosts?columns=name:host_name,state:status
+```sh
+thruk r '/hosts?columns=name:host_name,state:status'
 ```
 
 or by adding `as aliasname`
 
-```
-  %> thruk r '/hosts?columns=name:host_name,state as status'
+```sh
+thruk r '/hosts?columns=name:host_name,state as status'
 ```
 
 Note: If the column contains special characters, use backticks to enclose the column name, ex.:
 
-```
-  %> thruk r '/hosts?columns=`Disk C:\`'
+```sh
+thruk r '/hosts?columns=`Disk C:\`'
 ```
 
 or:
 
-```
-  %> thruk r '/hosts?columns=`Disk C:\` as size'
+```sh
+thruk r '/hosts?columns=`Disk C:\` as size'
 ```
 
 ### Performance Data Columns
@@ -286,9 +286,11 @@ There is also a hash containing the expanded performance values.
 
 Use these columns to filter results or select specific performance values.
 
+```sh
+thruk r '/hosts?limit=1'
 ```
-  %> thruk r /hosts?limit=1
 
+```text
 [
    {
 ...
@@ -340,8 +342,11 @@ Thruk expands custom data values into separate columns for host/service queries.
 
 Use these columns to filter results or select specific custom values.
 
+```sh
+thruk r '/hosts?limit=1&_WORKER=local'
 ```
-  %> thruk r '/hosts?limit=1&_WORKER=local'
+
+```text
 [
    {
 ...
@@ -382,8 +387,8 @@ Use `+`, `-`, `*` and `/` in the column selection for simple calculations.
 
 ex.: sum the number of problems for each host
 
-```
-  %> thruk r '/hosts?columns=name,num_services_crit+num_services_unknown+num_services_warn as num_services_problems'
+```sh
+thruk r '/hosts?columns=name,num_services_crit+num_services_unknown+num_services_warn as num_services_problems'
 ```
 
 ## Functions
@@ -415,8 +420,8 @@ Available transformations functions are:
 
 Example: return first 3 characters from upper case host name.
 
-```
-  %> thruk r '/hosts?columns=upper(substr(name, 0, 3)) as host'
+```sh
+thruk r '/hosts?columns=upper(substr(name, 0, 3)) as host'
 ```
 
 ### Aggregation Functions
@@ -434,46 +439,46 @@ Available aggregation functions are:
 
 ex.: return average latency over all hosts
 
-```
-  %> thruk r '/hosts?columns=avg(latency)'
+```sh
+thruk r '/hosts?columns=avg(latency)'
 ```
 
 The query can include grouping columns without aggregation functions.
 
 ex.: list average execution time over all services grouped by state.
 
-```
-  %> thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
+```sh
+thruk r '/services?columns=avg(execution_time),state&sort=avg(execution_time)'
 ```
 
 ex.: list unique custom variable values from all services
 
-```
-  %> thruk r '/services?columns=uniq(),_DEVICE_ID&sort=_DEVICE_ID'
+```sh
+thruk r '/services?columns=uniq(),_DEVICE_ID&sort=_DEVICE_ID'
 ```
 
 Rename columns by appending `:name`
 
-```
-  %> thruk r '/thruk/sessions?columns=count(*):sessions'
+```sh
+thruk r '/thruk/sessions?columns=count(*):sessions'
 ```
 
 Renaming can be combined with grouping columns.
 
-```
-  %> thruk r '/services?columns=avg(execution_time):avg_exec_time,host_name'
+```sh
+thruk r '/services?columns=avg(execution_time):avg_exec_time,host_name'
 ```
 
 The group by column can be renamed as well:
 
-```
-  %> thruk r '/services?columns=avg(execution_time),peer_name:site'
+```sh
+thruk r '/services?columns=avg(execution_time),peer_name:site'
 ```
 
 Use aggregation functions in filters. You cannot use their aliases in filters:
 
-```
-  %> thruk r '/services?columns=avg(execution_time):exec_time&avg(execution_time)[gt]=0'
+```sh
+thruk r '/services?columns=avg(execution_time):exec_time&avg(execution_time)[gt]=0'
 ```
 
 ### Disaggregation Functions
@@ -485,8 +490,8 @@ Available disaggregation functions are:
 - `to_rows`: allocate result rows from list column
 - `as_rows`: alias for to_rows
 
-```
-  %> thruk r '/hosts?columns=name,to_rows(services) as services'
+```sh
+thruk r '/hosts?columns=name,to_rows(services) as services'
 ```
 
 For this example, querying the services table would be simpler.
@@ -496,15 +501,15 @@ For this example, querying the services table would be simpler.
 When mixing aggregation and transformation functions, apply the aggregation function
 as the outer most function, as for example in:
 
-```
-  %> thruk r '/hosts/localhost?columns=avg(unit(calc(latency,/,1000), "ms"))'
+```sh
+thruk r '/hosts/localhost?columns=avg(unit(calc(latency,/,1000), "ms"))'
 ```
 
 When mixing disaggregation and transformation functions, apply the disaggregation function
 as the inner most function, as for example in:
 
-```
-  %> thruk r '/hosts/localhost?columns=upper(name),upper(to_rows(services))'
+```sh
+thruk r '/hosts/localhost?columns=upper(name),upper(to_rows(services))'
 ```
 
 ## Backends / Sites
@@ -514,20 +519,20 @@ Separate multiple sites with commas.
 
 - Use a path prefix `/sites/<sitename,...>`:
 
-```
-  %> thruk r /sites/test,prod/hosts
+```sh
+thruk r /sites/test,prod/hosts
 ```
 
 - Use the `backends` option with the cli client:
 
-```
-  %> thruk r -b test,prod /hosts
+```sh
+thruk r -b test,prod /hosts
 ```
 
 - Set the `backends` url parameter:
 
-```
-  %> thruk r /hosts?backends=test,prod
+```sh
+thruk r '/hosts?backends=test,prod'
 ```
 
 ::: tip All Sites
@@ -543,13 +548,16 @@ To query only local backends that use Unix sockets, use the `/sites/LOCAL/` pref
 
 Failed REST requests return a hash and an HTTP error code:
 
+```sh
+thruk r /none
 ```
-  %> thruk r /none
-  {
-    "code" : 404,
-    "message" : "unknown rest path"
-    "description" : "optional additional error messages"
-  }
+
+```json
+{
+  "code" : 404,
+  "message" : "unknown rest path",
+  "description" : "optional additional error messages"
+}
 ```
 
 ## Output Formats
@@ -562,13 +570,13 @@ JSON is the default output format.
 
 Wrapped JSON wraps the result into a hash containing additional metadata.
 
-```
-  %> thruk r /wrapped_json/hosts?columns=name,last_check
+```sh
+thruk r '/wrapped_json/hosts?columns=name,last_check'
 ```
 
 Will return something like:
 
-```
+```text
 {
    "data" : [...], # data as returned by the json format
    "meta" : {
@@ -597,52 +605,52 @@ Support for nested objects and semicolon escaping is limited.
 Nested objects use JSON encoding. If possible, use JSON output for better speed and reliability.
 :::
 
-```
-  %> thruk r /csv/hosts?columns=name,state
-```
-
-```
-  %> thruk r '/csv/hosts?columns=name,state&headers=0'
+```sh
+thruk r '/csv/hosts?columns=name,state'
 ```
 
-```
-  %> thruk r /hosts?columns=name,state --csv
+```sh
+thruk r '/csv/hosts?columns=name,state&headers=0'
 ```
 
+```sh
+thruk r '/hosts?columns=name,state' --csv
 ```
-  %> curl -g http://localhost/thruk/r/csv/hosts/stats
+
+```sh
+curl -H "X-Thruk-Auth-Key: $key" "$api/csv/hosts/stats"
 ```
 
 ### XLS
 
 Excel output is available via `/xls/` path prefix.
 
-```
-  %> thruk r /xls/hosts?columns=name,state
+```sh
+thruk r '/xls/hosts?columns=name,state'
 ```
 
-```
-  %> thruk r /hosts?columns=name,state --xls
+```sh
+thruk r '/hosts?columns=name,state' --xls
 ```
 
 ### Table
 
 Human readable table output is available via `/human/` or `/text/` path prefix.
 
-```
-  %> thruk r /human/hosts?columns=name,state
-```
-
-```
-  %> thruk r /hosts?columns=name,state --human
+```sh
+thruk r '/human/hosts?columns=name,state'
 ```
 
-```
-  %> thruk r /hosts?columns=name,state --text
+```sh
+thruk r '/hosts?columns=name,state' --human
 ```
 
+```sh
+thruk r '/hosts?columns=name,state' --text
 ```
-  %> thruk r /hosts?columns=name,state -t
+
+```sh
+thruk r '/hosts?columns=name,state' -t
 ```
 
 ## HTTP Methods
@@ -662,25 +670,25 @@ summarized below:
 If a REST request may exceed the usual 40-second timeout, start it in the background.
 Retrieve its result with a separate request once it is ready.
 
-```
-  %> curl -k -d "" 'https://username:password@localhost/thruk/r/config/check?background=1'
+```sh
+curl -H "X-Thruk-Auth-Key: $key" -d '' "$api/config/check?background=1"
 ```
 
 This returns something like:
 
-```
-  {
-    "job_id" : "737aa",
-    "message" : "request started in background with job id: 737aa",
-    "result_url" : "/thruk/jobs/737aa/output",
-    "success" : true
-  }
+```json
+{
+  "job_id" : "737aa",
+  "message" : "request started in background with job id: 737aa",
+  "result_url" : "/thruk/jobs/737aa/output",
+  "success" : true
+}
 ```
 
 Use curl's follow feature to retrieve the result when it is ready.
 
-```
-  %> curl -k -L https://omdadmin:omd@localhost/demo/thruk/r/thruk/jobs/1263d/output
+```sh
+curl -L -H "X-Thruk-Auth-Key: $key" "$api/thruk/jobs/737aa/output"
 ```
 
 If the result takes more than 30 seconds, the endpoint returns a 302 redirect

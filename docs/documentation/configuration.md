@@ -26,13 +26,15 @@ Thruk merges nested key/value pairs, such as Backends.
 
 ex.:
 
-```text
-thruk.conf:
+`thruk.conf`:
+
+```apache
 default_theme = Thruk
 ```
 
-```text
-thruk_local.conf:
+`thruk_local.conf`:
+
+```apache
 default_theme = Company
 ```
 
@@ -40,16 +42,18 @@ results in default_theme = Company
 
 nested values:
 
-```text
-thruk.conf:
+`thruk.conf`:
+
+```apache
 <initial_menu_state>
 General        = 1
 Current_Status = 1
 </initial_menu_state>
 ```
 
-```text
-thruk_local.conf:
+`thruk_local.conf`:
+
+```apache
 <initial_menu_state>
 Current_Status = 0
 Bookmarks      = 1
@@ -58,7 +62,7 @@ Bookmarks      = 1
 
 results in
 
-```text
+```apache
 <initial_menu_state>
 General        = 1
 Current_Status = 0
@@ -70,20 +74,20 @@ Thruk concatenates list values.
 
 ex.:
 
-```text
+```apache
 command_enabled = 1-4
 command_enabled = 33, 34
 ```
 
 results in:
 
-```text
+```apache
 command_enabled = 1-4, 33, 34
 ```
 
 To replace a list completely, first reset it to an empty value:
 
-```text
+```apache
 command_enabled = 1-4
 command_enabled =
 command_enabled = 33, 34
@@ -91,7 +95,7 @@ command_enabled = 33, 34
 
 results in:
 
-```text
+```apache
 command_enabled = 33, 34
 ```
 
@@ -152,7 +156,7 @@ Sets the text that Thruk prepends to all page titles.
 
 ex.:
 
-```text
+```apache
 title_prefix = Prod
 ```
 
@@ -163,7 +167,7 @@ Thruk checks private bookmarks first and uses the first match.
 
 ex.:
 
-```text
+```apache
 use_bookmark_titles = 1
 ```
 
@@ -176,7 +180,7 @@ parameter on most pages
 
 ex.:
 
-```text
+```apache
 use_dynamic_titles = 1
 ```
 
@@ -187,7 +191,7 @@ You must also change the fastcgi configuration.
 
 ex.:
 
-```text
+```apache
 url_prefix = /
 ```
 
@@ -205,7 +209,7 @@ timezones are set using the Region/Country format.
 
 ex.:
 
-```text
+```apache
 server_timezone = CET
 ```
 
@@ -221,7 +225,7 @@ Possible values are:
 
 ex.:
 
-```text
+```apache
 default_user_timezone = "Server Setting"
 ```
 
@@ -232,7 +236,7 @@ Set to 1 to enable cluster features or 0 for single node setups.
 
 ex.:
 
-```text
+```apache
 cluster_enabled = 1
 ```
 
@@ -249,7 +253,7 @@ cluster node must be available on the given address.
 
 ex.:
 
-```text
+```apache
 cluster_nodes = https://$hostname$/$url_prefix$/
 ```
 
@@ -260,7 +264,7 @@ Set timeout after which a node is removed from the cluster.
 
 ex.:
 
-```text
+```apache
 cluster_node_stale_timeout = 120
 ```
 
@@ -282,7 +286,7 @@ used on pre-authentication stage. If you want users to not create new keys, use
 
 ex.:
 
-```text
+```apache
 api_keys_enabled = 1
 ```
 
@@ -294,7 +298,7 @@ Set to 0 to disable creating new keys completely
 
 ex.:
 
-```text
+```apache
 max_api_keys_per_user = 10
 ```
 
@@ -306,7 +310,7 @@ enabled).
 
 ex.:
 
-```text
+```apache
 mobile_agent=iPhone,Android,IEMobile
 ```
 
@@ -317,7 +321,7 @@ the `themes_path` folder.
 
 ex.:
 
-```text
+```apache
 default_theme = Light
 ```
 
@@ -327,7 +331,7 @@ Default theme to use for if the user prefers a dark theme.
 
 ex.:
 
-```text
+```apache
 default_theme_dark = Dark
 ```
 
@@ -339,7 +343,7 @@ Set first day of week. Used in reports.
 
 ex.:
 
-```text
+```apache
 first_day_of_week = 1
 ```
 
@@ -353,7 +357,7 @@ not. Can be disabled by setting to 0.
 
 ex.:
 
-```text
+```apache
 report_use_temp_files = 14
 ```
 
@@ -366,7 +370,7 @@ of memory left.
 
 ex.:
 
-```text
+```apache
 report_max_objects = 1000
 ```
 
@@ -383,7 +387,7 @@ Setting this to 0 allows the MySQL backend to use indexes efficiently
 
 ex.:
 
-```text
+```apache
 report_include_class2 = 1
 ```
 
@@ -396,7 +400,7 @@ you should probably create a cron to run "thruk -a logcacheupdate"
 
 ex.:
 
-```text
+```apache
 report_update_logcache = 1
 ```
 
@@ -407,7 +411,7 @@ with displays version information and general links.
 
 ex.:
 
-```text
+```apache
 start_page = /thruk/main.html
 ```
 
@@ -419,7 +423,7 @@ Replace this with where you want your home location to be.
 
 ex.:
 
-```text
+```apache
 home_link = https://www.thruk.org
 ```
 
@@ -430,7 +434,7 @@ By default this is set up open in a new tab (_blank).
 
 ex.:
 
-```text
+```apache
 home_link_target = _blank
 ```
 
@@ -442,7 +446,7 @@ if you don't want a documentation link in the menu at all.
 
 ex.:
 
-```text
+```apache
 documentation_link = /thruk/docs/
 ```
 
@@ -453,7 +457,7 @@ to reflect your companies process of error handling.
 
 ex.:
 
-```text
+```apache
 all_problems_link = /thruk/cgi-bin/status.cgi?...
 ```
 
@@ -468,7 +472,7 @@ Wildcards are allowed since v3.06.
 
 ex.:
 
-```text
+```apache
 allowed_frame_links = http://intranet.my-company.com
 allowed_frame_links = https://wiki.my-company.com
 allowed_frame_links = *.my-company.com                # allow all links from my-company.com
@@ -487,7 +491,7 @@ that is, when clicked on, opened inside a frame in Thruk. If it doesn't match
 
 ex.:
 
-```text
+```apache
 allowed_frame_links = example.com
 link_target = _blank ^https?://cannot-run-in-frame.example.com/bar
 link_target = main ^https?://wiki.example.com/foo
@@ -501,7 +505,7 @@ Only affects the fcgid daemon.
 
 ex.:
 
-```text
+```apache
 max_process_memory=1000
 ```
 
@@ -519,7 +523,7 @@ a can_submit_commands setting in your monitoring configuration.
 
 ex.:
 
-```text
+```apache
 can_submit_commands = 1
 ```
 
@@ -537,7 +541,7 @@ See a list of available commands along with their ids on the [commands page](com
 
 ex.:
 
-```text
+```apache
 command_disabled = 14
 command_disabled = 35
 command_disabled = 17-34,50-65
@@ -554,7 +558,7 @@ See a list of available commands along with their ids on the [commands page](com
 
 ex.:
 
-```text
+```apache
 command_enabled = 1-4         # allow adding and removing comments
 command_enabled = 33,34,51,52 # allow acknowledgments
 command_enabled = 55,56,78,79 # allow downtimes
@@ -566,7 +570,7 @@ Convert authenticated username to lowercase.
 
 ex.:
 
-```text
+```apache
 make_auth_user_lowercase = 1
 ```
 
@@ -576,7 +580,7 @@ Convert authenticated username to uppercase.
 
 ex.:
 
-```text
+```apache
 make_auth_user_uppercase = 1
 ```
 
@@ -588,7 +592,7 @@ and 'user@domain' becomes just 'user'.
 
 ex.:
 
-```text
+```apache
 make_auth_replace_regex = s/^(.**?)@.**/$1/gmx
 ```
 
@@ -599,7 +603,7 @@ If disabled, host contacts see all services on their hosts, even without being s
 
 ex.:
 
-```text
+```apache
 use_strict_host_authorization = 1
 ```
 
@@ -612,7 +616,7 @@ multiple configuration attributes. Wildcards are allowed.
 
 ex.:
 
-```text
+```apache
 csrf_allowed_hosts=127.0.0.1
 csrf_allowed_hosts=192.168.*
 ```
@@ -626,7 +630,7 @@ you have to set a `htpasswd` entry in the
 
 ex.:
 
-```text
+```apache
 disable_user_password_change = 1
 ```
 
@@ -638,7 +642,7 @@ just affects the user password reset.
 
 ex.:
 
-```text
+```apache
 user_password_min_length = 5
 ```
 
@@ -651,7 +655,7 @@ To show oauth2 authentication with a toggle for the fallback basic auth form, se
 
 ex.:
 
-```text
+```apache
 basic_auth_enabled = 1
 ```
 
@@ -663,7 +667,7 @@ The path to your cgi.cfg. See [cgi.cfg](cgi-cfg.html) for details.
 
 ex.:
 
-```text
+```apache
 cgi_cfg = cgi.cfg
 ```
 
@@ -673,7 +677,7 @@ The path to your log4perl configuration file.
 
 ex.:
 
-```text
+```apache
 log4perl_conf = ./log4perl.conf
 ```
 
@@ -690,7 +694,7 @@ same as setting THRUK_VERBOSE environment.
 
 ex.:
 
-```text
+```apache
 thruk_verbose = 0
 ```
 
@@ -701,7 +705,7 @@ Only required for development, disables caches, enables template strict mode and
 
 ex.:
 
-```text
+```apache
 thruk_author = 1
 ```
 
@@ -712,7 +716,7 @@ profile will be logged. The default is 15. Set to 0 to disable logging completel
 
 ex.:
 
-```text
+```apache
 slow_page_log_threshold = 30
 ```
 
@@ -730,7 +734,7 @@ Possible options:
 
 ex.:
 
-```
+```apache
 machine_debug_info = prod
 ```
 
@@ -743,7 +747,7 @@ timestamp to the logfile.
 
 ex.:
 
-```text
+```apache
 <audit_logs>
 logfile          = /var/log/audit/thruk-%Y.%m.%d.log  # if set, audit log will be appended to this file. strftime format can used in the filename.
 login            = 1    # log if user logs in
@@ -763,13 +767,13 @@ static content from plugins is not accessible.
 
 Example redirect rule for apache:
 
-```text
+```apache
 AliasMatch /thruk/plugins/(.*?)/(.*)$ YOUR-PLUGIN-DIR/plugins/plugins-enabled/$1/root/$2
 ```
 
 ex.:
 
-```text
+```apache
 plugin_path = ./plugins
 ```
 
@@ -780,7 +784,7 @@ list thruk plugins. Can be specified multiple times.
 
 ex.:
 
-```text
+```apache
 plugin_registry_url = https://api.thruk.org/v1/plugin/list
 ```
 
@@ -791,13 +795,13 @@ location for you Thruk themes. Don't forget to set appropriate apache
 alias or rewrite rules when changing the themes path. Otherwise the
 static content from your themes may not accessible.
 
-```text
+```apache
 Alias /thruk/themes/ YOUR-THEMES-DIR/themes/themes-enabled/
 ```
 
 ex.:
 
-```text
+```apache
 themes_path = ./themes
 ```
 
@@ -807,7 +811,7 @@ Path to the var directory. Thruk stores user specific date here.
 
 ex.:
 
-```text
+```apache
 var_path = ./var
 ```
 
@@ -818,7 +822,7 @@ this is a good place.
 
 ex.:
 
-```text
+```apache
 tmp_path = /tmp
 ```
 
@@ -829,7 +833,7 @@ The path to your ssi (server side includes) files. See
 
 ex.:
 
-```text
+```apache
 ssi_path = ssi/
 ```
 
@@ -846,7 +850,7 @@ Template search order is:
 
 ex.:
 
-```text
+```apache
 user_template_path = ./my_templates
 ```
 
@@ -862,7 +866,7 @@ to the cgi directory.
 
 ex.:
 
-```text
+```apache
 logo_path_prefix = /icons/
 ```
 
@@ -875,7 +879,7 @@ the corresponding filesystem path.
 
 ex.:
 
-```text
+```apache
 physical_logo_path = /usr/share/icons/
 ```
 
@@ -885,7 +889,7 @@ Mode used when creating or saving files.
 
 ex.:
 
-```text
+```apache
 mode_file = 0660
 ```
 
@@ -895,7 +899,7 @@ Mode used when creating folders
 
 ex.:
 
-```text
+```apache
 mode_dir = 0770
 ```
 
@@ -912,7 +916,7 @@ per peer in your peer config.
 
 ex.:
 
-```text
+```apache
 resource_file = /etc/nagios3/resource.cfg
 ```
 
@@ -925,7 +929,7 @@ maximum number of allowed search boxes
 
 ex.:
 
-```text
+```apache
 maximum_search_boxes = 9
 ```
 
@@ -937,7 +941,7 @@ setups.
 
 ex.:
 
-```text
+```apache
 search_long_plugin_output = 1
 ```
 
@@ -949,7 +953,7 @@ When searching from the navigation bar, try to search hosts first.
 
 ex.:
 
-```text
+```apache
 search_hosts_first = 1
 ```
 
@@ -963,7 +967,7 @@ with "test_". You can use regular expressions. The Default is not set.
 
 ex.:
 
-```text
+```apache
 default_service_filter = !^test_
 ```
 
@@ -978,7 +982,7 @@ even if the user has global admin permissions.
 
 ex.:
 
-```text
+```apache
 default_main_filter = contact = $REMOTE_USER$
 ```
 
@@ -989,7 +993,7 @@ can be regular expressions.
 
 ex.:
 
-```text
+```apache
 main_exclude_top5_hostgroups = all_hosts, regex.*filter
 ```
 
@@ -1005,7 +1009,7 @@ need it.
 
 ex.:
 
-```text
+```apache
 use_pager = 1
 ```
 
@@ -1016,7 +1020,7 @@ selected value.
 
 ex.:
 
-```text
+```apache
 paging_steps = *100, 500, 1000, all
 ```
 
@@ -1026,7 +1030,7 @@ Just like the paging_steps, but only for the groups overview page.
 
 ex.:
 
-```text
+```apache
 group_paging_overview =  *3,  10, 100, all
 ```
 
@@ -1036,7 +1040,7 @@ Just like the paging_steps, but only for the groups summary page.
 
 ex.:
 
-```text
+```apache
 group_paging_summary = *10, 50, 100, all
 ```
 
@@ -1046,7 +1050,7 @@ Just like the paging_steps, but only for the groups grip page.
 
 ex.:
 
-```text
+```apache
 group_paging_grid = *5,  10, 50,  all
 ```
 
@@ -1057,7 +1061,7 @@ Defaults to 500.
 
 ex.:
 
-```text
+```apache
 problems_limit = 500
 ```
 
@@ -1068,7 +1072,7 @@ Set default for showing main data table at full size or not.
 
 ex.:
 
-```text
+```apache
 main_table_full = 0
 ```
 
@@ -1084,7 +1088,7 @@ Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
-```text
+```apache
 host_action_icon = action.gif
 ```
 
@@ -1098,7 +1102,7 @@ Icon can be overridden by a custom variable '_ACTION_ICON'.
 
 ex.:
 
-```text
+```apache
 service_action_icon = action.gif
 ```
 
@@ -1106,14 +1110,14 @@ service_action_icon = action.gif
 
 Set initial menu state.
 
-```text
+```apache
 closed  => 0
 open    => 1
 ```
 
 ex.:
 
-```text
+```apache
 <initial_menu_state>
 General        = 1
 Current_Status = 1
@@ -1133,7 +1137,7 @@ See allowed_frame_links option for how to integrate addons.
 
 ex.:
 
-```text
+```apache
 use_frames = 0
 ```
 
@@ -1145,14 +1149,14 @@ Width of the navigation frame in px.
 
 ex.:
 
-```text
+```apache
 navframesize = 190
 ```
 
 ::: tip
 To achieve a similar effect in Thruk 3.x you can create a ssi file, ex.:
 `ssi/common-header-navsize.ssi` and put this in there:
-```
+```apache
 <style>
 #nav-container {
   width: 300px !important;
@@ -1169,7 +1173,7 @@ Show the new split command box on the host / service details page.
 
 ex.:
 
-```text
+```apache
 use_new_command_box = 1
 ```
 
@@ -1178,7 +1182,7 @@ use_new_command_box = 1
 what email address bug reports will be sent to
 
 ex.:
-```text
+```apache
 bug_email_rcpt  = bugs@thruk.org
 ```
 
@@ -1188,7 +1192,7 @@ Default time format. Use POSIX format.
 
 ex.:
 
-```text
+```apache
 datetime_format = %Y-%m-%d  %H:%M:%S
 ```
 
@@ -1198,7 +1202,7 @@ Default long time format.
 
 ex.:
 
-```text
+```apache
 datetime_format_long = %a %b %e %H:%M:%S %Z %Y
 ```
 
@@ -1208,7 +1212,7 @@ Default log time format.
 
 ex.:
 
-```text
+```apache
 datetime_format_log = %B %d, %Y  %H
 ```
 
@@ -1218,7 +1222,7 @@ Default trends time format.
 
 ex.:
 
-```text
+```apache
 datetime_format_trends = %a %b %e %H:%M:%S %Y
 ```
 
@@ -1229,7 +1233,7 @@ shorter date format for today.
 
 ex.:
 
-```text
+```apache
 datetime_format_today = %H:%M:%S
 ```
 
@@ -1248,7 +1252,7 @@ attempts on the status details page.
 
 ex.:
 
-```text
+```apache
 show_notification_number = 0
 ```
 
@@ -1261,7 +1265,7 @@ See an example on the [Dynamic Views](dynamic-views.html) page.
 
 ex.:
 
-```text
+```apache
 default_host_columns = name,state,last_check,duration,plugin_output
 ```
 
@@ -1276,7 +1280,7 @@ only if there is more than one backend with the `?` as in `peer_name?:site`.
 
 ex.:
 
-```text
+```apache
 default_service_columns = host_name,description,state,last_check,duration,current_attempt,plugin_output
 ```
 
@@ -1289,7 +1293,7 @@ See an example on the [Dynamic Views](dynamic-views.html) page.
 
 ex.:
 
-```text
+```apache
 default_overview_columns = name,state,services,actions
 ```
 
@@ -1302,7 +1306,7 @@ See an example on the [Dynamic Views](dynamic-views.html) page.
 
 ex.:
 
-```text
+```apache
 default_grid_columns = name,state,actions
 ```
 
@@ -1318,7 +1322,7 @@ Valid values are:
 
 ex.:
 
-```text
+```apache
 show_backends_in_table = 0
 ```
 
@@ -1330,7 +1334,7 @@ and you need proper permissions for the link to appear.
 
 ex.:
 
-```text
+```apache
 show_config_edit_buttons = 1
 ```
 
@@ -1358,7 +1362,7 @@ In order to replace the user macros for commands, you have to set the
 
 ex.:
 
-```text
+```apache
 show_full_commandline = 0
 ```
 
@@ -1372,7 +1376,7 @@ The pattern is a simple perl regular substitute expression in the form of
 
 ex.:
 
-```text
+```apache
 commandline_obfuscate_pattern = /(\-\-password=")[^"]*(")/$1"***"$2/
 commandline_obfuscate_pattern = /(check_vmware_.*\-p )(\S+)/$1"***"/
 commandline_obfuscate_pattern = /(check_.*\--pw )(\S+)/$1"***"/
@@ -1433,7 +1437,7 @@ commands from a custom variable. In this case, set
 
 ex.:
 
-```text
+```apache
 show_full_commandline_source = check_command
 ```
 
@@ -1444,7 +1448,7 @@ Show additional logout button next to the top right preferences button.
 
 ex.:
 
-```text
+```apache
 show_logout_button=1
 ```
 
@@ -1455,7 +1459,7 @@ Change url of logout link. Might be useful in combination with oauth.
 
 ex.:
 
-```text
+```apache
 logout_link=/thruk/cgi-bin/login.cgi?logout
 ```
 
@@ -1466,7 +1470,7 @@ Choose popup, inline (directly in the status table) or off (hidden).
 
 ex.:
 
-```text
+```apache
 show_long_plugin_output = popup
 ```
 
@@ -1477,7 +1481,7 @@ itself.
 
 ex.:
 
-```text
+```apache
 status_color_background=0
 ```
 
@@ -1487,7 +1491,7 @@ Show if a host / service has modified attributes.
 
 ex.:
 
-```text
+```apache
 show_modified_attributes = 1
 ```
 
@@ -1497,7 +1501,7 @@ Show host / service contacts. User must have the configuration_information role.
 
 ex.:
 
-```text
+```apache
 show_contacts = 1
 ```
 
@@ -1507,7 +1511,7 @@ Seconds after which the "is_executing" icons disappear.
 
 ex.:
 
-```text
+```apache
 is_executing_timeout = 5
 ```
 
@@ -1518,7 +1522,7 @@ them on the problems page only. Use this value to force a value.
 
 ex.:
 
-```text
+```apache
 show_host_attempts = 1
 ```
 
@@ -1543,20 +1547,20 @@ will just work. No need to disabled `escape_html` just to show some links.
 
 ex.:
 
-```text
+```apache
 short_link = |INC(\d+)|[$1](https://tickets.company.com/ticket/$1)|
 short_link = |GH#(\d+)|[Issue $1](https://github.com/sni/thruk/issues/$1)|
 ```
 
 Replaces the string "INC12345" with the link:
 
-```text
+```apache
 <a href="https://tickets.company.com/ticket/12345">12345</a>
 ```
 
 Replaces the string "GH#123" with the link:
 
-```text
+```apache
 <a href="https://github.com/sni/thruk/issues/123">123</a>
 ```
 
@@ -1570,7 +1574,7 @@ Can be set multiple times.
 
 ex.:
 
-```text
+```apache
 copy_paste_link = (ticket id: ")(.*?)(")
 ```
 
@@ -1588,7 +1592,7 @@ Choose 'match', 'first', 'all', 'worst' or 'off'.
 
 ex.:
 
-```text
+```apache
 perf_bar_mode = match
 ```
 
@@ -1602,7 +1606,7 @@ need to install the proper SSI files.
 
 ex.:
 
-```text
+```apache
 perf_bar_pnp_popup = 1
 ```
 
@@ -1618,7 +1622,7 @@ and the panorama dashboard. Can be overridden in those plugins.
 
 ex.:
 
-```text
+```apache
 default_state_order = down, unreachable, \
                     unknown, critical, warning, \
                     acknowledged_down, acknowledged_unreachable, \
@@ -1637,7 +1641,7 @@ This works for /pnp4nagios/ urls and /pnp/.
 
 ex.:
 
-```text
+```apache
 shown_inline_pnp = 1
 ```
 
@@ -1665,7 +1669,7 @@ sample service configuration for graphite:
 
 ex.:
 
-```text
+```apache
 graph_word = /render/       # for graphite
 ```
 
@@ -1684,13 +1688,13 @@ setting multiple times.
 
 sample service configuration for graphite:
 
-```
+```apache
 graph_replace = s/[^\w\-]/_/gmx
 ```
 
 sample service configuration for graphios:
 
-```
+```apache
 graph_replace = s/\s//gmx
 graph_replace = s/[^\w\-]/_/gmx
 ```
@@ -1708,7 +1712,7 @@ Possible options:
 
 ex.:
 
-```text
+```apache
 http_backend_reverse_proxy = 1
 ```
 
@@ -1725,17 +1729,17 @@ Host variables are only used with HOST**, not by ** alone, see examples.
 
 ex.:
 
-```text
+```apache
 # only match a single variable
 show_custom_vars = _VAR1
 ```
 
-```text
+```apache
 # show all host variables for hosts and all service variables for services
 show_custom_vars = *
 ```
 
-```text
+```apache
 # show all host variables for hosts and all host and service variables for services
 show_custom_vars = HOST*
 show_custom_vars = *
@@ -1753,7 +1757,7 @@ Syntax is the same as `show_custom_vars`.
 
 ex.:
 
-```text
+```apache
 expose_custom_vars = _VAR1
 ```
 
@@ -1770,7 +1774,7 @@ its limited to admin users anyway.
 
 ex.:
 
-```text
+```apache
 expand_user_macros = USER1
 expand_user_macros = USER10-20
 expand_user_macros = PLUGIN*
@@ -1786,7 +1790,7 @@ Set to 'server' to log js error server side.
 Set to 'both' to log server side but still show the icon.
 
 ex.:
-```text
+```apache
 show_error_reports = both
 ```
 
@@ -1795,7 +1799,7 @@ show_error_reports = both
 don't report some known harmless javascript errors
 
 ex.:
-```text
+```apache
 skip_js_errors  = cluetip is not a function
 ```
 
@@ -1810,7 +1814,7 @@ displayed.
 
 ex.:
 
-```text
+```apache
 strict_passive_mode = 1
 ```
 
@@ -1822,7 +1826,7 @@ With this option, passive icon will be hidden in status details.
 
 ex.:
 
-```text
+```apache
 hide_passive_icon = 0
 ```
 
@@ -1838,7 +1842,7 @@ on status pages. It can be set to one of:
 
 ex.:
 
-```text
+```apache
 hide_top = auto
 ```
 
@@ -1855,7 +1859,7 @@ Set sitepanel to list/compact/collapsed/tree/auto/off to change the default beha
 
 ex.:
 
-```text
+```apache
 sitepanel = auto
 ```
 
@@ -1870,7 +1874,7 @@ Read more about Apaches mod_status here: http://httpd.apache.org/docs/current/mo
 
 ex.:
 
-```text
+```apache
 <apache_status>
 Site        http://127.0.0.1:5000/server-status
 System      http://127.0.0.1/server-status
@@ -1891,7 +1895,7 @@ makes sense when debug logging is activated.
 
 ex.:
 
-```text
+```apache
 backend_debug = 1
 ```
 
@@ -1904,7 +1908,7 @@ Disabled when set to 0, number of concurrent connections otherwise.
 
 ex.:
 
-```text
+```apache
 connection_pool_size = 5
 ```
 
@@ -1919,7 +1923,7 @@ or here [LMD](lmd.html).
 
 ex.:
 
-```text
+```apache
 use_lmd_core = 0
 ```
 
@@ -1929,7 +1933,7 @@ Path to lmd binary.
 
 ex.:
 
-```text
+```apache
 lmd_core_bin = /usr/local/go/src/github.com/sni/lmd/lmd/lmd
 ```
 
@@ -1940,7 +1944,7 @@ generated. Can be used multiple times.
 
 ex.:
 
-```text
+```apache
 lmd_core_config = /etc/thruk/lmd.ini
 lmd_core_config = /etc/thruk/lmd.ini.d/*.ini
 ```
@@ -1951,7 +1955,7 @@ Set some extra command line options when starting lmd.
 
 ex.:
 
-```
+```apache
 lmd_options = -debug-deadlock 30 -debug-profiler localhost:6060
 ```
 
@@ -1962,7 +1966,7 @@ Set to 0 to turn off automatic restarts (it will still be started if it is not r
 
 ex.:
 
-```text
+```apache
 lmd_timeout=5
 ```
 
@@ -1973,7 +1977,7 @@ instead
 
 ex.:
 
-```text
+```apache
 lmd_remote=localhost:3333
 ```
 
@@ -1988,7 +1992,7 @@ creating reports.
 
 ex.:
 
-```text
+```apache
 logcache = mysql://user:password@localhost:3306/thruk_log_cache
 ```
 
@@ -2001,7 +2005,7 @@ it is ok to remove some entries. Can be used multiple times.
 
 ex.:
 
-```text
+```apache
 logcache_import_exclude = "Warning: Passive check result was received for"
 logcache_import_exclude = "wproc: "
 logcache_import_exclude = "PASSIVE SERVICE CHECK: "
@@ -2023,7 +2027,7 @@ last manual update.
 
 ex.:
 
-```text
+```apache
 logcache_delta_updates = 1
 ```
 
@@ -2035,7 +2039,7 @@ execution.
 
 ex.:
 
-```text
+```apache
 logcache_worker = auto
 ```
 
@@ -2053,7 +2057,7 @@ you run very long initial imports. Value is in seconds.
 
 ex.:
 
-```text
+```apache
 logcache_update_stale_after = 28800
 ```
 
@@ -2064,7 +2068,7 @@ Default duration when running `thruk logcache clean`. See the
 
 ex.:
 
-```text
+```apache
 logcache_clean_duration = 2y
 ```
 
@@ -2076,7 +2080,7 @@ not required for sla reports and keeps a few extras like notifications.
 
 ex.:
 
-```text
+```apache
 logcache_compact_duration = 10w
 ```
 
@@ -2093,7 +2097,7 @@ is outside the range of the cache.
 
 ex.:
 
-```
+```apache
 logcache_auto_bypass = 0
 ```
 
@@ -2113,7 +2117,7 @@ There are some useful environment variables set before the script is started:
 
 ex.:
 
-```text
+```apache
 logcache_import_command = .../importscript.sh
 ```
 
@@ -2142,7 +2146,7 @@ control which logs should be fetched:
 
 ex.:
 
-```text
+```apache
 logcache_fetchlogs_command = IDO_DB_HOST=127.0.0.1 IDO_DB_PORT=3306 IDO_DB_USER=root IDO_DB_PW=root IDO_DB_NAME=icinga ./support/icinga2_ido_fetchlogs.sh mysql
 ```
 
@@ -2162,7 +2166,7 @@ pxc_strict_mode available here:
 
 ex.:
 
-```text
+```apache
 logcache_pxc_strict_mode = 1
 ```
 
@@ -2179,7 +2183,7 @@ after the backend reload
 
 ex.:
 
-```text
+```apache
 delay_pages_after_backend_reload = 10
 ```
 
@@ -2191,7 +2195,7 @@ to disabled hostname verification, set `ssl_ca_path` or `ssl_ca_file` instead.
 
 ex.:
 
-```text
+```apache
 ssl_verify_hostnames = 1
 ```
 
@@ -2203,7 +2207,7 @@ module is installed or `ssl_ca_path = '/etc/ssl/certs'` otherwise.
 
 ex.:
 
-```text
+```apache
 ssl_ca_path = /etc/ssl/certs
 ```
 
@@ -2213,7 +2217,7 @@ Sets path to your ca store. See `ssl_ca_path` for details.
 
 ex.:
 
-```
+```apache
 ssl_ca_file = /etc/ssl/certs/ca.pem
 ```
 
@@ -2226,7 +2230,7 @@ too.
 
 ex.:
 
-```text
+```apache
 cookie_auth_login_url = thruk/cgi-bin/login.cgi
 ```
 
@@ -2237,7 +2241,7 @@ credentials.
 
 ex.:
 
-```text
+```apache
 cookie_auth_restricted_url = http://localhost/thruk/cgi-bin/restricted.cgi
 ```
 
@@ -2249,7 +2253,7 @@ fallback is 86400 (1 day).
 
 ex.:
 
-```text
+```apache
 cookie_auth_session_timeout       = 604800
 ```
 
@@ -2262,7 +2266,7 @@ sessions (sessions will never invalidate).
 
 ex.:
 
-```text
+```apache
 cookie_auth_session_cache_timeout = 30
 ```
 
@@ -2276,7 +2280,7 @@ cache.
 
 ex.:
 
-```text
+```apache
 cookie_auth_session_cache_fail_timeout = 30
 ```
 
@@ -2287,7 +2291,7 @@ and can be disabled by setting it to zero.
 
 ex.:
 
-```text
+```apache
 cookie_auth_login_timeout = 10
 ```
 
@@ -2299,7 +2303,7 @@ two periods. Useful for single sign on environments.
 
 ex.:
 
-```text
+```apache
 cookie_auth_domain = .domain.com
 ```
 
@@ -2315,7 +2319,7 @@ Available standard environment variables are listed on the
 
 ex.:
 
-```text
+```apache
 cookie_auth_login_hook = ./bin/hook.sh
 ```
 
@@ -2346,7 +2350,7 @@ Default: 10
 
 ex.:
 
-```text
+```apache
 cookie_auth_disable_after_failed_logins = 3
 ```
 
@@ -2357,7 +2361,7 @@ The error message when an account is locked, may contain html.
 
 ex.:
 
-```
+```apache
 locked_message = account is locked, please contact an administrator
 ```
 
@@ -2371,7 +2375,7 @@ Default: 0
 
 ex.:
 
-```text
+```apache
 cookie_auth_verbose = 3
 ```
 
@@ -2393,7 +2397,7 @@ Set oauth (oauth2) authentication provider
 
 ex.:
 
-```text
+```apache
 <auth_oauth>
 <provider name>
   login         = "Login with OAuth"      # Value of the login button.
@@ -2426,7 +2430,7 @@ Set the default checked state for command options.
 
 ex.:
 
-```text
+```apache
 <cmd_defaults>
 ahas                   = 0  # For Hosts Too
 broadcast_notification = 0  # Broadcast
@@ -2450,7 +2454,7 @@ Forces acknowledgments to be sticky.
 
 ex.:
 
-```text
+```apache
 force_sticky_ack = 1
 ```
 
@@ -2460,7 +2464,7 @@ Forces sending a notification for acknowledgments.
 
 ex.:
 
-```text
+```apache
 force_send_notification = 1
 ```
 
@@ -2470,7 +2474,7 @@ Forces comments on acknowledgments to be persistent.
 
 ex.:
 
-```text
+```apache
 force_persistent_ack = 1
 ```
 
@@ -2480,7 +2484,7 @@ Forces normal comments to be persistent.
 
 ex.:
 
-```text
+```apache
 force_persistent_comments = 1
 ```
 
@@ -2490,7 +2494,7 @@ Default duration of new downtimes in seconds. Default is 2 hours.
 
 ex.:
 
-```text
+```apache
 downtime_duration = 7200
 ```
 
@@ -2501,7 +2505,7 @@ y=years to set human readable values. Default is unlimited.
 
 ex.:
 
-```text
+```apache
 downtime_max_duration = 4w
 ```
 
@@ -2512,7 +2516,7 @@ Show expire acknowledgement form.
 
 ex.:
 
-```text
+```apache
 has_expire_acks = 1
 ```
 
@@ -2523,7 +2527,7 @@ day.
 
 ex.:
 
-```text
+```apache
 expire_ack_duration = 86400
 ```
 
@@ -2534,7 +2538,7 @@ Options are 0, 10, 30, 60, 300, 900, 1800, 3600.
 
 ex.:
 
-```text
+```apache
 reschedule_spread = 0
 ```
 
@@ -2544,7 +2548,7 @@ Configure which commands should be available as quick status commands.
 
 ex.:
 
-```text
+```apache
 <cmd_quick_status>
 reschedule             = 0  # Reschedule next check
 downtime               = 0  # Add/remove downtimes
@@ -2567,7 +2571,7 @@ usually want to reschedule the agent instead of the passive check.
 The command reschedule alias can be used to translate the reschedule command
 from the passive service to the active agent service.
 
-```text
+```apache
 command_reschedule_alias = pattern;master_service_description
 ```
 
@@ -2588,7 +2592,7 @@ page.
 
 ex.:
 
-```text
+```apache
 command_reschedule_alias = ^check_mk\-(?!inventory);Check_MK
 ```
 
@@ -2598,7 +2602,7 @@ Use recurring downtime, shows recurring downtime links.
 
 ex.:
 
-```text
+```apache
 use_feature_recurring_downtime = 1
 ```
 
@@ -2609,7 +2613,7 @@ Use service's description instead of display name.
 
 ex.:
 
-```text
+```apache
 use_service_description = 1
 ```
 
@@ -2625,7 +2629,7 @@ Note: hosts will always be ordered by host_name
 
 ex.:
 
-```text
+```apache
 host_name_source = display_name, name
 ```
 
@@ -2641,7 +2645,7 @@ Note: services will always be ordered by description.
 
 ex.:
 
-```text
+```apache
 service_description_source = display_name, description
 ```
 
@@ -2651,7 +2655,7 @@ Use trends, shows trend links.
 
 ex.:
 
-```text
+```apache
 use_feature_trends = 1
 ```
 
@@ -2663,7 +2667,7 @@ Use 'wait_timeout' to adjust the wait time.
 
 ex.:
 
-```text
+```apache
 use_wait_feature = 1
 ```
 
@@ -2674,7 +2678,7 @@ will wait this amount and display the result immediately.
 
 ex.:
 
-```text
+```apache
 wait_timeout = 10
 ```
 
@@ -2688,7 +2692,7 @@ notifications / handlers are enabled again. They are also used by the
 
 ex.:
 
-```text
+```apache
 require_comments_for_disable_cmds = 1
 ```
 
@@ -2701,7 +2705,7 @@ delivered.
 
 ex.:
 
-```text
+```apache
 rest_commands_ignore_partial_errors = 0
 ```
 
@@ -2715,7 +2719,7 @@ writable by Thruk.
 
 ex.:
 
-```text
+```apache
 cron_file = /tmp/thruk_cron.tmp
 ```
 
@@ -2726,7 +2730,7 @@ will edit the crontab.
 
 ex.:
 
-```text
+```apache
 cron_pre_edit_cmd  = /usr/bin/crontab -l > /tmp/thruk_cron.tmp
 ```
 
@@ -2738,7 +2742,7 @@ file.
 
 ex.:
 
-```text
+```apache
 cron_post_edit_cmd = crontab /tmp/thruk_cron.tmp
 ```
 
@@ -2748,7 +2752,7 @@ Path to your thruk executable. Will be used in cronjobs.
 
 ex.:
 
-```text
+```apache
 thruk_bin = /usr/bin/thruk
 ```
 
@@ -2893,11 +2897,10 @@ Sample icons with two action icons:
 **Variant 1** - put your action menus into a separate folder.
 <Badge type="tip" text="New in Thruk 2.10" />
 
-```
+`thruk_local.conf`:
 
-  *thruk_local.conf:*
-
-    action_menu_items_folder /etc/thruk/action_menus/
+```apache
+action_menu_items_folder /etc/thruk/action_menus/
 ```
 
 Menu files must have the .json file extension and contain the raw json
@@ -2908,41 +2911,41 @@ you can access the menu by the name `some_menu`.
 **Variant 2** - reference a menu from an external file:
 <Badge type="tip" text="New in Thruk 2.10" />
 
-```
+`thruk_local.conf`:
 
-  *thruk_local.conf:*
-
-    <action_menu_items>
-        standard_menu      = file:///etc/thruk/standard_menu.json
-    </action_menu_items>
+```apache
+<action_menu_items>
+    standard_menu      = file:///etc/thruk/standard_menu.json
+</action_menu_items>
 ```
 
 Menu files must contain the raw json definition of the action menu.
 
 **Variant 3** - reference to a pre defined menu:
 
+`thruk_local.conf`:
+
+```apache
+<action_menu_items>
+    standard_menu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
+                    "title": "test title",\
+                    "menu":[\
+                       {"icon":"uil-redo",\
+                        "label":"refresh",\
+                        "action":"server://refresh/$HOSTNAME$"}\
+                    ]\
+                   }
+</action_menu_items>
 ```
 
-  *thruk_local.conf:*
+`host.cfg`:
 
-    <action_menu_items>
-        standard_menu = {"icon":"/thruk/themes/{{theme}}/images/dropdown.png",\
-                        "title": "test title",\
-                        "menu":[\
-                           {"icon":"uil-redo",\
-                            "label":"refresh",\
-                            "action":"server://refresh/$HOSTNAME$"}\
-                        ]\
-                       }
-    </action_menu_items>
-
-  *host.cfg:*
-
-    define host {
-      host_name            localhost
-      ...
-      _THRUK_ACTION_MENU   standard_menu
-    }
+```text
+define host {
+  host_name            localhost
+  ...
+  _THRUK_ACTION_MENU   standard_menu
+}
 ```
 
 **Variant 4** - define the menu in object config only:
@@ -2950,15 +2953,14 @@ Menu files must contain the raw json definition of the action menu.
 This obviously adds some overhead to your objects, so better use the other variants
 unless you want to change the menu from external commands.
 
-```
+`host.cfg`:
 
-  *host.cfg:*
-
-    define host {
-      host_name            localhost
-      ...
-      _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"uil-redo","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
-    }
+```text
+define host {
+  host_name            localhost
+  ...
+  _THRUK_ACTION_MENU   {"icon":"/thruk/themes/{{theme}}/images/dropdown.png", "title": "test title", "menu":[ {"icon":"uil-redo","label":"refresh","action":"server://refresh/$HOSTNAME$"}]}
+}
 ```
 
 ### action_menu_items_folder
@@ -2973,12 +2975,12 @@ This folder may also contain .js files since version 2.24.
 Both examples are equivalent and result in the same menu assuming there is
 a `/etc/thruk/action_menus/host_menu.json` file.
 
-```
+```apache
 
     action_menu_items_folder    =  /etc/thruk/action_menus/
 ```
 
-```
+```apache
 
     <action_menu_items>
         host_menu     = file:///etc/thruk/action_menus/host_menu.json
@@ -2995,7 +2997,7 @@ the corresponding action menu to matching hosts and services. The syntax is
 
 ex.:
 
-```text
+```apache
 <action_menu_apply>
 host_menu    = .*;$             # matches all hosts only
 service_menu = .*;.+$           # matches all services on all hosts
@@ -3020,7 +3022,7 @@ environment variable.
 
 ex.:
 
-```text
+```apache
 <action_menu_actions>
   example   = /usr/local/bin/sample.sh $HOSTNAME$ $SERVICEDESC$ $USER20$
   refresh   = /usr/local/bin/refresh.sh otherargs
@@ -3038,7 +3040,7 @@ unless all your backends are icinga.
 
 ex.:
 
-```text
+```apache
 enable_icinga_features = 1
 ```
 
@@ -3054,7 +3056,7 @@ shinken backends.
 
 ex.:
 
-```text
+```apache
 enable_shinken_features = 1
 ```
 
@@ -3065,7 +3067,7 @@ will only work with shinken backends.
 
 ex.:
 
-```text
+```apache
 <priorities>
 5   = Business Critical
 4   = Top Production
@@ -3087,7 +3089,7 @@ within 40seconds which is the default fcgi timeout.
 
 ex.:
 
-```text
+```apache
 no_external_job_forks = 1
 ```
 
@@ -3097,7 +3099,7 @@ Path to your thruk init script. Will be used to restart thruk.
 
 ex.:
 
-```text
+```apache
 thruk_init = /etc/init.d/thruk
 ```
 
@@ -3108,7 +3110,7 @@ rewrites which breaks setting cookies.
 
 ex.:
 
-```text
+```apache
 cookie_path = /
 ```
 
@@ -3118,7 +3120,7 @@ Sets all cookies with secure=1 if enabled.
 
 ex.:
 
-```text
+```apache
 cookie_secure_only = 1
 ```
 
@@ -3205,7 +3207,7 @@ for details.
 
 ex.:
 
-```text
+```apache
 <Component Thruk::Backend>
 <peer>
     name   = Local Naemon
@@ -3274,7 +3276,7 @@ config tool.
 
 ex.:
 
-```text
+```apache
 <Component Thruk::Plugin::ConfigTool>
 show_plugin_syntax_helper = 1
 thruk                     = .../thruk_local.conf
@@ -3398,7 +3400,7 @@ cannot use spaces or colons in attributes or default values.
 
 ex.:
 
-```
+```apache
 default_keys_host       = host_name use:generic-host alias address contact_groups _WORKER:local
 ```
 
@@ -3416,7 +3418,7 @@ Same as `default_keys_host` but used when creating a new template
 (the `(new template)` button). If not set, `default_keys_host` is
 used instead.
 
-```
+```apache
 default_keys_host_template  = use:generic-host
 ```
 
@@ -3435,7 +3437,7 @@ you to build your own panorama views.
 
 ex.:
 
-```text
+```apache
 <Component Thruk::Plugin::Panorama>
 default_dashboard        = 1,3,7,4
 readonly                 = 0
@@ -3499,7 +3501,7 @@ WMS provider serve map tile data for geo maps according to
 http://dev.openlayers.org/docs/files/OpenLayers/Layer/WMS-js.html#OpenLayers.Layer.WMS.OpenLayers.Layer.WMS
 Find more wms provider here: http://wiki.openstreetmap.org/wiki/WMS#OSM_WMS_Servers
 
-```text
+```apache
 <Component Thruk::Plugin::Panorama>
 ...
 wms_provider = <providername>   = ["<wms-url>", {"layers": "<layername>"}", {"properties": "..."}]
@@ -3521,7 +3523,7 @@ probably have to install [puppeteer](faq.html#puppeteer) in a recent version.
 
 ex.:
 
-```text
+```apache
 <Component Thruk::Plugin::Reports2>
 report_nice_level      = 5
 max_concurrent_reports = 2
@@ -3611,7 +3613,7 @@ The Minemap plugin gives an overview of your hosts and services.
 
 ex.:
 
-```text
+```apache
 <Component Thruk::Plugin::Minemap>
 minemap_default_link = /thruk/cgi-bin/minemap.cgi
 </Component>
@@ -3632,7 +3634,7 @@ need the roles:
 
 Configuration Example:
 
-```text
+```apache
 <Component Thruk::Plugin::BP>
 #spool_dir             = /var/naemon/rw/check_results
 result_backend         = naemon
@@ -3800,7 +3802,7 @@ overrides apply. The 'reports' overrides supersede the 'admin' overrides.
 
 ex.:
 
-```
+```apache
     # disable creating api keys
     max_api_keys_per_user = 0
 
@@ -3820,7 +3822,7 @@ The 'SuperAdmins' overrides supersede the 'Admins' overrides.
 
 ex.:
 
-```
+```apache
     # disable all commands, except reschedule for all users
     command_disabled = 0-6,8-95,97-999
 
@@ -3836,7 +3838,7 @@ The users directive overrides specific config settings for one user only.
 
 ex.:
 
-```
+```apache
     <User guest>
         # override single configuration item
         show_error_reports  = 0

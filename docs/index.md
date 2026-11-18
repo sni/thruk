@@ -6,6 +6,7 @@ It reads live data through the Livestatus API.
 ## Start here
 
 - [First steps](guides/first-steps.md) - a checklist for a new installation
+- [REST API quickstart](guides/rest-quickstart.md) - check your identity and read host states
 - [Access control](guides/access-control.md) - authentication and permissions
 - [Installation](documentation/install.md) - packages, OMD and source
 - [Configuration](documentation/configuration.md) - the `thruk_local.conf` options
