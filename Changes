@@ -27,6 +27,8 @@ next:
             - require admin permission for remote CLI stop and restart
             - prevent shell interpretation in job diagnostics
             - reject embedded newlines in external command frames
+            - strip CR/LF from all free-text command form fields (performance_data, plugin_output,
+              com_author, com_data_disable_cmd) which the bulk_send guard does not reach (GHSA-4w69-9wqr-7w5c)
           - OAuth:
             - add team_regex and team_filter options to transform and filter team names
             - bind callbacks to the browser which initiated the login

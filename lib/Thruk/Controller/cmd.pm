@@ -1329,7 +1329,14 @@ sub _set_request_param_defaults {
         $c->req->parameters->{'backend'} = $backends_list;
     }
 
-    $c->req->parameters->{com_data} =~ s/\n//gmx;
+    # free-text fields are interpolated into command templates; a CR/LF in any
+    # of them becomes a second, independently-prefixed external command frame
+    # after do_send_command() splits the rendered text on newlines (the
+    # bulk_send() guard runs after that split and cannot see it). Strip them
+    # the same way com_data already is.
+    for my $param (qw/com_data com_author performance_data plugin_output com_data_disable_cmd/) {
+        $c->req->parameters->{$param} =~ s/[\r\n]//gmx if defined $c->req->parameters->{$param};
+    }
 
     return;
 }
