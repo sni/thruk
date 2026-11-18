@@ -2,7 +2,7 @@
 
 This file documents the revision history for the Monitoring WebUI Thruk.
 
-next:
+3.32     Wed Nov 18 16:51:11 CET 2026
           - add Status Replay with a playable log-based host and service status timeline
           - disable the shipped administrator password on fresh installs and package upgrades;
             set a password with htpasswd /etc/thruk/htpasswd thrukadmin before login
