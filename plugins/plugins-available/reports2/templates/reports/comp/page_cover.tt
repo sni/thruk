@@ -15,7 +15,7 @@
         <div class="content">
           <div class="date">[% format_date(date.now, reportDateFormat) %]</div>
           <div>
-            <div class="title">[% subtitle %]</div>
+            <div class="title">[% subtitle | html %]</div>
             <div class="details">
               <table>
               [% WHILE coverdetails.size > 0 %]
@@ -28,7 +28,7 @@
               </table>
             </div>
             <div class="description">
-              [% r.desc %]
+              [% r.desc | html %]
             </div>
           </div>
         </div>
