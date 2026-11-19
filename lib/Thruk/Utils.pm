@@ -2377,6 +2377,12 @@ sub update_cron_file {
         $sections->{$section} = [];
         for my $entry (@{$entries}) {
             next unless $entry->[0];
+            # a CR/LF in the time entry would become a second, complete crontab
+            # line and run as the cron user, so refuse it
+            if($entry->[0] =~ m/[\r\n]/mx) {
+                _warn("refusing cron entry with a line break: %s", $entry->[0]);
+                next;
+            }
             push @{$sections->{$section}}, $entry->[0]." ".$user.$entry->[1];
         }
     }
@@ -2825,19 +2831,19 @@ sub get_cron_entries_from_param {
             # second, complete crontab entry (command execution as the cron
             # user), so it must be refused
             my %valid = (
-                'send_minute'   => qr/\A[0-9*,\/-]*\z/,
-                'send_hour'     => qr/\A[0-9*,\/-]*\z/,
-                'send_day'      => qr/\A[0-9*,\/-]*\z/,
-                'send_monthday' => qr/\A[A-Za-z0-9_]*\z/,
-                'send_cust'     => qr/\A[0-9A-Za-z*,\/-]+(?:[ \t]+[0-9A-Za-z*,\/-]+){4}\z/,
-                'week_day'      => qr/\A[0-9*,]*\z/,
+                'send_minute'   => qr{\A[0-9*,/-]*\z}mx,
+                'send_hour'     => qr{\A[0-9*,/-]*\z}mx,
+                'send_day'      => qr{\A[0-9*,/-]*\z}mx,
+                'send_monthday' => qr{\A[A-Za-z0-9_]*\z}mx,
+                'send_cust'     => qr{\A[0-9A-Za-z*,/-]+(?:[ \t]+[0-9A-Za-z*,/-]+){4}\z}mx,
+                'week_day'      => qr{\A[0-9*,]*\z}mx,
             );
             for my $field (keys %valid) {
                 my $value = $params->{$field.'_'.$x};
                 next unless defined $value;
                 for my $v (ref $value eq 'ARRAY' ? @{$value} : ($value)) {
                     next if !defined $v || $v eq '';
-                    confess("invalid schedule field $field\_$x") unless $v =~ $valid{$field};
+                    confess('invalid schedule field ' . $field . '_'.$x) unless $v =~ $valid{$field};
                 }
             }
             @weekdays = grep {!/^$/mx} @weekdays;
