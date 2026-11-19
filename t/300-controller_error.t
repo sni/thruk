@@ -5,7 +5,7 @@ use Test::More;
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 183;
+    plan tests => 185;
 }
 
 BEGIN {
@@ -25,5 +25,9 @@ for(0..25) {
     };
     TestUtils::test_page(%{$test});
 }
+
+my $url = '/thruk/cgi-bin/error.cgi?error=A%20%26%20B%20%3C%20C';
+like(request($url)->content, qr{<h1\b[^>]*>unknown error: A &amp; B &lt; C</h1>}, 'unknown error is escaped in HTML');
+is(Cpanel::JSON::XS::decode_json(request($url.'&json=1')->content)->{'message'}, 'unknown error: A & B < C', 'unknown error stays plain text in JSON');
 
 delete $ENV{'TEST_ERROR'};

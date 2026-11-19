@@ -399,6 +399,11 @@ sub index {
         }
     }
 
+    # Only the unknown-error heading includes the request's error parameter.
+    if($arg1 == 0 && !$c->stash->{'error_data'}) {
+        $c->stash->{errorMessage} = Thruk::Utils::Filter::escape_html($c->stash->{errorMessage});
+    }
+
     # going back on error pages is ok
     $c->stash->{'disable_backspace'} = 0;
 
