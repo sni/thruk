@@ -41,7 +41,7 @@
               [% IF modal %]
               <button class="w-20" onclick="closeModalWindow()">Cancel</button>
               [% ELSIF referer != "" %]
-              <a href="[% referer %]" class="button w-20">Cancel</a>
+              <a href="[% referer | html %]" class="button w-20">Cancel</a>
               [% ELSE %]
               <button class="w-20" onclick="window.history.go(-1)">Cancel</button>
               [% END %]
