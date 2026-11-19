@@ -21,7 +21,7 @@ Thruk Controller
 ##########################################################
 # REST PATH: GET /thruk/reports
 # list of reports.
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/reports?$%mx, \&_rest_get_thruk_reports);
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/reports?$%mx, \&_rest_get_thruk_reports, ['authorized_for_reports']);
 sub _rest_get_thruk_reports {
     my($c, $path_info) = @_;
     require Thruk::Utils::Reports;
@@ -37,7 +37,7 @@ sub _rest_get_thruk_reports {
 ##########################################################
 # REST PATH: POST /thruk/reports
 # create new report.
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/reports?$%mx, \&_rest_get_thruk_reports_new);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/reports?$%mx, \&_rest_get_thruk_reports_new, ['authorized_for_reports']);
 sub _rest_get_thruk_reports_new {
     my($c, $path_info) = @_;
     require Thruk::Utils::Reports;
@@ -68,7 +68,7 @@ sub _rest_get_thruk_reports_new {
 
 # REST PATH: DELETE /thruk/reports/<nr>
 # remove report for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id);
+Thruk::Controller::rest_v1::register_rest_path_v1(['GET', 'POST', 'PATCH', 'DELETE'], qr%^/thruk/reports?/(\d+)$%mx, \&_rest_get_thruk_report_by_id, ['authorized_for_reports']);
 sub _rest_get_thruk_report_by_id {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
@@ -124,7 +124,7 @@ sub _rest_get_thruk_report_by_id {
 ##########################################################
 # REST PATH: GET /thruk/reports/<nr>/report
 # return the actual report file in binary format.
-Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/reports?/(\d+)/report$%mx, \&_rest_get_thruk_report_by_id_file);
+Thruk::Controller::rest_v1::register_rest_path_v1('GET', qr%^/thruk/reports?/(\d+)/report$%mx, \&_rest_get_thruk_report_by_id_file, ['authorized_for_reports']);
 sub _rest_get_thruk_report_by_id_file {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
@@ -139,7 +139,7 @@ sub _rest_get_thruk_report_by_id_file {
 ##########################################################
 # REST PATH: POST /thruk/reports/<nr>/generate
 # generate report for given number.
-Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/reports?/(\d+)/generate$%mx, \&_rest_get_thruk_report_by_id_generate);
+Thruk::Controller::rest_v1::register_rest_path_v1('POST', qr%^/thruk/reports?/(\d+)/generate$%mx, \&_rest_get_thruk_report_by_id_generate, ['authorized_for_reports']);
 sub _rest_get_thruk_report_by_id_generate {
     my($c, $path_info, $nr) = @_;
     require Thruk::Utils::Reports;
