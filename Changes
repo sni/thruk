@@ -2,6 +2,11 @@
 
 This file documents the revision history for the Monitoring WebUI Thruk.
 
+next:
+          - Security:
+            - refuse cron schedule entries whose fields are not plain cron components (reports
+              and recurring downtimes) which could break out into a second, complete crontab entry
+
 3.32     Wed Nov 18 16:51:11 CET 2026
           - add Status Replay with a playable log-based host and service status timeline
           - disable the shipped administrator password on fresh installs and package upgrades;

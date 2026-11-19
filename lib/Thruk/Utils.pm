@@ -2819,6 +2819,27 @@ sub get_cron_entries_from_param {
         if(defined $params->{'send_type_'.$x}) {
             $params->{'week_day_'.$x} = [] unless defined $params->{'week_day_'.$x};
             my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
+            # field values reach the cron file via get_cron_time_entry() without
+            # further validation; anything that is not a plain cron component
+            # (notably CR/LF or shell metacharacters) could break out into a
+            # second, complete crontab entry (command execution as the cron
+            # user), so it must be refused
+            my %valid = (
+                'send_minute'   => qr/\A[0-9*,\/-]*\z/,
+                'send_hour'     => qr/\A[0-9*,\/-]*\z/,
+                'send_day'      => qr/\A[0-9*,\/-]*\z/,
+                'send_monthday' => qr/\A[A-Za-z0-9_]*\z/,
+                'send_cust'     => qr/\A[0-9A-Za-z*,\/-]+(?:[ \t]+[0-9A-Za-z*,\/-]+){4}\z/,
+                'week_day'      => qr/\A[0-9*,]*\z/,
+            );
+            for my $field (keys %valid) {
+                my $value = $params->{$field.'_'.$x};
+                next unless defined $value;
+                for my $v (ref $value eq 'ARRAY' ? @{$value} : ($value)) {
+                    next if !defined $v || $v eq '';
+                    confess("invalid schedule field $field\_$x") unless $v =~ $valid{$field};
+                }
+            }
             @weekdays = grep {!/^$/mx} @weekdays;
             my $type = $params->{'send_type_'.$x} || '';
             my $cust = $params->{'send_cust_'.$x} || '';

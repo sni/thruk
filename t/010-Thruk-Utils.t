@@ -15,7 +15,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 126;
+    plan tests => 127;
 
     use lib('t');
     require TestUtils;
@@ -435,6 +435,48 @@ is(scalar @{$chunks->[33]}, 1, "array_chunk_fixed_size returns fixed sized chunk
     is(Thruk::Utils::command_disabled($c, 0), 1, "0 is disabled");
     is(Thruk::Utils::command_disabled($c, 3), 1, "3 is disabled");
     is(Thruk::Utils::command_disabled($c, 5), 0, "5 is enabled");
+};
+
+#########################
+subtest 'cron entries from param validate cron fields' => sub {
+    # field values reach the cron file via get_cron_time_entry() without
+    # further validation; anything that is not a plain cron component must
+    # be refused before it can break out into a second, complete crontab
+    # entry (command execution)
+    my $params = {
+        'send_type_1'     => 'day',
+        'send_hour_1'     => '3',
+        'send_minute_1'   => '* * * * * /usr/bin/id > /tmp/x',
+        'send_cust_1'     => '0 1 * * 1',
+    };
+    my $entries = eval { Thruk::Utils::get_cron_entries_from_param($params) };
+    ok($@, 'shell metacharacters in send_minute are refused');
+    like($@, qr/send_minute_1/, 'error names the field');
+
+    $params->{'send_minute_1'} = '15'."\r\n";
+    delete $params->{'send_cust_1'};
+    $entries = eval { Thruk::Utils::get_cron_entries_from_param($params) };
+    ok($@, 'CR/LF in send_minute are refused');
+
+    $params->{'send_minute_1'} = '15';
+    $params->{'week_day_1'}    = ['1', '3;id'];
+    $entries = eval { Thruk::Utils::get_cron_entries_from_param($params) };
+    ok($@, 'shell metacharacters in week_day are refused');
+    like($@, qr/week_day_1/, 'error names the field');
+
+    my $ok_params = {
+        'send_type_1'     => 'day',
+        'send_hour_1'     => '3',
+        'send_minute_1'   => '0',
+        'week_day_1'      => ['1', '3'],
+        'send_type_2'     => 'cust',
+        'send_cust_2'     => '0 1 * * 1',
+    };
+    $entries = Thruk::Utils::get_cron_entries_from_param($ok_params);
+    is(scalar @{$entries}, 2, 'normal entries are kept');
+    is(Thruk::Utils::get_cron_time_entry($entries->[0]), " 0  3  *  *  *", 'day entry expands');
+    is(Thruk::Utils::get_cron_time_entry($entries->[1]), '0 1 * * 1', 'cust entry expands');
+    done_testing();
 };
 
 #########################
