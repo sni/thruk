@@ -3715,20 +3715,29 @@ sub get_timezone_data {
 
             # check if update already running
             # and start update in background otherwise
-            if($data->{'update_job'}) {
-                if(!Thruk::Utils::External::is_running($c, $data->{'update_job'}, 1)) {
+            # (jobs disabled/noexternalforks make External::perl return no job id)
+            my $job = $data->{'update_job'};
+            $job = undef if $job && $job !~ m%^\d{5,}$%mx;
+            if($job) {
+                if(!Thruk::Utils::External::is_running($c, $job, 1)) {
                     delete $data->{'update_job'};
                     $cache->set('timezones', $data);
                 }
             } elsif(!$force) {
                 # start update in background
-                my $job = Thruk::Utils::External::perl($c, {
+                my $newjob = Thruk::Utils::External::perl($c, {
                     expr       => ['Thruk::Utils::get_timezone_data', $c, undef, 1],
                     allow      => 'all',
                     background => 1,
                 });
-                $data->{'update_job'} = $job;
-                $cache->set('timezones', $data);
+                if(defined $newjob && $newjob =~ m%^\d{5,}$%mx) {
+                    $data->{'update_job'} = $newjob;
+                    $cache->set('timezones', $data);
+                } else {
+                    # no job was started (jobs disabled), the update ran inline
+                    # and already refreshed the cache
+                    $data = $cache->get('timezones');
+                }
             }
         }
         $timezones = $data->{'timezones'} unless $force;
