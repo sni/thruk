@@ -40,7 +40,7 @@ jobs:
           timeout_minutes: 40
           retry_wait_seconds: 180
           command: |
-            timeout -v 10m sudo bash -x ./.ci/prepare_machine.sh
+            timeout -v 20m sudo bash -x ./.ci/prepare_machine.sh
 
       - name: install dependencies
         uses: nick-fields/retry@v4
@@ -50,7 +50,7 @@ jobs:
           retry_wait_seconds: 180
           command: |
             chmod o+x /home/runner/
-            timeout -v 10m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
+            timeout -v 20m sudo su naemon -c 'bash -x ./.ci/install_deps.sh'
 
       - name: install puppeteer
         uses: nick-fields/retry@v4
