@@ -269,7 +269,7 @@ socket instead of TCP, provide the socket directory as the host:
 
 #### Differences from the MySQL Provider
 
-::: note
+::: info
 
 - **Bulk imports**: MySQL uses `LOAD DATA LOCAL INFILE` for fast bulk inserts.
   PostgreSQL falls back to extended INSERT statements. For very large initial
