@@ -274,10 +274,19 @@ sub get_logs {
 
     # check logcache version
     my $table_status = $self->_quote_table($prefix.'_status');
-    my @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    my @versions;
+    eval {
+        @versions = @{$dbh->selectcol_arrayref('SELECT value FROM '.$table_status.' WHERE status_id = 4 LIMIT 1')};
+    };
+    if($@ or scalar @versions < 1) {
+        # no (valid) status table, a failed statement leaves the transaction
+        # aborted on postgres, roll it back first
+        eval { $dbh->rollback; };
+        return;
+    }
     my $cache_ver = $self->cache_version();
-    if(scalar @versions < 1 || $versions[0] != $cache_ver) {
-        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0] // '0'));
+    if($versions[0] != $cache_ver) {
+        confess(sprintf("Logcache too old, required version %s but got %s. Run 'thruk logcache update' to upgrade.", $cache_ver, $versions[0]));
     }
 
     # check compact timerange and set a warning flag
