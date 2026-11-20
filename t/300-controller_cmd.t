@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2123;
+    plan tests => 2124;
 }
 
 BEGIN {
@@ -58,6 +58,36 @@ subtest 'bulk commands cannot contain additional command frames' => sub {
     ok(Thruk::Controller::cmd::bulk_send($c, { first => $commands }), 'allow trailing newline, separate commands and literal backslash-n');
     is_deeply(\@sent, [['first', $commands]], 'preserve valid command entries');
     ok(!defined $c->stash->{'last_command_error'}, 'clear previous error for a valid batch');
+    done_testing();
+};
+
+# regression: a CR/LF in an object-name field becomes a second, independently framed
+# command after do_send_command() splits the rendered text - the guard must reject
+subtest 'object-name fields with embedded CR/LF are rejected, not split into a second command frame' => sub {
+    local $c->{session} = { fake => 1 };
+
+    my $params = $c->req->parameters;
+    my $saved  = { %{$params} };
+    my $restore = sub { %{$params} = %{$saved}; };
+
+    # real command numbers whose templates interpolate the field without other required fields
+    my %cmd_typ = ( host => '26', service => '30', hostgroup => '63', servicegroup => '109' );
+    for my $field (qw/host service hostgroup servicegroup/) {
+        for my $sep ("\n", "\r", "\r\n") {
+            delete $c->stash->{'form_errors'};
+            $c->stash->{'last_command_error'} = 'previous error';
+            %{$params} = ( cmd_typ => $cmd_typ{$field}, com_author => 'test', host => 'mon1', service => 'svc1',
+                           $field => "mon1".$sep."DISABLE_NOTIFICATIONS" );
+            Thruk::Controller::cmd::do_send_command($c);
+            # no command frame may be queued, whatever the return value is
+            my @queued = map { @{$_} } values %{$c->stash->{'commands2send'} // {}};
+            is(scalar @queued, 0, "$field: no command queued");
+            is($c->stash->{'last_command_error'}, 'previous error', "$field rejected before any send was attempted");
+            my $msg = ($c->stash->{'form_errors'}->[0] // {})->{'message'} // '';
+            like($msg, qr/^\Q$field\E contains invalid CR\/LF characters$/m, "$field error recorded for the right field");
+        }
+    }
+    $restore->();
     done_testing();
 };
 

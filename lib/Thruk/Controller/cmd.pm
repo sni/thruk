@@ -684,8 +684,14 @@ sub do_send_command {
     }
 
     # apply extra escapes, required since naemon-livestatus >= 1.4.0
-    for my $key (qw/host service/) {
+    # object names land in the rendered command which is split on newlines;
+    # a CR/LF becomes a second, independently framed command - reject it
+    for my $key (qw/host service hostgroup servicegroup/) {
         next unless defined $c->req->parameters->{$key};
+        if($c->req->parameters->{$key} =~ m/[\r\n]/mx) {
+            $c->stash->{'form_errors'} = [ { message => $key.' contains invalid CR/LF characters' } ];
+            return;
+        }
         $c->req->parameters->{$key} = _escape_obj_slashes($c->req->parameters->{$key});
     }
 
