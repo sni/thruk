@@ -1699,6 +1699,18 @@ graph_replace = s/\s//gmx
 graph_replace = s/[^\w\-]/_/gmx
 ```
 
+### spannulls_multiplier
+
+spannulls_multiplier is the factor used to calculate the spannulls value for
+histou graph urls: `check_interval * interval_length * spannulls_multiplier`.
+Default is 2.5.
+
+ex.:
+
+```apache
+spannulls_multiplier = 3
+```
+
 ### http_backend_reverse_proxy
 
 The http_backend_reverse_proxy will proxy requests for pnp or grafana action_urls via the

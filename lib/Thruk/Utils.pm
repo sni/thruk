@@ -4499,7 +4499,8 @@ sub _enhance_histou_url {
 
     if($obj->{'check_interval'}) {
         my $interval_length = $c->stash->{'pi_detail'}->{$obj->{'peer_key'}}->{'interval_length'} // 60;
-        $url = $url.'&spannulls='.($obj->{'check_interval'} * $interval_length * 2);
+        my $spannulls_multiplier = $c->config->{'spannulls_multiplier'} // 2.5;
+        $url = $url.'&spannulls='.($obj->{'check_interval'} * $interval_length * $spannulls_multiplier);
     }
 
     $url = $url.'&hideLogo=1';

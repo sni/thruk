@@ -13,6 +13,8 @@ next:
               which were reachable by any authenticated user
             - refuse cron entries carrying a line break, a second, independent crontab line
               could be smuggled in via the report send_types API
+          - Graphs:
+            - add new option 'spannulls_multiplier' which controls the parameter for histou graphs
 
 3.32     Wed Nov 18 16:51:11 CET 2026
           - add Status Replay with a playable log-based host and service status timeline
