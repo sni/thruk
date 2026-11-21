@@ -56,7 +56,7 @@
         [% END %]
       [% END %]
       <td class='text-center'>[% date_format(c, com.entry_time) %]</td>
-      <td >[% com.author %]</td>
+      <td >[% com.author | html %]</td>
       <td class='whitespace-nowrap truncate w-1/2 max-w-xs'>[% IF escape_html_tags %][% escape_html(com.comment) | replace_links %][% ELSE %][% com.comment | replace_links %][% END %]</td>
       <td class='text-center'>[% com.id %]</td>
       <td class='text-center'>[% IF com.persistent %]Yes[% ELSE %]No[% END %]</td>

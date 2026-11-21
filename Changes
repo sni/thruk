@@ -4,6 +4,8 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape the comment author in the comments table (stored XSS via unescaped
+              com_author, GHSA-69wg-g5h9-ghjg, reported by @maxtli)
             - refuse cron schedule entries whose fields are not plain cron components (reports
               and recurring downtimes) which could break out into a second, complete crontab entry
             - escape the error parameter and the referer of the command form in the rendered
