@@ -4,6 +4,9 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape the author and comment text in the panorama comments grid (stored XSS via
+              unescaped comment/author rendered as HTML by the ExtJS grid cell, GHSA-wm48-j98q-3x77,
+              reported by @grapealbacore)
             - escape performance profile names and debug hints in the generated profile HTML
               (stored XSS via unescaped report_from_url URL labels, GHSA-ww3m-8p89-562g,
               reported by @grapealbacore)
