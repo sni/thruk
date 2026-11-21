@@ -1389,14 +1389,19 @@ sub _authorize_raw_query {
                 next;
             }
 
-            if($q =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
-                my $cmd_name = lc($1);
-                my $cmd_args = [split(/;/mx, $2)];
-                next if _authorize_command($c, $cmd_name, $cmd_args);
+            # every line of a command query is executed as its own request by
+            # the backend, so every COMMAND line has to be authorized
+            for my $line (split(/\n/mx, $q)) {
+                next unless $line =~ m/^COMMAND/mx;
+                if($line =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
+                    my $cmd_name = lc($1);
+                    my $cmd_args = [split(/;/mx, $2)];
+                    next if _authorize_command($c, $cmd_name, $cmd_args);
+                }
+                _warn(sprintf("rejected query command for user %s: %s", $c->user->{'username'}, $line));
+                return("permission denied - sending this command requires admin permissions.");
             }
-
-            _warn(sprintf("rejected query command for user %s: %s", $c->user->{'username'}, $q));
-            return("permission denied - sending this command requires admin permissions.");
+            next;
         }
 
         _warn(sprintf("rejected unknown query for user %s: %s", $c->user->{'username'}, $q));
@@ -1414,12 +1419,17 @@ sub _authorize_send_command {
     my %args = @{$opt->{'args'}};
     my $queries = _extract_queries($args{'command'});
     for my $q (@{$queries}) {
-        if($q =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
-            my $cmd_name = lc($1);
-            my $cmd_args = [split(/;/mx, $2)];
-            next if _authorize_command($c, $cmd_name, $cmd_args);
+        # every line of a command query is executed as its own request by the
+        # backend, so every line has to be authorized, not just the first one
+        for my $line (split(/\n/mx, $q)) {
+            next if $line =~ m/^\s*$/mx;
+            if($line =~ m/^COMMAND\s+\[\d+\]\s([A-Z_]+);?(.*)/mx) {
+                my $cmd_name = lc($1);
+                my $cmd_args = [split(/;/mx, $2)];
+                next if _authorize_command($c, $cmd_name, $cmd_args);
+            }
+            return("permission denied - sending this command requires admin permissions.");
         }
-        return("permission denied - sending this command requires admin permissions.");
     }
     return;
 }
