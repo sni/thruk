@@ -26,7 +26,7 @@ START=$5
 END=$6
 PNPURL=$7
 TEMPFILE=$8
-SOURCE=$9
+export SOURCE=$9
 
 if [ "$PNPURL" != "" ]; then
   PNPURL="$PNP_URL_PREFIX$PNPURL"
@@ -43,7 +43,7 @@ if [ "${PNPURL:0:5}" != "http:" -a "${PNPURL:0:6}" != "https:" ]; then
 
   # translate non-numeric source
   if ! [[ $SOURCE =~ ^[0-9]+$ ]]; then
-    SOURCENR=$(php $PNP_INDEX "$JSON_URI" | perl -MCpanel::JSON::XS -ne '$data = decode_json($_); my @matches = grep { $data->[$_]->{"ds_name"} eq "'$SOURCE'" } 0..$#$data; print $matches[0]')
+    SOURCENR=$(php $PNP_INDEX "$JSON_URI" | perl -MCpanel::JSON::XS -ne '$data = decode_json($_); my @matches = grep { $data->[$_]->{"ds_name"} eq $ENV{SOURCE} } 0..$#$data; print $matches[0]')
     if [ "$SOURCENR" != "" ]; then
       SOURCE=$SOURCENR
     fi
@@ -54,7 +54,7 @@ if [ "${PNPURL:0:5}" != "http:" -a "${PNPURL:0:6}" != "https:" ]; then
 else
   # translate non-numeric source
   if ! [[ $SOURCE =~ ^[0-9]+$ ]]; then
-    SOURCENR=$($PNP_GET "$PNPURL/$JSON_URI" | perl -MCpanel::JSON::XS -ne '$data = decode_json($_); my @matches = grep { $data->[$_]->{"ds_name"} eq "'$SOURCE'" } 0..$#$data; print $matches[0]')
+    SOURCENR=$($PNP_GET "$PNPURL/$JSON_URI" | perl -MCpanel::JSON::XS -ne '$data = decode_json($_); my @matches = grep { $data->[$_]->{"ds_name"} eq $ENV{SOURCE} } 0..$#$data; print $matches[0]')
     if [ "$SOURCENR" != "" ]; then
       SOURCE=$SOURCENR
     fi
