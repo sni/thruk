@@ -2440,6 +2440,7 @@ t/113-thruk_utils_auth.t
 t/114-thruk_utils_filter_custom_vars.t
 t/115-thruk_utils_custom_vars.t
 t/120-ssi-includes.t
+t/130-Thruk-Stats-escape.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t
@@ -2561,8 +2562,8 @@ t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
 t/data/user_overrides/thruk.conf
 t/helper/create_test_logs
-t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab
 t/perlcriticrc
+t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab
 t/test_request
 t/TestUtils.pm
 t/timed_test.sh
@@ -2871,8 +2872,8 @@ themes/themes-available/Light/images/logo.svg
 themes/themes-available/Light/images/logo_thruk.png
 themes/themes-available/Light/images/logo_thruk_small.png
 themes/themes-available/Light/images/logo_thruk_small_icon.png
-themes/themes-available/Light/images/thruk.svg
 themes/themes-available/Light/images/README.md
+themes/themes-available/Light/images/thruk.svg
 themes/themes-available/Light/src/Light.css
 themes/themes-available/Light/stylesheets/Light.css
 themes/themes-enabled/Dark

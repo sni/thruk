@@ -249,14 +249,20 @@ sub _format_html_row {
     elsif($name eq 'total time waited on rendering')  { $legend = '<div class="legend" style="background: var(--stats-time-view);"></div>'; }
     elsif($name eq 'total time waited on controller') { $legend = '<div class="legend" style="background: var(--stats-time-controller);"></div>'; }
     elsif($name =~ /^total\ time\ /mx) { $name_style = "margin-left: 5px"; $name_prefix = " &bull; "; }
+    # profile names (and hints) are attacker-influenced via report_from_url URLs;
+    # encode them before interpolating into generated HTML (GHSA-ww3m-8p89-562g)
+    require Thruk::Utils::Filter;
+    my $html_escape = \&Thruk::Utils::Filter::html_escape;
+    $title = $html_escape->($title);
+    $name  = $html_escape->($name);
     if(defined $row->{'debug_hint'}) {
-        $legend .= "<span class='textHINTsoft'>".$row->{'debug_hint'}."</span>";
+        $legend .= "<span class='textHINTsoft'>".$html_escape->($row->{'debug_hint'})."</span>";
     }
     $output .= "<td class='whitespace-pre ".$name_style." ".($onclick ? ' clickable ' : '').($bold ? ' font-bold ' : '')."' "
                     .$onclick
                     .($title ne $name ? " title='$title'" : "")
                 .">"
-            .'<div class="flexrow gap-x-1 justify-between"'.($row->{'debug_hint_title'} ? " title='".$row->{'debug_hint_title'}."'" : "").'>'
+            .'<div class="flexrow gap-x-1 justify-between"'.(defined $row->{'debug_hint_title'} && $row->{'debug_hint_title'} ne '' ? " title='".$html_escape->($row->{'debug_hint_title'})."'" : "").'>'
               .$name_prefix
               .$name
               .$legend
