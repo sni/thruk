@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2124;
+    plan tests => 2126;
 }
 
 BEGIN {
@@ -88,6 +88,54 @@ subtest 'object-name fields with embedded CR/LF are rejected, not split into a s
         }
     }
     $restore->();
+    done_testing();
+};
+
+# regression: the expire-ack branch appends the raw end_time (or expire_time
+# copied into it) to com_data after the strip, so a CR/LF in a date field
+# becomes a second, independently framed command
+subtest 'expire-ack date fields with embedded CR/LF are rejected, not split into a second command frame' => sub {
+    local $c->{session} = { fake => 1 };
+
+    my $params = $c->req->parameters;
+    my $saved  = { %{$params} };
+    my $restore = sub { %{$params} = %{$saved}; };
+
+    for my $field (qw/end_time expire_time/) {
+        for my $sep ("\n", "\r", "\r\n") {
+            delete $c->stash->{'form_errors'};
+            $c->stash->{'last_command_error'} = 'previous error';
+            %{$params} = ( cmd_typ => '33', com_author => 'test', host => 'mon1', use_expire => 1,
+                           com_data => 'ack', $field => "2026-11-20 10:00:00".$sep."DISABLE_NOTIFICATIONS" );
+            Thruk::Controller::cmd::do_send_command($c);
+            # no command frame may be queued, whatever the return value is
+            my @queued = map { @{$_} } values %{$c->stash->{'commands2send'} // {}};
+            is(scalar @queued, 0, "$field: no command queued");
+            is($c->stash->{'last_command_error'}, 'previous error', "$field rejected before any send was attempted");
+            my $msg = ($c->stash->{'form_errors'}->[0] // {})->{'message'} // '';
+            like($msg, qr/^\Q$field\E contains invalid CR\/LF characters$/m, "$field error recorded for the right field");
+        }
+    }
+    $restore->();
+    done_testing();
+};
+
+# regression: the CLI send_command action authorizes only the first line of a
+# query, while the backend executes every COMMAND line as its own request
+subtest 'cli send_command authorizes every command line of a query' => sub {
+    require Thruk::Utils::CLI;
+    my $c      = TestUtils::get_c();
+    my $denied = 'permission denied - sending this command requires admin permissions.';
+    no warnings 'redefine';
+    local *Thruk::Utils::CLI::_authorize_command = sub {
+        my(undef, $cmd_name) = @_;
+        return($cmd_name eq 'disable_host_check') ? 1 : undef;
+    };
+    my $one = 'COMMAND [1] DISABLE_HOST_CHECK;mon1';
+    my $two = "COMMAND [1] DISABLE_HOST_CHECK;mon1\nCOMMAND [1] DISABLE_NOTIFICATIONS";
+    is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', $two] }), $denied, 'the second COMMAND line is authorized too');
+    is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', $one] }), undef, 'a single permitted command line still passes');
+    is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', "COMMAND [1] DISABLE_NOTIFICATIONS\n".$one] }), $denied, 'a forbidden first line is refused');
     done_testing();
 };
 

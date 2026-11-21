@@ -683,6 +683,18 @@ sub do_send_command {
         return $c->detach('/error/index/12');
     }
 
+    # the expire-ack branch appends the raw end_time (or expire_time copied
+    # into it) to com_data after _set_request_param_defaults() stripped the
+    # free-text fields; the rendered line is split on newlines as well, so a
+    # CR/LF in a date field becomes a second, independently framed command
+    for my $key (qw/end_time expire_time/) {
+        next unless defined $c->req->parameters->{$key};
+        if($c->req->parameters->{$key} =~ m/[\r\n]/mx) {
+            $c->stash->{'form_errors'} = [ { message => $key.' contains invalid CR/LF characters' } ];
+            return;
+        }
+    }
+
     # apply extra escapes, required since naemon-livestatus >= 1.4.0
     # object names land in the rendered command which is split on newlines;
     # a CR/LF becomes a second, independently framed command - reject it
