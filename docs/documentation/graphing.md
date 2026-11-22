@@ -26,10 +26,9 @@ define service {
 }
 ```
 
-This legacy popup example requires `escape_action_url_html = 0` in
-`thruk_local.conf` so the embedded `class` and `rel` become HTML attributes.
-Only use this setting if you trust all host and service action URLs, including
-their expanded macros. Plain graph links do not require it.
+The stock OMD `host-pnp` and `srv-pnp` templates work with
+`escape_action_url_html = 1`. Thruk recognizes the matching graph and popup
+URLs and generates the `tips` class and `rel` URL used by the PNP hover SSI.
 
 ::: tip templates
 Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right action_url automatically.

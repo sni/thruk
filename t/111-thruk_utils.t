@@ -8,10 +8,11 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 15;
+plan tests => 16;
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Filter');
+use_ok('Thruk::Views::ToolkitRenderer');
 
 ################################################################################
 
@@ -44,6 +45,16 @@ subtest 'host action and notes link HTML' => sub {
         unlike($link, qr/O'Brien/, 'quotes escaped in graph and popup URLs');
         like($link, qr/' class='histou_tips' rel='/, 'generated popup attributes preserved');
     }
+    my $base = '/mon/pnp4nagios/index.php';
+    for my $service ('_HOST_', "Disk O'Brien+") {
+        my $query = "?host=server&srv=$service";
+        $host->{action_url_expanded} = "$base/graph$query' class='tips' rel='$base/popup$query";
+        my $srv = $service eq '_HOST_' ? '_HOST_' : 'Disk%20O%27Brien%2B';
+        my $attrs = "href='$base/graph?host=server&amp;srv=$srv&amp;theme=smoothness' class='tips' rel='$base/popup?host=server&amp;srv=$srv'";
+        like($render->(), qr/\Q$attrs\E/, "stock PNP graph and SSI popup for $service");
+    }
+    $host->{action_url_expanded} .= "' title='other";
+    unlike($render->(), qr/' class='tips' rel='/, 'extra backend attributes are not recognized as a stock popup');
 };
 $c->db->{'sections_depth'} = 0; # avoid some warnings
 my $backends = ["abcd", "1234"];

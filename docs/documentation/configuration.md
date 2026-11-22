@@ -1635,8 +1635,8 @@ default_state_order = down, unreachable, \
 ### escape_action_url_html
 
 Defaults to `1`. HTML-escape host and service action URLs when rendering links.
-Set to `0` only if trusted action URLs intentionally supply HTML attributes,
-for example for legacy PNP4Nagios popups.
+The stock OMD PNP4Nagios popup format is supported. Set to `0` only if
+trusted action URLs require other embedded HTML attributes.
 
 ### escape_notes_url_html
 

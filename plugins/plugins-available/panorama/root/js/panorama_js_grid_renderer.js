@@ -298,7 +298,7 @@ TP.render_host_icons = function(v, td, item, row, col, store, view, data) {
     if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" style="font-size:16px; line-height: 18px;" title="This host problem has been acknowledged"><\/i>'; }
     if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" style="font-size:16px; line-height: 18px;" title="This host has '+d.comments.length+' comments associated with it" onclick="return(host_comments_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
     if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" style="font-size:16px; line-height: 18px;" title="This host is currently in a period of scheduled downtime" onclick="return(host_downtimes_popup(\''+d.name+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+TP.url_attribute(d.action_url_expanded, escape_action_url_html)+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
+    if(d.action_url_expanded )              { icons += "<a href='"+TP.action_url_attribute(d.action_url_expanded)+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
     if(d.notes_url_expanded )               { icons += "<a href='"+TP.url_attribute(d.notes_url_expanded, escape_notes_url_html)+"' target='_blank' title='View Extra Host Notes'><i class='fa-solid fa-clipboard' style='font-size:16px; line-height: 18px;'><\/i><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu;
@@ -339,7 +339,7 @@ TP.render_service_icons = function(v, td, item, row, col, store, view, data) {
     if(d.acknowledged)                      { icons += '<i class="fa-solid fa-person-digging" style="font-size:16px; line-height: 18px;" title="This service problem has been acknowledged"><\/i>'; }
     if(d.comments && d.comments.length > 0) { icons += '<i class="fa-solid fa-comment clickable" style="font-size:16px; line-height: 18px;" title="This service has '+d.comments.length+' comments associated with it" onclick="return(service_comments_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
     if(d.scheduled_downtime_depth > 0)      { icons += '<i class="fa-solid fa-moon clickable" style="font-size:16px; line-height: 18px;" title="This service is currently in a period of scheduled downtime" onclick="return(service_downtimes_popup(\''+d.host_name+'\', \''+d.description+'\', \''+((item && item.raw) ? item.raw.peer_key : '')+'\'))"><\/i>'; }
-    if(d.action_url_expanded )              { icons += "<a href='"+TP.url_attribute(d.action_url_expanded, escape_action_url_html)+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
+    if(d.action_url_expanded )              { icons += "<a href='"+TP.action_url_attribute(d.action_url_expanded)+"' target='_blank'><i class='fa-solid fa-chart-line clickable' style='font-size:16px; line-height: 18px;' title='Show Performance Chart'><\/i><\/a>"; }
     if(d.notes_url_expanded )               { icons += "<a href='"+TP.url_attribute(d.notes_url_expanded, escape_notes_url_html)+"' style='font-size:16px; line-height: 18px;' target='_blank' title='View Extra Service Notes'><i class='fa-solid fa-clipboard'><\/i><\/a>"; }
     if(d.icon_image_expanded )              { icons += "<img src='"+logo_path_prefix+d.icon_image_expanded+"' border='0' width='20' height='20' alt='"+d.icon_image_alt+"' title='"+d.icon_image_alt+"'>"; }
     var action_menu = d.THRUK_ACTION_MENU || (item && item.raw) ? item.raw.THRUK_ACTION_MENU : null;
@@ -392,9 +392,21 @@ TP.url_attribute = function(url, escape) {
 }
 
 /* render action url */
+TP.action_url_attribute = function(url) {
+    if (escape_action_url_html) {
+        // Panorama grids do not load the status/extinfo popup SSI; keep the graph link.
+        var pnp = url.match(/^(\/(?:[\w-]+\/)?pnp(?:4nagios)?\/index\.php)\/graph\?host=(.*?)&srv=(.*?)' class='tips' rel='\1\/popup\?host=\2&srv=\3$/);
+        if (pnp) {
+            var param = function(value) { return encodeURIComponent(value).replace(/%25(?=[0-9a-f]{2})/gi, '%'); };
+            url = pnp[1]+'/graph?host='+param(pnp[2])+'&srv='+param(pnp[3]);
+        }
+    }
+    return TP.url_attribute(url, escape_action_url_html);
+}
+
 TP.render_action_url = function(v, td, item, row, col, store, view) {
     if (v) {
-        return "<a href='"+TP.url_attribute(v, escape_action_url_html)+"' target='_blank' title='Perform Extra Actions'><i class='fa-solid fa-chart-line'><\/i><\/a>";
+        return "<a href='"+TP.action_url_attribute(v)+"' target='_blank' title='Perform Extra Actions'><i class='fa-solid fa-chart-line'><\/i><\/a>";
     } else {
         return "";
     }

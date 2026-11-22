@@ -2088,6 +2088,10 @@ sub get_action_url {
 
     my $escape_html = $escape_fun == 2 && $c->config->{'escape_action_url_html'};
     if($action_url =~ m/\/pnp(|4nagios)\//mx) {
+        if($escape_html) {
+            my $link = pnp_popup_link($action_url);
+            return $link if defined $link;
+        }
         # add theme
         if($action_url !~ m/theme=/mx) {
             $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
@@ -2165,6 +2169,27 @@ sub get_action_url {
 }
 
 ########################################
+
+=head2 pnp_popup_link
+
+Render the stock OMD PNP action link, or return undef for other formats.
+
+=cut
+
+sub pnp_popup_link {
+    my($url) = @_;
+    return unless $url =~ m{
+        \A((?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?host=([^\r\n]*?)&srv=([^\r\n]*?)
+        '[ ]class='tips'[ ]rel='\1/popup\?host=\2&srv=\3\z
+    }mx;
+    my ($base, $host, $service) = ($1, $2, $3);
+    # The stock SSI reads rel from the DOM and embeds it in iframe HTML.
+    require URI::Escape;
+    my $query = '?host='.URI::Escape::uri_escape_utf8($host, '^A-Za-z0-9._~%\-')
+               .'&amp;srv='.URI::Escape::uri_escape_utf8($service, '^A-Za-z0-9._~%\-');
+    return $base.'/graph'.$query."&amp;theme=smoothness' class='tips' rel='".$base.'/popup'.$query;
+}
+
 sub _replace_url_spaces {
     my($pre, $txt, $post) = @_;
 
