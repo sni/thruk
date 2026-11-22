@@ -2443,6 +2443,7 @@ t/115-thruk_utils_custom_vars.t
 t/120-ssi-includes.t
 t/130-Thruk-Stats-escape.t
 t/140-panorama_tooltip_xss.t
+t/141-avail_outages_xss.t
 t/150-config-sitepanel.t
 t/200-view_Excel.t
 t/200-view_GD.t

@@ -4,6 +4,10 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape the plugin output of outage rows in the availability outage report
+              (avail.cgi?outages=1) by default (stored XSS via unescaped log_line_plugin_output
+              rendered into the outage table cell, GHSA-7qph-3mcp-cvqw, reported by @gargantuanapple).
+              For trusted setups that rely on HTML in plugin output, set escape_html_tags to 0.
             - escape host names and service descriptions in the panorama icon tooltip details
               (stored XSS via status.cgi JSON metadata concatenated unescaped into the ExtJS
               tooltip HTML sink, GHSA-j445-m9r7-q45g, reported by @gargantuanapple)

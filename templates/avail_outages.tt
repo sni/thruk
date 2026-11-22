@@ -126,7 +126,7 @@
           <td>[% duration(l.duration) %]</td>
         [% END %]
         <td class="[% l.class.upper | html %]">[% l.type %]</td>
-        <td class="truncate max-w-[600px]">[% log_line_plugin_output(l) %]</td>
+        <td class="truncate max-w-[600px]">[% IF escape_html_tags %][% escape_html(log_line_plugin_output(l)) %][% ELSE %][% log_line_plugin_output(l) %][% END %]</td>
         <td>
           <a href="showlog.cgi?host=[% l.host | uri %][% IF l.exists('service') %]&amp;service=[% l.service | uri %][% END %]&amp;start=[% l.start | uri %]&amp;end=[% IF l.end %][% l.end | uri %][% ELSE %][% date.now %][% END %][% add_request_backend %]">
             <i class="fa-solid fa-magnifying-glass-arrow-right" title='Show Logfiles'></i>
