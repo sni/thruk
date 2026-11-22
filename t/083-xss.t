@@ -40,7 +40,6 @@ my $whitelist_regex = [
     qr/^\w+\.(id|nr)$/,
     qr/^\w+\.href$/,
     qr/^\w+\.peer_key$/,
-    qr/^\w+\.target$/,
     qr/^\w+\.width$/,
     qr/^\w+\.height$/,
     qr/^\w+\.notes_url$/,
