@@ -525,6 +525,25 @@ sub uri_with {
 
 ########################################
 
+=head2 is_safe_bookmark_url
+
+  is_safe_bookmark_url($url)
+
+returns 1 if the url does not use an executable url scheme
+(javascript:, data:, vbscript:, file:), 0 otherwise.
+
+=cut
+sub is_safe_bookmark_url {
+    my($url) = @_;
+    # browsers trim leading whitespace before the scheme, so match after any
+    # leading whitespace; scheme comparison is case-insensitive
+    return 0 if defined $url and $url =~ m/^\s*(?:javascript|data|vbscript|file):/imx;
+    return 1;
+}
+
+
+########################################
+
 =head2 as_url_arg
 
   as_url_arg($str)

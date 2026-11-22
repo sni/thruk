@@ -41,6 +41,10 @@ next:
               which were reachable by any authenticated user
             - refuse cron entries carrying a line break, a second, independent crontab line
               could be smuggled in via the report send_types API
+             - refuse bookmarks with executable url schemes (javascript:, data:, vbscript:,
+               file:) which could be stored via the status.cgi bookmark form and rendered as
+               a script-capable navigation link in the side menu of other viewers
+               (stored XSS, GHSA-w5pf-vr4p-h335, reported by @garbleartistry)
           - Graphs:
             - add new option 'spannulls_multiplier' which controls the parameter for histou graphs
 

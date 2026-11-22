@@ -1611,6 +1611,9 @@ sub _process_bookmarks {
     my $keepp = {};
     if(    defined $newname   and $newname  ne ''
        and defined $bookmark  and $bookmark ne ''
+       # executable url schemes would enable stored xss in the navigation of
+       # other viewers (public bookmarks, GHSA-w5pf-vr4p-h335)
+       and Thruk::Utils::Filter::is_safe_bookmark_url($bookmark)
        and defined $section   and $section  ne ''
        and (    ( defined $button and $button eq 'add bookmark' )
              or ( defined $save   and $save   eq 'save changes' )
