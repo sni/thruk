@@ -4,6 +4,9 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape host names and service descriptions in the panorama icon tooltip details
+              (stored XSS via status.cgi JSON metadata concatenated unescaped into the ExtJS
+              tooltip HTML sink, GHSA-j445-m9r7-q45g, reported by @gargantuanapple)
             - escape host and service action and notes links by default. For trusted legacy
               popup attributes, set escape_action_url_html or escape_notes_url_html to 0.
             - escape host and service notes on the extinfo pages by default (stored XSS via

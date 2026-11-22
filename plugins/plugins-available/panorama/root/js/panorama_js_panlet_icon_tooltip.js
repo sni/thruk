@@ -441,6 +441,11 @@ TP.renderTipDetails = function(data) {
     if(TP.iconTip == undefined) { return; }
     if(TP.iconTip.panel == undefined) { return; }
     var panel      = TP.iconTip.panel;
+    // host names, service descriptions and display names come from the
+    // monitoring backend and must not be interpreted as HTML (stored XSS,
+    // GHSA-j445-m9r7-q45g); plugin_output is intentionally kept as HTML,
+    // like on the status detail pages
+    var _esc = function(v) { return v == undefined || v == null ? '' : Ext.String.htmlEncode(v); };
     var details    = '';
     var num_shown  = 0;
     if(panel.xdata.general.incl_hst || panel.iconType == 'host') {
@@ -467,7 +472,7 @@ TP.renderTipDetails = function(data) {
             var icons = TP.render_host_icons({}, {}, {}, {}, {}, {}, {}, host_object);
             var statename = TP.render_host_status(d[prefix+'state'], {}, {data:host_object});
             var detail  = '<tr>';
-            detail += '<td class="host"><table class="icons"><tr><td>'+d[prefix+'name']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
+            detail += '<td class="host"><table class="icons"><tr><td>'+_esc(d[prefix+'name'])+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             detail += '<td class="state '+statename.toUpperCase()+'"><div class="extinfostate">'+statename.toUpperCase()+'<\/div><\/td>';
             detail += '<td class="plugin_output">'+d[prefix+'plugin_output']+'<\/td>';
             detail += '<\/tr>';
@@ -508,11 +513,11 @@ TP.renderTipDetails = function(data) {
             var statename = TP.render_service_status(d['state'], {}, {data:d});
             details += '<tr>';
             if(last_host != d['host_name']) {
-                details += '<td class="host svchost">'+d['host_name']+'<\/td>';
+                details += '<td class="host svchost">'+_esc(d['host_name'])+'<\/td>';
             } else {
                 details += '<td class="emptyhost"><\/td>';
             }
-            details += '<td class="descr"><table class="icons"><tr><td>'+d['description']+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
+            details += '<td class="descr"><table class="icons"><tr><td>'+_esc(d['description'])+'<\/td><td class="icons">'+icons+'<\/td><\/tr><\/table><\/td>';
             details += '<td class="state '+statename.toUpperCase()+'"><div class="extinfostate">'+statename.toUpperCase()+'<\/div><\/td>';
             details += '<td class="plugin_output">'+d['plugin_output']+'<\/td>';
             details += '<\/tr>';
