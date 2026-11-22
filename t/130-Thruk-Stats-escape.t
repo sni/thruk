@@ -8,6 +8,7 @@ use warnings;
 use strict;
 use Test::More;
 
+use Thruk::Base ();
 use Thruk::Stats ();
 
 my $url = 'https://attacker.test/p?x=<svg/onload=PROFILE_MARKER>&y=1" onmouseover=alert(1)>';
