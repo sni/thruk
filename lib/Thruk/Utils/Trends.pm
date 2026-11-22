@@ -472,12 +472,15 @@ sub _draw_states {
                 "end_human"          => POSIX::strftime($c->config->{'datetime_format_trends'}, localtime($log->{'end'})),
                 "start"              => $log->{'start'},
                 "end"                => $log->{'end'},
-                "plugin_output"      => Thruk::Utils::Filter::log_line_plugin_output($log),
+                # plugin output is assigned to innerHTML in trends_report.tt; escape
+                # it so the default (escape_html_tags) branch renders it as text.
+                # the opt-out branch there runs html_entity_decode() to restore html.
+                "plugin_output"      => Thruk::Utils::Filter::escape_html(Thruk::Utils::Filter::log_line_plugin_output($log)),
 
                 "t1"                 => $t1,
                 "t2"                 => $t2,
 
-                "real_plugin_output" => $plugin_output,
+                "real_plugin_output" => Thruk::Utils::Filter::escape_html($plugin_output),
 
                 "duration"           => Thruk::Utils::Filter::duration($log->{'end'} - $log->{'start'}),
             };

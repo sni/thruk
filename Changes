@@ -8,6 +8,11 @@ next:
               (avail.cgi?outages=1) by default (stored XSS via unescaped log_line_plugin_output
               rendered into the outage table cell, GHSA-7qph-3mcp-cvqw, reported by @gargantuanapple).
               For trusted setups that rely on HTML in plugin output, set escape_html_tags to 0.
+            - escape the plugin output of SLA outage rows in the reports2 SLA report templates
+              (stored XSS via unescaped log_line_plugin_output rendered into the output div)
+            - html-escape the plugin output stored in the trends image_map so the trends detail
+              popup (client-side innerHTML) renders it as text by default; the escape_html_tags=0
+              opt-out still renders it as HTML
             - escape host names and service descriptions in the panorama icon tooltip details
               (stored XSS via status.cgi JSON metadata concatenated unescaped into the ExtJS
               tooltip HTML sink, GHSA-j445-m9r7-q45g, reported by @gargantuanapple)
