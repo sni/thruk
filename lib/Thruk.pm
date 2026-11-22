@@ -546,9 +546,10 @@ sub cache {
 sub _check_exit_reason {
     my($sig) = @_;
 
-    if($sig eq 'TERM' || $sig eq 'INT') {
+    if($sig eq 'TERM' || $sig eq 'INT' || $sig eq 'PIPE') {
         # sometime we receive sigpipes, ex. in log4perl END
-        # no need for duplicate stacks
+        # no need for duplicate stacks. for PIPE we must not print below, or the
+        # print to the dead pipe re-triggers SIGPIPE and this handler loops
         ## no critic
         $SIG{'PIPE'} = 'IGNORE';
         ## use critic
