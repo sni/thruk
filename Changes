@@ -4,6 +4,9 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape host and service names in the panorama grids and mine map
+              (stored XSS via unescaped display names and mine map headers
+              rendered as HTML by the ExtJS grid cells)
             - escape the author and comment text in the panorama comments grid (stored XSS via
               unescaped comment/author rendered as HTML by the ExtJS grid cell, GHSA-wm48-j98q-3x77,
               reported by @grapealbacore)

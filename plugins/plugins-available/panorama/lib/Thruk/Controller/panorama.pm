@@ -2354,10 +2354,11 @@ sub _task_servicesminemap {
     for my $svc (sort keys %{$uniq_services}) {
         my $index = 'col'.$x;
         $service2index->{$svc} = $index;
+        my $header_svc = Thruk::Utils::Filter::escape_html($svc);
         push @{$json->{'columns'}}, {
-                    'header'       => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
-                    'headerIE'     => '<div class="vertical" style="top: 8px; width: '.($height-25).'px; right: '.($height/2-16).'px;">'.$svc.'</div>',
-                    'headerChrome' => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$svc.'</div>',
+                    'header'       => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$header_svc.'</div>',
+                    'headerIE'     => '<div class="vertical" style="top: 8px; width: '.($height-25).'px; right: '.($height/2-16).'px;">'.$header_svc.'</div>',
+                    'headerChrome' => '<div class="vertical" style="top: '.($height/2-10).'px;">'.$header_svc.'</div>',
                     'width'        => 20,
                     'height'       => $height,
                     'dataIndex'    => $index,
@@ -2369,10 +2370,11 @@ sub _task_servicesminemap {
     for my $name (sort keys %{$hosts}) {
         my $hst  = $hosts->{$name};
         my $data;
+        my $display_name = Thruk::Utils::Filter::escape_html($hst->{'host_display_name'});
         if ($hst->{'host_action_url_expanded'}) {
-            $data = { 'host_display_name' => $hst->{'host_display_name'} . "&nbsp;<a target='_blank' href='".$hst->{'host_action_url_expanded'}."' style='position: relative;'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'></i></a>" };
+            $data = { 'host_display_name' => $display_name . "&nbsp;<a target='_blank' href='".$hst->{'host_action_url_expanded'}."' style='position: relative;'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'></i></a>" };
         } else {
-            $data = { 'host_display_name' => $hst->{'host_display_name'} };
+            $data = { 'host_display_name' => $display_name };
         }
 
         for my $svc (keys %{$uniq_services}) {
