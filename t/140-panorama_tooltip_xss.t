@@ -1,7 +1,7 @@
 use warnings;
 use strict;
-use Test::More;
 use File::Spec;
+use Test::More;
 
 my $js = File::Spec->rel2abs('plugins/plugins-available/panorama/root/js/panorama_js_panlet_icon_tooltip.js');
 ok(-f $js, 'panorama tooltip js found');
