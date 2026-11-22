@@ -687,7 +687,9 @@ sub do_send_command {
     # into it) to com_data after _set_request_param_defaults() stripped the
     # free-text fields; the rendered line is split on newlines as well, so a
     # CR/LF in a date field becomes a second, independently framed command
-    for my $key (qw/end_time expire_time/) {
+    # expire_time is the source: it is copied into end_time above, so it
+    # must be checked first for the error to name the field the user typed
+    for my $key (qw/expire_time end_time/) {
         next unless defined $c->req->parameters->{$key};
         if($c->req->parameters->{$key} =~ m/[\r\n]/mx) {
             $c->stash->{'form_errors'} = [ { message => $key.' contains invalid CR/LF characters' } ];
