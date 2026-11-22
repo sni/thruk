@@ -2,11 +2,9 @@ use warnings;
 use strict;
 use Test::More;
 
-use Thruk::Utils::Reports::Render ();
-
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 37;
+    plan tests => 38;
 }
 
 BEGIN {
@@ -15,6 +13,7 @@ BEGIN {
     import TestUtils;
 }
 
+use_ok('Thruk::Utils::Reports');
 use_ok("Thruk::Utils::Reports::Render");
 TestUtils::get_c();
 
