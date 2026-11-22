@@ -26,8 +26,10 @@ define service {
 }
 ```
 
-Thruk inserts the value verbatim into an +<a href=\'action_url\'>+.
-The quoting adds extra HTML parameters.
+This legacy popup example requires `escape_action_url_html = 0` in
+`thruk_local.conf` so the embedded `class` and `rel` become HTML attributes.
+Only use this setting if you trust all host and service action URLs, including
+their expanded macros. Plain graph links do not require it.
 
 ::: tip templates
 Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right action_url automatically.

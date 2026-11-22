@@ -2372,7 +2372,9 @@ sub _task_servicesminemap {
         my $data;
         my $display_name = Thruk::Utils::Filter::escape_html($hst->{'host_display_name'});
         if ($hst->{'host_action_url_expanded'}) {
-            $data = { 'host_display_name' => $display_name . "&nbsp;<a target='_blank' href='".$hst->{'host_action_url_expanded'}."' style='position: relative;'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'></i></a>" };
+            my $url = $hst->{'host_action_url_expanded'};
+            $url = Thruk::Utils::Filter::escape_html($url) if $c->config->{'escape_action_url_html'};
+            $data = { 'host_display_name' => $display_name . "&nbsp;<a target='_blank' href='".$url."' style='position: relative;'><i class='fa-solid fa-chart-line clickable' title='Show Performance Chart'></i></a>" };
         } else {
             $data = { 'host_display_name' => $display_name };
         }

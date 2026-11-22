@@ -4,6 +4,8 @@ This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
           - Security:
+            - escape host and service action and notes links by default. For trusted legacy
+              popup attributes, set escape_action_url_html or escape_notes_url_html to 0.
             - escape host and service names in the panorama grids and mine map
               (stored XSS via unescaped display names and mine map headers
               rendered as HTML by the ExtJS grid cells)

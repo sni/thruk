@@ -50,6 +50,8 @@ var omd_site                 = '[% omd_site %]';
 var grafana_default_panelId  = "[% c.config.grafana_default_panelId %]";
 var enable_shinken_features  = [% enable_shinken_features %];
 var escape_html_tags         = [% IF escape_html_tags %]true[% ELSE %]false[% END %];
+var escape_action_url_html   = [% IF c.config.escape_action_url_html %]true[% ELSE %]false[% END %];
+var escape_notes_url_html    = [% IF c.config.escape_notes_url_html %]true[% ELSE %]false[% END %];
 var jquery_ui_css            = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/css/smoothness/jquery-ui-[% c.config.jquery_ui %].custom.min.css';
 var jquery_ui_url            = '[% url_prefix %]vendor/jquery-ui-[% c.config.jquery_ui %]/js/jquery-ui-[% c.config.jquery_ui %].custom.min.js';
 

@@ -2086,7 +2086,7 @@ sub get_action_url {
     my $new_action_url = $action_url;
     my $graph_word = $c->config->{'graph_word'};
 
-    # don't escape pnp links, they often contain quotes on purpose
+    my $escape_html = $escape_fun == 2 && $c->config->{'escape_action_url_html'};
     if($action_url =~ m/\/pnp(|4nagios)\//mx) {
         # add theme
         if($action_url !~ m/theme=/mx) {
@@ -2098,19 +2098,26 @@ sub get_action_url {
         $action_url =~ s/(srv=)(.*?)(&)/_replace_url_spaces($1, $2, $3)/ge;
         ## use critic
         $action_url =~ s/&amp;/&/gmx;
-        $action_url =~ s/&/&amp;/gmx;
         $action_url =~ s/\+/%2B/gmx;
+        return Thruk::Utils::Filter::escape_html($action_url) if $escape_html;
+        $action_url =~ s/&/&amp;/gmx;
         return($action_url);
     }
     elsif($action_url =~ m/\/histou\.js\?/mx || $action_url =~ m/\/grafana\//mx) {
         $action_url = _enhance_histou_url($c, $action_url, $obj);
         my $custvars = get_custom_vars($c, $obj, $obj_prefix);
         $action_url =~ s/&amp;/&/gmx;
-        $action_url =~ s/&/&amp;/gmx;
         my $popup_url = $action_url;
         $popup_url =~ s|/dashboard/|/dashboard-solo/|gmx;
         $popup_url =~ s|/d/|/d-solo/|gmx;
-        $popup_url .= '&amp;panelId='.($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1');
+        $popup_url .= '&panelId='.($custvars->{'GRAPH_SOURCE'} // $c->config->{'grafana_default_panelId'} // '1');
+        if($escape_html) {
+            $action_url = Thruk::Utils::Filter::escape_html($action_url);
+            $popup_url  = Thruk::Utils::Filter::escape_html($popup_url);
+        } else {
+            $action_url =~ s/&/&amp;/gmx;
+            $popup_url  =~ s/&/&amp;/gmx;
+        }
         $action_url .= "' class='histou_tips' rel='".$popup_url;
         return($action_url);
     }
@@ -2143,7 +2150,7 @@ sub get_action_url {
         }
     }
 
-    if ($escape_fun == 2) {
+    if ($escape_html) {
         $new_action_url = Thruk::Utils::Filter::escape_html($new_action_url);
     }
     elsif($escape_fun == 1) {

@@ -101,7 +101,7 @@
           [% END %]
           [% IF service.notes_url_expanded %]
             <div>
-              <a href='[% l = set_target_link(service.notes_url_expanded, c.config.notes_url_target); l.0 %]' target='[% l.1 %]'>
+              <a href='[% l = set_target_link(service.notes_url_expanded, c.config.notes_url_target); c.config.escape_notes_url_html ? escape_html(l.0) : l.0 %]' target='[% l.1 %]'>
                 <i class="fa-solid fa-clipboard clickable" title='View Extra Service Notes'></i>
               </a>
             </div>

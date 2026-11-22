@@ -1632,6 +1632,17 @@ default_state_order = down, unreachable, \
                     up, ok, downtime_pending, pending
 ```
 
+### escape_action_url_html
+
+Defaults to `1`. HTML-escape host and service action URLs when rendering links.
+Set to `0` only if trusted action URLs intentionally supply HTML attributes,
+for example for legacy PNP4Nagios popups.
+
+### escape_notes_url_html
+
+Defaults to `1`. HTML-escape host and service notes URLs when rendering links.
+Set to `0` only if all expanded notes URLs are trusted and require embedded HTML.
+
 ### shown_inline_pnp
 
 Show inline pnp graph if available. If a service or host has a
