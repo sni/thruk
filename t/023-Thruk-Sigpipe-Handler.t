@@ -1,17 +1,19 @@
+#!/usr/bin/env perl
+
 use warnings;
 use strict;
 use Test::More;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 4;
+    plan tests => 5;
+
+    use lib('t');
+    require TestUtils;
+    import TestUtils;
 }
 
-use lib('t');
-require TestUtils;
-import TestUtils;  # sets THRUK_MODE=TEST and adds lib/ to @INC
-require Thruk;
-use Time::HiRes qw/gettimeofday/;
+use_ok("Thruk");
 
 # regression test: the SIGPIPE handler used to re-trigger itself when the output
 # pipe was dead (e.g. an orphaned test run whose reader is gone). it printed a
@@ -23,18 +25,8 @@ $ENV{THRUK_TEST_NO_LOG} = 1;    # keep _warn/_error off the real log files
 local $ENV{THRUK_NO_SHUTDOWN_WARNINGS} = 1;
 
 {
-    no warnings 'redefine';
-    package Thruk::SigpipeTest::DummyC;
-    sub req    { }                      # no url, no parameters, no header
-    sub stash  { $_[0]->{'stash'} }
-    sub config { $_[0]->{'config'} }
-    package main;
-}
-{ package Thruk::Globals; our $c; }  # declare so the "used only once" typo warning goes away
-
-{
-    my $dummy_c = bless { stash => { time_begin => [gettimeofday] }, config => {} },
-        'Thruk::SigpipeTest::DummyC';
+    my $dummy_c = TestUtils::get_c();
+    no warnings qw/once/;
     local $Thruk::Globals::c = $dummy_c;
     my $rc = eval { Thruk::_check_exit_reason('PIPE'); 1 };
     ok($rc, "sigpipe handler returns without looping: $@");

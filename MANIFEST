@@ -2374,6 +2374,7 @@ t/019-Thruk-Utils-OAuth.t
 t/020-Log-Log4perl.t
 t/021-Log-Log4perl-Forks.t
 t/022-Thruk-Utils-Log.t
+t/023-Thruk-Sigpipe-Handler.t
 t/070-template_errors.t
 t/071-template_encoding.t
 t/081-modules.t
