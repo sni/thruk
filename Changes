@@ -6,6 +6,9 @@ next:
           - Security:
             - escape host and service action and notes links by default. For trusted legacy
               popup attributes, set escape_action_url_html or escape_notes_url_html to 0.
+            - escape host and service notes on the extinfo pages by default (stored XSS via
+              notes rendered as raw HTML, GHSA-7vgh-mrgh-h79w). BREAKING CHANGE for anyone who
+              relied on HTML in notes: set escape_notes_html to 0 to restore the old behaviour.
             - escape host and service names in the panorama grids and mine map
               (stored XSS via unescaped display names and mine map headers
               rendered as HTML by the ExtJS grid cells)

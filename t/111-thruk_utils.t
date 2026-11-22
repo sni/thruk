@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 16;
+plan tests => 17;
 
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::Filter');
@@ -55,6 +55,33 @@ subtest 'host action and notes link HTML' => sub {
     }
     $host->{action_url_expanded} .= "' title='other";
     unlike($render->(), qr/' class='tips' rel='/, 'extra backend attributes are not recognized as a stock popup');
+};
+subtest 'extinfo host and service notes HTML' => sub {
+    my $payload = "<script>window.__THRUK_XSS__=1</script>";
+    my $template = q{
+        [% IF host.notes_expanded %]<div class="body">
+          [% c.config.escape_notes_html ? escape_html(host.notes_expanded) : host.notes_expanded %]
+        </div>[% END %]
+        [% IF service.notes_expanded %]<div class="body">
+          [% c.config.escape_notes_html ? escape_html(service.notes_expanded) : service.notes_expanded %]
+        </div>[% END %]
+    };
+    my $stash = { %{$c->stash},
+        host      => { name => 'test', peer_key => 'test', notes_expanded => $payload },
+        service   => { name => 'test', peer_key => 'test', notes_expanded => $payload } };
+    my $render = sub {
+        my $html = '';
+        Thruk::Views::ToolkitRenderer::render($c, \$template, $stash, \$html);
+        return $html;
+    };
+    my $escaped = '&lt;script&gt;window.__THRUK_XSS__=1&lt;/script&gt;';
+    my $html = $render->();
+    is(() = $html =~ /\Q$escaped\E/g, 2, 'notes escaped by default');
+    unlike($html, qr/<script>window/, 'no raw script tag rendered');
+    {
+        local $c->config->{'escape_notes_html'} = 0;
+        like($render->(), qr/<script>window\.__THRUK_XSS__=1<\/script>/s, 'opt-out renders raw notes');
+    }
 };
 $c->db->{'sections_depth'} = 0; # avoid some warnings
 my $backends = ["abcd", "1234"];

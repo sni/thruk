@@ -1634,14 +1634,28 @@ default_state_order = down, unreachable, \
 
 ### escape_action_url_html
 
+<Badge type="tip" text="New in Thruk 3.34" />
 Defaults to `1`. HTML-escape host and service action URLs when rendering links.
 The stock OMD PNP4Nagios popup format is supported. Set to `0` only if
 trusted action URLs require other embedded HTML attributes.
 
 ### escape_notes_url_html
 
+<Badge type="tip" text="New in Thruk 3.34" />
 Defaults to `1`. HTML-escape host and service notes URLs when rendering links.
 Set to `0` only if all expanded notes URLs are trusted and require embedded HTML.
+
+### escape_notes_html
+
+<Badge type="tip" text="New in Thruk 3.34" />
+Defaults to `1`. HTML-escape host and service notes on the extinfo pages.
+Set to `0` only if all your notes are trusted and intentionally contain HTML.
+
+**NOTE: breaking change.** Before this version host and service notes were
+rendered as raw HTML on the extinfo pages, which also allowed stored XSS via
+attacker-controlled notes (GHSA-7vgh-mrgh-h79w). If you rely on HTML markup in
+your notes, keep the default `1` in mind and either adapt your notes to plain
+text or explicitly set `escape_notes_html = 0` after auditing your note content.
 
 ### shown_inline_pnp
 

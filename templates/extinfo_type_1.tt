@@ -140,7 +140,7 @@
       <h3>Notes</h3>
     </div>
     <div class="body">
-      [% host.notes_expanded %]
+      [% c.config.escape_notes_html ? escape_html(host.notes_expanded) : host.notes_expanded %]
     </div>
   </div>
 [% END %]

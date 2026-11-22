@@ -67,6 +67,7 @@ my $base_defaults = {
     'shown_inline_pnp'                      => 1,
     'escape_action_url_html'                => 1,
     'escape_notes_url_html'                 => 1,
+    'escape_notes_html'                     => 1,
     'use_feature_trends'                    => 1,
     'use_wait_feature'                      => 1,
     'wait_timeout'                          => 10,
