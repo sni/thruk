@@ -374,6 +374,61 @@ sub get_url_with_retries {
 
 ##########################################################
 
+=head2 _check_report_url
+
+  _check_report_url($c, $url)
+
+die if $url is not allowed to be fetched by report_from_url
+
+only relative thruk urls, the local omd site and hosts explicitly
+allowed via the report_allow_url_hosts config option may be fetched.
+hostnames are matched literally (not resolved) so a dns rebinding
+attacker can not sneak past the list.
+
+=cut
+sub _check_report_url {
+    my($c, $url) = @_;
+    return if $url !~ m{^[a-z]+://}mx;
+    die("report from url '$url' not allowed: unsupported scheme\n") unless $url =~ m{^https?://}mx;
+
+    my $host;
+    if($url =~ m{^https?://\[([^\]]+)\]}mx) {
+        $host = $1;
+    } elsif($url =~ m{^https?://([^:/?\#]+)}mx) {
+        $host = $1;
+    }
+    $host = lc($host // '');
+    die("report from url '$url' not allowed: no host found\n") unless $host;
+
+    # allow the local omd site (operator-generated url) on the configured port only
+    if(defined $c->config->{'omd_local_site_url'}) {
+        my($omd_host, $omd_port) = $c->config->{'omd_local_site_url'} =~ m{^https?://([^:/?\#]+)(?::([0-9]{1,5}))?}mx;
+        $omd_host = lc($omd_host // '');
+        my $port;
+        if($url =~ m{^https?://\[?[^\]/:\#]+\]?:([0-9]{1,5})}mx) {
+            $port = 0 + $1;
+        } else {
+            $port = $url =~ m{^https://}mx ? 443 : 80;
+        }
+        return if $omd_host && $host eq $omd_host && (!defined $omd_port || $port == 0 + $omd_port);
+    }
+
+    # allow hosts explicitly allowed by the operator
+    my $allowed = $c->config->{'Thruk::Plugin::Reports2'}->{'report_allow_url_hosts'} || $c->config->{'report_allow_url_hosts'} || [];
+    $allowed = [ $allowed ] unless ref($allowed) eq 'ARRAY';
+    for my $a (@{$allowed}) {
+        my $allow_host = lc($a);
+        $allow_host =~ s/^[.]+//mx;
+        next unless $allow_host;
+        return if $host eq $allow_host;
+        return if $host =~ m/\.\Q$allow_host\E\z/mx;
+    }
+
+    die("report from url '$url' not allowed: host '$host' is not in report_allow_url_hosts\n");
+}
+
+##########################################################
+
 =head2 get_url
 
   get_url()
@@ -396,6 +451,12 @@ sub get_url {
         $url =~ s=^/$site/=/=gmx;
         $url = $c->config->{'omd_local_site_url'}.$url;
     }
+
+    # report_from_url must not fetch arbitrary external hosts (ssrf)
+    # shortcut: a redirect from an allowed host could still point to a private
+    # address (dns rebinding / open redirect); per-redirect revalidation would
+    # require a custom user agent, which is not worth it for this feature
+    _check_report_url($c, $url);
 
     # directly convert external urls
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
@@ -1087,6 +1148,12 @@ sub _read_static_content_file {
     }
 
     if($url =~ m/^https?:/mx) {
+       # embedded css/js/images: only fetch allowed hosts (ssrf protection)
+       eval { _check_report_url($c, $url); };
+       if($@) {
+          return(404, { result => ''}) if wantarray;
+          return '';
+       }
        return(Thruk::Utils::CLI::request_url($c, $url, { thruk_auth => $c->stash->{'fake_session_id'} }));
     }
     $url =~ s|^.*/\Q$product_prefix\E/||gmx;

@@ -205,6 +205,7 @@ my $base_defaults = {
     'report_max_objects'                    => 1000,
     'report_include_class2'                 => 1,
     'report_update_logcache'                => 1,
+    'report_allow_url_hosts'                => [],
     'perf_bar_pnp_popup'                    => 1,
     'status_color_background'               => 0,
     'apache_status'                         => {},
@@ -517,7 +518,7 @@ sub set_default_config {
         $config->{$key} = Thruk::Base::comma_separated_list($config->{$key});
     }
     # ensure comma separated lists for optional settings
-    for my $key (qw/host_name_source service_description_source/) {
+    for my $key (qw/host_name_source service_description_source report_allow_url_hosts/) {
         $config->{$key} = Thruk::Base::comma_separated_list($config->{$key}) if defined $config->{$key};
     }
 

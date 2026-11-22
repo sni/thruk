@@ -2,9 +2,11 @@ use warnings;
 use strict;
 use Test::More;
 
+use Thruk::Utils::Reports::Render ();
+
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 17;
+    plan tests => 37;
 }
 
 BEGIN {
@@ -56,4 +58,47 @@ my $urls = [
 ];
 for my $url (@{$urls}) {
     is(Thruk::Utils::Reports::Render::_absolutize_url($url->[0], $url->[1]), $url->[2], '_absolutize_url('.($url->[0]||'').', '.$url->[1].') -> '.$url->[2]);
+}
+
+###########################################################
+# _check_report_url
+{
+    my $c = TestUtils::get_c();
+    local $c->{config}->{omd_local_site_url}     = 'http://127.0.0.1:8388/omd';
+    local $c->{config}->{report_allow_url_hosts} = ['example.com'];
+
+    # allowed urls
+    for my $url (
+        '/thruk/cgi-bin/status.cgi',            # relative thruk url
+        'status.cgi?style=hostdetail',          # relative cgi url
+        'http://127.0.0.1:8388/omd/status.cgi', # omd_local_site_url host
+        'http://example.com/status.cgi',        # in report_allow_url_hosts
+        'http://sub.example.com/status.cgi',    # subdomain of allowed host
+    ) {
+        ok(defined eval { Thruk::Utils::Reports::Render::_check_report_url($c, $url); 1 }, "_check_report_url('$url') allowed");
+    }
+
+    # disallowed urls (ssrf targets)
+    for my $url (
+        'http://127.0.0.1:8080/internal-secret',  # omd host, wrong port
+        'http://localhost/internal-secret',
+        'http://0.0.0.0/',
+        'http://10.0.0.1/',
+        'http://172.16.0.1/',
+        'http://192.168.1.1/',
+        'http://169.254.169.254/latest/meta-data/',
+        'http://100.64.0.1/',
+        'http://[::1]/',
+        'http://[fd12::1]/',
+        'http://[fe80::1]/',
+        'http://[2001:db8::1]/',
+        'http://evil.com/',                     # not in allowlist
+        'http://example.evil.com/',             # lookalike suffix
+        'ftp://example.com/',                   # unsupported scheme
+    ) {
+        my $err;
+        eval { Thruk::Utils::Reports::Render::_check_report_url($c, $url) };
+        $err = $@;
+        ok($err, "_check_report_url('$url') rejected: $err");
+    }
 }
