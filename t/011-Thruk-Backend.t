@@ -1,6 +1,9 @@
 use warnings;
 use strict;
+use File::Temp ();
 use Test::More tests => 8;
+
+use Thruk::Backend::Pool ();
 
 ################################################################################
 # check if we have all subs in Provider/Base.pm
@@ -51,8 +54,6 @@ sub get_subs {
 ################################################################################
 # a caller-provided 'eval' argument pair must NOT be eval()'ed by do_on_peer
 # (GHSA-44p7-p5wf-qw57: remote.cgi API key could execute arbitrary perl)
-use File::Temp ();
-use Thruk::Backend::Pool ();
 my $tdir   = File::Temp::tempdir(CLEANUP => 1);
 my $marker = $tdir.'/marker';
 my $pool   = Thruk::Backend::Pool->new();
@@ -66,4 +67,3 @@ eval {
     $pool->do_on_peer('fakekey', 'get_hosts', ['filter', []]);
 };
 like($@, qr/no peer for key: fakekey/, 'normal arg pairs still reach the backend lookup');
-
