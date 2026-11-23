@@ -244,6 +244,7 @@ Ext.onReady(function() {
             }
             d = [];
             var content = xdata.popup.content.split(/\n/);
+            var warnings = TP.labelWarnings(img, 'tooltip');
             var curBlock = [];
             for(var x=0; x<content.length; x++) {
                 var line = content[x];
@@ -280,15 +281,16 @@ Ext.onReady(function() {
                     continue;
                 }
                 if(curBlock[0] != undefined) {
-                    curBlock[1] += img.setIconLabelDynamicText(line);
+                    curBlock[1] += img.setIconLabelDynamicText(line, warnings);
                     curBlock[1] += '<br>';
                     continue;
                 }
                 if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
                 curBlock[0] = '';
-                curBlock[1] = img.setIconLabelDynamicText(line)+'<br>';
+                curBlock[1] = img.setIconLabelDynamicText(line, warnings)+'<br>';
             }
             if(curBlock[0] != undefined) { d.push(curBlock); }
+            warnings.finish();
         }
 
         TP.iconTip.panel = undefined;

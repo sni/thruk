@@ -115,6 +115,10 @@ monitoring fields. Inside `{{…}}`, use addition, comparisons, conditionals, or
 function calls. Field values appear as text. Browser objects, script tags, and
 event handlers are not available.
 
+If part of a label is missing, hover over the label or icon to see what Panorama
+removed. The browser console also shows warnings for labels and custom tooltips.
+Each warning includes the widget ID. A refresh does not repeat an unchanged warning.
+
 [![labels 1](dashboard/contextmenu.png)](dashboard/contextmenu.png)
 [![labels 2](dashboard/dynlabel.png)](dashboard/dynlabel.png)
 [![labels 3](dashboard/dynlabel2.png)](dashboard/dynlabel2.png)

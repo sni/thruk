@@ -96,7 +96,7 @@ Ext.define('TP.IconLabel', {
         var panel = this;
         var txt = String(cfg.labeltext);
         if(txt == undefined) { txt = ''; }
-        panel.el.dom.title = '';
+        var warnings = TP.labelWarnings(panel, 'label');
 
         /* hide the icon element for label only appearance */
         if(panel.locked && panel.el) {
@@ -107,15 +107,16 @@ Ext.define('TP.IconLabel', {
 
         /* dynamic label? */
         if(txt.match(/\{\{.*?\}\}/)) {
-            txt = panel.setIconLabelDynamicText(txt);
+            txt = panel.setIconLabelDynamicText(txt, warnings);
 
             /* update value since it might have changed */
             if(panel.xdata.appearance.type == 'speedometer' && panel.xdata.appearance.speedosource.match(/^avail:(.*)$/)) {
                 panel.updateRender(panel.xdata);
             }
         } else {
-            txt = TP.labelMarkup(txt);
+            txt = TP.labelMarkup(txt, warnings);
         }
+        panel.el.dom.title = warnings.finish();
         /* no label at all */
         if(!cfg.labeltext) {
             if(panel.labelEl) { panel.labelEl.destroy(); panel.labelEl = undefined; }
@@ -126,6 +127,7 @@ Ext.define('TP.IconLabel', {
         }
         if(!panel.labelEl || !panel.labelEl.el) { return; }
         var el    = panel.labelEl.el.dom;
+        el.title = panel.el.dom.title;
         var style = el.style;
         style.zIndex = Number(panel.el.dom.style.zIndex)+1; /* keep above icon */
         var oldTxt = panel.labelEl.el.dom.innerHTML;
@@ -146,7 +148,7 @@ Ext.define('TP.IconLabel', {
         return;
     },
 
-    setIconLabelDynamicText: function(txt) {
+    setIconLabelDynamicText: function(txt, warnings) {
         var panel = this;
         if(TP.availabilities == undefined) { TP.availabilities = {}; }
         if(TP.availabilities[panel.id] == undefined) { TP.availabilities[panel.id] = {}; }
@@ -154,7 +156,7 @@ Ext.define('TP.IconLabel', {
         txt = txt.replace(/\{\{(.*?)\}\}(?!\})/g, function(match, part) {
             try {
                 TP.lastAvailError = undefined;
-                var res = TP.labelExpression(part, macros, panel);
+                var res = TP.labelExpression(part, macros, panel, warnings);
                 res = Ext.String.htmlEncode(String(res)).replace(/\n/g, '<br>');
                 if(TP.lastAvailError) {
                     var err = String(TP.lastAvailError).replace(/ at .*?\/Thruk/g, ' at Thruk');
@@ -165,7 +167,7 @@ Ext.define('TP.IconLabel', {
                 }
                 return res;
             } catch(err) {
-                panel.el.dom.title = err.message;
+                warnings.add(err.labelWarning || 'Invalid label expression');
                 return '';
             }
         });
@@ -176,7 +178,7 @@ Ext.define('TP.IconLabel', {
                 delete TP.availabilities[panel.id][key];
             }
         }
-        return TP.labelMarkup(txt);
+        return TP.labelMarkup(txt, warnings);
     },
 
     setIconLabelPosition: function(cfg) {
@@ -390,7 +392,24 @@ function nl2br(text) {
     return(text);
 }
 
-TP.labelMarkup = function(text) {
+TP.labelWarnings = function(panel, source) {
+    var messages = [];
+    return {
+        add: function(message) {
+            message = message.slice(0, 120);
+            if(messages.length < 8 && messages.indexOf(message) < 0) { messages.push(message); }
+        },
+        finish: function() {
+            var text = messages.join('; ');
+            var key = source+'Warning';
+            if(text && text != panel[key]) { console.warn('Panorama '+source+' ('+panel.id+'): '+text); }
+            panel[key] = text;
+            return text;
+        }
+    };
+};
+
+TP.labelMarkup = function(text, warnings) {
     if(!/[<&]/.test(text)) { return text; }
     // Parse in an inert template. Only new formatting elements enter the label.
     var template = document.createElement('template');
@@ -399,8 +418,11 @@ TP.labelMarkup = function(text) {
     function copy(parent, target) {
         for(var node = parent.firstChild; node; node = node.nextSibling) {
             if(node.nodeType == 3) { target.appendChild(document.createTextNode(node.data)); continue; }
-            if(node.nodeType != 1 || node.namespaceURI != 'http://www.w3.org/1999/xhtml') { continue; }
-            if(TP.labelPolicy.tags.indexOf(node.localName) < 0) { continue; }
+            if(node.nodeType != 1) { continue; }
+            if(node.namespaceURI != 'http://www.w3.org/1999/xhtml' || TP.labelPolicy.tags.indexOf(node.localName) < 0) {
+                warnings.add('Removed tag: '+node.localName);
+                continue;
+            }
             var el = document.createElement(node.localName);
             var presentation = TP.labelPolicy.presentation[node.localName] || [];
             presentation.forEach(function(attr) {
@@ -408,6 +430,12 @@ TP.labelMarkup = function(text) {
             });
             Object.keys(TP.labelPolicy.attributes).forEach(function(attr) {
                 if(node.hasAttribute(attr)) { TP.labelPolicy.attributes[attr](node, el); }
+            });
+            Array.from(node.attributes).forEach(function(attr) {
+                if(attr.name != 'style' && !el.hasAttribute(attr.name)) { warnings.add('Removed attribute: '+attr.name+' on '+node.localName); }
+            });
+            Array.from(node.style).forEach(function(prop) {
+                if(!el.style.getPropertyValue(prop)) { warnings.add('Removed style: '+prop); }
             });
             copy(node, el);
             target.appendChild(el);
@@ -417,10 +445,14 @@ TP.labelMarkup = function(text) {
     return label.innerHTML;
 };
 
-TP.labelExpression = function(source, macros, panel) {
+TP.labelExpression = function(source, macros, panel, warnings) {
     var tokens = source.match(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[a-zA-Z_]\w*|-?\d+(?:\.\d+)?|===|!==|==|!=|>=|<=|\S/g) || [];
     var i = 0;
-    function invalid() { throw new Error('Invalid label expression'); }
+    function invalid(message) {
+        var err = new Error(message || 'Invalid label expression');
+        err.labelWarning = err.message;
+        throw err;
+    }
     function take(s) {
         if(tokens[i] !== s) { return false; }
         i++;
@@ -483,7 +515,9 @@ TP.labelExpression = function(source, macros, panel) {
                 if(take('else')) { need('{'); no = expression(run && !condition); need('}'); }
                 return condition ? yes : no;
             }
-            if(!Object.prototype.hasOwnProperty.call(TP.labelPolicy.functions, s)) { invalid(); }
+            if(!Object.prototype.hasOwnProperty.call(TP.labelPolicy.functions, s)) {
+                invalid('Unknown function: '+s);
+            }
             var fn = TP.labelPolicy.functions[s];
             var args = [];
             if(fn.options) {
@@ -505,9 +539,16 @@ TP.labelExpression = function(source, macros, panel) {
         }
         var value = macros;
         var name = s;
+        var missing = false;
         do {
             if(/^(?:panel|constructor|prototype|__proto__)$/.test(name)) { invalid(); }
-            value = value && typeof value == 'object' && Object.prototype.hasOwnProperty.call(value, name) ? value[name] : undefined;
+            if(value && typeof value == 'object' && Object.prototype.hasOwnProperty.call(value, name)) {
+                value = value[name];
+            } else {
+                if(run && !missing) { warnings.add('Unknown field: '+name); }
+                missing = true;
+                value = undefined;
+            }
             if(take('.')) { name = identifier(tokens[i++]); }
             else if(name == 'perfdata' && take('[')) { name = string(tokens[i++]); need(']'); }
             else { break; }
