@@ -48,6 +48,18 @@ if [ $? -ne 1 ]; then
     fi
 fi
 
+omd status -b > /dev/null 2>&1
+if [ $? -ne 1 ]; then
+    echo "*** [ERROR] update failed, failed to stop site"
+    ps -fu $(id -un)
+    echo "*** trying to start site apache again..."
+    omd start apache
+    if [ "$THRUK_MAINT" = "1" ]; then
+        echo "*** [ERROR] thruk cluster is still in maintenance mode";
+    fi
+    exit 1
+fi
+
 if [ $(mount 2>/dev/null | grep -c /omd/sites/${OMD_SITE}/tmp) -gt 0 ]; then
     SITE_MOUNTED=1
 fi
