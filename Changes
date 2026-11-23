@@ -3,6 +3,7 @@
 This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
+          - treat REST and backend sort keys as data and not as code (GHSA-rjfp-vvx9-76vh)
           - escape plugin output in the availability outage report by default (GHSA-7qph-3mcp-cvqw)
           - escape plugin output in the reports2 SLA report by default
           - escape plugin output in the trends image map by default

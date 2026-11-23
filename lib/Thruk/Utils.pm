@@ -31,6 +31,40 @@ use Thruk::Utils::Log qw/:all/;
 ##############################################
 =head1 METHODS
 
+=head2 sort_rows
+
+  my $sorted = sort_rows($data, $specs)
+
+sort an arrayref of hashrefs by the given columns. The sort keys stay data and
+are never interpolated into source, so they cannot change the evaluated code.
+
+  $data is an arrayref of hashrefs.
+  $specs is an arrayref of { key => $field, order => 'asc'|'desc', numeric => 1|0 }
+
+=cut
+
+sub sort_rows {
+    my($data, $specs) = @_;
+
+    ## no critic
+    no warnings;    # sorting by undef values generates lots of errors
+    my $compare = sub {
+        my($a, $b) = @_;
+        for my $s (@{$specs}) {
+            my $r = $s->{'numeric'}
+                ? ($a->{$s->{'key'}} <=> $b->{$s->{'key'}})
+                : ($a->{$s->{'key'}} cmp $b->{$s->{'key'}});
+            $r = -$r if $s->{'order'} eq 'desc';
+            return $r if $r;
+        }
+        return 0;
+    };
+    my @sorted = sort { $compare->($a, $b) } @{$data};
+    use warnings;
+    ## use critic
+    return \@sorted;
+}
+
 =head2 parse_date
 
   my $timestamp = parse_date($c, $string)

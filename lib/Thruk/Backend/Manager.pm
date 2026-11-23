@@ -2664,9 +2664,8 @@ sub sort_result {
     }
 
     for my $key (@keys) {
-        # the keys are interpolated into an eval'ed sort comparator
-        # (see the same guard in rest_v1)
-        confess("invalid sort key") if !defined $key || ref $key || $key =~ m/[\\`\$>"'%\n\x00]/mx; # NO CRITIC BACKTICKS
+        # sort keys must be plain strings
+        confess("invalid sort key") if !defined $key || ref $key;
 
         # add extra column for custom variables
         if($key =~ m/^cust__(.*)$/mx) {
@@ -2678,39 +2677,19 @@ sub sort_result {
         }
     }
 
-    my @compares;
+    my @specs;
     for my $key (@keys) {
-
-        # sort numeric
-        if( defined $data->[0]->{$key} and looks_like_number($data->[0]->{$key}) ) {
-            push @compares, '$a->{"'.$key.'"} <=> $b->{"'.$key.'"}';
-        }
-
-        # sort alphanumeric
-        else {
-            push @compares, '$a->{"'.$key.'"} cmp $b->{"'.$key.'"}';
-        }
+        # sort numeric if the first row holds a number
+        my $numeric = ( defined $data->[0]->{$key} and looks_like_number($data->[0]->{$key}) ) ? 1 : 0;
+        push @specs, { key => $key, order => ( uc $order eq 'ASC' ? 'asc' : 'desc' ), numeric => $numeric };
     }
-    my $sortstring = join( ' || ', @compares );
 
-    ## no critic
-    no warnings;    # sorting by undef values generates lots of errors
-    if( uc $order eq 'ASC' ) {
-        eval '@sorted = sort {'.$sortstring.'} @{$data};';
-    }
-    else {
-        eval '@sorted = reverse sort {'.$sortstring.'} @{$data};';
-    }
-    use warnings;
-    ## use critic
-
-    if(scalar @sorted == 0 && $@) {
-        confess($@);
-    }
+    # the sort keys stay data and are not interpolated into source code
+    $data = Thruk::Utils::sort_rows($data, \@specs);
 
     $c->stats->profile( end => "sort_result()" ) if $c;
 
-    return ( \@sorted );
+    return ( $data );
 }
 
 # keep alias for backwards compatibility

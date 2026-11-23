@@ -15,7 +15,7 @@ use Thruk::Utils::Filter ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 127;
+    plan tests => 132;
 
     use lib('t');
     require TestUtils;
@@ -28,6 +28,7 @@ use_ok('Thruk');
 use_ok('Thruk::Utils');
 use_ok('Thruk::Utils::External');
 use_ok('Thruk::Backend::Manager');
+use_ok("Thruk::Controller::rest_v1");
 
 subtest 'single filename ids' => sub {
     for my $id ('0', 'new', 'test.json', 'test..json', '2026-11-07-user_1.json') {
@@ -156,18 +157,38 @@ is_deeply($befor_case, $sorted_case, 'sort by colum case a,b');
 
 {
     my $data = [ {a => 1}, {a => 2} ];
-    my $bad = '$a->{a};system("id")';
+    # sort keys are data and not evaluated as code (GHSA-rjfp-vvx9-76vh)
+    my $metachar = '$a->{a};system("id")';
     my $err = '';
-    eval { $b->sort_result($data, { 'ASC' => $bad }); 1; } or $err = $@;
-    like($err, qr/invalid sort key/, 'sort_result rejects sort key with shell metacharacters');
-    my $bad_arr = '$a->{a};';
+    eval { $b->sort_result([ { $metachar => 1 }, { $metachar => 2 } ], { 'ASC' => $metachar }); 1 } or $err = $@;
+    is($err, '', 'sort_result treats a metacharacter sort key as data');
+    # reference keys are still rejected
     $err = '';
-    eval { $b->sort_result($data, { 'ASC' => [$bad_arr] }); 1; } or $err = $@;
-    like($err, qr/invalid sort key/, 'sort_result rejects array sort keys with shell metacharacters');
-    my $bad_bt = 'a`id`b';
-    $err = '';
-    eval { $b->sort_result($data, { 'ASC' => $bad_bt }); 1; } or $err = $@;
-    like($err, qr/invalid sort key/, 'sort_result rejects sort key with backticks');
+    eval { $b->sort_result($data, { 'ASC' => { a => 1 } }); 1 } or $err = $@;
+    like($err, qr/invalid sort key/, 'sort_result rejects a reference sort key');
+}
+
+# sort keys stay data and must not be evaluated as code (GHSA-rjfp-vvx9-76vh)
+{
+    my $evil = '@{[die q(THRUK_SORT_EVAL_REACHED)]}';
+    my $data = [ { $evil => 2, b => 2 }, { $evil => 1, b => 1 } ];
+
+    my $err = '';
+    eval { Thruk::Utils::sort_rows($data, [{ key => $evil, order => 'asc', numeric => 1 }]); 1 } or $err = $@;
+    is($err, '', 'sort_rows does not evaluate a perl-interpolating sort key');
+    my $sorted = Thruk::Utils::sort_rows($data, [{ key => $evil, order => 'asc', numeric => 1 }]);
+    is_deeply([ map { $_->{$evil} } @{$sorted} ], [1, 2], 'sort_rows sorts a perl-interpolating key as data (asc)');
+    $sorted = Thruk::Utils::sort_rows($data, [{ key => $evil, order => 'desc', numeric => 1 }]);
+    is_deeply([ map { $_->{$evil} } @{$sorted} ], [2, 1], 'sort_rows sorts a perl-interpolating key as data (desc)');
+
+    # the REST _apply_sort entry point must also treat such keys as data
+    my($res, $c) = ctx_request('/thruk/main.html');
+    $c->req->parameters({'sort' => $evil});
+    my $rows = [ { $evil => 2 }, { $evil => 1 } ];
+    my $err2 = '';
+    eval { $rows = Thruk::Controller::rest_v1::_apply_sort($c, $rows); 1 } or $err2 = $@;
+    is($err2, '', 'REST _apply_sort does not evaluate a perl-interpolating sort key');
+    is_deeply([ map { $_->{$evil} } @{$rows} ], [1, 2], 'REST _apply_sort sorts a perl-interpolating key as data');
 }
 
 #########################
