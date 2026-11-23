@@ -87,9 +87,9 @@ sub cmd {
 
     $c->stats->profile(begin => "_cmd_logcache($mode)");
 
-    ## no critic
+    ## no critic (InputOutput::ProhibitInteractiveTest)
     my $terminal_attached = -t 0 ? 1 : 0;
-    ## use critic
+    ## use critic (InputOutput::ProhibitInteractiveTest)
 
     # parse options
     my $opt = {

@@ -884,12 +884,12 @@ sub _get_checks {
 sub _user_confirm {
     _infos("Continue? (y)es - (a)ll - (n)o: ");
 
-    ## no critic
+    ## no critic (InputOutput::ProhibitInteractiveTest)
     if(!-t 0) {
         _warn("no terminal, cannot ask for confirmation");
         return;
     }
-    ## use critic
+    ## use critic (InputOutput::ProhibitInteractiveTest)
     my $has_readkey = 0;
     eval {
         require Term::ReadKey;

@@ -936,7 +936,7 @@ sub _req {
     $options->{'remote_name'} = $self->{'remote_name'};
     $options->{'args'}        = $args;
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     if($ENV{'THRUK_DB_LAST_QUERY'}) {
         $ENV{'THRUK_DB_LAST_QUERY'} .= "\n\n***********\n";
     } else {
@@ -946,7 +946,7 @@ sub _req {
     if(length($ENV{'THRUK_DB_LAST_QUERY'}) > 100000) {
         $ENV{'THRUK_DB_LAST_QUERY'} = substr($ENV{'THRUK_DB_LAST_QUERY'}, 0, 100000)."\n**** CUT OFF ***\n";
     }
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     $self->{'ua'} || $self->reconnect();
     $self->{'ua'}->timeout($self->{'timeout'});

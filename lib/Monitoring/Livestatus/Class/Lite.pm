@@ -402,7 +402,7 @@ sub _execute {
     {
         my $st = $statement;
         utf8::encode($st); # avoid Wide character in setenv
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         if($ENV{'THRUK_DB_LAST_QUERY'}) {
             $ENV{'THRUK_DB_LAST_QUERY'} .= "\n\n***********\n";
         } else {
@@ -412,7 +412,7 @@ sub _execute {
         if(length($ENV{'THRUK_DB_LAST_QUERY'}) > 100000) {
             $ENV{'THRUK_DB_LAST_QUERY'} = substr($ENV{'THRUK_DB_LAST_QUERY'}, 0, 100000)."\n**** CUT OFF ***\n";
         }
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
     my $options   = $self->{'_options'};
     $options->{'slice'} = {};

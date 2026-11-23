@@ -1765,11 +1765,11 @@ sub replace_links {
     for my $pattern (@{$c->config->{'short_link'}}) {
         my @blocks = split(/\|/mx, $pattern);
         shift @blocks if $blocks[0] eq '';
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         my $re1 = qr($blocks[0]);
         my $re2 = $blocks[1];
         $txt =~ s|$re1|&_replace_dollars($re2, $1, $2, $3, $4, $5)|ge;
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
     }
 
     # markup link: [link text](https://url...)
@@ -1802,10 +1802,10 @@ sub replace_copy_paste {
 
     # copy paste links
     for my $pattern (@{$c->config->{'copy_paste_link'}}) {
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         my $re1 = qr($pattern);
         $txt =~ s|$re1|&_replace_dollars($link, $1, $2, escape_js($2), $3)|ge;
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
     }
 
     return($txt);
@@ -1925,7 +1925,7 @@ sub _find_target_for_link {
         _error("cannot parse '$t': $target not defined") unless $target;
         _error("cannot parse '$t': $regex not defined") unless $regex;
         next if (!$target || !$regex);
-        if($href =~ /$regex/) { ## no critic
+        if($href =~ /$regex/) { ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             return $target;
         }
     }

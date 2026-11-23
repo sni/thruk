@@ -47,9 +47,9 @@ sub get_config_help {
         while (<DATA>) {
             $var .= $_;
         }
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
         $helpdata = eval $var;
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval)
     }
 
     unless(defined $helpdata->{$type}->{$key}) {

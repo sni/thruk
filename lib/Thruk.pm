@@ -27,17 +27,17 @@ use Thruk::Timer qw/timing_breakpoint/;
 # clean up env
 $Thruk::Globals::tt_profiling = 0 unless defined $Thruk::Globals::tt_profiling;
 BEGIN {
-    ## no critic
+    ## no critic (BuiltinFunctions::ProhibitStringyEval, Variables::RequireLocalizedPunctuationVars)
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {
         $ENV{'THRUK_PERFORMANCE_DEBUG'} = 3;
     }
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 4) {
         $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} = 999;
     }
-    use Time::HiRes qw/gettimeofday tv_interval/;
+    use Time::HiRes qw/tv_interval/;
     eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
     eval "use Thruk::Template::Exception;" if $ENV{'TEST_AUTHOR'};
-    ## use critic
+    ## use critic (BuiltinFunctions::ProhibitStringyEval, Variables::RequireLocalizedPunctuationVars)
     $Thruk::Globals::tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 
@@ -220,9 +220,9 @@ sub _build_app {
             next if $config->{'routes_already_loaded'}->{$route_file};
             my $routes = $self->{'routes'};
             my $app    = $self;
-            ## no critic
+            ## no critic (BuiltinFunctions::ProhibitStringyEval)
             eval("#line 1 $route_file\n".Thruk::Utils::IO::read($route_file));
-            ## use critic
+            ## use critic (BuiltinFunctions::ProhibitStringyEval)
             if($@) {
                 _error("error while loading routes from ".$route_file.": ".$@);
                 confess($@);
@@ -550,9 +550,9 @@ sub _check_exit_reason {
         # sometime we receive sigpipes, ex. in log4perl END
         # no need for duplicate stacks. for PIPE we must not print below, or the
         # print to the dead pipe re-triggers SIGPIPE and this handler loops
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $SIG{'PIPE'} = 'IGNORE';
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
 
     # cli mode gets a sigpipe ex. when the result is piped somewhere which then returns early
@@ -565,9 +565,9 @@ sub _check_exit_reason {
     my $c   = $Thruk::Globals::c;
     my $url = ($c && $c->req) ? $c->req->url : undef;
 
-    ## no critic
+    ## no critic (InputOutput::ProhibitInteractiveTest)
     if($sig eq 'INT' && -t 0) {
-        ## use critic
+        ## use critic (InputOutput::ProhibitInteractiveTest)
         if(    $reason =~ m|Thruk::Utils::CLI::from_local|mx
             || !$url
             || $url =~ m|/dummy-internal/|mx
@@ -663,7 +663,7 @@ sub _remove_pid {
     return;
 }
 
-## no critic
+## no critic (TestingAndDebugging::ProhibitNoWarnings)
 {
     no warnings qw(redefine prototype);
     *CORE::GLOBAL::alarm = sub {
@@ -680,8 +680,8 @@ sub _remove_pid {
         }
         CORE::alarm($_[0]);
     };
-};
-## use critic
+}
+## use critic (TestingAndDebugging::ProhibitNoWarnings)
 set_signal_handler();
 END {
     _remove_pid();
@@ -696,12 +696,12 @@ END {
 
 =cut
 sub set_signal_handler {
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $SIG{INT}  = sub { _check_exit_reason("INT");  _clean_exit(); };
     $SIG{TERM} = sub { _check_exit_reason("TERM"); _clean_exit(); };
     $SIG{PIPE} = sub { _check_exit_reason("PIPE"); _clean_exit(); };
     $SIG{ALRM} = sub { _check_exit_reason("ALRM"); _clean_exit(); };
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     return;
 }
 
@@ -879,7 +879,7 @@ sub _setup_development_signals {
         # add signal handler to print memory information
         # ps -efl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR1
         print STDERR "adding USR1 signal handler\n";
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $SIG{'USR1'} = sub {
             printf(STDERR "mem:% 7s MB  before devel::sizeme\n", Thruk::Utils::IO::get_memory_usage());
             eval {
@@ -888,12 +888,12 @@ sub _setup_development_signals {
             };
             print STDERR $@ if $@;
         };
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
     if($ENV{'MALLINFO'}) {
         # add signal handler to print memory information
         # ps -efl | grep thruk_server.pl | awk '{print $4}' | xargs kill -USR2
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $SIG{'USR2'} = sub {
             print STDERR "adding USR2 signal handler\n";
             eval {
@@ -912,7 +912,7 @@ sub _setup_development_signals {
             };
             print STDERR $@ if $@;
         };
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
     return;
 }

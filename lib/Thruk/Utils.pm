@@ -46,7 +46,7 @@ are never interpolated into source, so they cannot change the evaluated code.
 sub sort_rows {
     my($data, $specs) = @_;
 
-    ## no critic
+    ## no critic (TestingAndDebugging::ProhibitNoWarnings)
     no warnings;    # sorting by undef values generates lots of errors
     my $compare = sub {
         my($a, $b) = @_;
@@ -61,7 +61,7 @@ sub sort_rows {
     };
     my @sorted = sort { $compare->($a, $b) } @{$data};
     use warnings;
-    ## use critic
+    ## use critic (TestingAndDebugging::ProhibitNoWarnings)
     return \@sorted;
 }
 
@@ -909,21 +909,21 @@ sub get_custom_vars {
             for my $pattern (@{Thruk::Base::list($c->config->{'action_menu_apply'}->{$menu})}) {
                 if(!$prefix && $data->{'description'}) {
                     my $test = $data->{'host_name'}.';'.$data->{'description'};
-                    ## no critic
+                    ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                     if($test =~ m/$pattern/) {
                         $data->{'custom_variables'}->{$prefix.'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
-                    ## use critic
+                    ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                 }
                 elsif($data->{$prefix.'name'}) {
                     my $test = $data->{$prefix.'name'}.';';
-                    ## no critic
+                    ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                     if($test =~ m/$pattern/) {
                         $data->{$prefix.'custom_variables'}->{'THRUK_ACTION_MENU'} = $menu;
                         last APPLY;
                     }
-                    ## use critic
+                    ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                 }
             }
         }
@@ -2131,10 +2131,10 @@ sub get_action_url {
             $action_url =~ s/(index.php.*?)'/$1&theme=smoothness'/mx;
         }
         # replace spaces in host / service names
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         $action_url =~ s/(host=)(.*?)(&)/_replace_url_spaces($1, $2, $3)/ge;
         $action_url =~ s/(srv=)(.*?)(&)/_replace_url_spaces($1, $2, $3)/ge;
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         $action_url =~ s/&amp;/&/gmx;
         $action_url =~ s/\+/%2B/gmx;
         return Thruk::Utils::Filter::escape_html($action_url) if $escape_html;
@@ -2167,17 +2167,17 @@ sub get_action_url {
             if ($action_url =~ m|$regex|mx){
                 my $new_host = $host;
                 for my $regex (@{$c->config->{'graph_replace'}}) {
-                    ## no critic
+                    ## no critic (BuiltinFunctions::ProhibitStringyEval)
                     eval('$new_host =~ '.$regex);
-                    ## use critic
+                    ## use critic (BuiltinFunctions::ProhibitStringyEval)
                 }
 
                 if ($svc) {
                     my $new_svc = $svc;
                     for my $regex (@{$c->config->{'graph_replace'}}) {
-                        ## no critic
+                        ## no critic (BuiltinFunctions::ProhibitStringyEval)
                         eval('$new_svc =~ '.$regex);
-                        ## use critic
+                        ## use critic (BuiltinFunctions::ProhibitStringyEval)
                     }
                     $new_action_url =~ s/\Q$svc\E/$new_svc/gmx;
                 }
@@ -2673,14 +2673,14 @@ switch real user and groups
 =cut
 
 sub switch_realuser {
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     if($< != $>) {
         $< = $> or confess("setuid failed: ".$!);
     }
     if($) != $() {
         $( = $) or confess("setgid failed: ".$!);
     }
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     return;
 }
 
@@ -3104,9 +3104,9 @@ sub get_template_variable {
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
     my $VAR1;
-    ## no critic
+    ## no critic (BuiltinFunctions::ProhibitStringyEval)
     eval($data);
-    ## use critic
+    ## use critic (BuiltinFunctions::ProhibitStringyEval)
     return $VAR1;
 }
 
@@ -3140,9 +3140,9 @@ sub precompile_templates {
     my $num = 0;
     my $stderr_output;
     do {
-        ## no critic
+        ## no critic (Variables::RequireInitializationForLocalVars)
         local *STDERR;
-        ## use critic
+        ## use critic (Variables::RequireInitializationForLocalVars)
         eval {
             open(STDERR, ">>", \$stderr_output);
         };

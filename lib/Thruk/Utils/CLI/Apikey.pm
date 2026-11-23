@@ -91,11 +91,11 @@ sub cmd {
     my($output, $rc) = ("", 0);
     if($mode eq 'info') {
         my $key = shift @{$commandoptions};
-        ## no critic
+        ## no critic (InputOutput::ProhibitInteractiveTest)
         if(!$key && -t 0) {
             $key = Thruk::Utils::CLI::read_stdin_password("enter private key: ");
         }
-        ## use critic
+        ## use critic (InputOutput::ProhibitInteractiveTest)
         $output = _print_key($c, $key);
     }
     elsif($mode eq 'create' || $mode eq 'new') {

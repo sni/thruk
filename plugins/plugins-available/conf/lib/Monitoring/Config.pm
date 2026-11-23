@@ -2252,9 +2252,9 @@ sub _check_references {
                 # expand wildcards and regex
                 my $newval = Thruk::Utils::convert_wildcards_to_regex($val);
                 for my $tst (keys %{$objects_by_name->{$link}}) {
-                    ## no critic
+                    ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                     return if $tst =~ m/$newval/;
-                    ## use critic
+                    ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                 }
             } elsif($attr eq 'parents' && $link eq 'service') {
                 if($val =~ m/,/mx) {

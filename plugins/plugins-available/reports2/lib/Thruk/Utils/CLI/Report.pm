@@ -143,12 +143,12 @@ sub _cmd_report {
     # create fake job when run from cron to save profile
     if(!$ENV{'THRUK_JOB_ID'}) {
         my($id,$dir) = Thruk::Utils::External::init_external($c);
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         Thruk::Utils::External::do_parent_stuff($c, $dir, $id, { allow => 'all', background => 1});
         Thruk::Utils::IO::write($dir."/pid", $$);
         $ENV{'THRUK_JOB_ID'}       = $id;
         $ENV{'THRUK_JOB_DIR'}      = $dir;
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         Thruk::Utils::IO::write($dir.'/stdout', "fake job create\n");
     }
 
@@ -171,9 +171,9 @@ sub _cmd_report {
     if(defined $report_file && $report_file eq '-2') {
         return($Thruk::Utils::Reports::error // "[".$nr.".rpt] report is running on another node already\n", 0);
     } elsif(defined $report_file && -f $report_file) {
-        ## no critic
+        ## no critic (InputOutput::ProhibitInteractiveTest)
         return(sprintf("[%s.rpt] report calculated successfully in %.1fs\n", $nr, $options->{'var'}->{'end_time'}-$options->{'var'}->{'start_time'}), 0) if(-t 0 || $ENV{'THRUK_CRON'}); # avoid pdf being printed to logfile
-        ## use critic
+        ## use critic (InputOutput::ProhibitInteractiveTest)
         $c->res->headers->content_type('application/octet-stream');
         return(Thruk::Utils::IO::read($report_file), 0);
     }

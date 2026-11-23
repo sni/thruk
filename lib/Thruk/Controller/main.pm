@@ -183,11 +183,11 @@ sub index {
         for my $ex (@{$excludes}) {
             if(Thruk::Base::looks_like_regex($ex)) {
                 for my $key (sort keys %{$hostgroups}) {
-                    ## no critic
+                    ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                     if($key =~ /$ex/) {
                         delete $hostgroups->{$key};
                     }
-                    ## use critic
+                    ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
                 }
             } else {
                 delete $hostgroups->{$ex};

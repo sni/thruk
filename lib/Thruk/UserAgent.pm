@@ -23,9 +23,9 @@ use Thruk::Utils::Log qw/:all/;
 
 use constant SSL_verify_mode_NONE => 0; # Net::SSLeay::VERIFY_NONE(),
 
-## no critic
+## no critic (Variables::RequireLocalizedPunctuationVars)
 $ENV{PERL_NET_HTTPS_SSL_SOCKET_CLASS} = "IO::Socket::SSL";
-## use critic
+## use critic (Variables::RequireLocalizedPunctuationVars)
 
 our $cwd = Cwd::getcwd;
 
@@ -52,9 +52,9 @@ sub new {
         'requests_redirectable' => [ 'GET' ],           # not used
     };
     if(!$verify_hostnames || (defined $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} && !$ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'})) {
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'PERL_LWP_SSL_VERIFY_HOSTNAME'} = 0; # required for older IO::Socket::SSLs
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         $self->{'ssl_opts'}->{'verify_hostname'} = 0;
         $self->{'ssl_opts'}->{'SSL_verify_mode'} = SSL_verify_mode_NONE;
         _debug("SSL verify_hostname is disabled");
@@ -67,9 +67,9 @@ sub new {
         $self->{'ssl_opts'}->{'SSL_ca_file'} = $thruk_config->{ssl_ca_file};
         _trace("using SSL_ca_file: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_file'});
     } else {
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
         eval "use Mozilla::CA;";
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval)
         if($@) {
             _trace("failed to load Mozilla::CA: %s", $@);
             $self->{'ssl_opts'}->{'SSL_ca_path'} = "/etc/ssl/certs";

@@ -1519,9 +1519,9 @@ sub _get_obfuscated_string {
             $m = MIME::Base64::decode_base64($2);
         }
         eval {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             $string =~ s/$m/\*\*\*/g;
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         };
     }
 
@@ -1532,18 +1532,18 @@ sub _get_obfuscated_string {
             $m = MIME::Base64::decode_base64($2);
         }
         eval {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             $string =~ s/\Q$m\E/\*\*\*/g;
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         };
     }
 
     my $c = $Thruk::Globals::c;
     if($c->config->{'commandline_obfuscate_pattern'}) {
         for my $pattern (@{$c->config->{'commandline_obfuscate_pattern'}}) {
-            ## no critic
+            ## no critic (BuiltinFunctions::ProhibitStringyEval)
             eval('$string =~ s'.$pattern.'g');
-            ## use critic
+            ## use critic (BuiltinFunctions::ProhibitStringyEval)
         }
     }
 

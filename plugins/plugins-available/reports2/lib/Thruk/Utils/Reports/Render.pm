@@ -140,18 +140,18 @@ sub expand_service_slas {
     my($param) = @_;
     my $slas = {};
     require Tie::IxHash;
-    ## no critic
+    ## no critic (Miscellanea::ProhibitTies)
     tie %{$slas}, "Tie::IxHash";
-    ## use critic
+    ## use critic (Miscellanea::ProhibitTies)
     for my $f (@{$param}) {
         my @hosts    = split/\s*,\s*/mx, $f->{'host'};
         my @services = split/\s*,\s*/mx, $f->{'service'};
         for my $h (@hosts) {
             if(!defined $slas->{$h}) {
                 $slas->{$h} = {};
-                ## no critic
+                ## no critic (Miscellanea::ProhibitTies)
                 tie %{$slas->{$h}}, "Tie::IxHash";
-                ## use critic
+                ## use critic (Miscellanea::ProhibitTies)
             }
             for my $s (@services) {
                 $slas->{$h}->{$s} = $f;

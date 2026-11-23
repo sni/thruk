@@ -129,9 +129,9 @@ sub perl {
         if(ref $conf->{'expr'} eq 'ARRAY') {
             $rc = eval { _call_perl_expr($conf->{'expr'}) };
         } else {
-            ## no critic
+            ## no critic (BuiltinFunctions::ProhibitStringyEval)
             $rc = eval($conf->{'expr'});
-            ## use critic
+            ## use critic (BuiltinFunctions::ProhibitStringyEval)
         }
         die($@) if $@;
         _finished_job_page($c, $c->stash) if !$c->stash->{job_id}; # breaks cascading jobs, ex.: xls export on showlog
@@ -167,9 +167,9 @@ sub perl {
             if(ref $conf->{'expr'} eq 'ARRAY') {
                 $rc = eval { _call_perl_expr($conf->{'expr'}) };
             } else {
-                ## no critic
+                ## no critic (BuiltinFunctions::ProhibitStringyEval)
                 $rc = eval($conf->{'expr'});
-                ## use critic
+                ## use critic (BuiltinFunctions::ProhibitStringyEval)
             }
             $err = $@;
             $c->stats->profile(end => 'External::perl eval');
@@ -262,9 +262,9 @@ sub perl {
 sub _call_perl_expr {
     my($expr) = @_;
     my($func, @args) = @{$expr};
-    ## no critic
+    ## no critic (TestingAndDebugging::ProhibitNoStrict)
     no strict 'refs';
-    ## use critic
+    ## use critic (TestingAndDebugging::ProhibitNoStrict)
     return $func->(@args);
 }
 
@@ -919,7 +919,7 @@ sub _init_child_process {
 
     Thruk::Base::restore_signal_handler();
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'THRUK_MODE'}               = 'CLI';
     $ENV{'THRUK_NO_CONNECTION_POOL'} = 1; # don't use connection pool after forking
     $ENV{'NO_EXTERNAL_JOBS'}         = 1; # don't fork twice
@@ -931,7 +931,7 @@ sub _init_child_process {
         $ENV{REMOTE_USER}        = $c->stash->{'remote_user'};
         $ENV{REMOTE_USER_GROUPS} = join(';', @{$c->user->{'groups'}});
     }
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     $c->{'app'}->{'pool'}->shutdown_threads() if $c->{'app'}->{'pool'};
 
@@ -951,9 +951,9 @@ sub _init_child_process {
         open(*STDERR, ">>", $fallback_log) || die "can't reopen stderr to $fallback_log: $!";
     }
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $|=1; # autoflush
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     # logging must be reset after closing the filehandles
     Thruk::Utils::Log::reset_logging();
@@ -1403,10 +1403,10 @@ sub wrap_prefix_output {
 
     open(my $fh, '>', $target_file) || die("cannot open log file: $target_file: $!");
 
-    ## no critic
+    ## no critic (Miscellanea::ProhibitTies)
     tie *STDOUT, 'Thruk::Utils::External', ($fh, "");
     tie *STDERR, 'Thruk::Utils::External', ($fh, "[E]");
-    ## use critic
+    ## use critic (Miscellanea::ProhibitTies)
 
     STDOUT->autoflush(1);
     STDERR->autoflush(1);
@@ -1475,9 +1475,9 @@ sub PRINT {
     my $line           = join("", @data);
     $self->{'newline'} = ($line =~ m/\n$/mx) ? 1 : 0;
 
-    ## no critic
+    ## no critic (TestingAndDebugging::ProhibitNoWarnings)
     no warnings 'utf8'; # suppress Wide character in print... warning
-    ## use critic
+    ## use critic (TestingAndDebugging::ProhibitNoWarnings)
 
     if(!$last_newline && !$self->{'newline'}) {
         # continue printing, previous line did not end with a newline

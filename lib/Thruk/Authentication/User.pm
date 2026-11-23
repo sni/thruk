@@ -793,9 +793,9 @@ sub transform_username {
     # regex replace?
     if($config->{'make_auth_replace_regex'}) {
         _debug("authentication regex replace before: ".$username) if $c;
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
         eval('$username =~ '.$config->{'make_auth_replace_regex'});
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval)
         _error("authentication regex replace error: ".$@) if ($c && $@);
         _debug("authentication regex replace after : ".$username) if $c;
     }

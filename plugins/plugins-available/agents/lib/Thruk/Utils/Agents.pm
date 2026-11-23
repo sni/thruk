@@ -917,14 +917,14 @@ sub check_pattern {
             return 1 if !_check_wildcard_pattern($val, $f, $substringmatch);
         }
         elsif($op eq '~' || $op eq '~~') {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             return 1 if $val =~ m/$f/;
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         }
         elsif($op eq '!~' || $op eq '!~~') {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             return 1 if $val !~ m/$f/;
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         } else {
             die("unknown operator: $op");
         }
@@ -944,9 +944,9 @@ sub _check_wildcard_pattern {
         my $p = "$pattern";
         $p =~ s/\.\*/*/gmx;
         $p =~ s/\*/.*/gmx;
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         return 1 if $str =~ m/$p/i;
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
     }
     return;
 }

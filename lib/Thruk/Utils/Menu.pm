@@ -330,9 +330,9 @@ sub _renew_navigation {
     $Thruk::Utils::Menu::additional_subitems = Thruk::Utils::IO::dclone($orig_additional_subitems);
     $Thruk::Utils::Menu::removed_items = {};
 
-    ## no critic
+    ## no critic (BuiltinFunctions::ProhibitStringyEval)
     eval("#line 1 $file\n".Thruk::Utils::IO::read($file));
-    ## use critic
+    ## use critic (BuiltinFunctions::ProhibitStringyEval)
     if($@) {
         _error("error while loading navigation from ".$file.": ".$@);
         confess($@);
@@ -380,9 +380,9 @@ sub _renew_navigation {
             # visibility defined by callback?
             if(defined $link->{'visible_cb'}) {
                 my $rc;
-                ## no critic
+                ## no critic (BuiltinFunctions::ProhibitStringyEval)
                 eval '$rc = '.$link->{'visible_cb'}.'($c);';
-                ## use critic
+                ## use critic (BuiltinFunctions::ProhibitStringyEval)
                 if($@) {
                     _error("error while running callback ".$link->{'visible_cb'}.": ".$@);
                 }

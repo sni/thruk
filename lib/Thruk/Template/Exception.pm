@@ -3,9 +3,9 @@ use base qw(Template::Exception);
 
 use strict;
 use warnings;
-## no critic
+## no critic (TestingAndDebugging::ProhibitNoWarnings)
 no warnings 'redefine';
-## use critic
+## use critic (TestingAndDebugging::ProhibitNoWarnings)
 use Carp;
 
 sub Template::Exception::new {

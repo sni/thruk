@@ -639,9 +639,9 @@ sub _append_performance_data_string {
             $unit = $totals->{perfunits}->{$p};
             last;
         }
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         if($key =~ m/^$p$/) {
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             $unit = $totals->{perfunits}->{$p};
             last;
         }
@@ -763,9 +763,9 @@ sub _replace_output {
         for my $d (@processed) {
             $d = 0 unless defined $d;
         }
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
         $value = eval(join("", @processed)) // '(error)';
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval)
     }
 
     if($format) {

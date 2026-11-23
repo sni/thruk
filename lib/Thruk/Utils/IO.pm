@@ -834,9 +834,9 @@ options are:
 
 =cut
 
-## no critic
+## no critic (Subroutines::RequireArgUnpacking)
 sub cmd {
-## use critic
+## use critic (Subroutines::RequireArgUnpacking)
     my($cmd, $options) = @_;
 
     # REMOVE AFTER: 01.01.2028

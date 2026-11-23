@@ -445,12 +445,12 @@ sub check_for_nasty_filename {
 
 =cut
 sub restore_signal_handler {
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $SIG{INT}  = 'DEFAULT';
     $SIG{TERM} = 'DEFAULT';
     $SIG{PIPE} = 'DEFAULT';
     $SIG{ALRM} = 'DEFAULT';
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     return;
 }
 
@@ -656,9 +656,9 @@ remove duplicate and non-existing folders from @INC without changing order of th
 =cut
 sub sanitize_inc {
     my $clean = Thruk::Base::array_uniq(\@INC);
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     @INC = grep { -d $_ } @{$clean};
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     return;
 }

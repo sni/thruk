@@ -684,9 +684,9 @@ sub custom {
         if($@) {
             _info("internal error while loading filter file ".$f->{'file'}.": ".$@);
         }
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
         eval('($status, $short_desc, $status_text, $extra) = '."$fname".'($c, $bp, $n, $real_args, $livedata);');
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval)
         if($@) {
             $status      = 3;
             $short_desc  = "UNKNOWN";

@@ -301,9 +301,9 @@ sub _log {
     my $usertz;
     if($ENV{'THRUK_SERVER_TZ'} and $ENV{'TZ'}) {
         $usertz = $ENV{'TZ'};
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'TZ'} = $ENV{'THRUK_SERVER_TZ'};
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         POSIX::tzset();
     }
 
@@ -324,9 +324,9 @@ sub _log {
 
     # restore user timezone
     if($usertz) {
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'TZ'} = $usertz;
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         POSIX::tzset();
     }
 
@@ -432,12 +432,12 @@ sub time_prefix {
 =cut
 sub wrap_stdout2log {
     my($capture, $tmp);
-    ## no critic
+    ## no critic (InputOutput::ProhibitOneArgSelect, Miscellanea::ProhibitTies, References::ProhibitDoubleSigils)
     open($capture, '>', \$tmp) || die("cannot open stdout capture: $!");
     tie *$capture, 'Thruk::Utils::Log', (*STDOUT);
     select $capture;
     STDOUT->autoflush(1);
-    ## use critic
+    ## use critic (InputOutput::ProhibitOneArgSelect, Miscellanea::ProhibitTies, References::ProhibitDoubleSigils)
     return($capture);
 }
 
@@ -449,9 +449,9 @@ sub wrap_stdout2log {
 
 =cut
 sub wrap_stdout2log_stop {
-    ## no critic
+    ## no critic (InputOutput::ProhibitOneArgSelect)
     select *STDOUT;
-    ## use critic
+    ## use critic (InputOutput::ProhibitOneArgSelect)
     untie *STDOUT;
     return;
 }
@@ -466,12 +466,12 @@ sub wrap_stdout2log_stop {
 =cut
 sub wrap_stderr2log {
     my($capture, $tmp);
-    ## no critic
+    ## no critic (InputOutput::ProhibitOneArgSelect, Miscellanea::ProhibitTies, References::ProhibitDoubleSigils)
     open($capture, '>', \$tmp) || die("cannot open stdout capture: $!");
     tie *$capture, 'Thruk::Utils::Log', (*STDERR);
     select $capture;
     STDERR->autoflush(1);
-    ## use critic
+    ## use critic (InputOutput::ProhibitOneArgSelect, Miscellanea::ProhibitTies, References::ProhibitDoubleSigils)
     return($capture);
 }
 
@@ -483,9 +483,9 @@ sub wrap_stderr2log {
 
 =cut
 sub wrap_stderr2log_stop {
-    ## no critic
+    ## no critic (InputOutput::ProhibitOneArgSelect)
     select *STDERR;
-    ## use critic
+    ## use critic (InputOutput::ProhibitOneArgSelect)
     untie *STDERR;
     return;
 }
@@ -659,9 +659,9 @@ sub get_screen_logger {
     STDERR->autoflush(1);
 
     # since we log to stderr, check if stderr is attached to a terminal
-    ## no critic
+    ## no critic (InputOutput::ProhibitInteractiveTest)
     my $use_color = -t STDERR;
-    ## use critic
+    ## use critic (InputOutput::ProhibitInteractiveTest)
     if($use_color) {
         eval {
             require Term::ANSIColor;

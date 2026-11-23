@@ -1409,9 +1409,9 @@ sub check_federation_peers {
         # may fail for older lmd releases which don't have parent or section information
         if($@ =~ m/\Qbad request: table sites has no column\E/mx) {
             _info("cannot check lmd federation mode, please update LMD.");
-            ## no critic
+            ## no critic (Variables::RequireLocalizedPunctuationVars)
             $ENV{'THRUK_USE_LMD_FEDERATION_FAILED'} = 1;
-            ## use critic
+            ## use critic (Variables::RequireLocalizedPunctuationVars)
         }
     }
     $c->db->reset_failed_backends($c); # do not confuse actual page from federation initialization

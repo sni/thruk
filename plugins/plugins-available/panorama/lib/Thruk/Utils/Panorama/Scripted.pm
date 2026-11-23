@@ -75,10 +75,10 @@ sub load_dashboard {
         $Thruk::Utils::Panorama::Scripted::data = $data || '{}';
         $Thruk::Utils::Panorama::Scripted::meta = $meta;
 
-        ## no critic
+        ## no critic (BuiltinFunctions::ProhibitStringyEval, TestingAndDebugging::ProhibitNoWarnings)
         no warnings qw(redefine);
         eval("#line 1 $file\n".$code);
-        ## use critic
+        ## use critic (BuiltinFunctions::ProhibitStringyEval, TestingAndDebugging::ProhibitNoWarnings)
         if($@) {
             _error("error while loading dynamic dashboard from ".$file.": ".$@);
             return;

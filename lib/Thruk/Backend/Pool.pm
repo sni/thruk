@@ -64,10 +64,10 @@ sub new {
 
     # change into home folder so we can use relative paths
     if($ENV{'OMD_ROOT'}) {
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'THRUKOLDPWD'} = Cwd::getcwd();
         $ENV{'HOME'} = $ENV{'OMD_ROOT'};
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         chdir($ENV{'HOME'});
     }
 
@@ -100,10 +100,10 @@ sub new {
 
     if($config->{'use_lmd_core'}) {
         $pool_size = 1; # no pool required when using lmd core
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
         $ENV{'THRUK_USE_LMD'} = 1;
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
         eval {
             Thruk::Utils::IO::mkdir_r($config->{'tmp_path'}.'/lmd') ;
         };
@@ -171,9 +171,9 @@ sub new {
         &timing_breakpoint('peers created');
         if($pool_size > 1) {
             printf(STDERR "mem:% 7s MB before pool with %d members\n", Thruk::Utils::IO::get_memory_usage(), $pool_size) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
-            ## no critic
+            ## no critic (Variables::RequireLocalizedPunctuationVars)
             $SIG{'USR1'}  = undef if $SIG{'USR1'};
-            ## use critic
+            ## use critic (Variables::RequireLocalizedPunctuationVars)
             require Thruk::Pool::Simple;
             $self->{'thread_pool'} = Thruk::Pool::Simple->new(
                 size    => $pool_size,
@@ -183,9 +183,9 @@ sub new {
             printf(STDERR "mem:% 7s MB after pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
         } else {
             printf(STDERR "mem:% 7s MB without pool\n", Thruk::Utils::IO::get_memory_usage()) if($ENV{'THRUK_PERFORMANCE_DEBUG'} && $ENV{'THRUK_PERFORMANCE_DEBUG'} >= 2);
-            ## no critic
+            ## no critic (Variables::RequireLocalizedPunctuationVars)
             $ENV{'THRUK_NO_CONNECTION_POOL'} = 1;
-            ## use critic
+            ## use critic (Variables::RequireLocalizedPunctuationVars)
         }
     }
 

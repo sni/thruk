@@ -39,10 +39,10 @@ sub set_timezone {
 
     $config->{'_server_timezone'} = $timezone unless $config->{'_server_timezone'};
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'TZ'} = $timezone;
     $ENV{'THRUK_SERVER_TZ'} = $config->{'_server_timezone'};
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     POSIX::tzset();
 
     return;

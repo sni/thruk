@@ -66,7 +66,7 @@ sub new {
     }
 
     # set some env defaults
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'THRUK_MODE'}       = 'CLI';
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
     Thruk::Base->config->{'no_external_job_forks'} = 1;
@@ -75,7 +75,7 @@ sub new {
     $ENV{'THRUK_VERBOSE'}    = $ENV{'THRUK_VERBOSE'} // $options->{'verbose'} // 0;
     $ENV{'THRUK_QUIET'}      = 1 if $options->{'quiet'};
     $ENV{'THRUK_VERBOSE'}    = 0 if$ENV{'THRUK_QUIET'};
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     if($options->{'verbose'} && $options->{'quiet'}) {
         _fatal("The quiet and verbose options are mutually exclusive. Choose one of them.");
@@ -301,9 +301,9 @@ load given module and returns true on success
 =cut
 sub load_module {
     my($module) = @_;
-    ## no critic
+    ## no critic (BuiltinFunctions::ProhibitStringyEval)
     eval "require $module";
-    ## use critic
+    ## use critic (BuiltinFunctions::ProhibitStringyEval)
     my $err = $@;
     if($err) {
         if($err =~ m/\QCompilation failed in require\E/mx) {
@@ -546,9 +546,9 @@ main entry point for cli commands from the terminal
 sub from_local {
     my($self, $c, $options) = @_;
     _debug2("from_local()");
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'NO_EXTERNAL_JOBS'} = 1;
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     local $ENV{'THRUK_CLI_SRC'} = 'CLI';
 
     # user can be set from command line
@@ -803,9 +803,9 @@ sub _run_command_action {
 
         my $skip_backends;
         {
-            ## no critic
+            ## no critic (TestingAndDebugging::ProhibitNoStrict)
             no strict 'refs';
-            ## use critic
+            ## use critic (TestingAndDebugging::ProhibitNoStrict)
             $skip_backends = ${"Thruk::Utils::CLI::".ucfirst($action)."::skip_backends"};
             if(ref $skip_backends eq 'CODE') {
                 $skip_backends = &{$skip_backends}($c, $opt, $src);
@@ -1500,11 +1500,11 @@ read password from stdin
 =cut
 sub read_stdin_password {
     my($msg) = @_;
-    ## no critic
+    ## no critic (InputOutput::ProhibitInteractiveTest)
     if(!-t 0) {
         return;
     }
-    ## use critic
+    ## use critic (InputOutput::ProhibitInteractiveTest)
     my $has_readkey = 0;
     eval {
         require Term::ReadKey;

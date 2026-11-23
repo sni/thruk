@@ -408,13 +408,13 @@ sub set_config_env {
 
     my $conf = get_config_env(\@files);
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     if($conf->{'thruk_verbose'}) {
         if(!$ENV{'THRUK_VERBOSE'} || $ENV{'THRUK_VERBOSE'} < $conf->{'thruk_verbose'}) {
             $ENV{'THRUK_VERBOSE'} = $conf->{'thruk_verbose'};
         }
     }
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     $config = $conf;
 
@@ -542,7 +542,7 @@ sub set_default_config {
     if($> != 0 && !-d ($var_path.'/.')) { CORE::mkdir($var_path); }
     die("'".$var_path."/.' does not exist, make sure it exists and has proper user/groups/permissions") unless -d ($var_path.'/.');
     my($uid, $groups) = get_user($var_path);
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'THRUK_USER_ID'}  = $config->{'thruk_user'}  || $uid;
     $ENV{'THRUK_USER'}     = $config->{'thruk_user'}  || $uid;
     $ENV{'THRUK_GROUP_ID'} = $config->{'thruk_group'} || $groups->[0];
@@ -558,7 +558,7 @@ sub set_default_config {
     }
 
     $ENV{'THRUK_GROUPS'}   = join(';', @{$groups});
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     if(Thruk::Base->mode eq 'CLI_SETUID') {
         if(defined $uid && $> == 0) {
@@ -692,9 +692,9 @@ sub set_default_config {
     }
 
     # make this setting available in env
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'THRUK_CURL'} = $ENV{'THRUK_CURL'} || $config->{'use_curl'} || 0;
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     if($config->{'action_menu_apply'}) {
         for my $menu (keys %{$config->{'action_menu_apply'}}) {
@@ -1311,10 +1311,10 @@ sub switch_user {
     my($uid, $groups, $home) = @_;
     if(scalar @{$groups} > 0) {
         POSIX::setgid($groups->[0]) || confess("setgid failed: ".$!);
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $) = join(" ", @{$groups});
         $( = $groups->[0];
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
     my @cmd = _get_orig_cmd_line();
     _debug("switching to uid: $uid");
@@ -1328,16 +1328,16 @@ sub switch_user {
             next unless -r $lib.'/.';
             push @clean, $lib;
         }
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'PERL5LIB'} = join(':', @clean);
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
 
 	# update home folder to avoid permission errors
     if($home && $ENV{'HOME'}) {
-        ## no critic
+        ## no critic (Variables::RequireLocalizedPunctuationVars)
         $ENV{'HOME'} = $home;
-        ## use critic
+        ## use critic (Variables::RequireLocalizedPunctuationVars)
     }
 
     exec(@cmd) || confess("exec (".'"'.join('" "', @cmd).'"'.") failed: ".$!);
@@ -1744,9 +1744,9 @@ returns all function names for a class
 sub get_functions_for_class {
     my($classname) = @_;
 
-    ## no critic
+    ## no critic (TestingAndDebugging::ProhibitNoStrict)
     no strict 'refs';
-    ## use critic
+    ## use critic (TestingAndDebugging::ProhibitNoStrict)
 
     # adopted from https://metacpan.org/dist/Class-Inspector/source/lib/Class/Inspector.pm#L147
     my $RE_IDENTIFIER = qr/\A[^\W\d]\w*\z/mxs;

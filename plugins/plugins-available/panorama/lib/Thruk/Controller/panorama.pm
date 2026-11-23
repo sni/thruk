@@ -1075,12 +1075,12 @@ sub _search_match {
         $match   = $query;
         $matched = 1;
     }
-    ## no critic
+    ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
     if($field =~ m#(.*)($query)(.*)#si) {
         ($pre,$match,$post) = ($1,$2,$3);
         $matched = 1;
     }
-    ## use critic
+    ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
 
     return unless $matched;
     my $found = {
@@ -2466,11 +2466,11 @@ sub _task_show_comments {
     if($include) {
         my $filtered = [];
         for my $d (@{$data}) {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             if($d->{'author'} =~ m/$include/ || $d->{'comment'} =~ m/$include/) {
                 push @{$filtered}, $d;
             }
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         }
         $data = $filtered;
     }
@@ -2479,11 +2479,11 @@ sub _task_show_comments {
     if($exclude) {
         my $filtered = [];
         for my $d (@{$data}) {
-            ## no critic
+            ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
             if($d->{'author'} !~ m/$exclude/ && $d->{'comment'} !~ m/$exclude/) {
                 push @{$filtered}, $d;
             }
-            ## use critic
+            ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         }
         $data = $filtered;
     }

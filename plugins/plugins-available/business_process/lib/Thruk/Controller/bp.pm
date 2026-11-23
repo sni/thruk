@@ -604,9 +604,9 @@ sub _bp_start_page {
     my $filter = $c->req->parameters->{'filter'} // '';
     if($filter) {
         my $new_bps = [];
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         my $regex = qr/$filter/i;
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         for my $bp (@{$bps}) {
             push @{$new_bps}, $bp if $bp->{'name'} =~ $regex;
         }

@@ -332,9 +332,9 @@ sub get_logs {
     ';
     confess($sql) if $sql =~ m/(ARRAY|HASH)/mx;
 
-    ## no critic
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     $ENV{'THRUK_DB_LAST_QUERY'} = $sql;
-    ## use critic
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
 
     # logfiles into tmp file
     my($fh, $filename);

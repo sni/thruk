@@ -1836,9 +1836,9 @@ sub get_groups_filter {
         elsif($type eq 'contactgroup') {
             $cache->{$type} = $c->db->get_contactgroup_names() unless defined $cache->{$type};
         }
-        ## no critic
+        ## no critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         @names = grep(/$value/i, @{$cache->{$type}});
-        ## use critic
+        ## use critic (RegularExpressions::RequireExtendedFormatting, RegularExpressions::RequireLineBoundaryMatching)
         if(scalar @names == 0) { @names = ($value); }
     } else {
         my $groups = [];
