@@ -1,3 +1,68 @@
+function test_shared_label_rendering() {
+    var panel = {
+        id: 'label_test',
+        el: { dom: {} },
+        host: { name: '<test>', state: 0, acknowledged: 1, last_check: 100000, private_field: 'hidden' },
+        xdata: {}
+    };
+    var render = function(label) {
+        return TP.IconLabel.prototype.setIconLabelDynamicText.call(panel, label);
+    };
+    var cases = [
+        ['Healthy', 'Healthy'],
+        ['<b>{{name}}</b><br>', '<b>&lt;test&gt;</b><br>'],
+        ['<b title=x>label</b>', '<b title="x">label</b>'],
+        ['<img border=1 width="50%" height=16 hspace=2 vspace=3 align=middle onload="unused">',
+         '<img border="1" width="50%" height="16" hspace="2" vspace="3" align="middle">'],
+        ['<p align=right border=1><font color=red face=serif size=3>Alert</font><br clear=all></p>',
+         '<p align="right"><font color="red" face="serif" size="3">Alert</font><br clear="all"></p>'],
+        ['<span class="site-label warning" onclick="unused">label</span>', '<span class="site-label warning">label</span>'],
+        ['<img src="../plugins/panorama/images/server.png" alt="Server">',
+         '<img alt="Server" src="'+new URL('../plugins/panorama/images/server.png', document.baseURI).href+'">'],
+        ['<img src="https://example.invalid/icon.png" alt="Remote">', '<img alt="Remote">'],
+        ['<img src="/other/icon.PNG?v=2#main">', '<img src="'+window.location.origin+'/other/icon.PNG?v=2#main">'],
+        ['<img src="'+window.location.origin+'/icon.webp">', '<img src="'+window.location.origin+'/icon.webp">'],
+        ['<img src="//example.invalid/image.svg">', '<img>'],
+        ['<img src="/download?name=icon.png">', '<img>'],
+        ['<span style="color: {{state == 0 ? \'green\' : \'red\'}}; position: fixed" onclick="unused">{{name}}</span>',
+         '<span style="color: green;">&lt;test&gt;</span>'],
+        ['{{private_field}}{{window}}{{TP}}', ''],
+        ['<style>b{color:red}</style><b>label</b>', '<b>label</b>'],
+        ['{{sprintf("%02d", acknowledged + 1)}}', '02'],
+        ['{{strftime("%Y", last_check)}}', '1970'],
+        ['{{if(acknowledged) {"yes"} else {"no"}}}', 'yes'],
+        ['{{nl2br("a\\nb")}}', 'a<br>b'],
+        ["{{panel['constructor']}}", ''],
+        ['{{name.toString()}}', ''],
+        ['{{toString()}}', ''],
+        ['{{constructor}}', '']
+    ];
+    TP.availabilities = TP.availabilities || {};
+    var opts = {d: '24h'};
+    var cached = {};
+    cached[Ext.JSON.encode(opts)] = {last: 99.5, last_refresh: Date.now()/1000};
+    TP.availabilities[panel.id] = cached;
+    cases.push(['{{sprintf("%.2f", availability({d: "24h"}))}}', '99.50']);
+    try {
+        var result = document.createElement('div');
+        var image = "url('/assets/pattern.png?v=2')";
+        result.innerHTML = render('<span style="background-image: '+image+'">label</span>');
+        if(result.firstChild.style.backgroundImage != 'url("'+window.location.origin+'/assets/pattern.png?v=2")') { throw Error('missing label background'); }
+        result.innerHTML = render('<span style="background-image: '+image+', url(https://example.invalid/icon.png)">label</span>');
+        if(result.firstChild.style.backgroundImage) { throw Error('unexpected layered background'); }
+        result.innerHTML = render('<span style="border: 1px solid red; border-image-source: url(icon.png)">label</span>');
+        var style = result.firstChild.style;
+        if(style.borderTop != '1px solid red' || /url/i.test(style.borderImageSource)) { throw Error('invalid label border'); }
+        cases.forEach(function(c) {
+            var actual = render(c[0]);
+            if(actual !== c[1]) { throw Error(c[0]+': expected '+c[1]+', got '+actual); }
+        });
+    } finally {
+        delete TP.availabilities[panel.id];
+    }
+    return 1;
+}
+
 function test_get_group_status_unknown() {
     var group = {"hosts":{"ack_down":0,"ack_unreachable":0,
                           "down":0, "pending":0, "unreachable":0,"up":0,

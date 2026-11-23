@@ -1481,8 +1481,7 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
     var help = {
             xtype:   'label',
             cls:     'labelhelp',
-            html:    '<p>Use HTML to format your label<br>'
-                    +'Ex.: <u>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/u>, Newlines: <u>&lt;br&gt;<\/u><\/p>'
+            html:    '<p>Use HTML to format a label. Ex.: <u>Host &lt;b&gt;{{name}}&lt;/b&gt;<\/u>, Newlines: <u>&lt;br&gt;<\/u><\/p>'
                     +'<p>It is possible to create dynamic labels with {{placeholders}}.<br>'
                     +'Ex.: <u>Host {{name}}: {{plugin_output}}<\/u><\/p>'
                     +'<p>You may also do calculations inside placeholders like this:<br>'
@@ -1544,7 +1543,14 @@ TP.iconLabelHelp = function(panel, textarea_id, extra) {
                     +'<tr><td><\/td><td colspan=2><u>{{ sprintf("%.2f", availability({d: "24h", tm: "5x8", s: "cu", downtime: false})) }}%<\/u><\/td><\/tr>'
                     +extra_items
 
-                    +'<\/table>',
+                    +'<\/table><p><b>Label reference<\/b><br>'
+                    +'Formatting tags: '+TP.labelPolicy.tags.join(', ')+'.<br>'
+                    +'Attributes: '+Object.keys(TP.labelPolicy.attributes).join(', ')+'.<br>'
+                    +'Legacy attributes by tag: '+Object.keys(TP.labelPolicy.presentation).map(function(tag) {
+                        return tag+': '+TP.labelPolicy.presentation[tag].join(', ');
+                    }).join('; ')+'.<br>'
+                    +'Inline styles: '+TP.labelPolicy.styles.join(', ')+'.<br>'
+                    +'Functions: '+Object.keys(TP.labelPolicy.functions).join(', ')+'.<\/p>',
                 listeners: {
                     afterrender: function(This) {
                         var examples = This.el.dom.getElementsByTagName('u');

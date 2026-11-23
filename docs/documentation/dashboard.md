@@ -90,6 +90,31 @@ The state can be represented in various types:
 Each icon and widget can have a static or dynamic label.
 To change icon settings, double-click the icon or right-click it to open the context menu.
 
+Use HTML to style a label. For example, this label shows a healthy host in green:
+
+```html
+<span style="color: {{state == 0 ? 'green' : 'red'}}"><b>{{name}}</b></span>
+```
+
+Use `border` for an outline around label content. For example:
+
+```html
+<img src="../plugins/panorama/images/server.png" alt="Server" style="border: 1px solid gray">
+```
+
+Use a relative or absolute URL on the dashboard's origin. The URL path must end
+in `.png`, `.gif`, `.jpg`, `.jpeg`, `.webp`, or `.svg`. Query strings and fragments
+are allowed. The same rule applies to a single CSS background image:
+
+```html
+<span style="background-image: url('../usercontent/images/pattern.png')">{{name}}</span>
+```
+
+The label editor lists the supported tags, attributes, styles, functions, and
+monitoring fields. Inside `{{…}}`, use addition, comparisons, conditionals, or
+function calls. Field values appear as text. Browser objects, script tags, and
+event handlers are not available.
+
 [![labels 1](dashboard/contextmenu.png)](dashboard/contextmenu.png)
 [![labels 2](dashboard/dynlabel.png)](dashboard/dynlabel.png)
 [![labels 3](dashboard/dynlabel2.png)](dashboard/dynlabel2.png)

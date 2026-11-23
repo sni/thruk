@@ -995,32 +995,19 @@ TP.getShapeColor = function(type, panel, xdata, forceColor) {
     return({color: fillcolor, value: p.val, perfdata: p, range: r});
 }
 
-TP.evalInContext = function(js, context) {
-    var restore = {};
-    for(var key in context) { restore[key] = window[key]; window[key] = context[key]; }
-    var res, err;
-    try {
-        res = eval(js);
-    } catch(e) { err = e; }
-    for(var key in restore) {
-        if(restore[key] == undefined) {
-            delete(window[key]);
-        } else {
-            window[key] = restore[key];
-        }
-    }
-    if(err) { throw(err); }
-    return(res);
-}
-
 TP.getPanelMacros = function(panel) {
-    var macros = { panel: panel };
+    var macros = {};
     if(panel.getName)      { macros['name'] = panel.getName(); }
     if(panel.servicegroup) { macros.totals = panel.servicegroup; macros['alias'] = panel.servicegroup.alias; macros['name'] = panel.servicegroup.name; }
     if(panel.hostgroup)    { macros.totals = panel.hostgroup;    macros['alias'] = panel.hostgroup.alias;    macros['name'] = panel.hostgroup.name; }
     if(panel.results)      { macros.totals = panel.results; }
-    if(panel.host)         { for(var key in panel.host)    { macros[key] = panel.host[key];    } macros['performance_data'] = panel.host['perf_data']; }
-    if(panel.service)      { for(var key in panel.service) { macros[key] = panel.service[key]; } macros['performance_data'] = panel.service['perf_data']; }
+    [panel.host, panel.service].forEach(function(obj) {
+        if(!obj) { return; }
+        TP.labelPolicy.fields.forEach(function(key) {
+            if(Object.prototype.hasOwnProperty.call(obj, key)) { macros[key] = obj[key]; }
+        });
+        macros.performance_data = obj.perf_data;
+    });
     if(macros.perf_data) {
         macros.perf_data = parse_perf_data(macros['performance_data']);
         macros.perfdata = {};
