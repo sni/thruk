@@ -17,14 +17,15 @@ next:
           - refuse cron schedule entries with malformed fields
           - escape the error and referer parameters of the command form
           - escape report name and description in generated report pages
-          - require authorized_for_reports on the report REST routes
-          - refuse cron entries containing a line break
+          - require authorized_for_reports on the report REST routes ( GHSA-j4w6-p83g-g5qf)
+          - refuse cron entries containing a line break ( GHSA-3cjx-6wcv-r6g9)
           - refuse bookmarks with executable url schemes (GHSA-w5pf-vr4p-h335)
           - refuse a caller-provided 'eval' argument pair in remote.cgi (GHSA-44p7-p5wf-qw57)
           - sanitize pnp graph export source (GHSA-fjj8-9jv6-5g6p)
           - escape html in the action url (GHSA-7xch-vwp2-xvcr)
           - escape html in bookmark links (GHSA-4f3q-c36g-2h2q)
           - restrict report_from_url to allowed hosts (GHSA-j7m6-r8rq-xgm9)
+          - sanitize command argument input ( GHSA-4r78-rwq7-mmfv)
           - add report_allow_url_hosts option
           - add option 'spannulls_multiplier' for histou graphs
 
