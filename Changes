@@ -45,6 +45,10 @@ next:
                file:) which could be stored via the status.cgi bookmark form and rendered as
                a script-capable navigation link in the side menu of other viewers
                (stored XSS, GHSA-w5pf-vr4p-h335, reported by @garbleartistry)
+          - refuse a caller-provided 'eval' argument pair in Thruk::Backend::Pool::do_on_peer
+            (GHSA-44p7-p5wf-qw57, reported by @glacieraxiom). Any API-key-authenticated
+            remote.cgi user could send action=raw with args ["eval", "<perl>"] and execute
+            arbitrary Perl in the worker.
           - Graphs:
             - add new option 'spannulls_multiplier' which controls the parameter for histou graphs
 
