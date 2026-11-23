@@ -67,9 +67,7 @@ sub new {
         $self->{'ssl_opts'}->{'SSL_ca_file'} = $thruk_config->{ssl_ca_file};
         _trace("using SSL_ca_file: %s (from configuration)", $self->{'ssl_opts'}->{'SSL_ca_file'});
     } else {
-        ## no critic (BuiltinFunctions::ProhibitStringyEval)
-        eval "use Mozilla::CA;";
-        ## use critic (BuiltinFunctions::ProhibitStringyEval)
+        eval { require Mozilla::CA; };
         if($@) {
             _trace("failed to load Mozilla::CA: %s", $@);
             $self->{'ssl_opts'}->{'SSL_ca_path'} = "/etc/ssl/certs";

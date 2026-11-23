@@ -301,9 +301,10 @@ load given module and returns true on success
 =cut
 sub load_module {
     my($module) = @_;
-    ## no critic (BuiltinFunctions::ProhibitStringyEval)
-    eval "require $module";
-    ## use critic (BuiltinFunctions::ProhibitStringyEval)
+    _debug2("trying to load module: ".$module);
+    eval {
+        load($module);
+    };
     my $err = $@;
     if($err) {
         if($err =~ m/\QCompilation failed in require\E/mx) {

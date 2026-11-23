@@ -22,9 +22,11 @@ Help for various configuration settings
 return help for config directive
 
 =cut
+
+our $helpdata;
+
 sub get_config_help {
     my($type, $key) = @_;
-    our($helpdata);
 
     $key =~ s|^[\-\+\!]+||gmx;
 
@@ -41,17 +43,6 @@ sub get_config_help {
         return "Custom variables allow users to define additional properties in their host, service, and contact definitions, and use their values in notifications, event handlers, and host and service checks.<br><ul><li>Custom variable names must begin with an underscore (_) to prevent name collision with standard variables</li><li>Custom variable names are converted to all uppercase before use</li><li>Custom variables are inherited from object templates like normal variables</li><li>Scripts can reference custom variable values with macros and environment variables</li></ul>";
     }
 
-    # read data unless defined already
-    if(!defined $helpdata) {
-        my $var;
-        while (<DATA>) {
-            $var .= $_;
-        }
-        ## no critic (BuiltinFunctions::ProhibitStringyEval)
-        $helpdata = eval $var;
-        ## use critic (BuiltinFunctions::ProhibitStringyEval)
-    }
-
     unless(defined $helpdata->{$type}->{$key}) {
         if($type eq 'discoveryrule') {
             return $helpdata->{'host'}->{$key} if $helpdata->{'host'}->{$key};
@@ -63,13 +54,7 @@ sub get_config_help {
 
 ##########################################################
 
-
-1;
-
-##########################################################
-
-__DATA__
-{
+$helpdata = {
     'command' => {
         'command_line' => '<p>This directive is used to define what is actually executed by Nagios when the command is used for service or host checks, notifications, or event handlers. Before the command line is executed, all valid macros are replaced with their respective values.  See the documentation on macros for determining when you can use different macros.  Note that the command line is <i>not</i> surrounded in quotes.  Also, if you want to pass a dollar sign ($) on the command line, you have to escape it with another dollar sign.</p><p><strong>NOTE</strong>: You may not include a <b>semicolon</b> (;) in the <i>command_line</i> directive, because everything after it will be ignored as a config file comment.  You can work around this limitation by setting one of the <b>$USER$</b> macros in your resource file to a semicolon and then referencing the appropriate $USER$ macro in the <i>command_line</i> directive in place of the semicolon.</p><p>If you want to pass arguments to commands during runtime, you can use <b>$ARGn$</b> macros in the <i>command_line</i> directive of the command definition and then separate individual arguments from the command name (and from each other) using bang (!) characters in the object definition directive (host check command, service event handler command, etc) that references the command.  More information on how arguments in command definitions are processed during runtime can be found in the documentation on macros.</p>',
         'command_name' => 'This directive is the short name used to identify the command.  It is referenced in contact, host, and service definitions (in notification, check, and event handler directives), among other places.',
@@ -104,7 +89,7 @@ __DATA__
         'alias' => 'This directive is used to define a longer name or description used to identify the contact group.',
         'contactgroup_members' => 'This optional directive can be used to include contacts from other "sub" contact groups in this contact group.  Specify a comma-delimited list of short names of other contact groups whose members should be included in this group.',
         'contactgroup_name' => 'This directive is a short name used to identify the contact group.',
-        'members' => 'This optional directive is used to define a list of the <i>short names</i> of contacts  that should be included in this group.   Multiple contact names should be separated by commas.  This directive may be used as an alternative to (or in addition to) using the <i>contactgroups</i> directive in contact definitions.'
+        'members' => 'This optional directive is used to define a list of the <i>short names</i> of contacts  that should be included in this group.   Multiple contact names should be separated by commas.  This directive may be used as an alternative to (or in addition to) using the <i>contactgroups</i> directive in contact definitions.',
     },
     'host' => {
         '2d_coords' => 'This variable is used to define coordinates to use when drawing the host in the statusmap CGI.  Coordinates should be given in positive integers, as they correspond to physical pixels in the generated image.  The origin for drawing (0,0) is in the upper left hand corner of the image and extends in the positive x direction (to the right) along the top of the image and in the positive y direction (down) along the left hand side of the image.  For reference, the size of the icons drawn is usually about 40x40 pixels (text takes a little extra space).  The coordinates you specify here are for the upper left hand corner of the host icon that is drawn.  Note:  Don\'t worry about what the maximum x and y coordinates that you can use are.  The CGI will automatically calculate the maximum dimensions of the image it creates based on the largest x and y coordinates you specify.',
@@ -175,7 +160,7 @@ __DATA__
         'host_name' => 'This directive is used to identify the <i>short name(s)</i> of the host(s) <i>that is being depended upon</i> (also referred to as the master host).  Multiple hosts should be separated by commas.',
         'hostgroup_name' => 'This directive is used to identify the <i>short name(s)</i> of the hostgroup(s) <i>that is being depended upon</i> (also referred to as the master host).  Multiple hostgroups should be separated by commas.  The hostgroup_name may be used instead of, or in addition to, the host_name directive.',
         'inherits_parent' => 'This directive indicates whether or not the dependency inherits dependencies of the host <i>that is being depended upon</i> (also referred to as the master host).  In other words, if the master host is dependent upon other hosts and any one of those dependencies fail, this dependency will also fail.',
-        'notification_failure_criteria' => 'This directive is used to define the criteria that determine when notifications for the dependent host should <i>not</i> be sent out.  If the <i>master</i> host is in one of the failure states we specify, notifications for the <i>dependent</i> host will not be sent to contacts.  Valid options are a combination of one or more of the following: <b>o</b> = fail on an UP state, <b>d</b> = fail on a DOWN state, <b>u</b> = fail on an UNREACHABLE state, and <b>p</b> = fail on a pending state (e.g. the host has not yet been checked).  If you specify <b>n</b> (none) as an option, the notification dependency will never fail and notifications for the dependent host will always be sent out.  Example: If you specify <b>d</b> in this field, the notifications for the <i>dependent</i> host will not be sent out if the <i>master</i> host is in a DOWN state.'
+        'notification_failure_criteria' => 'This directive is used to define the criteria that determine when notifications for the dependent host should <i>not</i> be sent out.  If the <i>master</i> host is in one of the failure states we specify, notifications for the <i>dependent</i> host will not be sent to contacts.  Valid options are a combination of one or more of the following: <b>o</b> = fail on an UP state, <b>d</b> = fail on a DOWN state, <b>u</b> = fail on an UNREACHABLE state, and <b>p</b> = fail on a pending state (e.g. the host has not yet been checked).  If you specify <b>n</b> (none) as an option, the notification dependency will never fail and notifications for the dependent host will always be sent out.  Example: If you specify <b>d</b> in this field, the notifications for the <i>dependent</i> host will not be sent out if the <i>master</i> host is in a DOWN state.',
     },
     'hostescalation' => {
         'contact_groups' => 'This directive is used to identify the <i>short name</i> of the contact group that should be notified when the host notification is escalated.  Multiple contact groups should be separated by commas.  You must specify at least one contact or contact group in each host escalation definition.',
@@ -186,7 +171,7 @@ __DATA__
         'host_name' => 'This directive is used to identify the <i>short name</i> of the host that the escalation should apply to.',
         'hostgroup_name' => 'This directive is used to identify the <i>short name(s)</i> of the hostgroup(s) that the escalation should apply to.  Multiple hostgroups should be separated by commas.  If this is used, the escalation will apply to all hosts that are members of the specified hostgroup(s).',
         'last_notification' => 'This directive is a number that identifies the <i>last</i> notification for which this escalation is effective.  For instance, if you set this value to 5, this escalation will not be used if more than five notifications are sent out for the host.  Setting this value to 0 means to keep using this escalation entry forever (no matter how many notifications go out).',
-        'notification_interval' => 'This directive is used to determine the interval at which notifications should be made while this escalation is valid.  If you specify a value of 0 for the interval, Nagios will send the first notification when this escalation definition is valid, but will then prevent any more problem notifications from being sent out for the host.  Notifications are sent out again until the host recovers.  This is useful if you want to stop having notifications sent out after a certain amount of time.  Note:  If multiple escalation entries for a host overlap for one or more notification ranges, the smallest notification interval from all escalation entries is used.'
+        'notification_interval' => 'This directive is used to determine the interval at which notifications should be made while this escalation is valid.  If you specify a value of 0 for the interval, Nagios will send the first notification when this escalation definition is valid, but will then prevent any more problem notifications from being sent out for the host.  Notifications are sent out again until the host recovers.  This is useful if you want to stop having notifications sent out after a certain amount of time.  Note:  If multiple escalation entries for a host overlap for one or more notification ranges, the smallest notification interval from all escalation entries is used.',
     },
     'hostextinfo' => {
         '2d_coords' => 'This variable is used to define coordinates to use when drawing the host in the statusmap CGI.  Coordinates should be given in positive integers, as they correspond to physical pixels in the generated image.  The origin for drawing (0,0) is in the upper left hand corner of the image and extends in the positive x direction (to the right) along the top of the image and in the positive y direction (down) along the left hand side of the image.  For reference, the size of the icons drawn is usually about 40x40 pixels (text takes a little extra space).  The coordinates you specify here are for the upper left hand corner of the host icon that is drawn.  Note:  Don\'t worry about what the maximum x and y coordinates that you can use are.  The CGI will automatically calculate the maximum dimensions of the image it creates based on the largest x and y coordinates you specify.',
@@ -207,7 +192,7 @@ __DATA__
         'hostgroup_name' => 'This directive is used to define a short name used to identify the host group.',
         'members' => 'This is a list of the <i>short names</i> of hosts that should be included in this group.   Multiple host names should be separated by commas.  This directive may be used as an alternative to (or in addition to) the <i>hostgroups</i> directive in host definitions.',
         'notes' => 'This directive is used to define an optional string of notes pertaining to the host.  If you specify a note here, you will see the it in the extended information CGI (when you are viewing information about the specified host).',
-        'notes_url' => 'This variable is used to define an optional URL that can be used to provide more information about the host group.  If you specify an URL, you will see a red folder icon in the CGIs (when you are viewing hostgroup information) that links to the URL you specify here.  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).  This can be very useful if you want to make detailed information on the host group, emergency contact methods, etc. available to other support staff.'
+        'notes_url' => 'This variable is used to define an optional URL that can be used to provide more information about the host group.  If you specify an URL, you will see a red folder icon in the CGIs (when you are viewing hostgroup information) that links to the URL you specify here.  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).  This can be very useful if you want to make detailed information on the host group, emergency contact methods, etc. available to other support staff.',
     },
     'service' => {
         'action_url' => 'This directive is used to define an optional URL that can be used to provide more actions to be performed on the service.  If you specify an URL, you will see a red "splat" icon in the CGIs (when you are viewing service information) that links to the URL you specify here.  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).',
@@ -278,7 +263,7 @@ __DATA__
         'servicegroup_name' => 'This directive is used to specify the short name(s) of the servicegroup(s) that will inherit the dependency. Multiple servicegroups should be separated by commas.',
         'inherits_parent' => 'This directive indicates whether or not the dependency inherits dependencies of the service <i>that is being depended upon</i> (also referred to as the master service).  In other words, if the master service is dependent upon other services and any one of those dependencies fail, this dependency will also fail.',
         'notification_failure_criteria' => 'This directive is used to define the criteria that determine when notifications for the dependent service should <i>not</i> be sent out.  If the <i>master</i> service is in one of the failure states we specify, notifications for the <i>dependent</i> service will not be sent to contacts.  Valid options are a combination of one or more of the following: <b>o</b> = fail on an OK state, <b>w</b> = fail on a WARNING state, <b>u</b> = fail on an UNKNOWN state, <b>c</b> = fail on a CRITICAL state, and <b>p</b> = fail on a pending state (e.g. the service has not yet been checked).  If you specify <b>n</b> (none) as an option, the notification dependency will never fail and notifications for the dependent service will always be sent out.  Example: If you specify <b>w</b> in this field, the notifications for the <i>dependent</i> service will not be sent out if the <i>master</i> service is in a WARNING state.',
-        'service_description' => 'This directive is used to identify the <i>description</i> of the service <i>that is being depended upon</i> (also referred to as the master service).'
+        'service_description' => 'This directive is used to identify the <i>description</i> of the service <i>that is being depended upon</i> (also referred to as the master service).',
     },
     'serviceescalation' => {
         'contact_groups' => 'This directive is used to identify the <i>short name</i> of the contact group that should be notified when the service notification is escalated.  Multiple contact groups should be separated by commas.  You must specify at least one contact or contact group in each service escalation definition.',
@@ -291,7 +276,7 @@ __DATA__
         'servicegroup_name' => 'This directive is used to specify the <i>short name(s)</i> of the servicegroup(s) that the service escalation should apply to or is associated with. Multiple servicegroups should be separated by commas. The servicegroup_name may be used instead of, or in addition to, the service_name directive.',
         'last_notification' => 'This directive is a number that identifies the <i>last</i> notification for which this escalation is effective.  For instance, if you set this value to 5, this escalation will not be used if more than five notifications are sent out for the service.  Setting this value to 0 means to keep using this escalation entry forever (no matter how many notifications go out).',
         'notification_interval' => 'This directive is used to determine the interval at which notifications should be made while this escalation is valid.  If you specify a value of 0 for the interval, Nagios will send the first notification when this escalation definition is valid, but will then prevent any more problem notifications from being sent out for the host.  Notifications are sent out again until the host recovers.  This is useful if you want to stop having notifications sent out after a certain amount of time.  Note:  If multiple escalation entries for a host overlap for one or more notification ranges, the smallest notification interval from all escalation entries is used.',
-        'service_description' => 'This directive is used to identify the <i>description</i> of the service the escalation should apply to.'
+        'service_description' => 'This directive is used to identify the <i>description</i> of the service the escalation should apply to.',
     },
     'serviceextinfo' => {
         'action_url' => 'This directive is used to define an optional URL that can be used to provide more actions to be performed on the service.  If you specify an URL, you will see a link that says "Extra Service Actions" in the extended information CGI (when you are viewing information about the specified service).  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).',
@@ -300,7 +285,7 @@ __DATA__
         'icon_image_alt' => 'This variable is used to define an optional string that is used in the ALT tag of the image specified by the <i>&lt;icon_image&gt;</i> argument.  The ALT tag is used in the status, extended information and statusmap CGIs.',
         'notes' => 'This directive is used to define an optional string of notes pertaining to the service.  If you specify a note here, you will see the it in the extended information CGI (when you are viewing information about the specified service).',
         'notes_url' => 'This directive is used to define an optional URL that can be used to provide more information about the service.  If you specify an URL, you will see a link that says "Extra Service Notes" in the extended information CGI (when you are viewing information about the specified service).  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).  This can be very useful if you want to make detailed information on the service, emergency contact methods, etc. available to other support staff.',
-        'service_description' => 'This directive is description of the service which the data is associated with.'
+        'service_description' => 'This directive is description of the service which the data is associated with.',
     },
     'servicegroup' => {
         'action_url' => 'This directive is used to define an optional URL that can be used to provide more actions to be performed on the service group.  If you specify an URL, you will see a red "splat" icon in the CGIs (when you are viewing service group information) that links to the URL you specify here.  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).',
@@ -309,14 +294,14 @@ __DATA__
         'notes' => 'This directive is used to define an optional string of notes pertaining to the service group.  If you specify a note here, you will see the it in the extended information CGI (when you are viewing information about the specified service group).',
         'notes_url' => 'This directive is used to define an optional URL that can be used to provide more information about the service group.  If you specify an URL, you will see a red folder icon in the CGIs (when you are viewing service group information) that links to the URL you specify here.  Any valid URL can be used.  If you plan on using relative paths, the base path will the the same as what is used to access the CGIs (i.e. <i>/cgi-bin/nagios/</i>).  This can be very useful if you want to make detailed information on the service group, emergency contact methods, etc. available to other support staff.',
         'servicegroup_members' => 'This optional directive can be used to include services from other "sub" service groups in this service group.  Specify a comma-delimited list of short names of other service groups whose members should be included in this group.',
-        'servicegroup_name' => 'This directive is used to define a short name used to identify the service group.'
+        'servicegroup_name' => 'This directive is used to define a short name used to identify the service group.',
     },
     'timeperiod' => {
         '[exception]' => '<p>You can specify several different types of exceptions to the standard rotating weekday schedule.  Exceptions can take a number of different forms including single days of a specific or generic month, single weekdays in a month, or single calendar dates.  You can also specify a range of days/dates and even specify skip intervals to obtain functionality described by "every 3 days between these dates".  Rather than list all the possible formats for exception strings, I\'ll let you look at the example timeperiod definitions above to see what\'s possible. :-)  Weekdays and different types of exceptions all have different levels of precedence, so its important to understand how they can affect each other.  More information on this can be found in the documentation on timeperiods.</p>',
         '[weekday]' => 'The weekday directives ("<i>sunday</i>" through "<i>saturday</i>")are comma-delimited lists of time ranges that are "valid" times for a particular day of the week.  Notice that there are seven different days for which you can define time ranges (Sunday through Saturday).  Each time range is in the form of <b>HH:MM-HH:MM</b>, where hours are specified on a 24 hour clock.  For example, <b>00:15-24:00</b> means 12:15am in the morning for this day until 12:00am midnight (a 23 hour, 45 minute total time range).  If you wish to exclude an entire day from the timeperiod, simply do not include it in the timeperiod definition.',
         'alias' => 'This directive is a longer name or description used to identify the time period.',
         'exclude' => 'This directive is used to specify the short names of other timeperiod definitions whose time ranges should be excluded from this timeperiod.  Multiple timeperiod names should be separated with a comma.',
-        'timeperiod_name' => 'This directives is the short name used to identify the time period.'
+        'timeperiod_name' => 'This directives is the short name used to identify the time period.',
     },
     'module' => {
         'module_name' => 'This directive identifies the unique name of the module so you cannot have two modules with the same module name. It is mandatory, otherwise the config will not be accepted and the module will not be loaded.',
@@ -324,7 +309,6 @@ __DATA__
         'path' => 'mandatory directive specifies the path to the module binary to be loaded. For event broker modules like idomod the user running the core must be allowed to read and load the module.',
         'args' => 'This directive defines optional arguments passed to the module. idomod needs config_file=.../idomod.cfg while other modules have their own syntax. This directive is passed as argument string to the event broker module loader if used as neb module.',
         'modules' => 'List of submodules.',
-
         'host' => 'Host name or IP address to connect or listen to (depending on the module).',
         'port' => 'TCP port to connect or listen to (depending on the module).',
         'mapping_command' => 'no help yet',
@@ -337,11 +321,9 @@ __DATA__
         'mapping_file' => 'no help yet',
         'max_logs_age' => 'no help yet',
         'method' => 'no help yet',
-        'path' => 'no help yet',
         'property' => 'no help yet',
         'socket' => 'no help yet',
         'value' => 'no help yet',
-
     },
     'escalation' => {
         'escalation_name' => 'This directive identifies the unique name of the escalation so you reference this escalation by your hosts and services.',
@@ -539,3 +521,5 @@ __DATA__
         'modulation_period' => 'This directive is used to specify the short name of the time period during which the modulation applies.',
     },
 };
+
+1;

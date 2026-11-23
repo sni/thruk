@@ -27,7 +27,7 @@ use Thruk::Timer qw/timing_breakpoint/;
 # clean up env
 $Thruk::Globals::tt_profiling = 0 unless defined $Thruk::Globals::tt_profiling;
 BEGIN {
-    ## no critic (BuiltinFunctions::ProhibitStringyEval, Variables::RequireLocalizedPunctuationVars)
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
     if($ENV{'THRUK_VERBOSE'} and $ENV{'THRUK_VERBOSE'} >= 3) {
         $ENV{'THRUK_PERFORMANCE_DEBUG'} = 3;
     }
@@ -35,9 +35,9 @@ BEGIN {
         $ENV{'MONITORING_LIVESTATUS_CLASS_TRACE'} = 999;
     }
     use Time::HiRes qw/tv_interval/;
-    eval "use Thruk::Template::Context;" if $ENV{'THRUK_PERFORMANCE_DEBUG'};
-    eval "use Thruk::Template::Exception;" if $ENV{'TEST_AUTHOR'};
-    ## use critic (BuiltinFunctions::ProhibitStringyEval, Variables::RequireLocalizedPunctuationVars)
+    eval { require Thruk::Template::Context; }   if $ENV{'THRUK_PERFORMANCE_DEBUG'};
+    eval { require Thruk::Template::Exception; } if $ENV{'TEST_AUTHOR'};
+    ## use critic (Variables::RequireLocalizedPunctuationVars)
     $Thruk::Globals::tt_profiling = 1 if $ENV{'THRUK_PERFORMANCE_DEBUG'};
 }
 

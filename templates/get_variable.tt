@@ -1,3 +1,2 @@
-﻿[% USE Dumper %]
-[% PROCESS $temp %]
-[% Dumper.dump($var) %]
+﻿[% PROCESS $temp %]
+[% json_encode($var) %]

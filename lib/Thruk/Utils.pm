@@ -13,6 +13,7 @@ Utilities Collection for Thruk
 use warnings;
 use strict;
 use Carp qw/confess longmess/;
+use Cpanel::JSON::XS ();
 use Data::Dumper qw/Dumper/;
 use Date::Calc qw/Localtime Monday_of_Week Week_of_Year Today Add_Delta_Days/;
 use File::Copy qw/copy/;
@@ -3103,11 +3104,8 @@ sub get_template_variable {
     }
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
-    my $VAR1;
-    ## no critic (BuiltinFunctions::ProhibitStringyEval)
-    eval($data);
-    ## use critic (BuiltinFunctions::ProhibitStringyEval)
-    return $VAR1;
+    # the template renders the variable as json, decode it
+    return Cpanel::JSON::XS->new->allow_nonref->decode($data);
 }
 
 ##############################################
