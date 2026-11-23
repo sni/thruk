@@ -3105,7 +3105,9 @@ sub get_template_variable {
     POSIX::setlocale(POSIX::LC_TIME, $default_time_locale);
 
     # the template renders the variable as json, decode it
-    return Cpanel::JSON::XS->new->allow_nonref->decode($data);
+    my $res = Cpanel::JSON::XS->new->decode($data);
+    return($res->[0]) if ref $res eq 'ARRAY';
+    confess("Unexpected template variable format: $data");
 }
 
 ##############################################

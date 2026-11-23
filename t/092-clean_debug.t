@@ -7,9 +7,9 @@ plan skip_all => 'Author test. Set $ENV{TEST_AUTHOR} to a true value to run.' un
 my $filter = $ARGV[0];
 
 my $cmds = {
-  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/" => {},
-  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"              => { 'skip_comments' => 1, exclude => [qr/\.t:/, qr/sticky.sh/] },
-  "grep -nr 'dump\(' templates/ plugins/plugins-available/*/templates" => { exclude => [qr/get_variable\.tt/]},
+  "grep -nr 'print STDERR Dumper' lib/ plugins/plugins-available/ t/"  => {},
+  "grep -nr '^sleep' lib/ plugins/plugins-available/ t/"               => { 'skip_comments' => 1, exclude => [qr/\.t:/, qr/sticky.sh/] },
+  "grep -nr 'dump\(' templates/ plugins/plugins-available/*/templates" => {},
 };
 
 # find all missed debug outputs

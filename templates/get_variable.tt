@@ -1,2 +1,2 @@
 ﻿[% PROCESS $temp %]
-[% json_encode($var) %]
+[% json_encode([$var]) %]
