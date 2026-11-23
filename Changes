@@ -3,54 +3,29 @@
 This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
-          - Security:
-            - escape the plugin output of outage rows in the availability outage report
-              (avail.cgi?outages=1) by default (stored XSS via unescaped log_line_plugin_output
-              rendered into the outage table cell, GHSA-7qph-3mcp-cvqw, reported by @gargantuanapple).
-              For trusted setups that rely on HTML in plugin output, set escape_html_tags to 0.
-            - escape the plugin output of SLA outage rows in the reports2 SLA report templates
-              (stored XSS via unescaped log_line_plugin_output rendered into the output div)
-            - html-escape the plugin output stored in the trends image_map so the trends detail
-              popup (client-side innerHTML) renders it as text by default; the escape_html_tags=0
-              opt-out still renders it as HTML
-            - escape host names and service descriptions in the panorama icon tooltip details
-              (stored XSS via status.cgi JSON metadata concatenated unescaped into the ExtJS
-              tooltip HTML sink, GHSA-j445-m9r7-q45g, reported by @gargantuanapple)
-            - escape host and service action and notes links by default. For trusted legacy
-              popup attributes, set escape_action_url_html or escape_notes_url_html to 0.
-            - escape host and service notes on the extinfo pages by default (stored XSS via
-              notes rendered as raw HTML, GHSA-7vgh-mrgh-h79w). BREAKING CHANGE for anyone who
-              relied on HTML in notes: set escape_notes_html to 0 to restore the old behaviour.
-            - escape host and service names in the panorama grids and mine map
-              (stored XSS via unescaped display names and mine map headers
-              rendered as HTML by the ExtJS grid cells)
-            - escape the author and comment text in the panorama comments grid (stored XSS via
-              unescaped comment/author rendered as HTML by the ExtJS grid cell, GHSA-wm48-j98q-3x77,
-              reported by @grapealbacore)
-            - escape performance profile names and debug hints in the generated profile HTML
-              (stored XSS via unescaped report_from_url URL labels, GHSA-ww3m-8p89-562g,
-              reported by @grapealbacore)
-            - escape the comment author in the comments table (stored XSS via unescaped
-              com_author, GHSA-69wg-g5h9-ghjg, reported by @maxtli)
-            - refuse cron schedule entries whose fields are not plain cron components (reports
-              and recurring downtimes) which could break out into a second, complete crontab entry
-            - escape the error parameter and the referer of the command form in the rendered
-              templates (stored XSS via crafted links)
-            - escape the report name and description in the generated report page
-            - require authorized_for_reports on the report REST routes (/r/v1/thruk/reports)
-              which were reachable by any authenticated user
-            - refuse cron entries carrying a line break, a second, independent crontab line
-              could be smuggled in via the report send_types API
-             - refuse bookmarks with executable url schemes (javascript:, data:, vbscript:,
-               file:) which could be stored via the status.cgi bookmark form and rendered as
-               a script-capable navigation link in the side menu of other viewers
-               (stored XSS, GHSA-w5pf-vr4p-h335, reported by @garbleartistry)
-          - refuse a caller-provided 'eval' argument pair in Thruk::Backend::Pool::do_on_peer
-            (GHSA-44p7-p5wf-qw57, reported by @glacieraxiom). Any API-key-authenticated
-            remote.cgi user could send action=raw with args ["eval", "<perl>"] and execute
-            arbitrary Perl in the worker.
-          - Graphs:
-            - add new option 'spannulls_multiplier' which controls the parameter for histou graphs
+          - escape plugin output in the availability outage report by default (GHSA-7qph-3mcp-cvqw)
+          - escape plugin output in the reports2 SLA report by default
+          - escape plugin output in the trends image map by default
+          - escape names in panorama icon tooltip details (GHSA-j445-m9r7-q45g)
+          - escape action and notes links by default
+          - escape host and service notes on extinfo pages by default (GHSA-7vgh-mrgh-h79w)
+          - escape names in panorama grids and mine map
+          - escape authors and comments in the panorama comments grid (GHSA-wm48-j98q-3x77)
+          - escape names and debug hints in generated profile HTML (GHSA-ww3m-8p89-562g)
+          - escape comment authors in the comments table (GHSA-69wg-g5h9-ghjg)
+          - refuse cron schedule entries with malformed fields
+          - escape the error and referer parameters of the command form
+          - escape report name and description in generated report pages
+          - require authorized_for_reports on the report REST routes
+          - refuse cron entries containing a line break
+          - refuse bookmarks with executable url schemes (GHSA-w5pf-vr4p-h335)
+          - refuse a caller-provided 'eval' argument pair in remote.cgi (GHSA-44p7-p5wf-qw57)
+          - sanitize pnp graph export source (GHSA-fjj8-9jv6-5g6p)
+          - escape html in the action url (GHSA-7xch-vwp2-xvcr)
+          - escape html in bookmark links (GHSA-4f3q-c36g-2h2q)
+          - restrict report_from_url to allowed hosts (GHSA-j7m6-r8rq-xgm9)
+          - add report_allow_url_hosts option
+          - add option 'spannulls_multiplier' for histou graphs
 
 3.32     Wed Nov 18 16:51:11 CET 2026
           - add Status Replay with a playable log-based host and service status timeline
