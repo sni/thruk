@@ -124,8 +124,9 @@ sub _handle_file {
     my $nr = $file;
     $file  = $c->config->{'var_path'}.'/downtimes/'.$file.'.tsk';
     if(!-s $file) {
-        _error("cannot read %s: %s", $file, $!);
-        return("", 1);
+        # benign race: crond started the job before the downtime was removed
+        _debug("cannot read %s: %s", $file, $!);
+        return("recurring downtime ".$nr." no longer exists, skipped.\n", 0);
     }
     my $downtime = Thruk::Utils::RecurringDowntimes::read_downtime($c, $file, undef, undef, undef, undef, undef, undef, undef, 0);
     if(!$downtime) {
