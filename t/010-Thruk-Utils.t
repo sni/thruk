@@ -497,6 +497,14 @@ subtest 'cron entries from param validate cron fields' => sub {
     is(scalar @{$entries}, 2, 'normal entries are kept');
     is(Thruk::Utils::get_cron_time_entry($entries->[0]), " 0  3  *  *  *", 'day entry expands');
     is(Thruk::Utils::get_cron_time_entry($entries->[1]), '0 1 * * 1', 'cust entry expands');
+    for my $minute ('0 1', "0\t1") {
+        eval { Thruk::Utils::get_cron_time_entry({ type => 'day', minute => $minute, hour => '3' }) };
+        like($@, qr/expected five time fields/, 'extra schedule field raises an error');
+    }
+    eval { Thruk::Utils::get_cron_time_entry({ type => 'cust', cust => '@daily 1 2 3 4' }) };
+    like($@, qr/invalid character/, 'cron shorthand is not a time field');
+    like(Thruk::Utils::get_cron_time_entry({ type => 'monthday', minute => 0, hour => 3, month_day => '1st_Monday' }),
+         qr/^\s*0\s+3\s+\*\s+\*\s+1\s+\[/, 'monthly day check follows the five time fields');
     done_testing();
 };
 

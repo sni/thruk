@@ -2532,6 +2532,7 @@ return time part of crontab entry
 sub get_cron_time_entry {
     my($cr) = @_;
     my $cron;
+    my $suffix = '';
     if($cr->{'type'} eq 'month') {
         $cron = sprintf("% 2s % 2s % 2s  *  *", $cr->{'minute'}, $cr->{'hour'}, $cr->{'day'});
     }
@@ -2566,17 +2567,18 @@ sub get_cron_time_entry {
         $day = 5 if $d eq 'Friday';
         $day = 6 if $d eq 'Saturday';
         $day = 0 if $d eq 'Sunday';
-        $cron = sprintf("% 2s % 2s *  *  % 2s %s", $cr->{'minute'}, $cr->{'hour'}, $day, $daycheck);
+        $cron = sprintf("% 2s % 2s *  *  % 2s", $cr->{'minute'}, $cr->{'hour'}, $day);
+        $suffix = ' '.$daycheck;
     }
     elsif($cr->{'type'} eq 'cust') {
-        my @tst = split/\s+/mx, $cr->{'cust'};
-        if(scalar @tst == 5) {
-            $cron = $cr->{'cust'};
-        }
+        $cron = $cr->{'cust'};
     } else {
         confess("unknown cron type: ".$cr->{'type'});
     }
-    return $cron;
+    my @fields = split ' ', $cron // '';
+    confess('invalid cron schedule: expected five time fields') unless @fields == 5;
+    confess('invalid character in cron schedule') if $cron =~ m{[^0-9A-Za-z*,/ \t-]}mx;
+    return $cron.$suffix;
 }
 
 
