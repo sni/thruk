@@ -33,7 +33,7 @@ sub index {
     my $keywords = $c->req->uri->query;
     if($keywords && $keywords =~ m/setcookie/gmx) {
         my $url = delete $c->req->parameters->{'referer'};
-        if(!$url || $url !~ m/^\//gmx) {
+        if(!Thruk::Utils::Filter::is_local_redirect($url) || $url !~ m{\A/}mx) {
             $url = $c->stash->{'url_prefix'};
         } else {
             delete $c->req->parameters->{'setcookie'};

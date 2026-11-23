@@ -525,6 +525,19 @@ sub uri_with {
 
 ########################################
 
+=head2 is_local_redirect
+
+Returns true for relative redirect targets, including paths that start with a single slash.
+
+=cut
+sub is_local_redirect {
+    my($url) = @_;
+    return unless defined $url && !ref $url && length $url;
+    return $url !~ m{\A\s*(?:[a-z][a-z0-9+.-]*:|[/\\]{2}|\\)|[\x00-\x1f\x7f]}imx;
+}
+
+########################################
+
 =head2 is_safe_bookmark_url
 
   is_safe_bookmark_url($url)

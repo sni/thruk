@@ -1583,7 +1583,9 @@ sub _process_perfmap_page {
 sub _process_bookmarks {
     my( $c ) = @_;
 
+    return unless Thruk::Utils::check_csrf($c);
     my $referer       = $c->req->parameters->{'referer'} || 'status.cgi';
+    $referer = 'status.cgi' unless Thruk::Utils::Filter::is_local_redirect($referer);
     my $bookmark      = $c->req->parameters->{'bookmark'};
     my $bookmarks     = Thruk::Utils::list($c->req->parameters->{'bookmarks'}  // []);
     my $bookmarksp    = Thruk::Utils::list($c->req->parameters->{'bookmarksp'} // []);

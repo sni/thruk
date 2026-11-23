@@ -90,7 +90,7 @@ sub index {
     }
 
     # Validate after decoding and removing keywords, before any redirect uses the referer.
-    if($referer =~ m{\A\s*(?:[a-z][a-z0-9+.-]*:|[/\\]{2}|\\)|[\x00-\x1f\x7f]}imx) {
+    if($referer && !Thruk::Utils::Filter::is_local_redirect($referer)) {
         $referer = $c->stash->{'url_prefix'};
     }
 
