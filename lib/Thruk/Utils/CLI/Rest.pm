@@ -716,11 +716,11 @@ sub _replace_output {
         $var    = $1;
     }
 
-    my @vars = $var =~ m{([^\s+*/()-]+|[+*/()-])}gx;
+    my @vars = $var =~ m{([^\s+*/()-]+|[+*/()-])}gmx;
     my @processed;
     my $error;
     for my $v (@vars) {
-        if($v =~ m{\A[+*/()-]\z}x) {
+        if($v =~ m{\A[+*/()-]\z}mx) {
             push @processed, $v;
             next;
         }
@@ -730,7 +730,7 @@ sub _replace_output {
             $v  = $2;
         }
         my $val;
-        if($nr == 0 && $v =~ m/\A\d+\.?\d*\z/x && !(ref $result->[$nr]->{'json'} eq 'HASH' && defined $result->[$nr]->{'json'}->{$v})) {
+        if($nr == 0 && $v =~ m/\A\d+\.?\d*\z/mx && !(ref $result->[$nr]->{'json'} eq 'HASH' && defined $result->[$nr]->{'json'}->{$v})) {
             $val = $v;
         } else {
             my($ok);
@@ -760,7 +760,7 @@ sub _replace_output {
         $format   = "";
         $strftime = "";
     }
-    elsif(@processed == 1 && $vars[0] !~ m{\A[+*/()-]\z}x) {
+    elsif(@processed == 1 && $vars[0] !~ m{\A[+*/()-]\z}mx) {
         $value = $processed[0] // '(null)';
     } else {
         $value = _output_arithmetic(\@processed, 0, 0);
