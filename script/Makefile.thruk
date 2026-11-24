@@ -147,6 +147,7 @@ local_install: local_patches
 	chmod 755 ${DESTDIR}${DATADIR}/thruk_authd.pl
 	cp -rp menu.conf ${DESTDIR}${DATADIR}/
 	cp -rp plugins/plugins-available ${DESTDIR}${DATADIR}/plugins/
+	rm -rf ${DESTDIR}${DATADIR}/t/xt
 	cp -rp themes/themes-available ${DESTDIR}${DATADIR}/themes/
 	cp -p LICENSE Changes ${DESTDIR}${DATADIR}/
 	cp -p script/check_thruk_rest         ${DESTDIR}${DATADIR}/script/

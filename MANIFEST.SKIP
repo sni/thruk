@@ -99,14 +99,14 @@ t/testurls.txt
 rpsresults.html
 .gem/
 .idea/
-^action_menus/*
+^action_menus/
 ^lmd.ini$
 ^thruk_local.d/.*.conf
 t/600-scenarios.t
 t/610-scenario-.*\.t
+plugins/plugins-available/[^/]+/t/
 # keep the dashboard fixture parsed by t/095-doc_markdown.t
 ^t/scenarios/(?!(cli_api/omd/skel/etc/thruk/panorama/1\.tab$)).*
-action_menus/*.js
 ^.ci/
 .github/
 ^continue$
