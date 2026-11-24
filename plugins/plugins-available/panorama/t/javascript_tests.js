@@ -11,6 +11,10 @@ function test_shared_label_rendering() {
         warnings.finish();
         return html;
     };
+    // The harness serves the test page over file://, where images are not
+    // rewritten to the page origin. The same-origin rewrites only apply on
+    // http(s) pages, so gate those assertions on the page protocol.
+    var isHttp = /^https?:$/.test(window.location.protocol);
     var cases = [
         ['Healthy', 'Healthy'],
         ['<b>{{name}}</b><br>', '<b>&lt;test&gt;</b><br>'],
@@ -21,10 +25,13 @@ function test_shared_label_rendering() {
          '<p align="right"><font color="red" face="serif" size="3">Alert</font><br clear="all"></p>'],
         ['<span class="site-label warning" onclick="unused">label</span>', '<span class="site-label warning">label</span>'],
         ['<img src="../plugins/panorama/images/server.png" alt="Server">',
-         '<img alt="Server" src="'+new URL('../plugins/panorama/images/server.png', document.baseURI).href+'">'],
+         isHttp ? '<img alt="Server" src="'+new URL('../plugins/panorama/images/server.png', document.baseURI).href+'">'
+                : '<img alt="Server">'],
         ['<img src="https://example.invalid/icon.png" alt="Remote">', '<img alt="Remote">'],
-        ['<img src="/other/icon.PNG?v=2#main">', '<img src="'+window.location.origin+'/other/icon.PNG?v=2#main">'],
-        ['<img src="'+window.location.origin+'/icon.webp">', '<img src="'+window.location.origin+'/icon.webp">'],
+        ['<img src="/other/icon.PNG?v=2#main">',
+         isHttp ? '<img src="'+window.location.origin+'/other/icon.PNG?v=2#main">' : '<img>'],
+        ['<img src="'+window.location.origin+'/icon.webp">',
+         isHttp ? '<img src="'+window.location.origin+'/icon.webp">' : '<img>'],
         ['<img src="//example.invalid/image.svg">', '<img>'],
         ['<img src="/download?name=icon.png">', '<img>'],
         ['<span style="color: {{state == 0 ? \'green\' : \'red\'}}; position: fixed" onclick="unused">{{name}}</span>',
@@ -50,7 +57,8 @@ function test_shared_label_rendering() {
         var result = document.createElement('div');
         var image = "url('/assets/pattern.png?v=2')";
         result.innerHTML = render('<span style="background-image: '+image+'">label</span>');
-        if(result.firstChild.style.backgroundImage != 'url("'+window.location.origin+'/assets/pattern.png?v=2")') { throw Error('missing label background'); }
+        if(!isHttp && result.firstChild.style.backgroundImage) { throw Error('unexpected background on non-http page'); }
+        if(isHttp && result.firstChild.style.backgroundImage != 'url("'+window.location.origin+'/assets/pattern.png?v=2")') { throw Error('missing label background'); }
         result.innerHTML = render('<span style="background-image: '+image+', url(https://example.invalid/icon.png)">label</span>');
         if(result.firstChild.style.backgroundImage) { throw Error('unexpected layered background'); }
         result.innerHTML = render('<span style="border: 1px solid red; border-image-source: url(icon.png)">label</span>');
