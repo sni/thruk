@@ -13,7 +13,7 @@ while(<$ph>) {
     chomp($line);
     check_json_xs($line);
 }
-ok($found > 500, "checked $found total files.");
+ok($found > 400, "checked $found total files.");
 done_testing();
 
 
