@@ -716,13 +716,11 @@ sub _replace_output {
         $var    = $1;
     }
 
-    my @vars = split(/([\s\-\+\/\*\(\)]+)/mx, $var);
+    my @vars = $var =~ m{([^\s+*/()-]+|[+*/()-])}gx;
     my @processed;
     my $error;
     for my $v (@vars) {
-        $v =~ s/^\s*//gmx;
-        $v =~ s/\s*$//gmx;
-        if($v =~ m/[\s\-\+\/\*\(\)]+/mx) {
+        if($v =~ m{\A[+*/()-]\z}x) {
             push @processed, $v;
             next;
         }
@@ -732,7 +730,7 @@ sub _replace_output {
             $v  = $2;
         }
         my $val;
-        if($nr == 0 && $v =~ m/^\d\.?\d*$/mx && !defined $result->[$nr]->{'json'}->{$v}) {
+        if($nr == 0 && $v =~ m/\A\d+\.?\d*\z/x && !(ref $result->[$nr]->{'json'} eq 'HASH' && defined $result->[$nr]->{'json'}->{$v})) {
             $val = $v;
         } else {
             my($ok);
@@ -749,7 +747,12 @@ sub _replace_output {
         if(ref $val) {
             $val = Cpanel::JSON::XS->new->canonical->encode($val);
         }
-        push @processed, $val;
+        if(@vars == 1) {
+            push @processed, $val;
+        } else {
+            return('(error)') if defined $val && !looks_like_number($val);
+            push @processed, 0 + ($val // 0);
+        }
     }
     my $value = "";
     if($error) {
@@ -757,15 +760,11 @@ sub _replace_output {
         $format   = "";
         $strftime = "";
     }
-    elsif(scalar @processed == 1) {
+    elsif(@processed == 1 && $vars[0] !~ m{\A[+*/()-]\z}x) {
         $value = $processed[0] // '(null)';
     } else {
-        for my $d (@processed) {
-            $d = 0 unless defined $d;
-        }
-        ## no critic (BuiltinFunctions::ProhibitStringyEval)
-        $value = eval(join("", @processed)) // '(error)';
-        ## use critic (BuiltinFunctions::ProhibitStringyEval)
+        $value = _output_arithmetic(\@processed, 0, 0);
+        return('(error)') if !defined $value || @processed;
     }
 
     if($format) {
@@ -773,6 +772,37 @@ sub _replace_output {
     }
     if($strftime) {
         return(POSIX::strftime($strftime, localtime($value)));
+    }
+    return($value);
+}
+
+##############################################
+my %precedence = ('+' => 1, '-' => 1, '*' => 2, '/' => 2);
+sub _output_arithmetic {
+    my($tokens, $min_precedence, $depth) = @_;
+    return if $depth > 32;
+    my $value = shift @{$tokens};
+    return unless defined $value;
+    if($value eq '(') {
+        $value = _output_arithmetic($tokens, 0, $depth + 1);
+        return unless defined $value && @{$tokens} && shift(@{$tokens}) eq ')';
+    } elsif($value eq '+' || $value eq '-') {
+        my $operand = _output_arithmetic($tokens, 3, $depth + 1);
+        return unless defined $operand;
+        $value = $value eq '-' ? -$operand : $operand;
+    } else {
+        return unless looks_like_number($value);
+    }
+    while(@{$tokens}) {
+        my $op = $tokens->[0];
+        last unless exists $precedence{$op} && $precedence{$op} >= $min_precedence;
+        shift @{$tokens};
+        my $rhs = _output_arithmetic($tokens, $precedence{$op} + 1, $depth + 1);
+        return unless defined $rhs;
+        if($op eq '+')    { $value += $rhs; }
+        elsif($op eq '-') { $value -= $rhs; }
+        elsif($op eq '*') { $value *= $rhs; }
+        else              { return if $rhs == 0; $value /= $rhs; }
     }
     return($value);
 }

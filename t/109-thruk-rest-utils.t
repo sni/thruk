@@ -5,7 +5,7 @@ use HTTP::Request ();
 use MIME::Base64 qw/encode_base64/;
 use Test::More;
 
-plan tests => 39;
+plan tests => 40;
 
 BEGIN {
     use lib('t');
@@ -19,6 +19,19 @@ use_ok 'Thruk::Utils';
 
 _test_replace_output();
 _test_get_filter();
+
+subtest 'REST output arithmetic keeps row values as data' => sub {
+    my $row = {plugin_output => '2 * 3', state => 1};
+    my $result = [{json => []}, {json => [$row]}];
+    my $field = '1:0.plugin_output';
+    is(Thruk::Utils::CLI::Rest::_replace_output($field, $result), '2 * 3', 'plain output preserves text');
+    is(Thruk::Utils::CLI::Rest::_replace_output("$field + 1:0.state%d", $result), '(error)', 'arithmetic rejects expression text before formatting');
+    $row->{'plugin_output'} = '5';
+    is(Thruk::Utils::CLI::Rest::_replace_output("$field + 1:0.state", $result), 6, 'numeric row values work');
+    is(Thruk::Utils::CLI::Rest::_replace_output("12 - ($field + 1) * -2", $result), 24, 'precedence, grouping and unary minus');
+    is(Thruk::Utils::CLI::Rest::_replace_output("$field / 0", $result), '(error)', 'division by zero');
+    is(Thruk::Utils::CLI::Rest::_replace_output("($field + 1", $result), '(error)', 'missing closing parenthesis');
+};
 
 subtest 'REST input features require a local CLI origin' => sub {
     my $c = TestUtils::ctx_request('/');
