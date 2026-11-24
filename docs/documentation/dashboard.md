@@ -111,7 +111,7 @@ are allowed. The same rule applies to a single CSS background image:
 ```
 
 The label editor lists the supported tags, attributes, styles, functions, and
-monitoring fields. Inside `{{…}}`, use addition, comparisons, conditionals, or
+monitoring fields. Inside <span v-pre>`{{…}}`</span>, use addition, comparisons, conditionals, or
 function calls. Field values appear as text. Browser objects, script tags, and
 event handlers are not available.
 
