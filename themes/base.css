@@ -469,6 +469,19 @@ TH.links.rowSelected:hover {
   @apply overflow-hidden block text-ellipsis whitespace-nowrap;
 }
 
+.detail_plugin_outputBlock {
+  @apply block whitespace-normal;
+  overflow-wrap: anywhere;
+
+  pre {
+    @apply whitespace-pre-wrap;
+  }
+
+  &.plugin-output-collapsed {
+    @apply overflow-hidden max-h-[305px];
+  }
+}
+
 @layer base {
   .flexrow {
     @apply flex flex-row flex-wrap gap-5;
