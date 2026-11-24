@@ -1,6 +1,6 @@
 ﻿[% PROCESS _blocks.tt %]
 
-<div class="overflow-auto">
+<div>
 [% orig_perfdata = perfdata %]
 [% tmp = split_perfdata(perfdata) %]
 [% IF tmp.size > 0 && tmp.0.size > 0 %]
@@ -10,6 +10,8 @@
     [% IF p.warn || p.crit || p.min || p.max %][% show_perf_column = 1; LAST; %][% END %]
   [% END %]
   [% last_parent = '' %]
+  <div id="perfdata_table_view">
+  <div class="overflow-auto">
   <div class="w-min">
   <table id="perfdata_human" class="cellborder cellspacing rowhover">
     <tr>
@@ -42,17 +44,27 @@
       </td>
     </tr>
     [% END %]
-    [% IF splited.size >= 10 %]
-      <tr>
-        <td colspan="[% IF has_parents %]7[% ELSE %]6[% END %]" class="text-center">
-          <div id="perf_show_more" class="link hoverable rounded clickable font-normal" onclick="jQuery('.js-perfdata-table-row').removeClass('hidden'); jQuery('#perf_show_more').addClass('hidden'); jQuery('#perf_show_less').removeClass('hidden');"> show more...</div>
-          <div id="perf_show_less" class="link hoverable rounded clickable font-normal hidden" onclick="jQuery('.js-perfdata-table-row').addClass('hidden'); jQuery('#perf_show_more').removeClass('hidden'); jQuery('#perf_show_less').addClass('hidden'); scrollToEl('perfdata_human');"> show less...</div>
-        </td>
-      </tr>
-    [% END %]
   </table>
   </div>
-  <div id="perfdata_raw" style="display:none;">
+  </div>
+  [% IF splited.size >= 10 %]
+    <div class="flex justify-center">
+      <button
+        type="button"
+        id="perfdata_expand"
+        class="round small iconOnly mt-1 mb-2"
+        title="Expand performance data"
+        aria-label="Expand performance data"
+        aria-controls="perfdata_human"
+        aria-expanded="false"
+        onclick="togglePerformanceData();"
+        >
+        <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+      </button>
+    </div>
+  [% END %]
+  </div>
+  <div id="perfdata_raw" class="overflow-auto" style="display:none;">
     [% perfdata = orig_perfdata %]
     [% orig_perfdata | html %]
   </div>
