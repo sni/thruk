@@ -53,7 +53,10 @@ function test_shared_label_rendering() {
     cached[Ext.JSON.encode(opts)] = {last: 99.5, last_refresh: Date.now()/1000};
     TP.availabilities[panel.id] = cached;
     cases.push(['{{sprintf("%.2f", availability({d: "24h"}))}}', '99.50']);
+    var originalWarn = console.warn;
+    var logs = [];
     try {
+        console.warn = function(message) { logs.push(message); };
         var result = document.createElement('div');
         var image = "url('/assets/pattern.png?v=2')";
         result.innerHTML = render('<span style="background-image: '+image+'">label</span>');
@@ -68,23 +71,18 @@ function test_shared_label_rendering() {
             var actual = render(c[0]);
             if(actual !== c[1]) { throw Error(c[0]+': expected '+c[1]+', got '+actual); }
         });
-        var originalWarn = console.warn;
-        var logs = [];
-        try {
-            console.warn = function(message) { logs.push(message); };
-            var bad = '<aside></aside><b data-other="secret" style="position: fixed">{{unknownField}}{{unknownFn()}}</b>';
-            render(bad);
-            render(bad);
-            if(logs.length != 1 || logs[0].indexOf('secret') >= 0) { throw Error('invalid label warning log'); }
-            ['aside', 'data-other', 'position', 'unknownField', 'unknownFn'].forEach(function(name) {
-                if(panel.labelWarning.indexOf(name) < 0) { throw Error('missing warning for '+name); }
-            });
-            render('Healthy');
-            if(panel.labelWarning || logs.length != 1) { throw Error('label warning did not clear'); }
-        } finally {
-            console.warn = originalWarn;
-        }
+        var bad = '<aside></aside><b data-other="secret" style="position: fixed">{{unknownField}}{{unknownFn()}}</b>';
+        logs.length = 0;
+        render(bad);
+        render(bad);
+        if(logs.length != 1 || logs[0].indexOf('secret') >= 0) { throw Error('invalid label warning log'); }
+        ['aside', 'data-other', 'position', 'unknownField', 'unknownFn'].forEach(function(name) {
+            if(panel.labelWarning.indexOf(name) < 0) { throw Error('missing warning for '+name); }
+        });
+        render('Healthy');
+        if(panel.labelWarning) { throw Error('label warning did not clear'); }
     } finally {
+        console.warn = originalWarn;
         delete TP.availabilities[panel.id];
     }
     return 1;
