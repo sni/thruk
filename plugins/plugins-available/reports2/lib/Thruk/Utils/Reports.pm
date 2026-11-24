@@ -1896,6 +1896,11 @@ sub _report_die {
         $err  = ($c->stash->{'raw_error_data'}->{'msg'}   // $c->stash->{'error_data'}->{'msg'})."\n";
         $err .= ($c->stash->{'raw_error_data'}->{'descr'} // $c->stash->{'error_data'}->{'descr'})."\n" if $c->stash->{'error_data'}->{'descr'};
     }
+    # die() from $c->detach() replaces the original error with an internal
+    # sentinel, use the error data the error controller already collected
+    elsif($c->{'detached'} && ($c->stash->{errorMessage} || $c->stash->{errorDescription})) {
+        $err = $c->stash->{errorMessage}.($c->stash->{errorDescription} ? "\n".$c->stash->{errorDescription} : '');
+    }
 
     _debug("stack:");
     _debug(Carp::longmess("report failed"));
