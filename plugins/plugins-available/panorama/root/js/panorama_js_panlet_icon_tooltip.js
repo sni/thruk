@@ -276,7 +276,7 @@ Ext.onReady(function() {
                 m = line.match(/^(.*):$/);
                 if(m && m[1]) {
                     if(curBlock[0] != undefined) { d.push(curBlock); curBlock = []; }
-                    curBlock[0] = m[1];
+                    curBlock[0] = TP.labelMarkup(m[1], warnings);
                     curBlock[1] = '';
                     continue;
                 }
