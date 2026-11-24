@@ -34,10 +34,11 @@ sub get_checks {
     # generic services check
     if(scalar @{$services} > 0) {
         push @{$checks}, {
-            'id'       => 'svc',
-            'name'     => 'services',
-            'check'    => 'check_service',
-            'parent'   => 'agent version',
+            'id'            => 'svc',
+            'name'          => 'services',
+            'check'         => 'check_service',
+            'parent'        => 'agent version',
+            '_GRAPH_SOURCE' => 'failed',
         };
     }
 
