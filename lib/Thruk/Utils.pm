@@ -2538,9 +2538,8 @@ sub get_cron_time_entry {
         $cron = sprintf("% 2s % 2s % 2s  *  *", $cr->{'minute'}, $cr->{'hour'}, $cr->{'day'});
     }
     elsif($cr->{'type'} eq 'week') {
-        if(defined $cr->{'week_day'} and $cr->{'week_day'} ne '') {
-            $cron = sprintf("% 2s % 2s  *  * % 2s", $cr->{'minute'}, $cr->{'hour'}, $cr->{'week_day'});
-        }
+        return unless defined $cr->{'week_day'} && $cr->{'week_day'} ne '';
+        $cron = sprintf("% 2s % 2s  *  * % 2s", $cr->{'minute'}, $cr->{'hour'}, $cr->{'week_day'});
     }
     elsif($cr->{'type'} eq 'day') {
         $cron = sprintf("% 2s % 2s  *  *  *", $cr->{'minute'}, $cr->{'hour'});
@@ -2573,6 +2572,7 @@ sub get_cron_time_entry {
     }
     elsif($cr->{'type'} eq 'cust') {
         $cron = $cr->{'cust'};
+        return unless defined $cron && $cron !~ /\A[ \t]*\z/mx;
     } else {
         confess($source."unknown cron type: ".$cr->{'type'});
     }
@@ -2893,6 +2893,9 @@ sub get_cron_entries_from_param {
     my $cron_entries = [];
     for my $x (1..99) {
         if(defined $params->{'send_type_'.$x}) {
+            my $type = $params->{'send_type_'.$x};
+            my $cust = $params->{'send_cust_'.$x} // '';
+            next if $type eq 'cust' && $cust =~ /\A[ \t]*\z/mx;
             $params->{'week_day_'.$x} = [] unless defined $params->{'week_day_'.$x};
             my @weekdays = ref $params->{'week_day_'.$x} eq 'ARRAY' ? @{$params->{'week_day_'.$x}} : ($params->{'week_day_'.$x});
             # field values reach the cron file via get_cron_time_entry() without
@@ -2917,8 +2920,7 @@ sub get_cron_entries_from_param {
                 }
             }
             @weekdays = grep {!/^$/mx} @weekdays;
-            my $type = $params->{'send_type_'.$x} || '';
-            my $cust = $params->{'send_cust_'.$x} || '';
+            next if $type eq 'week' && !@weekdays;
             push @{$cron_entries}, {
                 'type'      => $type,
                 'hour'      => defined $params->{'send_hour_'.$x}     ? $params->{'send_hour_'.$x}     : '',
