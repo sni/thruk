@@ -2222,7 +2222,7 @@ script/check_thruk_rest.sh
 script/generate_timeperiod_transitions.pl
 script/grafana_export.sh
 script/html2pdf.sh
-script/install_puppeteer.sh
+script/install_browser.sh
 script/Makefile.thruk
 script/maybe_offline
 script/nagexp
@@ -2230,8 +2230,8 @@ script/nagimp
 script/naglint
 script/pnp_export.sh
 script/print_post_variables.sh
-script/puppeteer.cjs
 script/reenable_actions
+script/render_url.pl
 script/templates_cleanup.pl
 script/test_cpan_modules.pl
 script/test_page_rps
@@ -2328,6 +2328,7 @@ t/090-io.t
 t/091-io-locked-test.t
 t/092-backticks.t
 t/092-clean_debug.t
+t/092-puppeteer-remnants.t
 t/092-private_subs.t
 t/092-stash-config.t
 t/092-thruk-view-json.t
@@ -2364,6 +2365,12 @@ t/101-backend_postgresql.t
 t/101-cli-thruk.t
 t/103-thruk_utils_io.t
 t/104-thruk_utils_cache.t
+t/105-browser-housekeeping.t
+t/105-install-browser.t
+t/105-render-lookup.t
+t/105-render-url.t
+t/105-render-wrapper.t
+t/105-reports-browser-warning.t
 t/105-thruk-utils-ssi.t
 t/106-thruk_context.t
 t/107-thruk_utils_avail.t
@@ -2484,6 +2491,8 @@ t/data/number_lists/thruk_local.conf
 t/data/remove_duplicates/core.cfg
 t/data/remove_duplicates/expect.cfg
 t/data/remove_duplicates/test.cfg
+t/data/render_url/pagesize.html
+t/data/render_url/report.html
 t/data/resource.cfg
 t/data/resource2.cfg
 t/data/scalar_values/thruk.conf
@@ -2502,6 +2511,7 @@ t/data/test_hash_comments.cfg
 t/data/test_spaces.conf
 t/data/user_overrides/thruk.conf
 t/helper/create_test_logs
+t/lib/TestRenderServer.pl
 t/perlcriticrc
 t/scenarios/cli_api/omd/skel/etc/thruk/panorama/1.tab
 t/test_request

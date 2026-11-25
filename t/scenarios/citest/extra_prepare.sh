@@ -9,7 +9,9 @@ chown -R naemon:naemon /var/lib/naemon/thruk 2>&1 | grep -v "Read-only file syst
 ln -sfn $(realpath /thruk/support/thruk_templates.cfg) /etc/naemon/conf.d/thruk_templates.cfg
 sudo su naemon -c -- bash -c 'cd ~/thruk && ./.ci/install_deps.sh'
 
-/thruk/script/install_puppeteer.sh
+# libraries of chrome-headless-shell, install_browser.sh only names them
+DEBIAN_FRONTEND=noninteractive apt-get install -y libatk1.0-0 libatk-bridge2.0-0 libatspi2.0-0 libgbm1 libnspr4 libnss3 libxcomposite1 libxdamage1 libxkbcommon0 libxrandr2 libpango-1.0-0 libasound2t64
+/thruk/script/install_browser.sh
 
 sed -i /etc/naemon/naemon.cfg -e 's/.*check_workers=.*/check_workers=2/'
 service naemon start

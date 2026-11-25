@@ -11,6 +11,7 @@ eval $(perl -I ~/perl5/lib/perl5/ -Mlocal::lib)
 export PERL5LIB=./lib:.:$PERL5LIB
 
 export TEST_AUTHOR=1
+export THRUK_TEST_BROWSER_REQUIRED=1
 export THRUK_AUTHOR=1
 export TEST_MYSQL="mysql://naemon:naemon@localhost:3306/test"
 
