@@ -21,38 +21,23 @@ TEMPFILE=$6
 
 DIR=$(dirname $0)
 export PATH=$PATH:$DIR
+export THRUK_BROWSER THRUK_BROWSER_NO_SANDBOX WAIT_TIMEOUT START_TIMEOUT THRUK_COOKIE_AUTH_DOMAIN
 
 INPUT="$INPUT&from=$START&to=$END"
 
-NODE="node"
-if [ -n "$OMD_ROOT" ]; then
-    if [ -d "$OMD_ROOT/node_modules/" ]; then
-        export NODE_PATH=$OMD_ROOT/node_modules/
-    elif [ -d "$OMD_ROOT/lib/node_modules/" ]; then
-        export NODE_PATH=$OMD_ROOT/lib/node_modules/
-    fi
-    export XDG_CONFIG_HOME=$OMD_ROOT/tmp/thruk/puppeteer.cache
-    export XDG_CACHE_HOME=$XDG_CACHE_HOME
-else
-    export XDG_CONFIG_HOME=/tmp/puppeteer.cache.$(id -u)
-    export XDG_CACHE_HOME=$XDG_CACHE_HOME
-fi
-if [ -z "$NODE_PATH" ] && [ -d "/var/lib/thruk/puppeteer/node_modules" ]; then
-    export NODE_PATH="/var/lib/thruk/puppeteer/node_modules"
-    if [ -z "$PUPPETEER_EXECUTABLE_PATH" ]; then
-        export PUPPETEER_EXECUTABLE_PATH=$(ls -1 /var/lib/thruk/puppeteer/chromium/chrome/*/chrome*/chrome 2>/dev/null | head -n 1)
-    fi
-    if [ -z "$PUPPETEER_EXECUTABLE_PATH" -a -x /usr/bin/chromium ]; then
-        export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-    fi
-    if [ -d "/var/lib/thruk/puppeteer/node" ]; then
-        NODE="/var/lib/thruk/puppeteer/node/bin/node"
-    fi
+if [ -d "$TEMPFILE" ]; then
+    echo "ERROR: $TEMPFILE is a directory"
+    exit 1
 fi
 
-$NODE $DIR/puppeteer.cjs "$INPUT" "${TEMPFILE}.png" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
+# the output is only put in place after the renderer succeeded.
+# Each call has its own staging file, so parallel calls cannot publish each other's output.
+STAGE="${TEMPFILE}.$$.png"
+trap 'rm -f "$STAGE"' EXIT
+rm -f "$STAGE"
+perl "$DIR/render_url.pl" "$INPUT" "$STAGE" "$WIDTH" "$HEIGHT" "$THRUK_SESSION_ID" 2>&1
 rc=$?
-if [ -e "$TEMPFILE.png" ]; then
-    mv "$TEMPFILE.png" "$TEMPFILE"
+if [ $rc -eq 0 ]; then
+    mv "$STAGE" "${TEMPFILE}" || rc=1
 fi
 exit $rc
