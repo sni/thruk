@@ -240,8 +240,9 @@ sub _report_checks  {
             $details .= sprintf(" report failed: #%d - %s\n", $r->{'nr'}, $r->{'name'});
             $errors++;
         }
+        my $file = $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.rpt';
         for my $cr (@{$r->{'schedule'}}) {
-            my $time = Thruk::Utils::get_cron_time_entry($cr);
+            my $time = Thruk::Utils::get_cron_time_entry($cr, $file);
             if(!defined $time) {
                 $details .= sprintf(" report cannot expand cron entry: #%d - %s\n", $r->{'nr'}, $r->{'name'});
                 $errors++;
@@ -411,7 +412,7 @@ sub check_recurring_downtime {
     }
 
     for my $cr (@{$downtime->{'schedule'}}) {
-        my $time = Thruk::Utils::get_cron_time_entry($cr);
+        my $time = Thruk::Utils::get_cron_time_entry($cr, $file);
         if(!defined $time) {
             $details .= "  - ERROR: cannot expand cron entry in recurring downtime ".$file."\n";
             $errors++;

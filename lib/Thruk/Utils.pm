@@ -2523,14 +2523,15 @@ sub update_cron_file_maintenance {
 
 =head2 get_cron_time_entry
 
-  get_cron_time_entry($cronentry)
+  get_cron_time_entry($cronentry, [$file])
 
 return time part of crontab entry
 
 =cut
 
 sub get_cron_time_entry {
-    my($cr) = @_;
+    my($cr, $file) = @_;
+    my $source = defined $file ? "$file: " : '';
     my $cron;
     my $suffix = '';
     if($cr->{'type'} eq 'month') {
@@ -2573,11 +2574,11 @@ sub get_cron_time_entry {
     elsif($cr->{'type'} eq 'cust') {
         $cron = $cr->{'cust'};
     } else {
-        confess("unknown cron type: ".$cr->{'type'});
+        confess($source."unknown cron type: ".$cr->{'type'});
     }
     my @fields = split ' ', $cron // '';
-    confess('invalid cron schedule: expected five time fields') unless @fields == 5;
-    confess('invalid character in cron schedule') if $cron =~ m{[^0-9A-Za-z*,/ \t-]}mx;
+    confess($source.'invalid cron schedule: expected five time fields') unless @fields == 5;
+    confess($source.'invalid character in cron schedule') if $cron =~ m{[^0-9A-Za-z*,/ \t-]}mx;
     return $cron.$suffix;
 }
 

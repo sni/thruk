@@ -15,7 +15,7 @@
     <th class="align-top">
       [% fh.desc %]
       [% IF fh.required %]<span class="required">*</span>[% END %]
-      [% IF fh.details != '' %]<br><span class="whitespace-normal text-xs font-normal">[% fh.details %]</span>[% END %]
+      [% IF fh.details != '' %]<br><span class="whitespace-normal text-xs font-normal max-w-[200px] inline-block">[% fh.details %]</span>[% END %]
     </th>
     <td colspan=2>
       [% PROCESS field_form fh=fh %]
