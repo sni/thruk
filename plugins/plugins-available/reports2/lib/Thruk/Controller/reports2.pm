@@ -51,7 +51,7 @@ sub index {
     $c->stash->{infoBoxTitle}          = 'Reporting';
     $c->stash->{has_jquery_ui}         = 1;
     $c->stash->{has_debug_options}     = 1;
-    $c->stash->{'puppeteer'}           = 1;
+    $c->stash->{'pdf_renderer'}        = 1;
     $c->stash->{'disable_backspace'}   = 1;
     $c->stash->{'filtered'}            = 0;
     $c->stash->{'plugin_name'}         = Thruk::Utils::get_plugin_name(__FILE__, __PACKAGE__);
@@ -159,8 +159,10 @@ sub index {
         }
     }
 
-    if(!$ENV{'OMD_ROOT'} && !-d $c->config->{'var_path'}."/puppeteer" && !Thruk::Utils::has_node_module($c, 'puppeteer')) {
-        $c->stash->{'puppeteer'} = 0;
+    if(!$ENV{'OMD_ROOT'}) {
+        # the wrapper reads the rc files, so this is the answer a rendering run would get
+        my($rc) = Thruk::Utils::IO::cmd([$c->config->{home}.'/script/html2pdf.sh', '--find-browser'], { timeout => 10 });
+        $c->stash->{'pdf_renderer'} = 0 if $rc != 0;
     }
 
     # show list of configured reports

@@ -81,8 +81,8 @@ sub cmd {
     ($total, $removed) = Thruk::Utils::External::cleanup_job_folders($c, 1);
     _info("  - %-20s: removed %5d / %5d old job folders", "jobs", $removed, $total);
 
-    ($total, $removed) = cleanup_puppeteer_folders($c, 1);
-    _info("  - %-20s: removed %5d / %5d old puppeteer folders", "reports", $removed, $total);
+    ($total, $removed) = cleanup_browser_folders($c, 1);
+    _info("  - %-20s: removed %5d / %5d old browser folders", "reports", $removed, $total);
 
     $c->stats->profile(end => "_cmd_maintenance($action)");
 
@@ -148,34 +148,42 @@ sub clean_old_user_files {
 
 ##############################################
 
-=head2 cleanup_puppeteer_folders
+=head2 cleanup_browser_folders
 
-    cleanup_puppeteer_folders($c, [$verbose])
+    cleanup_browser_folders($c, [$verbose])
 
-removes old puppeteer/chromium temp folders from /tmp that are
-no longer in use (older than 2 hours)
+removes old temp folders of the browser used to render pdfs and images
+that are no longer in use (older than 2 hours)
 
 =cut
-sub cleanup_puppeteer_folders {
+sub cleanup_browser_folders {
     my($c, $verbose) = @_;
 
-    $c->stats->profile(begin => "cleanup_puppeteer_folders");
+    $c->stats->profile(begin => "cleanup_browser_folders");
 
     my($total, $removed) = (0, 0);
     my $max_age      = time() - 7200;      # keep them for two hours
-    for my $olddir (glob("/tmp/puppeteer_dev_chrome_profile-*"), glob("/tmp/org.chromium.Chromium.*")) {
+    my $tmp_path     = $c->config->{'tmp_path'};
+    my @patterns     = ("/tmp/thruk_browser_*", $tmp_path."/thruk_browser_*");
+    # folders left by puppeteer, which had been used for rendering before
+    push @patterns, "/tmp/puppeteer_dev_chrome_profile-*", "/tmp/org.chromium.Chromium.*", "/tmp/puppeteer.cache.*", $tmp_path."/puppeteer.cache";
+    my %seen;
+    for my $olddir (grep { -e $_ && !$seen{$_}++ } map { glob($_) } @patterns) {
+        # /tmp is shared: only own folders, never symlinks
+        my @stat = lstat($olddir);
+        next if(-l _ || !-d _ || $stat[4] != $>);
         $total++;
-        my @stat = stat($olddir);
         if($stat[9] < $max_age) {
-            Thruk::Utils::IO::cmd("rm -rf $olddir");
+            # no shell, other users can choose these names
+            Thruk::Utils::IO::cmd(['rm', '-rf', '--', $olddir]);
             $removed++;
             if($verbose && -d $olddir.'/.') {
-                _warn("unable to remove puppeteer folder: %s", $olddir);
+                _warn("unable to remove browser folder: %s", $olddir);
             }
         }
     }
 
-    $c->stats->profile(end => "cleanup_puppeteer_folders");
+    $c->stats->profile(end => "cleanup_browser_folders");
     return($total, $removed);
 }
 

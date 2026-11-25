@@ -5,14 +5,14 @@
 
 [% PROCESS _infobox.tt %]
 
-[% IF !puppeteer %]
+[% IF !pdf_renderer %]
 <div class="card red alert top-center w-[550px]">
   <div class="head">
     <h3>Missing Converter!</h3>
   </div>
   <div class="body">
-    Puppeteer is missing, no pdfs can be generated.<br>
-    <i class="uil uil-external-link-alt"></i> <a class="link" href="http://www.thruk.org/faq.html#_puppeteer" target="_blank">please read the FAQ.</a>
+    No browser for PDF creation found, no pdfs can be generated.<br>
+    <i class="uil uil-external-link-alt"></i> <a class="link" href="https://www.thruk.org/documentation/faq.html#chromium" target="_blank">please read the FAQ.</a>
   </div>
 </div>
 [% END %]
