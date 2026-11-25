@@ -3571,6 +3571,8 @@ function cron_change_date(id) {
     hideElement('div_send_day_'+nr);
     hideElement('div_send_cust_'+nr);
     showElement('div_send_'+type+'_'+nr);
+    document.getElementById('div_send_cust_'+nr).querySelector('input').disabled = type_sel.disabled || type != 'cust' || nr == '0';
+    cron_validate_weekdays(document.getElementById('div_send_week_'+nr), type == 'week' && nr != '0' && !type_sel.disabled);
 
     if(type == 'cust') {
         hideElement('hour_select_'+nr);
@@ -3578,6 +3580,11 @@ function cron_change_date(id) {
         showElement('hour_select_'+nr);
     }
     cron_schedule_tz_refresh();
+}
+
+function cron_validate_weekdays(group, active) {
+    var missing = active && !group.querySelector('input:checked');
+    group.querySelector('input[type=checkbox]').setCustomValidity(missing ? 'Select at least one weekday.' : '');
 }
 
 /* Cron schedule TZ: HH:MM is server time; optional browser-equivalence preview. */

@@ -178,7 +178,7 @@
       </div>
       <div class="footer justify-evenly">
         [% IF rd.file %]
-          <button name="recurring" value="remove" class="hover-red w-32" onclick="return(confirm('Do you really want to remove this downtime?'))">
+          <button name="recurring" value="remove" formnovalidate class="hover-red w-32" onclick="return(confirm('Do you really want to remove this downtime?'))">
             <i class="uil uil-trash-alt"></i>Delete
           </button>
         [% END %]
