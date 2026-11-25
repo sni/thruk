@@ -42,8 +42,9 @@ sub update_cron_file {
     for my $d (@{$downtimes}) {
         next unless defined $d->{'schedule'};
         next unless scalar @{$d->{'schedule'}} > 0;
+        my $file = $c->config->{'var_path'}.'/downtimes/'.$d->{'file'}.'.tsk';
         for my $cr (@{$d->{'schedule'}}) {
-            my $time = Thruk::Utils::get_cron_time_entry($cr);
+            my $time = Thruk::Utils::get_cron_time_entry($cr, $file);
             if(!defined $time) {
                 _warn(sprintf("could not expand cron entry for downtime id: %s", $d->{'file'}));
                 next;

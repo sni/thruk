@@ -1032,8 +1032,9 @@ sub update_cron_file {
     for my $r (@{$reports}) {
         next unless defined $r->{'send_types'};
         next unless scalar @{$r->{'send_types'}} > 0;
+        my $file = $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.rpt';
         for my $st (@{$r->{'send_types'}}) {
-            my $time = Thruk::Utils::get_cron_time_entry($st);
+            my $time = Thruk::Utils::get_cron_time_entry($st, $file);
             next unless defined $time;
             $combined_entries->{$time} = [] unless $combined_entries->{$time};
             push @{$combined_entries->{$time}}, $r->{'nr'};
