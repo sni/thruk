@@ -82,7 +82,7 @@ See [command responses](../documentation/rest_commands.md#response).
 
 1. Confirm that the reporting plugin and its package dependencies are installed.
 2. Check whether the HTML report renders before investigating PDF conversion.
-3. For PDF failures, check the puppeteer and Chromium installation.
+3. For PDF failures, run the rendering test `script/html2pdf.sh --selftest` as the user which runs Thruk. It names the chromium browser in use or says why none can be used, see the [chromium FAQ](../documentation/faq.md#chromium).
 4. For slow historical queries, review the logfile cache and backend log access.
 5. Check the cron log if only scheduled reports fail.
 

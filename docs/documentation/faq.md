@@ -211,42 +211,80 @@ See the [cluster setup](cluster.md) for details.
 
 ### wkhtmltopdf
 
-wkhtmltopdf is no longer required and has been replaced by puppeteer.
+wkhtmltopdf is no longer required. PDFs are created with a [chromium](#chromium) browser.
 
 ### phantomjs
 
-phantomjs is no longer required and has been replaced by puppeteer.
+phantomjs is no longer required. PDFs are created with a [chromium](#chromium) browser.
 
 ### puppeteer {#puppeteer}
 
-The reports2 plugin requires puppeteer to create PDF reports.
-For details about puppeteer, see https://pptr.dev/.
-OMD includes puppeteer from version 5.
+Puppeteer is no longer used, it has been replaced by a [chromium](#chromium) browser which Thruk controls directly.
+NodeJS and npm are not required anymore. `PUPPETEER_*` settings are ignored, use `THRUK_BROWSER` instead.
+The folder /var/lib/thruk/puppeteer is not used anymore and can be removed.
 
-The easiest way to install puppeteer is with the included installer:
+### chromium {#chromium}
 
-```console
-  #> /usr/share/thruk/script/install_puppeteer.sh
-```
+Thruk uses a headless chromium browser to create PDF reports, PDFs from urls
+and images of Grafana graphs. Thruk starts the browser itself and controls it
+directly, no additional software is required.
 
-This will install puppeteer into /var/lib/thruk/puppeteer
+OMD ships the browser with the OMD package, there is nothing to do.
 
-It requires node and npm to be installed.
+On other installations the first browser from this list is used:
 
-If chromium is installed before you run the installer, Thruk uses the system chromium.
-Otherwise, puppeteer downloads chromium into /var/lib/thruk/puppeteer/chromium.
+1. the browser set in `THRUK_BROWSER`
+2. the browser installed by the Thruk installer in /var/lib/thruk/browser
+3. a chromium from your distribution: `chromium`, `chromium-browser`,
+   `chrome-headless-shell`, `google-chrome` or `google-chrome-stable`
+   in /usr/bin, /usr/local/bin, /snap/bin and then in `PATH`
 
-To prevent the chromium download, set this environment variable before you run the installer:
-
-```console
-  #> export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-```
-
-Then specify which chromium puppeteer should use, for example in /etc/thruk/thruk.env:
+So with a chromium package installed there is nothing more to do. If there is
+none, run the installer as root:
 
 ```console
-  #> export PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+  #> /usr/share/thruk/script/install_browser.sh
 ```
+
+It downloads `chrome-headless-shell` into /var/lib/thruk/browser, tells you
+which libraries are missing and ends with a rendering test. It does not install
+any packages and changes nothing outside this folder. A different folder and
+version can be given as arguments. There is no such download for aarch64,
+install the chromium package of your distribution there.
+
+Run the rendering test at any time with the user which runs Thruk. It prints
+the browser and its version and whether the browser sandbox is used:
+
+```console
+  %> /usr/share/thruk/script/html2pdf.sh --selftest
+```
+
+Settings can be put into /etc/thruk/thruk.env or into the file ~/.thruk of
+the user which runs Thruk:
+
+```console
+  THRUK_BROWSER=/usr/bin/chromium
+  THRUK_BROWSER_NO_SANDBOX=1
+```
+
+- `THRUK_BROWSER`: absolute path of the browser to use. Rendering fails if this
+  file is not an executable, no other browser is tried then.
+- `THRUK_BROWSER_NO_SANDBOX`: the browser is started with its sandbox. If it
+  does not start that way, for example in most containers, Thruk starts it
+  without sandbox and says so in the output. Set this to `1` to start without
+  sandbox right away.
+- `WAIT_TIMEOUT`: seconds to wait for a Grafana graph, default 20.
+- `START_TIMEOUT`: seconds to wait for the browser to start, default 30.
+
+After an update from a release which did not use chromium directly: run the
+rendering test. If it finds no browser, install the chromium package of your
+distribution or run the installer. The reports page shows a warning as long as
+no browser is found.
+
+The session of the user is only sent to the Thruk host itself (and hosts inside
+`cookie_auth_domain`). It is removed as soon as a page loads a frame or opens a
+page from another host. A page which embeds frames from other hosts is therefore
+rendered without login from that point on.
 
 ### How can I enable the business process addon.
 

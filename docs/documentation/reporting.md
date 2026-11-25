@@ -47,7 +47,9 @@ http://template-toolkit.org/docs/manual/index.html
 
 #### Converting
 
-Puppeteer converts the generated HTML report to a PDF file.
+A headless chromium browser converts the generated HTML report to a PDF file.
+The [FAQ](faq.html#chromium) explains which browser is used, its settings
+and how to check it with the rendering test `html2pdf.sh --selftest`.
 
 #### Sending Reports By Mail
 

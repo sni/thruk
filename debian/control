@@ -49,6 +49,7 @@ Package: thruk-plugin-reporting
 Architecture: any
 Depends: ${misc:Depends},
          thruk-base (= ${source:Version}),
-         fonts-liberation
+         fonts-liberation,
+         unzip
 Description: This package contains the reporting addon for thruk useful for sla
  and event reporting.

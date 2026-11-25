@@ -7,6 +7,10 @@ case "$1" in
         rm -f /etc/thruk/plugins/plugins-enabled/reports2
         ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
         service thruk condrestart >/dev/null || :
+        if ! /usr/share/thruk/script/html2pdf.sh --find-browser >/dev/null 2>&1; then
+            echo "PDF reports need a Chromium browser. To install it, run: /usr/share/thruk/script/install_browser.sh"
+            [ ! -d /var/lib/thruk/puppeteer ] || echo "The folder /var/lib/thruk/puppeteer is not used anymore and can be removed."
+        fi
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
