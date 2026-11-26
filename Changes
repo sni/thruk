@@ -3,6 +3,62 @@
 This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
+          - Security:
+            - escape the plugin output of outage rows in the availability outage report
+              (avail.cgi?outages=1) by default (stored XSS via unescaped log_line_plugin_output
+              rendered into the outage table cell, GHSA-7qph-3mcp-cvqw, reported by @gargantuanapple).
+              For trusted setups that rely on HTML in plugin output, set escape_html_tags to 0.
+            - escape the plugin output of SLA outage rows in the reports2 SLA report templates
+              (stored XSS via unescaped log_line_plugin_output rendered into the output div)
+            - html-escape the plugin output stored in the trends image_map so the trends detail
+              popup (client-side innerHTML) renders it as text by default; the escape_html_tags=0
+              opt-out still renders it as HTML
+            - escape host names and service descriptions in the panorama icon tooltip details
+              (stored XSS via status.cgi JSON metadata concatenated unescaped into the ExtJS
+              tooltip HTML sink, GHSA-j445-m9r7-q45g, reported by @gargantuanapple)
+            - escape host and service action and notes links by default. For trusted legacy
+              popup attributes, set escape_action_url_html or escape_notes_url_html to 0.
+            - escape host and service notes on the extinfo pages by default (stored XSS via
+              notes rendered as raw HTML, GHSA-7vgh-mrgh-h79w). BREAKING CHANGE for anyone who
+              relied on HTML in notes: set escape_notes_html to 0 to restore the old behaviour.
+            - escape host and service names in the panorama grids and mine map
+              (stored XSS via unescaped display names and mine map headers
+              rendered as HTML by the ExtJS grid cells)
+            - escape the author and comment text in the panorama comments grid (stored XSS via
+              unescaped comment/author rendered as HTML by the ExtJS grid cell, GHSA-wm48-j98q-3x77,
+              reported by @grapealbacore)
+            - escape performance profile names and debug hints in the generated profile HTML
+              (stored XSS via unescaped report_from_url URL labels, GHSA-ww3m-8p89-562g,
+              reported by @grapealbacore)
+            - escape the comment author in the comments table (stored XSS via unescaped
+              com_author, GHSA-69wg-g5h9-ghjg, reported by @maxtli)
+            - refuse cron schedule entries whose fields are not plain cron components (reports
+              and recurring downtimes) which could break out into a second, complete crontab entry
+            - escape the error parameter and the referer of the command form in the rendered
+              templates (stored XSS via crafted links)
+            - escape the report name and description in the generated report page
+            - require authorized_for_reports on the report REST routes (/r/v1/thruk/reports)
+              which were reachable by any authenticated user
+            - refuse cron entries carrying a line break, a second, independent crontab line
+              could be smuggled in via the report send_types API
+          - Graphs:
+            - add new option 'spannulls_multiplier' which controls the parameter for histou graphs
+          - Reports:
+            - replace puppeteer by direct control of the chromium browser for pdf and image export.
+              NodeJS and npm are no longer required at runtime. What to do after the update:
+              - OMD: nothing
+              - other installations: run /usr/share/thruk/script/html2pdf.sh --selftest. If it finds
+                no browser, install the chromium package of your distribution or run
+                /usr/share/thruk/script/install_browser.sh. The reports page shows a warning
+                as long as no browser is found. The package installation also shows a note then.
+              - PUPPETEER_* settings are ignored, use THRUK_BROWSER to select a browser.
+                The folder /var/lib/thruk/puppeteer is not used anymore and can be removed.
+              - see https://www.thruk.org/documentation/faq.html#chromium
+            - start the browser with its sandbox, fall back to no sandbox if it does not start
+              (THRUK_BROWSER_NO_SANDBOX=1 disables the sandbox)
+            - settings in thruk.env and ~/.thruk (ex.: WAIT_TIMEOUT) work without export now
+            - remove the session cookie as soon as a rendered page leaves the allowed host
+              or embeds a page from another host
           - prevent Perl execution in REST CLI output arithmetic (GHSA-j8xr-cx52-cxj9)
           - treat REST and backend sort keys as data and not as code (GHSA-rjfp-vvx9-76vh)
           - escape plugin output in the availability outage report by default (GHSA-7qph-3mcp-cvqw)

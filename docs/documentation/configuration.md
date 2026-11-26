@@ -3555,8 +3555,10 @@ drop down selection.
 
 ## Component Thruk::Plugin::Reports2
 
-The 'Reports2' plugin creates sla reports in html or pdf format. You
-probably have to install [puppeteer](faq.html#puppeteer) in a recent version.
+The 'Reports2' plugin creates sla reports in html or pdf format. PDF files
+are created with a [chromium browser](faq.html#chromium). The FAQ explains how
+the browser is found, its settings (`THRUK_BROWSER`, `THRUK_BROWSER_NO_SANDBOX`)
+and the rendering test `html2pdf.sh --selftest`.
 
 ex.:
 
@@ -3589,7 +3591,7 @@ Url used to replace relative links in html reports.
 ### phantomjs
 
 `phantomjs` is deprecated and no longer use. It has been replaced
-with puppeteer. See the [FAQ](faq.html#puppeteer)
+with a chromium browser. See the [FAQ](faq.html#chromium)
 for further information.
 
 ### pnp_export {#pnp_export}

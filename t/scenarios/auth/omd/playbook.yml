@@ -5,12 +5,13 @@
     - role: local_tests
     - role: thruk_developer
   tasks:
-  - name: "install tesseract"
+  - name: "install tesseract and poppler-utils"
     include_role:
       name: yum_apt_retry
     vars:
       package:
         - tesseract
+        - poppler-utils
   - name: "omd config change"
     shell: "omd config demo change"
     args:

@@ -1516,6 +1516,8 @@ sub read_report_file {
 
         # strip performance debug output
         $report->{'error'}  =~ s%^\[.*INFO.*Req:.*$%%gmx;
+        # note of the renderer, the report was rendered without browser sandbox
+        $report->{'error'}  =~ s%^browser\ did\ not\ start\ with\ sandbox\ .*,\ sandbox\ is\ off\ for\ this\ run$%%gmx;
         if($report->{'error'} =~ m%\S+%mx) {
             $report->{'failed'} = 1;
             $report->{'var'}->{'is_running'} = 0;
@@ -1789,21 +1791,16 @@ sub _convert_to_pdf {
     if(!-e $attachment.'.pdf') {
         my $error = Thruk::Utils::IO::read($logfile);
         if($error eq "") { $error = $out; }
-        if($error =~ m/internal\/modules\/cjs\/loader\.js/mx) {
-            $error =~ s/^.*?internal\/modules\/cjs\/loader(\.js:\d+|:\d*)\s*throw\s*err;\s*\^\s*Error:/Node Error:/sgmx; # remove useless info from node errors
-            Thruk::Utils::IO::write($logfile, $error);
-        } else {
-            Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
-        }
+        Thruk::Utils::IO::write($logfile, $error, undef, 1) unless -s $logfile;
         die('report failed: '.$error);
     }
 
     move($attachment.'.pdf', $attachment) or die('move '.$attachment.'.pdf to '.$attachment.' failed: '.$!);
     Thruk::Utils::IO::ensure_permissions('file', $attachment);
 
-    # remove old puppeteer/chromium temp folders left in /tmp by previous reports
-    eval { Thruk::Utils::CLI::Maintenance::cleanup_puppeteer_folders($c); };
-    _warn("cleanup_puppeteer_folders failed: %s", $@) if $@;
+    # remove old browser temp folders left by previous reports
+    eval { Thruk::Utils::CLI::Maintenance::cleanup_browser_folders($c); };
+    _warn("cleanup_browser_folders failed: %s", $@) if $@;
 
     $c->stats->profile(end => "_convert_to_pdf()");
     return;

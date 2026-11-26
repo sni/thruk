@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>render test report</title>
+<script src="../../../root/thruk/vendor/jquery-3.6.4.min.js"></script>
+<script src="../../../root/thruk/vendor/flot-d7c58b5/jquery.flot.js"></script>
+<style>
+  body { font-family: sans-serif; }
+  #chart { width: 600px; height: 300px; }
+</style>
+</head>
+<body>
+<h1>Render Test Report</h1>
+<div id="chart"></div>
+<script>
+  // the axis labels only exist when the browser did run this script
+  jQuery(function() {
+    var data = [[0, 91], [1, 93], [2, 97], [3, 95], [4, 99]];
+    jQuery.plot("#chart", [{ data: data, lines: { show: true } }], {
+      yaxis: { min: 90, max: 100, ticks: [90, 92, 94, 96, 98, 100], tickFormatter: function(v) { return "avail" + v + "pct"; } },
+      xaxis: { ticks: [0, 1, 2, 3, 4], tickFormatter: function(v) { return "week" + (v + 1); } }
+    });
+  });
+</script>
+</body>
+</html>

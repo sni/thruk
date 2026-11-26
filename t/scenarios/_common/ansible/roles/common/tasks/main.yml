@@ -65,7 +65,7 @@
     line: "  check_command                  check_local_disk!0.02%!0.01%!/"
     regexp: '^.*check_command.*check_local_disk!.*!.*!/'
 
-- name: make puppeteer wait longer on busy machines
+- name: wait longer for grafana charts on busy machines
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/.thruk
     line: "WAIT_TIMEOUT=120"
@@ -75,7 +75,7 @@
     mode: "0644"
     create: true
 
-- name: make puppeteer wait longer on busy machines
+- name: wait longer for the browser start on busy machines
   lineinfile:
     dest: /opt/omd/sites/{{ site }}/.thruk
     line: "START_TIMEOUT=120"
@@ -137,3 +137,62 @@
     - 'shopt -s histappend'
     - 'PROMPT_COMMAND="history -a"'
     - 'export HISTFILE=/var/tmp/.bash_history.$UID'
+
+# an omd without THRUK_BROWSER (omd-labs nightly before the renderer change) has no browser
+# the renderer looks for; install one into /var/lib/thruk/browser, a site THRUK_BROWSER wins.
+# The role also runs while the base image is built, /thruk is mounted only in the scenario container.
+- stat: path=/thruk/script/install_browser.sh
+  register: install_browser_script
+
+- name: "check THRUK_BROWSER of the site"
+  shell: "sudo su - {{ site }} -c 'echo $THRUK_BROWSER'"
+  register: site_thruk_browser
+  changed_when: false
+
+- name: "libraries of chrome-headless-shell"
+  include_role:
+    name: yum_apt_retry
+  vars:
+    rpm:
+      - alsa-lib
+      - atk
+      - at-spi2-atk
+      - at-spi2-core
+      - cups-libs
+      - libdrm
+      - libXcomposite
+      - libXdamage
+      - libxkbcommon
+      - libXrandr
+      - mesa-libgbm
+      - nss
+      - pango
+      - cairo
+      - unzip
+    deb:
+      - libatk1.0-0
+      - libatk-bridge2.0-0
+      - libatspi2.0-0
+      - libgbm1
+      - libnspr4
+      - libnss3
+      - libxcomposite1
+      - libxdamage1
+      - libxfixes3
+      - libxkbcommon0
+      - libxrandr2
+      - libpango-1.0-0
+      - unzip
+  when:
+    - install_browser_script.stat.exists
+    - site_thruk_browser.stdout == ""
+
+# start.sh exports OMD_ROOT for root, the selftest would then create $OMD_ROOT/tmp/thruk as root
+# and the following 'omd start' fails to chmod it.
+- name: "install a browser for rendering"
+  shell: "env -u OMD_ROOT /thruk/script/install_browser.sh"
+  args:
+    creates: /var/lib/thruk/browser/chrome-headless-shell/chrome-headless-shell
+  when:
+    - install_browser_script.stat.exists
+    - site_thruk_browser.stdout == ""

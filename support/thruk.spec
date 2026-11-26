@@ -88,6 +88,7 @@ This package contains the base files for thruk.
 Summary:     Thruk Gui Reporting Addon
 Group:       Applications/System
 Requires:    %{name}-base = %{version}-%{release}
+Requires:    unzip
 AutoReqProv: no
 
 %description plugin-reporting
@@ -389,6 +390,10 @@ ln -s ../plugins-available/reports2 /etc/thruk/plugins/plugins-enabled/reports2
 %else
   /etc/init.d/thruk condrestart >/dev/null || :
 %endif
+if ! /usr/share/thruk/script/html2pdf.sh --find-browser >/dev/null 2>&1; then
+  echo "PDF reports need a Chromium browser. To install it, run: /usr/share/thruk/script/install_browser.sh"
+  [ ! -d /var/lib/thruk/puppeteer ] || echo "The folder /var/lib/thruk/puppeteer is not used anymore and can be removed."
+fi
 exit 0
 
 %preun plugin-reporting
@@ -482,8 +487,8 @@ exit 0
 %attr(0755,root,root) %{_datadir}/thruk/script/thruk.psgi
 %attr(0755,root,root) %{_datadir}/thruk/script/grafana_export.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/html2pdf.sh
-%attr(0644,root,root) %{_datadir}/thruk/script/puppeteer.cjs
-%attr(0755,root,root) %{_datadir}/thruk/script/install_puppeteer.sh
+%attr(0644,root,root) %{_datadir}/thruk/script/render_url.pl
+%attr(0755,root,root) %{_datadir}/thruk/script/install_browser.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/pnp_export.sh
 %attr(0755,root,root) %{_datadir}/thruk/script/convert_old_datafile
 %attr(0755,root,root) %{_datadir}/thruk/script/check_thruk_rest

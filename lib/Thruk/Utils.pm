@@ -4395,32 +4395,6 @@ sub render_db_profile {
 
 ##############################################
 
-=head2 has_node_module
-
-  has_node_module($c, $module_name)
-
-return true if npm module is installed
-
-=cut
-sub has_node_module {
-    my($c, $module_name) = @_;
-    return unless Thruk::Base::has_binary("node");
-    return unless Thruk::Base::has_binary("npm");
-
-    my($rc, $out) = Thruk::Utils::IO::cmd(["npm", "ls", "-g"]);
-    if($out =~ m/$module_name/mx) {
-        return 1;
-    }
-
-    ($rc, $out) = Thruk::Utils::IO::cmd(["npm", "ls"]);
-    if($out =~ m/$module_name/mx) {
-        return 1;
-    }
-    return;
-}
-
-##############################################
-
 =head2 extract_connection_error
 
   extract_connection_error($err)
