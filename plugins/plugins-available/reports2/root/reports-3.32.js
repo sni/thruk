@@ -37,6 +37,33 @@ function update_reports_type_step2() {
     jQuery(".js-type-filter").change();
 }
 
+/* validate a report_from_url url against report_allow_url_hosts,
+ * debounced so rapid typing only triggers a single request */
+var reports_check_url_cb = thruk_debounce(function(input) {
+    var field  = jQuery(input);
+    var errBox = field.next('.reports-url-error');
+    var url    = field.val();
+    jQuery.ajax({
+        url:  'reports2.cgi',
+        data: { action: 'check_url', url: url },
+        type: 'POST',
+        cache: false,
+        success: function(data) {
+            if(field.val() != url) {
+                return; // stale response, a newer value was already typed
+            }
+            var error = (data.error || '').trim();
+            input.setCustomValidity(error);
+            if(errBox.length > 0) {
+                errBox.text(error).toggleClass('hidden', !error);
+            }
+        }
+    });
+}, 400);
+function reports_check_url(input) {
+    reports_check_url_cb(input);
+}
+
 /* show hide specific types of reports */
 var last_reports_typ;
 function reports_view(typ) {

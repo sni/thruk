@@ -4,7 +4,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 38;
+    plan tests => 47;
 }
 
 BEGIN {
@@ -13,6 +13,7 @@ BEGIN {
     import TestUtils;
 }
 
+use_ok('Thruk::Utils::IO');
 use_ok('Thruk::Utils::Reports');
 use_ok("Thruk::Utils::Reports::Render");
 TestUtils::get_c();
@@ -60,22 +61,42 @@ for my $url (@{$urls}) {
 }
 
 ###########################################################
-# _check_report_url
+# check_report_url
 {
     my $c = TestUtils::get_c();
     local $c->{config}->{omd_local_site_url}     = 'http://127.0.0.1:8388/omd';
     local $c->{config}->{report_allow_url_hosts} = ['example.com'];
+    my($hostname, $fqdn) = Thruk::Utils::IO::get_host_names();
+    ok($fqdn, "get_host_names() returned a fqdn: $fqdn");
+    ok($hostname, "get_host_names() returned a hostname: $hostname");
 
     # allowed urls
     for my $url (
         '/thruk/cgi-bin/status.cgi',            # relative thruk url
         'status.cgi?style=hostdetail',          # relative cgi url
         'http://127.0.0.1:8388/omd/status.cgi', # omd_local_site_url host
+        "http://$hostname/status.cgi",          # machines own hostname
+        "http://$fqdn/status.cgi",              # machines own fqdn
         'http://example.com/status.cgi',        # in report_allow_url_hosts
         'http://sub.example.com/status.cgi',    # subdomain of allowed host
     ) {
-        ok(defined eval { Thruk::Utils::Reports::Render::_check_report_url($c, $url); 1 }, "_check_report_url('$url') allowed");
+        ok(defined eval { Thruk::Utils::Reports::Render::check_report_url($c, $url); 1 }, "check_report_url('$url') allowed");
     }
+
+    # report_save() validates the url of report_from_url reports
+    local $c->{config}->{report_allow_url_hosts} = ['example.com'];
+    my %base = (
+        'name'     => 'test url report',
+        'template' => 'report_from_url.tt',
+        'params'   => {},
+    );
+    $base{'params'}{'url'} = 'http://evil.com/status.cgi';
+    is(Thruk::Utils::Reports::report_save($c, 'new', \%base), undef, 'report_save() rejects disallowed url');
+    like($c->stash->{'thruk_message_raw'}, qr/not allowed/, 'report_save() sets error message for disallowed url');
+    $base{'params'}{'url'} = 'http://example.com/status.cgi';
+    my $saved = Thruk::Utils::Reports::report_save($c, 'new', \%base);
+    ok($saved, 'report_save() accepts allowed url');
+    unlink($c->{config}->{var_path}.'/reports/'.$saved->{nr}.'.rpt') if ref($saved) && $saved->{nr};
 
     # disallowed urls (ssrf targets)
     for my $url (
@@ -91,13 +112,14 @@ for my $url (@{$urls}) {
         'http://[fd12::1]/',
         'http://[fe80::1]/',
         'http://[2001:db8::1]/',
+        'http://'.$fqdn.'.local.evil.com/',     # fqdn lookalike suffix
         'http://evil.com/',                     # not in allowlist
         'http://example.evil.com/',             # lookalike suffix
         'ftp://example.com/',                   # unsupported scheme
     ) {
         my $err;
-        eval { Thruk::Utils::Reports::Render::_check_report_url($c, $url) };
+        eval { Thruk::Utils::Reports::Render::check_report_url($c, $url) };
         $err = $@;
-        ok($err, "_check_report_url('$url') rejected: $err");
+        ok($err, "check_report_url('$url') rejected: $err");
     }
 }

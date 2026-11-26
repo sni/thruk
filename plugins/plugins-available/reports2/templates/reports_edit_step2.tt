@@ -349,6 +349,9 @@
         [% END %]
       </tbody>
     </table>
+  [% ELSIF type == 'url' %]
+    <input type="text" class="w-full" name="params.[% key %]" value="[% value | html %]" placeholder="ex.: status.cgi or https://..." onkeyup="reports_check_url(this)" onchange="reports_check_url(this)">
+    <div class="reports-url-error textALERT text-xs mt-1 hidden"></div>
   [% ELSIF type == 'filter' %]
     [% substyle   = 'service' %]
     [% paneprefix = sprintf('f%02d_', loop.index)  %]

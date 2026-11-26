@@ -38,6 +38,19 @@ var serviceprops       = new Array( 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024,
 // no op version for confirm
 function noop_confirm() { return true; }
 
+/* delayed call helper. cancels a previous pending call, so rapid calls
+ * only fire fn once, delay ms after the last call.
+ * fn is called with the same `this` and arguments as the last call.
+ */
+function thruk_debounce(fn, delay) {
+    var timer;
+    return function() {
+        var self = this, args = arguments;
+        clearTimeout(timer);
+        timer = window.setTimeout(function() { fn.apply(self, args); }, delay);
+    };
+}
+
 /*******************************************************************************
   ,ad8888ba,  88888888888 888b      88 88888888888 88888888ba  88   ,ad8888ba,
  d8"'    `"8b 88          8888b     88 88          88      "8b 88  d8"'    `"8b
@@ -3584,7 +3597,11 @@ function cron_change_date(id) {
 
 function cron_validate_weekdays(group, active) {
     var missing = active && !group.querySelector('input:checked');
-    group.querySelector('input[type=checkbox]').setCustomValidity(missing ? 'Select at least one weekday.' : '');
+    var msg     = missing ? 'Select at least one weekday.' : '';
+    var boxes   = group.querySelectorAll('input[type=checkbox]');
+    for(var i = 0; i < boxes.length; i++) {
+        boxes[i].setCustomValidity(msg);
+    }
 }
 
 /* Cron schedule TZ: HH:MM is server time; optional browser-equivalence preview. */

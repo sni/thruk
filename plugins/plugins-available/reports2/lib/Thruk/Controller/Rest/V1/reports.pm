@@ -51,8 +51,8 @@ sub _rest_get_thruk_reports_new {
         });
     }
     return({
-        'message' => 'failed to save report',
-        'code'    => 500,
+        'message' => $c->stash->{'thruk_message_raw'} || 'failed to save report',
+        'code'    => 400,
     });
 }
 

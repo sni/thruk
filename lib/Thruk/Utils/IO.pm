@@ -42,6 +42,24 @@ if($@) {
 ##############################################
 =head1 METHODS
 
+=head2 get_host_names
+
+  ($hostname, $fqdn) = get_host_names()
+
+return the machines short hostname and full qualified domain name, cached.
+
+=cut
+our $hostname;
+our $fqdn;
+sub get_host_names {
+    return($hostname, $fqdn) if defined $fqdn;
+    chomp($hostname = (Thruk::Utils::IO::cmd("hostname")) // '');
+    chomp($fqdn     = (Thruk::Utils::IO::cmd("hostname --fqdn")) // '');
+    return($hostname, $fqdn);
+}
+
+##########################################
+
 =head2 close
 
   close($fh, $filename, $just_close)

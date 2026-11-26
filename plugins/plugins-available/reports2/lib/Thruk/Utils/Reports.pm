@@ -414,6 +414,16 @@ sub report_save {
     my $report        = get_new_report($c, $data);
     # Runtime state must never come from submitted report data.
     $report->{'var'}  = $old_report->{'var'} || {};
+
+    # validate the url of report_from_url reports against report_allow_url_hosts (ssrf)
+    if(($report->{'template'} // '') eq 'report_from_url.tt' && defined $report->{'params'}->{'url'}) {
+        my $url = $report->{'params'}->{'url'};
+        eval { Thruk::Utils::Reports::Render::check_report_url($c, $url); };
+        if($@) {
+            Thruk::Utils::set_message( $c, 'fail_message', $@ );
+            return;
+        }
+    }
     my $fields = _get_required_fields($c, $report);
     if(!$fields) {
         Thruk::Utils::set_message( $c, 'fail_message', 'invalid report template');

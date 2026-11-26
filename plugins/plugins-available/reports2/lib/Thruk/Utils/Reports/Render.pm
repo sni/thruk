@@ -374,19 +374,20 @@ sub get_url_with_retries {
 
 ##########################################################
 
-=head2 _check_report_url
+=head2 check_report_url
 
-  _check_report_url($c, $url)
+  check_report_url($c, $url)
 
 die if $url is not allowed to be fetched by report_from_url
 
-only relative thruk urls, the local omd site and hosts explicitly
-allowed via the report_allow_url_hosts config option may be fetched.
+only relative thruk urls, the local omd site, the machines own
+hostname and fqdn and hosts explicitly allowed via the
+report_allow_url_hosts config option may be fetched.
 hostnames are matched literally (not resolved) so a dns rebinding
 attacker can not sneak past the list.
 
 =cut
-sub _check_report_url {
+sub check_report_url {
     my($c, $url) = @_;
     return if $url !~ m{^[a-z]+://}mx;
     die("report from url '$url' not allowed: unsupported scheme\n") unless $url =~ m{^https?://}mx;
@@ -399,18 +400,26 @@ sub _check_report_url {
     }
     $host = lc($host // '');
     die("report from url '$url' not allowed: no host found\n") unless $host;
+    my $port;
+    if($url =~ m{^https?://\[?[^\]/:\#]+\]?:([0-9]{1,5})}mx) {
+        $port = 0 + $1;
+    } else {
+        $port = $url =~ m{^https://}mx ? 443 : 80;
+    }
 
     # allow the local omd site (operator-generated url) on the configured port only
     if(defined $c->config->{'omd_local_site_url'}) {
         my($omd_host, $omd_port) = $c->config->{'omd_local_site_url'} =~ m{^https?://([^:/?\#]+)(?::([0-9]{1,5}))?}mx;
         $omd_host = lc($omd_host // '');
-        my $port;
-        if($url =~ m{^https?://\[?[^\]/:\#]+\]?:([0-9]{1,5})}mx) {
-            $port = 0 + $1;
-        } else {
-            $port = $url =~ m{^https://}mx ? 443 : 80;
-        }
         return if $omd_host && $host eq $omd_host && (!defined $omd_port || $port == 0 + $omd_port);
+    }
+
+    # allow the machines own hostname and fqdn, also when reports run
+    # from cron. skipped if the name is an ip address (contains no
+    # letters), since allowing an ip would open every local port on it
+    my($hostname, $fqdn) = Thruk::Utils::IO::get_host_names();
+    for my $local (lc($hostname // ''), lc($fqdn // '')) {
+        return if $local =~ m/^[a-z0-9.\-]*[a-z][a-z0-9.\-]*$/mx && $host eq $local;
     }
 
     # allow hosts explicitly allowed by the operator
@@ -456,7 +465,7 @@ sub get_url {
     # shortcut: a redirect from an allowed host could still point to a private
     # address (dns rebinding / open redirect); per-redirect revalidation would
     # require a custom user agent, which is not worth it for this feature
-    _check_report_url($c, $url);
+    check_report_url($c, $url);
 
     # directly convert external urls
     if($url =~ m/^https?:\/\/([^\/]+)/mx && $c->stash->{'param'}->{'pdf'} && $c->stash->{'param'}->{'pdf'} eq 'yes') {
@@ -1149,7 +1158,7 @@ sub _read_static_content_file {
 
     if($url =~ m/^https?:/mx) {
        # embedded css/js/images: only fetch allowed hosts (ssrf protection)
-       eval { _check_report_url($c, $url); };
+       eval { check_report_url($c, $url); };
        if($@) {
           return(404, { result => ''}) if wantarray;
           return '';

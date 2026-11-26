@@ -9,6 +9,7 @@ use Thruk::Request ();
 use Thruk::Utils::Auth ();
 use Thruk::Utils::External ();
 use Thruk::Utils::Log qw/:all/;
+use Thruk::Utils::Reports::Render ();
 
 =head1 NAME
 
@@ -112,6 +113,15 @@ sub index {
             $json        = { 'hosts' => $res[0], 'services' => $res[1], 'too_many' => $too_many };
         }
         return $c->render(json => $json);
+    }
+
+    # validate a report_from_url url against report_allow_url_hosts
+    if($action eq 'check_url') {
+        my $url   = $c->req->parameters->{'url'} || '';
+        my $error = '';
+        eval { Thruk::Utils::Reports::Render::check_report_url($c, $url); };
+        $error = $@ if $@;
+        return $c->render(json => { 'error' => $error });
     }
 
     if(defined $report_nr) {

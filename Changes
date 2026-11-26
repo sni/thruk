@@ -27,8 +27,10 @@ next:
           - escape html in bookmark links (GHSA-4f3q-c36g-2h2q)
           - restrict report_from_url to allowed hosts (GHSA-j7m6-r8rq-xgm9)
           - sanitize command argument input ( GHSA-4r78-rwq7-mmfv)
-          - add report_allow_url_hosts option
           - add option 'spannulls_multiplier' for histou graphs
+          - Reports:
+            - add report_allow_url_hosts option
+            - allow own host in report_from_url and validate url in the editor
 
 3.32     Wed Nov 18 16:51:11 CET 2026
           - add Status Replay with a playable log-based host and service status timeline

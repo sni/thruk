@@ -211,8 +211,7 @@ sub _check_db_fs {
 
     _debug("[%s] db runs on %s with datadir %s", $prefix, $dbhost, $datadir);
 
-    chomp(my $hostname = Thruk::Utils::IO::cmd("hostname"));
-    chomp(my $fqdn     = Thruk::Utils::IO::cmd("hostname --fqdn"));
+    my($hostname, $fqdn) = Thruk::Utils::IO::get_host_names();
 
     # not on the same host, no chance to access the filesystem
     if($dbhost ne $hostname && $dbhost ne $fqdn) {

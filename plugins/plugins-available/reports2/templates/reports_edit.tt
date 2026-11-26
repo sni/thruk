@@ -60,7 +60,7 @@
             </tr>
             <tr>
               <th class="align-top">Description</th>
-              <td colspan=2><textarea name="desc" wrap="hard" cols="56" class="w-full">[% r.desc %]</textarea></td>
+              <td colspan=2 class="min-w-[600px]"><textarea name="desc" wrap="hard" cols="56" class="w-full">[% r.desc %]</textarea></td>
             </tr>
             [% IF c.check_user_roles('admin') %]
             <tr>
