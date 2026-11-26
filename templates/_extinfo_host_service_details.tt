@@ -209,25 +209,24 @@ END
     </td>
   </tr>
   <tr>
-    <th class="align-top">
-      <div
-        class="link hoverable rounded clickable font-normal moreStatusOutputButton"
-        style="visibility: hidden;"
-        onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
-        >
-        (toggle full plugin output)
-      </div>
-    </th>
+    <th></th>
     <td class='detail_plugin_output whitespace-normal'>
-      <span class="detail_plugin_outputBlock mightOverflowBlock max-w-[500px] max-h-[300px] min-[2200px]:max-w-[1000px] min-[2200px]:max-h-[600px]">
+      <span id="detail_plugin_output" class="detail_plugin_outputBlock plugin-output-collapsed max-w-[500px] min-[2200px]:max-w-[1000px]">
         [% PROCESS _plugin_output.tt %]
       </span>
-      <div
-        class="link text-center hoverable rounded clickable font-normal moreStatusOutputButton"
-        style="visibility: hidden;"
-        onClick="toggleClass('.detail_plugin_outputBlock', 'mightOverflowBlock');"
-        >
-        (toggle full plugin output)
+      <div class="flex justify-center">
+        <button
+          type="button"
+          class="round small iconOnly mt-1 mb-2 moreStatusOutputButton"
+          style="display: none;"
+          title="Expand plugin output"
+          aria-label="Expand plugin output"
+          aria-controls="detail_plugin_output"
+          aria-expanded="false"
+          onClick="togglePluginOutput();"
+          >
+          <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+        </button>
       </div>
     </td>
   </tr>
@@ -238,17 +237,17 @@ END
       <div
         class="link hoverable rounded clickable font-normal"
         id="raw_perf_switch"
-        onclick="showElement('perfdata_raw'); hideElement('perfdata_human'); hideElement('raw_perf_switch'); showElement('human_perf_switch');"
+        onclick="showElement('perfdata_raw'); hideElement('perfdata_table_view'); hideElement('raw_perf_switch'); showElement('human_perf_switch');"
         >
-          (show raw data)
+          (Show raw data)
       </div>
       <div
         class="link hoverable rounded clickable font-normal"
         style="display: none;"
         id="human_perf_switch"
-        onclick="hideElement('perfdata_raw'); showElement('perfdata_human'); hideElement('human_perf_switch'); showElement('raw_perf_switch');"
+        onclick="hideElement('perfdata_raw'); showElement('perfdata_table_view'); hideElement('human_perf_switch'); showElement('raw_perf_switch');"
         >
-        (show human data)
+        (Show table)
       </div>
       [% END %]
     </th>
@@ -474,6 +473,27 @@ END
 
 <script>
   <!--
+  function togglePluginOutput() {
+    jQuery(".detail_plugin_outputBlock").toggleClass("plugin-output-collapsed");
+    setPluginOutputOverflowSize();
+  }
+
+  function togglePerformanceData() {
+    var button = jQuery("#perfdata_expand");
+    var expanded = button.attr("aria-expanded") != "true";
+    var label = expanded ? "Collapse performance data" : "Expand performance data";
+    jQuery("#perfdata_human .js-perfdata-table-row").toggleClass("hidden", !expanded);
+    button.attr("aria-expanded", expanded ? "true" : "false")
+      .attr("aria-label", label)
+      .attr("title", label)
+      .find("I")
+      .toggleClass("fa-chevron-up", expanded)
+      .toggleClass("fa-chevron-down", !expanded);
+    if(!expanded) {
+      scrollToEl('perfdata_human');
+    }
+  }
+
   /* set overflow size for pluginoutput */
   function setPluginOutputOverflowSize() {
     var block = jQuery(".detail_plugin_outputBlock")[0];
@@ -481,28 +501,28 @@ END
       return;
     }
 
-    var perf = jQuery("#perfdata_human")[0];
+    var perf = jQuery("#perfdata_table_view")[0];
     if(perf) {
+      var display = perf.style.display;
       perf.style.display = "none";
       var width  = Math.floor(jQuery(perf).parents("TD").first().innerWidth()) - 16;
-      jQuery(perf).parents("DIV").first().css("max-width", width+"px");
-      perf.style.display = "";
+      jQuery("#perfdata_table_view, #perfdata_raw").css("max-width", width+"px");
+      perf.style.display = display;
     }
 
     block.style.maxWidth  = "";
-    block.style.maxHeight = "";
-    jQuery(".moreStatusOutputButton").css("visibility", "hidden");
     var tdWidth  = Math.floor(jQuery(block).parents("TD").innerWidth()) - 16;
-    var tdHeight = Math.floor(jQuery(block).parents("TD").innerHeight());
     block.style.setProperty("max-width", tdWidth+"px", "important");
-    if(block.offsetWidth < block.scrollWidth) {
-      jQuery(".moreStatusOutputButton").css("visibility", "");
-    }
-
-    block.style.setProperty("max-height", tdHeight+"px", "important");
-    if(block.offsetHeight+1 < block.scrollHeight) {
-      jQuery(".moreStatusOutputButton").css("visibility", "");
-    }
+    var expanded = !jQuery(block).hasClass("plugin-output-collapsed");
+    var label = expanded ? "Collapse plugin output" : "Expand plugin output";
+    jQuery(".moreStatusOutputButton")
+      .toggle(expanded || block.offsetHeight+1 < block.scrollHeight)
+      .attr("aria-expanded", expanded ? "true" : "false")
+      .attr("aria-label", label)
+      .attr("title", label)
+      .find("I")
+      .toggleClass("fa-chevron-up", expanded)
+      .toggleClass("fa-chevron-down", !expanded);
   }
   jQuery(document).ready(function() {
     setPluginOutputOverflowSize();
