@@ -30,7 +30,7 @@
         [% END %]
       </select>
     </div>
-    <div id="div_send_week_[% nr %]" style="display: none">
+    <div id="div_send_week_[% nr %]" style="display: none" onchange="cron_validate_weekdays(this, true)">
       [% lookup = {} %]
       [% FOREACH w = cr.week_day.split(',') %][% lookup.$w = 1 %][% END %]
       <input type="hidden" name="week_day_[% nr %]" value="">
@@ -67,7 +67,7 @@
     </div>
     <div id="div_send_day_[% nr %]" style="display: none"></div>
     <div id="div_send_cust_[% nr %]" style="display: none">
-      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); escape_html(cr.cust); END %]" class="w-full" placeholder="minute hour dom month dow   (cron syntax)"[% IF !can_edit %] disabled[% END %]>
+      <input type="text" name="send_cust_[% nr %]" value="[% IF cr.exists('cust'); escape_html(cr.cust); END %]" class="w-full" placeholder="minute hour dom month dow   (cron syntax)" pattern="[0-9A-Za-z*,\/\-]+([ \t]+[0-9A-Za-z*,\/\-]+){4}" title="Enter five cron fields, for example: 5 1 * * *" required disabled>
     </div>
   </td>
   <td id="hour_select_[% nr %]" class="whitespace-nowrap">

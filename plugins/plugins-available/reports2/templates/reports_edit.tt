@@ -5,7 +5,7 @@
 <div class="flexrow h-full">
   [% PROCESS _infobox.tt extra_classes="2xl:block hidden order-2" %]
 
-  <form action="reports2.cgi" method="POST" class="w-[800px] h-full" onsubmit="setFormBtnSpinner(this)">
+  <form action="reports2.cgi" method="POST" class="w-[850px] h-full" onsubmit="setFormBtnSpinner(this)">
     <input type="submit" name="send" value="save" style="display:none"><!-- make enter submit the form -->
     <input type="hidden" name="action" value="save">
     <input type="hidden" name="report" value="[% r.nr %]">
@@ -127,7 +127,7 @@
                   <option value="print"[%  IF r.failed_backends == 'print'  %] selected[% END %]>ignore the error and add error details page</option>
                 </select>
                 <br>
-                <span class="whitespace-normal text-xs font-normal">choose what happens if some of the selected backends are not available.</span>
+                <span class="whitespace-normal text-xs font-normal max-w-[200px] inline-block">choose what happens if some of the selected backends are not available.</span>
               </td>
             </tr>
             [% END %]
@@ -197,7 +197,7 @@
         </table>
       </div>
       <div class="footer justify-evenly" style="flex: 0 0 40px;">
-          [% IF r.nr != "new" %]<button name="action" value="remove" class="hover-red w-32" onclick="return(confirm('really remove report: [% r.name | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
+          [% IF r.nr != "new" %]<button name="action" value="remove" formnovalidate class="hover-red w-32" onclick="return(confirm('really remove report: [% r.name | html %]?'))"><i class="uil uil-trash-alt"></i> Delete</button>[% END %]
           <button class="submit w-44 green"><i class="uil uil-save"></i> Save Report</button>
           [% IF r.nr != "new" %]<button name="action" value="clone" class="w-32"><i class="uil uil-copy"></i> Clone Report</button>[% END %]
       </div>

@@ -17,6 +17,7 @@ use Time::HiRes qw/gettimeofday tv_interval/;
 use Thruk::Backend::Provider::DBcommon ();
 use Thruk::Constants ':peer_states';
 use Thruk::Utils ();
+use Thruk::Utils::Log qw/_strip_line/;
 use Thruk::Utils::RecurringDowntimes ();
 
 my $rc_codes = {
@@ -240,10 +241,11 @@ sub _report_checks  {
             $details .= sprintf(" report failed: #%d - %s\n", $r->{'nr'}, $r->{'name'});
             $errors++;
         }
-        for my $cr (@{$r->{'schedule'}}) {
-            my $time = Thruk::Utils::get_cron_time_entry($cr);
-            if(!defined $time) {
-                $details .= sprintf(" report cannot expand cron entry: #%d - %s\n", $r->{'nr'}, $r->{'name'});
+        my $file = $c->config->{'var_path'}.'/reports/'.$r->{'nr'}.'.rpt';
+        for my $cr (@{$r->{'send_types'}}) {
+            eval { Thruk::Utils::get_cron_time_entry($cr, $file) };
+            if($@) {
+                $details .= "  - "._strip_line($@)."\n";
                 $errors++;
             }
         }
@@ -411,11 +413,7 @@ sub check_recurring_downtime {
     }
 
     for my $cr (@{$downtime->{'schedule'}}) {
-        my $time = Thruk::Utils::get_cron_time_entry($cr);
-        if(!defined $time) {
-            $details .= "  - ERROR: cannot expand cron entry in recurring downtime ".$file."\n";
-            $errors++;
-        }
+        Thruk::Utils::get_cron_time_entry($cr, $file);
     }
 
     return($errors, $details, $fixables);

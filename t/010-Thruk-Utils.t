@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Data::Dumper qw/Dumper/;
 use Encode qw/is_utf8/;
+use File::Temp qw/tempdir/;
 use Test::More;
 use utf8;
 
@@ -12,10 +13,11 @@ use Thruk::Config 'noautoload';
 use Thruk::Context ();
 use Thruk::Utils::Encode ();
 use Thruk::Utils::Filter ();
+use Thruk::Utils::IO ();
 
 BEGIN {
     plan skip_all => 'internal test only' if defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'};
-    plan tests => 132;
+    plan tests => 133;
 
     use lib('t');
     require TestUtils;
@@ -90,6 +92,24 @@ my $b = Thruk::Backend::Manager->new($p);
 isa_ok($b, 'Thruk::Backend::Manager');
 
 my $c = TestUtils::get_c();
+
+subtest 'report selfcheck uses stored cron schedules' => sub {
+    require Thruk::Utils::SelfCheck;
+    my $dir = tempdir(CLEANUP => 1);
+    local $c->config->{'var_path'} = $dir;
+    mkdir "$dir/reports" or die $!;
+    my $file = "$dir/reports/2.rpt";
+    my $report = { name => 'scheduled report', template => 'sla_report.tt', send_types => [{ type => 'cust', cust => '' }] };
+    Thruk::Utils::IO::json_store($file, $report);
+    my($rc) = Thruk::Utils::SelfCheck->self_check($c, 'reports');
+    is($rc, 0, 'empty custom schedule is skipped');
+    push @{$report->{'send_types'}}, { type => 'cust', cust => '5 1 *' };
+    Thruk::Utils::IO::json_store($file, $report);
+    my($status, $msg, $details) = Thruk::Utils::SelfCheck->self_check($c, 'reports');
+    is($status, 2, 'invalid custom schedule makes selfcheck critical');
+    is($msg, 'CRITICAL - reports', 'summary identifies the failed check');
+    is($details, "Reports:\n  - $file: invalid cron schedule: expected five time fields\n\n", 'details show the file and reason without Perl diagnostics');
+};
 
 #########################
 my $app = $c->app;
@@ -492,14 +512,22 @@ subtest 'cron entries from param validate cron fields' => sub {
         'week_day_1'      => ['1', '3'],
         'send_type_2'     => 'cust',
         'send_cust_2'     => '0 1 * * 1',
+        'send_type_3'     => 'cust',
+        'send_cust_3'     => '',
+        'send_type_4'     => 'week',
+        'week_day_4'      => '',
     };
     $entries = Thruk::Utils::get_cron_entries_from_param($ok_params);
     is(scalar @{$entries}, 2, 'normal entries are kept');
+    ok(!defined Thruk::Utils::get_cron_time_entry({ type => 'week', week_day => '' }), 'weekly schedule with no weekdays is skipped');
+    like(Thruk::Utils::get_cron_time_entry({ type => 'week', hour => 9, minute => 0, week_day => '0' }),
+         qr/^\s*0\s+9\s+\*\s+\*\s+0$/, 'Sunday alone is a valid selection');
+    ok(!defined Thruk::Utils::get_cron_time_entry({ type => 'cust', cust => '' }), 'empty stored custom schedule is skipped');
     is(Thruk::Utils::get_cron_time_entry($entries->[0]), " 0  3  *  *  *", 'day entry expands');
     is(Thruk::Utils::get_cron_time_entry($entries->[1]), '0 1 * * 1', 'cust entry expands');
     for my $minute ('0 1', "0\t1") {
-        eval { Thruk::Utils::get_cron_time_entry({ type => 'day', minute => $minute, hour => '3' }) };
-        like($@, qr/expected five time fields/, 'extra schedule field raises an error');
+        eval { Thruk::Utils::get_cron_time_entry({ type => 'day', minute => $minute, hour => '3' }, '/reports/7.rpt') };
+        like($@, qr{^/reports/7\.rpt: invalid cron schedule: expected five time fields}, 'extra schedule field identifies the source file');
     }
     eval { Thruk::Utils::get_cron_time_entry({ type => 'cust', cust => '@daily 1 2 3 4' }) };
     like($@, qr/invalid character/, 'cron shorthand is not a time field');
