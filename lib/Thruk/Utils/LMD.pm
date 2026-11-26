@@ -12,7 +12,7 @@ LMD Utilities Collection for Thruk
 
 use warnings;
 use strict;
-use Carp qw/confess/;
+use Carp qw/confess longmess/;
 use File::Copy qw/copy move/;
 use Time::HiRes ();
 
@@ -71,7 +71,19 @@ sub check_proc {
 
         write_lmd_config($c, $config);
 
-        _info("lmd not running, starting up...") if $log_missing;
+        # in a fresh job/cron process nothing has logged yet, so the file logger must be forced to exist
+        Thruk::Utils::Log::_init_logging();
+        my $filelogger = $Thruk::Utils::Log::filelogger;
+        if($filelogger) {
+            # file logger only (not _info) so restarts do not pollute the CLI screen or the job output
+            $filelogger->info("lmd not running, starting up...");
+            # on-demand restart (a web request found lmd dead) logs the caller stack to help debug why lmd stopped
+            $filelogger->info("lmd start triggered by: ".longmess()) if $log_missing;
+        } else {
+            # plain command line run: debug level only
+            _debug("lmd not running, starting up...");
+            _debug("lmd start triggered by: ".longmess());
+        }
         my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
                 .' -pidfile '.$lmd_dir.'/pid'
                 .' -config "'.$lmd_dir.'/lmd.ini"';
