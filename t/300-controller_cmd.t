@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2126;
+    plan tests => 2127;
 }
 
 BEGIN {
@@ -136,6 +136,16 @@ subtest 'cli send_command authorizes every command line of a query' => sub {
     is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', $two] }), $denied, 'the second COMMAND line is authorized too');
     is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', $one] }), undef, 'a single permitted command line still passes');
     is(Thruk::Utils::CLI::_authorize_send_command($c, { args => ['command', "COMMAND [1] DISABLE_NOTIFICATIONS\n".$one] }), $denied, 'a forbidden first line is refused');
+    done_testing();
+};
+
+subtest 'cli raw queries reject mixed reads and commands' => sub {
+    require Thruk::Utils::CLI;
+    my $command = 'COMMAND [1] TEST_ONLY';
+    for my $query ("$command\nGET hosts", "GET hosts\n$command") {
+        is(Thruk::Utils::CLI::_authorize_raw_query($c, { args => [$query] }),
+           'permission denied - mixed GET/COMMAND query.', 'mixed paragraph is refused');
+    }
     done_testing();
 };
 

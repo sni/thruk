@@ -1359,6 +1359,10 @@ sub _authorize_raw_query {
     for my $q (@{$queries}) {
         if($q =~ m/^GET\s+(.*)$/mx) {
             my $table = $1;
+            if($q =~ m/^COMMAND/mx) {
+                _warn(sprintf("rejected mixed GET/COMMAND query for user %s", $c->user->{'username'}));
+                return("permission denied - mixed GET/COMMAND query.");
+            }
             if($c->check_user_roles(["authorized_for_all_hosts", "authorized_for_all_services"])) {
                 # OK without changes
                 next;

@@ -3,6 +3,7 @@
 This file documents the revision history for the Monitoring WebUI Thruk.
 
 next:
+          - reject mixed GET and COMMAND lines in CLI raw queries (GHSA-34x5-m9vx-995j)
           - prevent Perl execution in REST CLI output arithmetic (GHSA-j8xr-cx52-cxj9)
           - treat REST and backend sort keys as data and not as code (GHSA-rjfp-vvx9-76vh)
           - escape plugin output in the availability outage report by default (GHSA-7qph-3mcp-cvqw)
