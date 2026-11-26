@@ -70,7 +70,7 @@
     </div>
   </div>
   <div class="mainTable [% IF main_table_full %]fullsize[% END %]">
-    <table class="mainTable js-striped" id="msTable">
+    <table class="mainTable js-striped min-w-full" id="msTable">
       <thead>
         <tr>
           [% FOREACH col = columns %]
