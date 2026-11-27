@@ -815,9 +815,11 @@ sub test_command {
         my $expr   = join(' ', @exprs);
         my $end    = $start + $duration;
         ok(1, "waiting for $expr to appear till ".(scalar localtime $end));
+        my $t;
         while($now <= $end) {
+            $t->cleanup() if $t;
             alarm(15);
-            my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
+            $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
             $test->{'test_cmd'} = $t;
             eval {
                 local $SIG{ALRM} = sub { die "timeout on cmd: ".$test->{'cmd'}."\n" };
@@ -861,6 +863,7 @@ sub test_command {
             fail("content ".$expr." did not occur within ".$duration." seconds");
             bail_out_cmd($test, -1, "waitfor failed");
         }
+        $t->cleanup();
     }
 
     my $t = Test::Cmd->new(prog => $prg, workdir => '') || bail_out_cmd($test, -1, $!);
@@ -918,6 +921,8 @@ sub test_command {
     $test->{'stderr'} = $stderr;
     $test->{'exit'}   = $rc;
 
+    # Finish cleanup before a later background job inherits the work directory.
+    $t->cleanup($return ? 'pass' : 'fail');
     return $return;
 }
 
