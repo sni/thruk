@@ -193,6 +193,7 @@ sub index {
 
         # comments / downtimes quick commands
         for my $id (@idsdata) {
+            $id =~ s/^(?:com|dtm)_//mx; # row id prefixes from comments/downtimes table
             my($typ, $id, $backend) = split(/_/m,$id, 3);
             $c->db->enable_backends($backend, 1);
             if($typ eq 'hst' and defined $host_quick_commands->{$quick_command} ) {
