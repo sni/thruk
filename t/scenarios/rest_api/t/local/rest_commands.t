@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 51;
+plan tests => 55;
 
 ###########################################################
 # test thruks script path
@@ -30,6 +30,10 @@ TestUtils::test_command({
 TestUtils::test_command({
     cmd  => '/usr/bin/env sed -i etc/thruk/thruk_local.d/lmd.conf -e s/\#use_lmd_core=.*/use_lmd_core=1/g',
     like => ['/^$/'],
+});
+TestUtils::test_command({
+    cmd  => '/usr/bin/env omd start lmd',
+    like => ['/Starting lmd.*OK/'],
 });
 
 TestUtils::test_command({

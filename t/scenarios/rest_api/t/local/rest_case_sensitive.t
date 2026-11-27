@@ -8,7 +8,7 @@ BEGIN {
     import TestUtils;
 }
 
-plan tests => 230;
+plan tests => 242;
 
 ###########################################################
 # test thruks script path
@@ -67,7 +67,15 @@ sub _set_lmd {
             cmd  => '/usr/bin/env sed -i etc/thruk/thruk_local.d/lmd.conf -e s/\#use_lmd_core=.*/use_lmd_core=1/g',
             like => ['/^$/'],
         });
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env omd start lmd',
+            like => ['/Starting lmd.*OK/'],
+        });
     } else {
+        TestUtils::test_command({
+            cmd  => '/usr/bin/env omd stop lmd',
+            like => ['/Stopping lmd.*OK|^$/'], # shows nothing when already disabled
+        });
         TestUtils::test_command({
             cmd  => '/usr/bin/env sed -i etc/thruk/thruk_local.d/lmd.conf -e s/^.*use_lmd_core=.*/#use_lmd_core=1/g',
             like => ['/^$/'],
@@ -78,6 +86,7 @@ sub _set_lmd {
         cmd  => '/usr/bin/env omd reload apache',
         like => ['/Reloading apache configuration.*OK/'],
     });
+
     sleep(3);
     # wait till page is back online
     TestUtils::test_page(
