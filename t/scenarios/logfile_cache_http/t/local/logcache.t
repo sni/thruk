@@ -218,6 +218,14 @@ TestUtils::test_command({
     is($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable)), $rows_before, 'active logcache rows untouched');
 
     ###########################################################
+    # pause cron for the clean and compact fixtures: a concurrent
+    # logcache import rebuilds the table from the naemon log and
+    # drops the old fixture rows (absent from that log)
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env omd stop crontab',
+    });
+
+    ###########################################################
     # clean removes entries older than the given duration
     my $old = time() - 10*86400;
     $dbh->do('INSERT INTO '.$qt->($logtable).' (time,class,type,state,state_type,contact_id,host_id,service_id,message)'
@@ -245,6 +253,9 @@ TestUtils::test_command({
         like => [qr/\QOK - compacted \E\d+\Q log items and removed \E[1-9]\d*/],
     });
     cmp_ok($dbh->selectrow_array('SELECT count(*) FROM '.$qt->($logtable).' WHERE message = ?', undef, 'dbcommon unittest duplicate alert'), '<', 3, 'duplicate alerts compacted');
+    TestUtils::test_command({
+        cmd  => '/usr/bin/env omd start crontab',
+    });
 
     ###########################################################
     # cache version guard
