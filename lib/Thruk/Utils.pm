@@ -2224,7 +2224,7 @@ sub pnp_popup_link {
     elsif($url =~ m{
         \A((?:https?://[A-Za-z0-9.-]+(?::[0-9]+)?)?(?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?
         host=([^\r\n]*?)&srv=([^&\r\n]*)\z
-    }mx && $3 !~ m/'\s\w/m) {
+    }mx && $3 !~ m/'\s\w/mx) {
         # a quote before whitespace marks leftover HTML attributes, not a graph URL
         ($base, $host, $service) = ($1, $2, $3);
     }
