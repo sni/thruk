@@ -141,11 +141,13 @@ subtest 'cli send_command authorizes every command line of a query' => sub {
 
 subtest 'cli raw queries reject mixed reads and commands' => sub {
     require Thruk::Utils::CLI;
+    local $ENV{'THRUK_TEST_NO_LOG'} = "";
     my $command = 'COMMAND [1] TEST_ONLY';
     for my $query ("$command\nGET hosts", "GET hosts\n$command") {
         is(Thruk::Utils::CLI::_authorize_raw_query($c, { args => [$query] }),
            'permission denied - mixed GET/COMMAND query.', 'mixed paragraph is refused');
     }
+    is(scalar(grep /rejected mixed GET\/COMMAND query/, split /\n/, $ENV{'THRUK_TEST_NO_LOG'}), 2, 'both rejections are logged');
     done_testing();
 };
 
