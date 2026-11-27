@@ -345,7 +345,7 @@ sub _run_do {
     }
 
     my $log_timestamps = 0;
-    if($ENV{'THRUK_CRON'} || Thruk::Base->verbose) {
+    if($ENV{'THRUK_CRON'} || $ENV{'THRUK_LOG_TIMESTAMPS'} || Thruk::Base->verbose) {
         $log_timestamps = 1;
     }
 

@@ -26,14 +26,15 @@ use Thruk::Utils::Log qw/:all/;
 
 =head2 check_proc
 
-  check_proc($config, [$c], [$log_missing])
+  check_proc($config, [$c], [$log_missing], [$max_wait = 0])
 
 makes sure lmd process is running. Returns undef or the lmd pid.
 
 =cut
 
 sub check_proc {
-    my($config, $c, $log_missing) = @_;
+    my($config, $c, $log_missing, $max_wait) = @_;
+    $max_wait ||= 0;
 
     return if $config->{'lmd_remote'};
 
@@ -78,11 +79,11 @@ sub check_proc {
             # file logger only (not _info) so restarts do not pollute the CLI screen or the job output
             $filelogger->info("lmd not running, starting up...");
             # on-demand restart (a web request found lmd dead) logs the caller stack to help debug why lmd stopped
-            $filelogger->info("lmd start triggered by: ".longmess()) if $log_missing;
+            $filelogger->info(longmess("lmd start triggered by")) if $log_missing;
         } else {
             # plain command line run: debug level only
             _debug("lmd not running, starting up...");
-            _debug("lmd start triggered by: ".longmess());
+            _debug(longmess("lmd start triggered by"));
         }
         my $cmd = ($config->{'lmd_core_bin'} || 'lmd')
                 .' -pidfile '.$lmd_dir.'/pid'
@@ -137,6 +138,33 @@ sub check_proc {
     unlink($startlock);
 
     confess($err) if $err;
+
+    if($max_wait > 0) {
+        my $end_time = time() + $max_wait;
+        while(time() < $end_time) {
+            my $stats;
+            eval {
+                $stats = $c->db->lmd_stats($c);
+            };
+            if($@) {
+                _debug("lmd start wait: %s", $@);
+                sleep 1;
+                next;
+            }
+            if(!$stats || ref $stats ne 'ARRAY') {
+                _debug("lmd start wait: no result (yet)");
+                sleep 1;
+                next;
+            }
+            my($total,$up) = (0, 0);
+            for my $s (@{$stats}) {
+                $total++;
+                $up++ if $s->{'status'} == 0;
+            }
+            _debug("lmd start wait: total $total, up $up");
+            last if $up >= 1;
+        }
+    }
 
     &timing_breakpoint('check_proc');
     return($pid);
@@ -284,7 +312,7 @@ sub check_initial_start {
         return;
     }
 
-    check_proc($config, $c, 0);
+    check_proc($config, $c, 1);
     check_changed_lmd_config($c, $config);
 
     &timing_breakpoint("lmd check_initial_start done");
@@ -304,6 +332,7 @@ check if pidfile exists and contains a valid pid, returns zero or the actual pid
 sub check_pid {
     my($file) = @_;
     my $pid = Thruk::Utils::IO::saferead($file);
+    chomp($pid) if $pid;
     return $pid if($pid && Thruk::Utils::CLI::pid_exists($pid, 'lmd'));
     return 0;
 }

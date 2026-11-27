@@ -679,7 +679,7 @@ sub get_screen_logger {
 
     my $timeformat = $withdate ? '%d{yyyy/MM/dd} %d{ABSOLUTE}' : '%d{ABSOLUTE}';
     my $format     = '['.$timeformat.'][%p]'.$prefix.'%m{chomp}';
-    if($ENV{'THRUK_CRON'} || $ENV{'TEST_AUTHOR'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
+    if($ENV{'THRUK_CRON'} || $ENV{'TEST_AUTHOR'} || $ENV{'THRUK_LOG_TIMESTAMPS'} || $config->{'thruk_author'} || Thruk::Base->debug()) {
         $format = '['.$timeformat.']['.($use_color ? '%p{1}' : '%p').'][%-30Z]%U'.$prefix.'%m{chomp}';
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('Z', \&_striped_caller_information);
         Log::Log4perl::Layout::PatternLayout::add_global_cspec('U', \&_thread_id);
@@ -693,7 +693,7 @@ sub get_screen_logger {
     }
 
     Log::Log4perl::Layout::PatternLayout::add_global_cspec('Q', \&_priority_error_warn_only);
-    if((!Thruk::Base->verbose() || Thruk::Base->quiet()) && !$ENV{'THRUK_CRON'}) {
+    if((!Thruk::Base->verbose() || Thruk::Base->quiet()) && !$ENV{'THRUK_CRON'} && !$ENV{'THRUK_LOG_TIMESTAMPS'}) {
         $format = '%Q%m{chomp}';
     }
 
