@@ -52,7 +52,7 @@
   <div id="pnp_graph_pane" class="relative justify-center min-h-[160px]">
     <a href="[% url_prefix %]#[% strip_trailing_slash(pnp_url) %]/graph?host=[% hst | uri %]&amp;srv=[% svc | uri %]&amp;theme=smoothness" class="w-full">
       <div id="pnpwaitimg" class="absolute top-10 left-1/2 transform -translate-x-1/2" title="waiting"><div class="spinner w-12 h-12"></div></div>
-      <img id="pnpimg" style="display:none;" alt="pnp graph" class="mx-auto">
+      <img id="pnpimg" style="display:none;" alt="pnp graph" class="mx-auto" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
       <div id="pnperr" style="display:none" class="textALERT text-center py-2">Could not retrieve graph data</div>
       <iframe id="pnp_iframe" class="w-full h-[270px] p-0 m-0 mx-auto hidden"></iframe>
     </a>

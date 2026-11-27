@@ -19,7 +19,7 @@
       <div>
         <a class="link" href='[% l = set_target_link(hostgroup.action_url, c.config.action_url_target); l.0 %]' target='[% l.1 %]' title='Perform Additional Actions On This Hostgroup'>
           <i class="fa-solid fa-chart-line text-4xl w-fit h-fit"></i><br>
-          <font size="-1"><i>Extra Actions</i></font>
+          <span class="text-xs">Extra Actions</span>
         </a>
       </div>
     [% END %]
@@ -28,7 +28,7 @@
       <div>
         <a class="link" href='[% l = set_target_link(hostgroup.notes_url, c.config.notes_url_target); l.0 %]' target='[% l.1 %]' title='View Additional Notes For This Hostgroup'>
           <i class="fa-solid fa-clipboard text-4xl w-fit h-fit"></i><br>
-          <font size="-1"><i>Extra Notes</i></font>
+          <span class="text-xs">Extra Notes</span>
         </a>
       </div>
     [% END %]

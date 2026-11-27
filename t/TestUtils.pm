@@ -504,7 +504,7 @@ sub test_page {
             next if $match =~ m/"\s*\+\s*icon\s*\+\s*"/mxo;
             next if $match =~ m/\/"\+/mxo;
             next if $match eq '';
-            next if $match =~ m/data:image\/png;base64/mxo;
+            next if $match =~ m/^data:/mxo;
             $match =~ s/"\s*\+\s*url_prefix\s*\+\s*"/\//gmxo;
             $match =~ s/"\s*\+\s*theme\s*\+\s*"/Thruk/gmxo;
             $links_to_check->{$match} = 1;
