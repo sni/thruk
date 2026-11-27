@@ -80,13 +80,13 @@
   </div>
 
   <div class="head px-0 clickable">
-    <span                 class="tabs text-center w-12"    onclick="return move_histou_img(-0.5)"><i class="uil uil-angle-left text-lg contents"></i></span>
+    <span title="Move the graph back by half of the selected time range" class="tabs text-center w-12"    onclick="return move_histou_img(-0.5)"><i class="uil uil-angle-left text-lg contents"></i></span>
     <span id="histou_th1" class="tabs text-center w-[18%]" onclick="return set_histou_img(   -14400, '', this.id, histou_source)">4 hours</span>
-    <span id="histou_th2" class="tabs text-center w-[18%]" onclick="return set_histou_img(   -90000, '', this.id, histou_source)">day</span>
+    <span id="histou_th2" class="tabs text-center w-[18%]" onclick="return set_histou_img(   -86400, '', this.id, histou_source)">day</span>
     <span id="histou_th3" class="tabs text-center w-[18%]" onclick="return set_histou_img(  -540000, '', this.id, histou_source)">week</span>
     <span id="histou_th4" class="tabs text-center w-[18%]" onclick="return set_histou_img( -2764800, '', this.id, histou_source)">month</span>
     <span id="histou_th5" class="tabs text-center w-[18%]" onclick="return set_histou_img(-30067200, '', this.id, histou_source)">year</span>
-    <span                 class="tabs text-center w-12"    onclick="return move_histou_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
+    <span title="Move the graph forward by half of the selected time range" class="tabs text-center w-12"    onclick="return move_histou_img( 0.5)"><i class="uil uil-angle-right text-lg contents"></i></span>
   </div>
   <div class="h-[262px] relative justify-center">
     <a id="histou_graph_link" href="[% url_prefix %]#[% histou_url %]" class="clickable absolute top-0 left-0 w-full h-full z-40"></a>
@@ -99,7 +99,7 @@
 
 <script>
   var histou_id     = 'histou_th2';
-  var histou_start  = [% date.now - 90000 %];
+  var histou_start  = [% date.now - 86400 %];
   var histou_end    = [% date.now %];
   if(window.location.hash != '#') {
     var values = window.location.hash.split("/");
