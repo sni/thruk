@@ -14,14 +14,14 @@
     success: function(data) {
       if(!data.match(/^\[/)) { return; }
       var sources    = eval(data);
-      var has_graphs = false;
+      var has_graphs = 0;
       jQuery('#pnp_source_select').find('option').remove();
       jQuery(sources).each(function(x, s) {
           jQuery('#pnp_source_select').append('<option value="'+x+'"'+((x==pnp_source || s.ds_name == pnp_source) ? ' selected' : '')+'>'+s.ds_name+'<\/option>');
-          has_graphs = true;
+          has_graphs++;
       });
       /* only useful for multiple sources */
-      if(has_graphs) {
+      if(has_graphs > 1) {
         jQuery('#pnp_source_select').show();
       }
     },
