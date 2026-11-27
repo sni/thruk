@@ -395,7 +395,7 @@ TP.url_attribute = function(url, escape) {
 TP.action_url_attribute = function(url) {
     if (escape_action_url_html) {
         // Panorama grids do not load the status/extinfo popup SSI; keep the graph link.
-        var pnp = url.match(/^(\/(?:[\w-]+\/)?pnp(?:4nagios)?\/index\.php)\/graph\?host=(.*?)&srv=(.*?)' class='tips' rel='\1\/popup\?host=\2&srv=\3$/);
+        var pnp = url.match(/^((?:https?:\/\/[A-Za-z0-9.-]+(?::[0-9]+)?)?\/(?:[\w-]+\/)?pnp(?:4nagios)?\/index\.php)\/graph\?host=(.*?)&srv=(.*?)' class='tips' rel='\1\/popup\?host=\2&srv=\3$/);
         if (pnp) {
             var param = function(value) { return encodeURIComponent(value).replace(/%25(?=[0-9a-f]{2})/gi, '%'); };
             url = pnp[1]+'/graph?host='+param(pnp[2])+'&srv='+param(pnp[3]);

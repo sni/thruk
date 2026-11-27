@@ -89,8 +89,8 @@
         <td class='[% class %] text-center'>[% IF d.high_flap_threshold %][% d.high_flap_threshold %]%[% ELSE %]Program-wide value[% END %]</td>
         <td class='[% class %] text-center'>[% IF d.process_performance_data %]Yes[% ELSE %]No[% END %]</td>
         <td class='[% class %]'>[% d.notes %]</td>
-        <td class='[% class %]'>[% d.notes_url %]</td>
-        <td class='[% class %]'>[% d.action_url %]</td>
+        <td class='[% class %]'>[% d.notes_url | html %]</td>
+        <td class='[% class %]'>[% d.action_url | html %]</td>
         <td class='[% class %]'>[% IF d.icon_image %]<div class="flex min-w-max"><img src="[% logo_path_prefix %][% d.icon_image_expanded %]" height="20" width="20" alt="service icon"><span>[% d.icon_image %]</span></div>[% END %]</td>
         <td class='[% class %]'>[% d.icon_image_alt %]</td>
         [% IF enable_shinken_features %]

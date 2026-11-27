@@ -2214,7 +2214,7 @@ Render the stock OMD PNP action link, or return undef for other formats.
 sub pnp_popup_link {
     my($url) = @_;
     return unless $url =~ m{
-        \A((?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?host=([^\r\n]*?)&srv=([^\r\n]*?)
+        \A((?:https?://[A-Za-z0-9.-]+(?::[0-9]+)?)?(?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?host=([^\r\n]*?)&srv=([^\r\n]*?)
         '[ ]class='tips'[ ]rel='\1/popup\?host=\2&srv=\3\z
     }mx;
     my ($base, $host, $service) = ($1, $2, $3);

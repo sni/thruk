@@ -45,8 +45,8 @@ subtest 'host action and notes link HTML' => sub {
         unlike($link, qr/O'Brien/, 'quotes escaped in graph and popup URLs');
         like($link, qr/' class='histou_tips' rel='/, 'generated popup attributes preserved');
     }
-    my $base = '/mon/pnp4nagios/index.php';
-    for my $service ('_HOST_', "Disk O'Brien+") {
+    for my $case (['/mon/pnp4nagios/index.php', '_HOST_'], ['http://192.168.1.2/site/pnp4nagios/index.php', "Disk O'Brien+"]) {
+        my ($base, $service) = @{$case};
         my $query = "?host=server&srv=$service";
         $host->{action_url_expanded} = "$base/graph$query' class='tips' rel='$base/popup$query";
         my $srv = $service eq '_HOST_' ? '_HOST_' : 'Disk%20O%27Brien%2B';
