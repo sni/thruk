@@ -1310,14 +1310,15 @@ sub lmd_stats {
     return unless defined $c->config->{'use_lmd_core'};
     require Thruk::Utils::LMD;
     $self->reset_failed_backends();
-    my($backends) = $self->select_backends();
-    my $stats = $self->get_sites( backend => $backends );
+    my($backends)      = $self->select_backends();
+    my $stats          = $self->get_sites( backend => $backends );
     my($status, undef) = Thruk::Utils::LMD::status($c->config);
-    my $start_time = $status->[0]->{'start_time'};
-    my $now = time();
+    my $start_time     = $status->[0]->{'start_time'};
+    my $now            = time();
+    my $runtime        = $now - $start_time;
     for my $stat (@{$stats}) {
-        $stat->{'bytes_send_rate'}     = $stat->{'bytes_send'} / ($now - $start_time);
-        $stat->{'bytes_received_rate'} = $stat->{'bytes_received'} / ($now - $start_time);
+        $stat->{'bytes_send_rate'}     = $runtime > 0 ? $stat->{'bytes_send'} / $runtime     : 0;
+        $stat->{'bytes_received_rate'} = $runtime > 0 ? $stat->{'bytes_received'} / $runtime : 0;
     }
     return($stats);
 }
@@ -2160,8 +2161,8 @@ sub _get_result_lmd_with_retries {
     if($err && !$c->stash->{'lmd_ok'}) {
         $c->stats->profile( begin => "_get_result_lmd_with_retries, check lmd proc");
         require Thruk::Utils::LMD;
-        Thruk::Utils::LMD::check_proc($c->config, $c, ($ENV{'THRUK_CLI_SRC'} && $ENV{'THRUK_CLI_SRC'} eq 'FCGI') ? 1 : 0);
-        sleep(1);
+        # restart and wait up to 15 seconds for startup
+        Thruk::Utils::LMD::check_proc($c->config, $c, 1, 15);
         $c->stats->profile( end => "_get_result_lmd_with_retries, check lmd proc");
 
         # then retry again
