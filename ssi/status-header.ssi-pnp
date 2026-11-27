@@ -5,6 +5,7 @@ function resizeGraphIFrame(obj) {
   } catch(e) {}
 }
 var hideTooltipTimer = null;
+var showTooltipTimer = null;
 var scheduleHideTooltip = function() {
   clearTimeout(hideTooltipTimer);
   hideTooltipTimer = setTimeout(function(){ jQuery("#tooltip").remove(); }, 300);
@@ -13,12 +14,15 @@ jQuery(document).ready(function() {
   jQuery("a.histou_tips, a.tips").hover(
     function(e){
       clearTimeout(hideTooltipTimer);
+      clearTimeout(showTooltipTimer);
+      var el = this;
+      showTooltipTimer = setTimeout(function(){
       jQuery("#tooltip").remove();
       var popup_width   = 600;
       var popup_height  = 200;
-      var url           = this.rel;
-      var icon_pos      = jQuery(this).offset();
-      var popup_pos_x   = icon_pos.left + jQuery(this).outerWidth() + 5;
+      var url           = el.rel;
+      var icon_pos      = jQuery(el).offset();
+      var popup_pos_x   = icon_pos.left + jQuery(el).outerWidth() + 5;
       if(icon_pos.left + popup_width > jQuery(window).width()) {
         popup_pos_x  = icon_pos.left - popup_width - 5;
       }
@@ -48,8 +52,10 @@ jQuery(document).ready(function() {
       } else {
         showPopup(url);
       }
+      }, 200);
     },
       function(){
+        clearTimeout(showTooltipTimer);
         scheduleHideTooltip();
       }
   );
