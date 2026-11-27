@@ -2213,11 +2213,25 @@ Render the stock OMD PNP action link, or return undef for other formats.
 
 sub pnp_popup_link {
     my($url) = @_;
-    return unless $url =~ m{
-        \A((?:https?://[A-Za-z0-9.-]+(?::[0-9]+)?)?(?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?host=([^\r\n]*?)&srv=([^\r\n]*?)
-        '[ ]class='tips'[ ]rel='\1/popup\?host=\2&srv=\3\z
-    }mx;
-    my ($base, $host, $service) = ($1, $2, $3);
+    my ($base, $host, $service);
+    # legacy OMD stock link with the tips/rel attributes, or a plain graph URL
+    if($url =~ m{
+        \A((?:https?://[A-Za-z0-9.-]+(?::[0-9]+)?)?(?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?
+        host=([^\r\n]*?)&srv=([^\r\n]*?)'[ ]class='tips'[ ]rel='\1/popup\?host=\2&srv=\3\z
+    }mx) {
+        ($base, $host, $service) = ($1, $2, $3);
+    }
+    elsif($url =~ m{
+        \A((?:https?://[A-Za-z0-9.-]+(?::[0-9]+)?)?(?:/[\w-]+)?/pnp(?:4nagios)?/index\.php)/graph\?
+        host=([^\r\n]*?)&srv=([^&\r\n]*)\z
+    }mx && $3 !~ m/'\s\w/m) {
+        # a quote before whitespace marks leftover HTML attributes, not a graph URL
+        ($base, $host, $service) = ($1, $2, $3);
+    }
+    else {
+        # unrecognized format; fall back to the generic handling
+        return;
+    }
     # The stock SSI reads rel from the DOM and embeds it in iframe HTML.
     require URI::Escape;
     my $query = '?host='.URI::Escape::uri_escape_utf8($host, '^A-Za-z0-9._~%\-')

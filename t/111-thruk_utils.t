@@ -52,6 +52,9 @@ subtest 'host action and notes link HTML' => sub {
         my $srv = $service eq '_HOST_' ? '_HOST_' : 'Disk%20O%27Brien%2B';
         my $attrs = "href='$base/graph?host=server&amp;srv=$srv&amp;theme=smoothness' class='tips' rel='$base/popup?host=server&amp;srv=$srv'";
         like($render->(), qr/\Q$attrs\E/, "stock PNP graph and SSI popup for $service");
+        # plain graph URL without the legacy tips/rel attributes gets the same popup link
+        $host->{action_url_expanded} = "$base/graph$query";
+        like($render->(), qr/\Q$attrs\E/, "plain PNP graph URL recognized for $service");
     }
     $host->{action_url_expanded} .= "' title='other";
     unlike($render->(), qr/' class='tips' rel='/, 'extra backend attributes are not recognized as a stock popup');

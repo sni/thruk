@@ -15,20 +15,26 @@ Do not set `graph_url`: only other graphing addons need it.
 
 OMD preconfigures PNP4Nagios integration.
 
-Example Service
+Example Host and Service
 
 ```
+define host {
+  host_name             Example Host
+  action_url            /dev/pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=_HOST_
+}
+
 define service {
   host_name             Example Host
   service_description   Service with Performance Data
   use                   generic_service
-  action_url            /pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$' class='tips' rel='/pnp4nagios/index.php/popup?host=$HOSTNAME$&srv=$SERVICEDESC$
+  action_url            /dev/pnp4nagios/index.php/graph?host=$HOSTNAME$&srv=$SERVICEDESC$
 }
 ```
 
-The stock OMD `host-pnp` and `srv-pnp` templates work with
-`escape_action_url_html = 1`. Thruk recognizes the matching graph and popup
-URLs and generates the `tips` class and `rel` URL used by the PNP hover SSI.
+Thruk recognizes the `/pnp4nagios/` (or `/pnp/`) graph URL, adds the `tips`
+class and the matching `/popup` URL used by the hover popup, and escapes the
+name safely. You do not set the popup URL or the class yourself.
+The stock OMD `host-pnp` and `srv-pnp` templates work the same way.
 
 ::: tip templates
 Often you can use the templates 'host-pnp' or 'srv-pnp' which set the right action_url automatically.
