@@ -5,7 +5,7 @@ use Test::More;
 
 BEGIN {
     plan skip_all => 'backends required' if(!-s 'thruk_local.conf' and !defined $ENV{'PLACK_TEST_EXTERNALSERVER_URI'});
-    plan tests => 2127;
+    plan tests => 2128;
 }
 
 BEGIN {
@@ -155,10 +155,14 @@ subtest 'cli raw queries reject mixed reads and commands' => sub {
 my $backends = $c->db->get_peers();
 @{$backends} = grep { !defined $_->{disabled} || $_->{disabled} != HIDDEN_LMD_PARENT } @{$backends}; # remove lmd parents, for this test
 SKIP: {
-    my $num = 21;
+    my $num = 22;
     skip "test is useless with only a single backend",                $num if (scalar @{$backends} <= 1);
     skip "test is requires authorized_for_all_service_commands role", $num if !$c->user->check_user_roles('authorized_for_all_service_commands');
     skip "test is requires authorized_for_all_host_commands role",    $num if !$c->user->check_user_roles('authorized_for_all_host_commands');
+
+    local $ENV{'THRUK_TEST_NO_LOG'} = '';
+    local $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
+    my $backend_error = '400: Failed validation of service as type service (argument 0)';
 
     TestUtils::test_page(
         'url'      => '/thruk/cgi-bin/cmd.cgi',
@@ -176,6 +180,7 @@ SKIP: {
     like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[0]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got first command');
     like($ENV{'THRUK_TEST_NO_AUDIT_LOG'}, '/\['.$backends->[1]->{'name'}.'\] cmd: COMMAND \[\d+\] SCHEDULE_SVC_CHECK;host1;svc1;\d+/', 'got second command');
 
+    like($ENV{'THRUK_TEST_NO_LOG'}, qr/\Q$backend_error\E/, 'backend rejection was logged');
     $ENV{'THRUK_TEST_NO_AUDIT_LOG'} = 1;
     $ENV{'THRUK_TEST_NO_LOG'}       = "";
     TestUtils::test_page(
