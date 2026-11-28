@@ -30,10 +30,10 @@
         [% IF p.defined("html") %]
           <div class="font-mono">[% p.html %]</div>
           [% IF p.defined("text") %]
-            <div style="display: none;">[% p.text %]</div>
+            <div style="display: none;">[% p.text | html %]</div>
           [% END %]
         [% ELSIF p.defined("text") %]
-          <div class="whitespace-pre font-mono">[% p.text %]</div>
+          <div class="whitespace-pre font-mono">[% p.text | html %]</div>
         [% END %]
       </div>
     [% END %]

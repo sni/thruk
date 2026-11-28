@@ -22,7 +22,7 @@
     [% FOREACH d = data %]
       [% SET class = '' %]
       [% SET class = 'tableRowSelected' IF jump == d.name %]
-      <tr class='[% class %]' id="[% name2id(d.name, 'hostgroup') %]">
+      <tr class='[% class %]'[% IF d.row_id %] id="[% d.row_id | html %]"[% END %]>
         <td class='[% class %] shadow-none'>
           [% IF use_feature_configtool && c.check_user_roles('authorized_for_system_commands') %]
             <a href="conf.cgi?sub=objects&amp;type=hostgroup&amp;data.name=[% d.name | uri %]&amp;backend=[% d.peer_key.join(",") %]">

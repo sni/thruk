@@ -112,6 +112,13 @@ sub index {
         return $c->redirect_to($c->stash->{'url_prefix'}."cgi-bin/config.cgi");
     }
 
+    my %seen;
+    my $prefix = substr($type, 0, -1);
+    for my $row (@{$c->stash->{'data'}}) {
+        my $name = $type eq 'services' ? $row->{'host_name'}.'_'.$row->{'description'} : $row->{'name'};
+        my $id = Thruk::Utils::Filter::name2id($name, $prefix);
+        $row->{'row_id'} = $id if length($id) && !$seen{$id}++;
+    }
     $c->stash->{jump} = $c->req->parameters->{'jump'} || '';
 
     return 1;
